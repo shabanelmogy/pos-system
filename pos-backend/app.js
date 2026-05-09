@@ -15,7 +15,7 @@ connectDB();
 // Middlewares
 app.use(cors({
     credentials: true,
-    origin: config.frontendUrl.split(",").map((url) => url.trim())
+    origin: config.corsOrigin.split(",").map((url) => url.trim())
 }))
 app.use(express.json()); // parse incoming request in json format
 app.use(cookieParser())
