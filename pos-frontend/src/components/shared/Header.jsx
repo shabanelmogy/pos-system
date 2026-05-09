@@ -10,11 +10,13 @@ import { logout } from "../../https";
 import { removeUser } from "../../redux/slices/userSlice";
 import { useNavigate } from "react-router-dom";
 import { MdDashboard } from "react-icons/md";
+import { useSnackbar } from "notistack";
 
 const Header = () => {
   const userData = useSelector((state) => state.user);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { enqueueSnackbar } = useSnackbar();
 
   const logoutMutation = useMutation({
     mutationFn: () => logout(),
@@ -24,6 +26,8 @@ const Header = () => {
       navigate("/auth");
     },
     onError: (error) => {
+      const message = error.response?.data?.message || "Logout failed. Please try again.";
+      enqueueSnackbar(message, { variant: "error" });
       console.log(error);
     },
   });

@@ -10,3 +10,15 @@ export const axiosWrapper = axios.create({
   withCredentials: true,
   headers: { ...defaultHeader },
 });
+
+// Response Interceptor for global error handling
+axiosWrapper.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    // If backend returns 401 (Unauthorized), redirect to login
+    if (error.response && error.response.status === 401) {
+      window.location.href = "/auth";
+    }
+    return Promise.reject(error);
+  }
+);

@@ -43,6 +43,38 @@ app.get("/", (req, res) => {
     });
 });
 
+// Log Viewer - View server logs from browser
+app.get("/debug-logs", (req, res) => {
+    const fs = require("fs");
+    const path = require("path");
+    const logDir = path.join(__dirname, "logs");
+    
+    try {
+        if (!fs.existsSync(logDir)) {
+            return res.send("Logs directory not found.");
+        }
+        
+        const files = fs.readdirSync(logDir).filter(f => f.startsWith("node"));
+        if (files.length === 0) {
+            return res.send("No log files found yet. Make sure stdoutLogEnabled='true' in web.config.");
+        }
+        
+        // Sort by modification time to get latest
+        files.sort((a, b) => {
+            return fs.statSync(path.join(logDir, b)).mtime.getTime() - 
+                   fs.statSync(path.join(logDir, a)).mtime.getTime();
+        });
+        
+        const latestLog = path.join(logDir, files[0]);
+        const content = fs.readFileSync(latestLog, "utf8");
+        
+        res.header("Content-Type", "text/plain");
+        res.send(`Latest Log File: ${files[0]}\n\n${content}`);
+    } catch (error) {
+        res.status(500).send("Error reading logs: " + error.message);
+    }
+});
+
 app.get("/api-docs.json", (req, res) => {
     res.json(swaggerSpec);
 })

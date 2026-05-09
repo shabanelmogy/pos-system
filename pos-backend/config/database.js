@@ -14,7 +14,16 @@ const connectDB = async () => {
         console.log(`MongoDB Connected: ${conn.connection.host}`);
         return conn;
     } catch (error) {
-        console.log(`Database connection failed: ${error.message}`);
+        console.error("=========================================");
+        console.error("DATABASE CONNECTION ERROR DETAILS:");
+        console.error(`Message: ${error.message}`);
+        console.error(`Error Name: ${error.name}`);
+        if (error.message.includes("ETIMEOUT") || error.message.includes("selection timeout")) {
+            console.error("PROBABLE CAUSE: Network Firewall / IP Whitelist. Check MongoDB Atlas Network Access (Allow 0.0.0.0/0).");
+        } else if (error.message.includes("auth failed") || error.message.includes("Authentication failed")) {
+            console.error("PROBABLE CAUSE: Invalid Username or Password. Check Adam%%402008 in web.config.");
+        }
+        console.error("=========================================");
         throw error;
     }
 }
