@@ -6,12 +6,22 @@ import { tables } from "../constants";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { getTables } from "../https";
 
+import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+
 const Tables = () => {
   const [status, setStatus] = useState("all");
+  const navigate = useNavigate();
+  const customerData = useSelector((state) => state.customer);
 
-    useEffect(() => {
-      document.title = "POS | Tables"
-    }, [])
+  useEffect(() => {
+    document.title = "POS | Tables";
+
+    // Safety Check: Redirect if customer info is missing
+    if (!customerData.customerName || !customerData.customerPhone) {
+      navigate("/");
+    }
+  }, [customerData, navigate]);
 
   const { data: resData, isError } = useQuery({
     queryKey: ["tables"],

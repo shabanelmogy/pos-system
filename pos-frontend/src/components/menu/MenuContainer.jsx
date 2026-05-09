@@ -73,31 +73,36 @@ const MenuContainer = () => {
           return (
             <div
               key={item.id}
-              className="flex flex-col items-start justify-between p-4 rounded-lg h-[150px] cursor-pointer hover:bg-[#2a2a2a] bg-[#1a1a1a]"
+              className="flex flex-col items-start justify-between p-4 rounded-lg min-h-[160px] cursor-pointer hover:bg-[#2a2a2a] bg-[#1a1a1a] transition-all"
             >
-              <div className="flex items-start justify-between w-full">
-                <h1 className="text-[#f5f5f5] text-lg font-semibold">
+              <div className="flex items-start justify-between w-full gap-2">
+                <h1 className="text-[#f5f5f5] text-md sm:text-lg font-semibold line-clamp-2">
                   {item.name}
                 </h1>
-                <button onClick={() => handleAddToCart(item)} className="bg-[#2e4a40] text-[#02ca3a] p-2 rounded-lg"><FaShoppingCart size={20} /></button>
+                <button 
+                  onClick={() => handleAddToCart(item)} 
+                  className="bg-[#2e4a40] text-[#02ca3a] p-2 rounded-lg flex-none hover:bg-[#3d5a4d] transition-colors"
+                >
+                  <FaShoppingCart size={18} />
+                </button>
               </div>
-              <div className="flex items-center justify-between w-full">
-                <p className="text-[#f5f5f5] text-xl font-bold">
+              <div className="flex flex-wrap items-center justify-between w-full mt-4 gap-2">
+                <p className="text-[#f5f5f5] text-lg sm:text-xl font-bold flex-none">
                   ₹{item.price}
                 </p>
-                <div className="flex items-center justify-between bg-[#1f1f1f] px-4 py-3 rounded-lg gap-6 w-[50%]">
+                <div className="flex items-center justify-between bg-[#1f1f1f] px-2 sm:px-4 py-2 rounded-lg gap-3 sm:gap-6 ml-auto">
                   <button
                     onClick={() => decrement(item.id)}
-                    className="text-yellow-500 text-2xl"
+                    className="text-yellow-500 text-xl sm:text-2xl hover:text-yellow-400"
                   >
                     &minus;
                   </button>
-                  <span className="text-white">
+                  <span className="text-white text-sm sm:text-base font-bold min-w-[20px] text-center">
                     {itemId == item.id ? itemCount : "0"}
                   </span>
                   <button
                     onClick={() => increment(item.id)}
-                    className="text-yellow-500 text-2xl"
+                    className="text-yellow-500 text-xl sm:text-2xl hover:text-yellow-400"
                   >
                     &#43;
                   </button>

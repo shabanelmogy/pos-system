@@ -7,14 +7,21 @@ import CustomerInfo from "../components/menu/CustomerInfo";
 import CartInfo from "../components/menu/CartInfo";
 import Bill from "../components/menu/Bill";
 import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 const Menu = () => {
 
-    useEffect(() => {
-      document.title = "POS | Menu"
-    }, [])
-
   const customerData = useSelector((state) => state.customer);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    document.title = "POS | Menu";
+    
+    // Safety Check: Redirect if order flow wasn't started correctly
+    if (!customerData.customerName || !customerData.customerPhone || !customerData.table) {
+      navigate("/");
+    }
+  }, [customerData, navigate]);
 
   return (
     <section className="bg-[#1f1f1f] h-[calc(100vh-5rem)] overflow-y-auto lg:overflow-hidden flex flex-col lg:flex-row gap-3">
@@ -51,12 +58,12 @@ const Menu = () => {
           <CustomerInfo />
           <hr className="border-[#2a2a2a] border-t-2" />
         </div>
-        
+
         {/* Cart Items - Scrollable middle */}
         <div className="flex-1 overflow-y-auto custom-scrollbar">
           <CartInfo />
         </div>
-        
+
         {/* Bills - Fixed at bottom */}
         <div className="flex-none border-t-2 border-[#2a2a2a] bg-[#1a1a1a]">
           <Bill />
