@@ -1,5 +1,5 @@
 {
-  "installCommand": "cd pos-frontend && npm ci",
+  "installCommand": "cd pos-frontend && npm install",
   "buildCommand": "cd pos-frontend && npm run build",
   "outputDirectory": "pos-frontend/dist",
   "framework": "vite",
