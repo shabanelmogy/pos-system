@@ -24,10 +24,24 @@ app.options("*", cors(corsOptions))
 app.use(express.json()); // parse incoming request in json format
 app.use(cookieParser())
 
-// Root Endpoint
-app.get("/", (req,res) => {
-    res.redirect("/api-docs");
-})
+// Debug Middleware
+app.use((req, res, next) => {
+    if (req.method === "OPTIONS" || req.originalUrl.includes("/api/")) {
+        console.log(`[DEBUG] Incoming ${req.method} request from Origin: ${req.headers.origin}`);
+    }
+    next();
+});
+
+// Root Endpoint - Status Check
+app.get("/", (req, res) => {
+    const mongoose = require("mongoose");
+    res.json({
+        status: "Online",
+        database: mongoose.connection.readyState === 1 ? "Connected" : "Disconnected",
+        node_env: process.env.NODE_ENV,
+        cors_configured: config.corsOrigin
+    });
+});
 
 app.get("/api-docs.json", (req, res) => {
     res.json(swaggerSpec);

@@ -18,9 +18,12 @@ const globalErrorHandler = (err, req, res, next) => {
     console.error(`[${req.method}] ${req.originalUrl} ${statusCode}: ${message}`);
 
     return res.status(statusCode).json({
+        success: false,
         status: statusCode,
         message,
-        errorStack: config.nodeEnv === "development" ? err.stack : ""
+        error: err.name,
+        // Include stack only in development
+        stack: config.nodeEnv === "development" ? err.stack : undefined
     })
 }
 
