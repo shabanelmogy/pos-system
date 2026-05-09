@@ -22,6 +22,7 @@ const Tables = () => {
   
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [isSummaryModalOpen, setIsSummaryModalOpen] = useState(false);
+  const [serviceStatus, setServiceStatus] = useState("all"); // New filter state
 
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
@@ -65,8 +66,14 @@ const Tables = () => {
   }
 
   // Separate tables into Active and Free
-  const activeTables = resData?.filter(table => table.status === "Booked") || [];
+  const activeTablesRaw = resData?.filter(table => table.status === "Booked") || [];
   const freeTables = resData?.filter(table => table.status !== "Booked") || [];
+
+  // Apply service status filter to active tables
+  const activeTables = activeTablesRaw.filter(table => {
+    if (serviceStatus === "all") return true;
+    return table.currentOrder?.orderStatus === serviceStatus;
+  });
 
   return (
     <section className="bg-[#1f1f1f] h-[calc(100vh-5rem)] flex flex-col overflow-hidden">
@@ -97,12 +104,40 @@ const Tables = () => {
         {/* LEFT SIDE: ACTIVE ORDERS (Main Area) */}
         <div className="flex-[1.5] border-r border-[#333] flex flex-col bg-[#1f1f1f]">
           <div className="px-8 py-4 bg-[#262626] border-b border-[#333] flex justify-between items-center">
-             <h2 className="text-[#f6b100] text-sm font-black uppercase tracking-widest flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-[#f6b100] animate-pulse"></span>
-                Active Service
-             </h2>
+             <div className="flex flex-col gap-1">
+                <h2 className="text-[#f6b100] text-sm font-black uppercase tracking-widest flex items-center gap-2">
+                   <span className="w-2 h-2 rounded-full bg-[#f6b100] animate-pulse"></span>
+                   Active Service
+                </h2>
+                <div className="flex items-center gap-3 mt-2">
+                   <button 
+                     onClick={() => setServiceStatus("all")}
+                     className={`text-[10px] font-bold px-3 py-1 rounded-full border transition-all ${
+                       serviceStatus === "all" ? "bg-[#f6b100] text-[#1a1a1a] border-[#f6b100]" : "text-[#ababab] border-[#444] hover:border-[#666]"
+                     }`}
+                   >
+                     All ({activeTablesRaw.length})
+                   </button>
+                   <button 
+                     onClick={() => setServiceStatus("In Progress")}
+                     className={`text-[10px] font-bold px-3 py-1 rounded-full border transition-all ${
+                       serviceStatus === "In Progress" ? "bg-yellow-500/20 text-yellow-500 border-yellow-500/50" : "text-[#ababab] border-[#444] hover:border-[#666]"
+                     }`}
+                   >
+                     In Progress ({activeTablesRaw.filter(t => t.currentOrder?.orderStatus === "In Progress").length})
+                   </button>
+                   <button 
+                     onClick={() => setServiceStatus("Ready")}
+                     className={`text-[10px] font-bold px-3 py-1 rounded-full border transition-all ${
+                       serviceStatus === "Ready" ? "bg-green-500/20 text-green-500 border-green-500/50" : "text-[#ababab] border-[#444] hover:border-[#666]"
+                     }`}
+                   >
+                     Ready ({activeTablesRaw.filter(t => t.currentOrder?.orderStatus === "Ready").length})
+                   </button>
+                </div>
+             </div>
              <span className="text-[#ababab] text-[10px] font-bold bg-[#1a1a1a] px-2 py-1 rounded">
-               {activeTables.length} Tables
+               {activeTables.length} Shown
              </span>
           </div>
           <div className="flex-1 overflow-y-auto p-8 scrollbar-hide">

@@ -1,10 +1,33 @@
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { FaTimes, FaUser, FaShoppingCart, FaCreditCard, FaEdit } from "react-icons/fa";
+import { FaTimes, FaUser, FaShoppingCart, FaCreditCard, FaEdit, FaCheckCircle } from "react-icons/fa";
 import { getAvatarName, getBgColor } from "../../utils";
+import useAuth from "../../hooks/useAuth";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { updateOrderStatus } from "../../https";
+import { useSnackbar } from "notistack";
 
 const OrderSummaryModal = ({ isOpen, onClose, order, onUpdate }) => {
+  const { canCompleteOrders } = useAuth();
+  const { enqueueSnackbar } = useSnackbar();
+  const queryClient = useQueryClient();
+
+  const statusMutation = useMutation({
+    mutationFn: (data) => updateOrderStatus(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries(["tables"]);
+      enqueueSnackbar("Order marked as Ready!", { variant: "success" });
+    },
+    onError: () => {
+      enqueueSnackbar("Failed to update status", { variant: "error" });
+    }
+  });
+
   if (!order) return null;
+
+  const handleMarkAsReady = () => {
+    statusMutation.mutate({ orderId: order._id, orderStatus: "Ready" });
+  };
 
   return (
     <AnimatePresence>
@@ -70,6 +93,18 @@ const OrderSummaryModal = ({ isOpen, onClose, order, onUpdate }) => {
 
             {/* Footer / Total */}
             <div className="px-6 py-6 bg-[#222] border-t border-[#333]">
+              
+              {/* Mark as Ready Button (For Waiters/Cashiers) */}
+              {order?.orderStatus === "In Progress" && (
+                <button
+                  onClick={handleMarkAsReady}
+                  disabled={statusMutation.isPending}
+                  className="w-full bg-[#2e4a40] text-green-500 border border-green-500/30 py-3 rounded-xl font-bold mb-4 flex items-center justify-center gap-2 hover:bg-[#34554a] transition-all disabled:opacity-50"
+                >
+                  <FaCheckCircle /> {statusMutation.isPending ? "Updating..." : "MARK AS READY"}
+                </button>
+              )}
+
               <div className="flex justify-between items-center mb-6">
                  <div>
                    <p className="text-[#ababab] text-[10px] font-bold uppercase">Total Bill (incl. tax)</p>
@@ -87,16 +122,18 @@ const OrderSummaryModal = ({ isOpen, onClose, order, onUpdate }) => {
               <div className="flex gap-3">
                  <button 
                    onClick={onClose}
-                   className="flex-1 bg-transparent border border-[#444] text-[#f5f5f5] py-3 rounded-xl font-bold hover:bg-[#333] transition-colors"
+                   className={`${canCompleteOrders ? "flex-1" : "w-full"} bg-transparent border border-[#444] text-[#f5f5f5] py-3 rounded-xl font-bold hover:bg-[#333] transition-colors`}
                  >
-                   Close
+                   Close Summary
                  </button>
-                 <button 
-                   onClick={() => onUpdate(order)}
-                   className="flex-1 bg-[#f6b100] text-[#1a1a1a] py-3 rounded-xl font-black flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-95 transition-all"
-                 >
-                   <FaEdit /> UPDATE
-                 </button>
+                 {canCompleteOrders && (
+                    <button 
+                      onClick={() => onUpdate(order)}
+                      className="flex-1 bg-[#f6b100] text-[#1a1a1a] py-3 rounded-xl font-black flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-95 transition-all"
+                    >
+                      <FaEdit /> UPDATE
+                    </button>
+                 )}
               </div>
             </div>
           </motion.div>
