@@ -12,6 +12,7 @@ import { useMutation } from "@tanstack/react-query";
 import { removeAllItems } from "../../redux/slices/cartSlice";
 import { removeCustomer } from "../../redux/slices/customerSlice";
 import Invoice from "../invoice/Invoice";
+import { useNavigate } from "react-router-dom";
 
 function loadScript(src) {
   return new Promise((resolve) => {
@@ -29,6 +30,7 @@ function loadScript(src) {
 
 const Bill = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const customerData = useSelector((state) => state.customer);
   const cartData = useSelector((state) => state.cart);
@@ -64,8 +66,15 @@ const Bill = () => {
           return;
         }
 
-        // create order
+        if (!customerData.table) {
+          enqueueSnackbar("Table information missing! Please select a table again.", {
+            variant: "error",
+          });
+          navigate("/tables");
+          return;
+        }
 
+        // create order
         const reqData = {
           amount: totalPriceWithTax.toFixed(2),
         };
@@ -98,7 +107,7 @@ const Bill = () => {
                 totalWithTax: totalPriceWithTax,
               },
               items: cartData,
-              table: customerData.table.tableId,
+              table: customerData.table?.tableId,
               paymentMethod: paymentMethod,
               paymentData: {
                 razorpay_order_id: response.razorpay_order_id,
@@ -127,6 +136,14 @@ const Bill = () => {
         });
       }
     } else {
+      if (!customerData.table) {
+        enqueueSnackbar("Table information missing! Please select a table again.", {
+          variant: "error",
+        });
+        navigate("/tables");
+        return;
+      }
+
       // Place the order
       const orderData = {
         customerDetails: {
@@ -141,7 +158,7 @@ const Bill = () => {
           totalWithTax: totalPriceWithTax,
         },
         items: cartData,
-        table: customerData.table.tableId,
+        table: customerData.table?.tableId,
         paymentMethod: paymentMethod,
       };
       orderMutation.mutate(orderData);
@@ -231,7 +248,10 @@ const Bill = () => {
       </div>
 
       <div className="flex items-center gap-3 px-5 mt-4">
-        <button className="bg-[#025cca] px-4 py-3 w-full rounded-lg text-[#f5f5f5] font-semibold text-lg">
+        <button 
+          onClick={() => orderInfo ? setShowInvoice(true) : enqueueSnackbar("Place the order first to print!", { variant: "info" })}
+          className="bg-[#025cca] px-4 py-3 w-full rounded-lg text-[#f5f5f5] font-semibold text-lg"
+        >
           Print Receipt
         </button>
         <button

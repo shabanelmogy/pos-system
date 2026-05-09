@@ -8,28 +8,46 @@ const Invoice = ({ orderInfo, setShowInvoice }) => {
     const printContent = invoiceRef.current.innerHTML;
     const WinPrint = window.open("", "", "width=900,height=650");
 
+    if (!WinPrint) {
+      alert("Please allow popups to print the receipt");
+      return;
+    }
+
     WinPrint.document.write(`
-            <html>
-              <head>
-                <title>Order Receipt</title>
-                <style>
-                  body { font-family: Arial, sans-serif; padding: 20px; }
-                  .receipt-container { width: 300px; border: 1px solid #ddd; padding: 10px; }
-                  h2 { text-align: center; }
-                </style>
-              </head>
-              <body>
-                ${printContent}
-              </body>
-            </html>
-          `);
+      <html>
+        <head>
+          <title>Order Receipt</title>
+          <style>
+            body { font-family: 'Inter', sans-serif; padding: 20px; color: #333; }
+            .receipt-header { text-align: center; margin-bottom: 20px; }
+            .details { margin-bottom: 15px; font-size: 14px; }
+            .item-list { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
+            .item-list th, .item-list td { text-align: left; padding: 5px 0; border-bottom: 1px solid #eee; }
+            .totals { text-align: right; font-size: 14px; }
+            .grand-total { font-size: 18px; font-weight: bold; margin-top: 10px; }
+            @media print {
+              .no-print { display: none; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="receipt-header">
+            <h1>RESTRO</h1>
+            <p>Order Receipt</p>
+          </div>
+          ${printContent}
+        </body>
+      </html>
+    `);
 
     WinPrint.document.close();
     WinPrint.focus();
+    
+    // Use a small delay to ensure styles are applied before printing
     setTimeout(() => {
       WinPrint.print();
       WinPrint.close();
-    }, 1000);
+    }, 500);
   };
 
   return (
@@ -138,7 +156,7 @@ const Invoice = ({ orderInfo, setShowInvoice }) => {
         </div>
 
         {/* Buttons */}
-        <div className="flex justify-between mt-4">
+        <div className="flex justify-between mt-4 no-print">
           <button
             onClick={handlePrint}
             className="text-blue-500 hover:underline text-xs px-4 py-2 rounded-lg"
