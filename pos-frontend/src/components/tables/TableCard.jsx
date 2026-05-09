@@ -1,18 +1,26 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { getAvatarName, getBgColor } from "../../utils"
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { updateTable } from "../../redux/slices/customerSlice";
 import { FaLongArrowAltRight } from "react-icons/fa";
 
 const TableCard = ({id, name, status, initials, seats}) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const customerData = useSelector((state) => state.customer);
+
   const handleClick = (name) => {
-    if(status === "Booked") return;
+    if (status === "Booked") return;
+
+    // Best Practice: Prevent selection if customer info is missing
+    if (!customerData.customerName || !customerData.customerPhone) {
+      window.dispatchEvent(new CustomEvent("open-create-order-modal"));
+      return;
+    }
 
     const table = { tableId: id, tableNo: name }
-    dispatch(updateTable({table}))
+    dispatch(updateTable({ table }))
     navigate(`/menu`);
   };
 

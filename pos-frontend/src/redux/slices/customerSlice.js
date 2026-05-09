@@ -19,6 +19,7 @@ const customerSlice = createSlice({
             state.customerName = name;
             state.customerPhone = phone;
             state.guests = guests;
+            state.table = null; // Always reset table when starting new customer
         },
 
         removeCustomer: (state) => {

@@ -10,6 +10,7 @@ const addOrder = async (req, res, next) => {
       .status(201)
       .json({ success: true, message: "Order created!", data: order });
   } catch (error) {
+    console.error("ORDER CREATION ERROR:", error);
     next(error);
   }
 };

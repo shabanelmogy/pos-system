@@ -17,9 +17,9 @@ const Menu = () => {
   const customerData = useSelector((state) => state.customer);
 
   return (
-    <section className="bg-[#1f1f1f] h-[calc(100vh-5rem)] overflow-hidden flex gap-3">
+    <section className="bg-[#1f1f1f] h-[calc(100vh-5rem)] overflow-y-auto lg:overflow-hidden flex flex-col lg:flex-row gap-3">
       {/* Left Div */}
-      <div className="flex-[3]">
+      <div className="flex-[3] w-full">
         <div className="flex items-center justify-between px-10 py-4">
           <div className="flex items-center gap-4">
             <BackButton />
@@ -45,15 +45,22 @@ const Menu = () => {
         <MenuContainer />
       </div>
       {/* Right Div */}
-      <div className="flex-[1] bg-[#1a1a1a] mt-4 mr-3 h-[780px] rounded-lg pt-2">
-        {/* Customer Info */}
-        <CustomerInfo />
-        <hr className="border-[#2a2a2a] border-t-2" />
-        {/* Cart Items */}
-        <CartInfo />
-        <hr className="border-[#2a2a2a] border-t-2" />
-        {/* Bills */}
-        <Bill />
+      <div className="flex-[1] bg-[#1a1a1a] lg:mt-4 lg:mb-4 lg:mr-3 h-[calc(100vh-10rem)] rounded-lg flex flex-col overflow-hidden">
+        {/* Customer Info - Fixed at top */}
+        <div className="flex-none">
+          <CustomerInfo />
+          <hr className="border-[#2a2a2a] border-t-2" />
+        </div>
+        
+        {/* Cart Items - Scrollable middle */}
+        <div className="flex-1 overflow-y-auto custom-scrollbar">
+          <CartInfo />
+        </div>
+        
+        {/* Bills - Fixed at bottom */}
+        <div className="flex-none border-t-2 border-[#2a2a2a] bg-[#1a1a1a]">
+          <Bill />
+        </div>
       </div>
 
       <BottomNav />

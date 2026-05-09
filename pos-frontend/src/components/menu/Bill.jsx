@@ -13,6 +13,7 @@ import { removeAllItems } from "../../redux/slices/cartSlice";
 import { removeCustomer } from "../../redux/slices/customerSlice";
 import Invoice from "../invoice/Invoice";
 import { useNavigate } from "react-router-dom";
+import { FaTrash } from "react-icons/fa";
 
 function loadScript(src) {
   return new Promise((resolve) => {
@@ -43,6 +44,15 @@ const Bill = () => {
   const [showInvoice, setShowInvoice] = useState(false);
   const [orderInfo, setOrderInfo] = useState();
 
+  const handleCancelOrder = () => {
+    if (window.confirm("Are you sure you want to cancel this draft order?")) {
+      dispatch(removeAllItems());
+      dispatch(removeCustomer());
+      enqueueSnackbar("Order cancelled", { variant: "info" });
+      navigate("/");
+    }
+  };
+
   const handlePlaceOrder = async () => {
     if (!paymentMethod) {
       enqueueSnackbar("Please select a payment method!", {
@@ -71,6 +81,15 @@ const Bill = () => {
             variant: "error",
           });
           navigate("/tables");
+          return;
+        }
+
+        console.log("[Bill] Checking Customer Data:", customerData);
+        if (!customerData.customerName || !customerData.customerPhone) {
+          enqueueSnackbar("Customer details missing! Please restart the order.", {
+            variant: "error",
+          });
+          navigate("/");
           return;
         }
 
@@ -120,9 +139,9 @@ const Bill = () => {
             }, 1500);
           },
           prefill: {
-            name: customerData.name,
+            name: customerData.customerName,
             email: "",
-            contact: customerData.phone,
+            contact: customerData.customerPhone,
           },
           theme: { color: "#025cca" },
         };
@@ -141,6 +160,15 @@ const Bill = () => {
           variant: "error",
         });
         navigate("/tables");
+        return;
+      }
+
+      console.log("[Bill-Cash] Checking Customer Data:", customerData);
+      if (!customerData.customerName || !customerData.customerPhone) {
+        enqueueSnackbar("Customer details missing! Please restart the order.", {
+          variant: "error",
+        });
+        navigate("/");
         return;
       }
 
@@ -207,65 +235,85 @@ const Bill = () => {
   });
 
   return (
-    <>
-      <div className="flex items-center justify-between px-5 mt-2">
-        <p className="text-xs text-[#ababab] font-medium mt-2">
-          Items({cartData.lenght})
-        </p>
-        <h1 className="text-[#f5f5f5] text-md font-bold">
-          ₹{total.toFixed(2)}
+    <div className="w-full">
+      <div className="flex justify-between items-center px-5 py-2">
+        <h1 className="text-[#f5f5f5] text-lg font-bold tracking-wider">
+          Bill
         </h1>
-      </div>
-      <div className="flex items-center justify-between px-5 mt-2">
-        <p className="text-xs text-[#ababab] font-medium mt-2">Tax(5.25%)</p>
-        <h1 className="text-[#f5f5f5] text-md font-bold">₹{tax.toFixed(2)}</h1>
-      </div>
-      <div className="flex items-center justify-between px-5 mt-2">
-        <p className="text-xs text-[#ababab] font-medium mt-2">
-          Total With Tax
-        </p>
-        <h1 className="text-[#f5f5f5] text-md font-bold">
-          ₹{totalPriceWithTax.toFixed(2)}
-        </h1>
-      </div>
-      <div className="flex items-center gap-3 px-5 mt-4">
-        <button
-          onClick={() => setPaymentMethod("Cash")}
-          className={`bg-[#1f1f1f] px-4 py-3 w-full rounded-lg text-[#ababab] font-semibold ${
-            paymentMethod === "Cash" ? "bg-[#383737]" : ""
-          }`}
+        <button 
+          onClick={handleCancelOrder}
+          className="text-red-500 hover:text-red-600 flex items-center gap-1 text-[10px] font-semibold uppercase tracking-tighter"
         >
-          Cash
-        </button>
-        <button
-          onClick={() => setPaymentMethod("Online")}
-          className={`bg-[#1f1f1f] px-4 py-3 w-full rounded-lg text-[#ababab] font-semibold ${
-            paymentMethod === "Online" ? "bg-[#383737]" : ""
-          }`}
-        >
-          Online
+          <FaTrash size={10} /> Cancel
         </button>
       </div>
 
-      <div className="flex items-center gap-3 px-5 mt-4">
-        <button 
-          onClick={() => orderInfo ? setShowInvoice(true) : enqueueSnackbar("Place the order first to print!", { variant: "info" })}
-          className="bg-[#025cca] px-4 py-3 w-full rounded-lg text-[#f5f5f5] font-semibold text-lg"
-        >
-          Print Receipt
-        </button>
-        <button
-          onClick={handlePlaceOrder}
-          className="bg-[#f6b100] px-4 py-3 w-full rounded-lg text-[#1f1f1f] font-semibold text-lg"
-        >
-          Place Order
-        </button>
+      <div className="space-y-1 px-5">
+        <div className="flex items-center justify-between text-[13px]">
+          <p className="text-[#ababab] font-medium">
+            Items({cartData.length})
+          </p>
+          <h1 className="text-[#f5f5f5] font-bold">
+            ₹{total.toFixed(2)}
+          </h1>
+        </div>
+        <div className="flex items-center justify-between text-[13px]">
+          <p className="text-[#ababab] font-medium">Tax (5.25%)</p>
+          <h1 className="text-[#f5f5f5] font-bold">₹{tax.toFixed(2)}</h1>
+        </div>
+        <div className="flex items-center justify-between pt-1 border-t border-[#2a2a2a] mt-1">
+          <p className="text-[#f5f5f5] text-sm font-semibold">Total</p>
+          <h1 className="text-[#f6b100] text-lg font-black">
+            ₹{totalPriceWithTax.toFixed(2)}
+          </h1>
+        </div>
+      </div>
+
+      <div className="px-5 mt-3 space-y-2 pb-3">
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setPaymentMethod("Cash")}
+            className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all ${
+              paymentMethod === "Cash"
+                ? "bg-[#f6b100] text-[#1a1a1a]"
+                : "bg-[#262626] text-[#ababab]"
+            }`}
+          >
+            Cash
+          </button>
+          <button
+            onClick={() => setPaymentMethod("Online")}
+            className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all ${
+              paymentMethod === "Online"
+                ? "bg-[#f6b100] text-[#1a1a1a]"
+                : "bg-[#262626] text-[#ababab]"
+            }`}
+          >
+            Online
+          </button>
+        </div>
+        
+        <div className="grid grid-cols-2 gap-2">
+          <button 
+            onClick={() => orderInfo ? setShowInvoice(true) : enqueueSnackbar("Place order first!", { variant: "info" })}
+            className="bg-[#025cca] py-3 rounded-lg text-[#f5f5f5] font-bold text-[11px] uppercase tracking-wide"
+          >
+            Print
+          </button>
+          <button
+            onClick={handlePlaceOrder}
+            disabled={orderMutation.isPending}
+            className="bg-[#f6b100] py-3 rounded-lg text-[#1a1a1a] font-black text-[11px] uppercase tracking-wide disabled:opacity-50"
+          >
+            {orderMutation.isPending ? "..." : "Order"}
+          </button>
+        </div>
       </div>
 
       {showInvoice && (
         <Invoice orderInfo={orderInfo} setShowInvoice={setShowInvoice} />
       )}
-    </>
+    </div>
   );
 };
 

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FaHome } from "react-icons/fa";
 import { MdOutlineReorder, MdTableBar } from "react-icons/md";
 import { CiCircleMore } from "react-icons/ci";
@@ -7,6 +7,8 @@ import { useNavigate, useLocation } from "react-router-dom";
 import Modal from "./Modal";
 import { useDispatch } from "react-redux";
 import { setCustomer } from "../../redux/slices/customerSlice";
+import { removeAllItems } from "../../redux/slices/cartSlice";
+import useAuth from "../../hooks/useAuth";
 
 const BottomNav = () => {
   const navigate = useNavigate();
@@ -20,6 +22,12 @@ const BottomNav = () => {
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
 
+  useEffect(() => {
+    const handleOpenModal = () => openModal();
+    window.addEventListener("open-create-order-modal", handleOpenModal);
+    return () => window.removeEventListener("open-create-order-modal", handleOpenModal);
+  }, []);
+
   const increment = () => {
     if(guestCount >= 6) return;
     setGuestCount((prev) => prev + 1);
@@ -32,10 +40,26 @@ const BottomNav = () => {
   const isActive = (path) => location.pathname === path;
 
   const handleCreateOrder = () => {
+    if (!name || !phone) {
+      alert("Please enter customer name and phone number!");
+      return;
+    }
+    if (guestCount <= 0) {
+      alert("Please select at least 1 guest!");
+      return;
+    }
     // send the data to store
-    dispatch(setCustomer({name, phone, guests: guestCount}));
+    dispatch(setCustomer({ name, phone, guests: guestCount }));
+    dispatch(removeAllItems());
+    
+    // Clear local state
+    setName("");
+    setPhone("");
+    setGuestCount(0);
+    
+    closeModal();
     navigate("/tables");
-  }
+  };
 
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-[#262626] p-2 h-16 flex justify-around">
@@ -73,6 +97,7 @@ const BottomNav = () => {
         className="absolute bottom-6 bg-[#F6B100] text-[#f5f5f5] rounded-full p-4 items-center"
       >
         <BiSolidDish size={40} />
+        <span className="absolute -bottom-5 left-1/2 -translate-x-1/2 text-[#f6b100] text-[10px] font-bold whitespace-nowrap">NEW ORDER</span>
       </button>
 
       <Modal isOpen={isModalOpen} onClose={closeModal} title="Create Order">
