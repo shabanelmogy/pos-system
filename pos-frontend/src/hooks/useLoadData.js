@@ -10,6 +10,12 @@ const useLoadData = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    // If we are on the auth page, don't try to load user data to avoid loops
+    if (window.location.pathname === "/auth") {
+      setIsLoading(false);
+      return;
+    }
+
     const fetchUser = async () => {
       try {
         const { data } = await getUserData();
@@ -20,7 +26,7 @@ const useLoadData = () => {
         dispatch(removeUser());
         navigate("/auth");
         console.log(error);
-      }finally{
+      } finally {
         setIsLoading(false);
       }
     };

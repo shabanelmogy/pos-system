@@ -16,7 +16,12 @@ axiosWrapper.interceptors.response.use(
   (response) => response,
   (error) => {
     // If backend returns 401 (Unauthorized), redirect to login
-    if (error.response && error.response.status === 401) {
+    // ONLY if we are not already on the auth page to avoid infinite loops
+    if (
+      error.response &&
+      error.response.status === 401 &&
+      window.location.pathname !== "/auth"
+    ) {
       window.location.href = "/auth";
     }
     return Promise.reject(error);

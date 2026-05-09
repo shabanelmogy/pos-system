@@ -2,9 +2,44 @@ import React from "react";
 import { FaCheckDouble, FaLongArrowAltRight } from "react-icons/fa";
 import { FaCircle } from "react-icons/fa";
 import { formatDateAndTime, getAvatarName } from "../../utils/index";
+import useAuth from "../../hooks/useAuth";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { updateOrderStatus, updateTable } from "../../https";
+import { enqueueSnackbar } from "notistack";
 
-const OrderCard = ({ key, order }) => {
-  console.log(order);
+const OrderCard = ({ order }) => {
+  const { canCompleteOrders } = useAuth();
+  const queryClient = useQueryClient();
+
+  const statusMutation = useMutation({
+    mutationFn: updateOrderStatus,
+    onSuccess: () => {
+      queryClient.invalidateQueries(["orders"]);
+      enqueueSnackbar("Order Completed!", { variant: "success" });
+      
+      // If completed, also free the table
+      if (order.table?._id) {
+        tableMutation.mutate({ 
+          tableId: order.table._id, 
+          status: "Available" 
+        });
+      }
+    },
+    onError: () => {
+      enqueueSnackbar("Failed to update status", { variant: "error" });
+    }
+  });
+
+  const tableMutation = useMutation({
+    mutationFn: updateTable,
+    onSuccess: () => {
+      queryClient.invalidateQueries(["tables"]);
+    }
+  });
+
+  const handleCompleteOrder = () => {
+    statusMutation.mutate({ orderId: order._id, orderStatus: "Completed" });
+  };
   return (
     <div key={key} className="w-[500px] bg-[#262626] p-4 rounded-lg mb-4">
       <div className="flex items-center gap-5">
@@ -52,6 +87,16 @@ const OrderCard = ({ key, order }) => {
         <h1 className="text-[#f5f5f5] text-lg font-semibold">Total</h1>
         <p className="text-[#f5f5f5] text-lg font-semibold">₹{order.bills.totalWithTax.toFixed(2)}</p>
       </div>
+
+      {canCompleteOrders && order.orderStatus !== "Completed" && (
+        <button
+          onClick={handleCompleteOrder}
+          disabled={statusMutation.isPending}
+          className="w-full mt-4 bg-[#f6b100] text-[#1a1a1a] font-bold py-2 rounded-lg hover:bg-yellow-600 transition-colors"
+        >
+          {statusMutation.isPending ? "Updating..." : "Complete Order & Free Table"}
+        </button>
+      )}
     </div>
   );
 };

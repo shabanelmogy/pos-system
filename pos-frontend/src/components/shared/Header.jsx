@@ -11,9 +11,10 @@ import { removeUser } from "../../redux/slices/userSlice";
 import { useNavigate } from "react-router-dom";
 import { MdDashboard } from "react-icons/md";
 import { useSnackbar } from "notistack";
+import useAuth from "../../hooks/useAuth";
 
 const Header = () => {
-  const userData = useSelector((state) => state.user);
+  const { role, name, canAccessDashboard } = useAuth();
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
@@ -58,7 +59,7 @@ const Header = () => {
 
       {/* LOGGED USER DETAILS */}
       <div className="flex items-center gap-4">
-        {userData.role === "Admin" && (
+        {canAccessDashboard && (
           <div onClick={() => navigate("/dashboard")} className="bg-[#1f1f1f] rounded-[15px] p-3 cursor-pointer">
             <MdDashboard className="text-[#f5f5f5] text-2xl" />
           </div>
@@ -70,10 +71,10 @@ const Header = () => {
           <FaUserCircle className="text-[#f5f5f5] text-4xl" />
           <div className="flex flex-col items-start">
             <h1 className="text-md text-[#f5f5f5] font-semibold tracking-wide">
-              {userData.name || "TEST USER"}
+              {name || "TEST USER"}
             </h1>
             <p className="text-xs text-[#ababab] font-medium">
-              {userData.role || "Role"}
+              {role || "Role"}
             </p>
           </div>
           <IoLogOut
