@@ -36,6 +36,25 @@ A full-featured **Restaurant POS System** built using the **MERN Stack** to stre
 ---
 <br>
 
+## Deploy on Render
+
+This repo includes a `render.yaml` Blueprint for deploying both apps:
+
+- `pos-backend`: Node/Express web service
+- `pos-frontend`: Vite static site
+
+In Render, create a new Blueprint from this repo and provide these secret values when prompted:
+
+- `MONGODB_URI`
+- `RAZORPAY_KEY_ID`
+- `RAZORPAY_KEY_SECRET`
+- `RAZORPAY_WEBHOOK_SECRET`
+- `VITE_RAZORPAY_KEY_ID`
+
+`JWT_SECRET` is generated automatically. The frontend and backend URLs are wired automatically through Render's `RENDER_EXTERNAL_URL`.
+
+---
+
 ## 📺 **YouTube Playlist**
 
 🎬 Follow the complete tutorial series on building this Restaurant POS System on YouTube:  
