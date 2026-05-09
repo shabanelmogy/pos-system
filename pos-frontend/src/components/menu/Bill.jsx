@@ -14,6 +14,7 @@ import { removeCustomer } from "../../redux/slices/customerSlice";
 import Invoice from "../invoice/Invoice";
 import { useNavigate } from "react-router-dom";
 import { FaTrash } from "react-icons/fa";
+import useAuth from "../../hooks/useAuth";
 
 function loadScript(src) {
   return new Promise((resolve) => {
@@ -32,6 +33,7 @@ function loadScript(src) {
 const Bill = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { canCompleteOrders } = useAuth();
 
   const customerData = useSelector((state) => state.customer);
   const cartData = useSelector((state) => state.cart);
@@ -40,7 +42,7 @@ const Bill = () => {
   const tax = (total * taxRate) / 100;
   const totalPriceWithTax = total + tax;
 
-  const [paymentMethod, setPaymentMethod] = useState();
+  const [paymentMethod, setPaymentMethod] = useState("");
   const [showInvoice, setShowInvoice] = useState(false);
   const [orderInfo, setOrderInfo] = useState();
 
@@ -172,7 +174,7 @@ const Bill = () => {
         return;
       }
 
-      // Place the order
+      // Place or Update the order
       const orderData = {
         customerDetails: {
           name: customerData.customerName,
@@ -189,15 +191,30 @@ const Bill = () => {
         table: customerData.table?.tableId,
         paymentMethod: paymentMethod,
       };
-      orderMutation.mutate(orderData);
+
+      if (customerData.orderId && !customerData.orderId.includes("new")) {
+        // Update existing order
+        orderMutation.mutate({ orderId: customerData.orderId, ...orderData });
+      } else {
+        // Create new order
+        orderMutation.mutate(orderData);
+      }
     }
   };
 
   const orderMutation = useMutation({
-    mutationFn: (reqData) => addOrder(reqData),
+    mutationFn: (reqData) => {
+      if (reqData.orderId) {
+        return updateOrder(reqData);
+      }
+      return addOrder(reqData);
+    },
     onSuccess: (resData) => {
       const { data } = resData.data;
       console.log(data);
+      enqueueSnackbar(customerData.orderId ? "Order Updated!" : "Order Placed!", {
+        variant: "success",
+      });
 
       setOrderInfo(data);
 
@@ -226,8 +243,6 @@ const Bill = () => {
     mutationFn: (reqData) => updateTable(reqData),
     onSuccess: (resData) => {
       console.log(resData);
-      dispatch(removeCustomer());
-      dispatch(removeAllItems());
     },
     onError: (error) => {
       console.log(error);
@@ -270,43 +285,57 @@ const Bill = () => {
       </div>
 
       <div className="px-5 mt-3 space-y-2 pb-3">
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setPaymentMethod("Cash")}
-            className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all ${
-              paymentMethod === "Cash"
-                ? "bg-[#f6b100] text-[#1a1a1a]"
-                : "bg-[#262626] text-[#ababab]"
-            }`}
-          >
-            Cash
-          </button>
-          <button
-            onClick={() => setPaymentMethod("Online")}
-            className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all ${
-              paymentMethod === "Online"
-                ? "bg-[#f6b100] text-[#1a1a1a]"
-                : "bg-[#262626] text-[#ababab]"
-            }`}
-          >
-            Online
-          </button>
-        </div>
+        {canCompleteOrders && (
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setPaymentMethod("Cash")}
+              className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all ${
+                paymentMethod === "Cash"
+                  ? "bg-[#f6b100] text-[#1a1a1a]"
+                  : "bg-[#262626] text-[#ababab]"
+              }`}
+            >
+              Cash
+            </button>
+            <button
+              onClick={() => setPaymentMethod("Online")}
+              className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all ${
+                paymentMethod === "Online"
+                  ? "bg-[#f6b100] text-[#1a1a1a]"
+                  : "bg-[#262626] text-[#ababab]"
+              }`}
+            >
+              Online
+            </button>
+          </div>
+        )}
         
         <div className="grid grid-cols-2 gap-2">
-          <button 
-            onClick={() => orderInfo ? setShowInvoice(true) : enqueueSnackbar("Place order first!", { variant: "info" })}
-            className="bg-[#025cca] py-3 rounded-lg text-[#f5f5f5] font-bold text-[11px] uppercase tracking-wide"
-          >
-            Print
-          </button>
-          <button
-            onClick={handlePlaceOrder}
-            disabled={orderMutation.isPending}
-            className="bg-[#f6b100] py-3 rounded-lg text-[#1a1a1a] font-black text-[11px] uppercase tracking-wide disabled:opacity-50"
-          >
-            {orderMutation.isPending ? "..." : "Order"}
-          </button>
+          {canCompleteOrders ? (
+            <>
+              <button 
+                onClick={() => orderInfo ? setShowInvoice(true) : enqueueSnackbar("Place order first!", { variant: "info" })}
+                className="bg-[#025cca] py-3 rounded-lg text-[#f5f5f5] font-bold text-[11px] uppercase tracking-wide"
+              >
+                Print
+              </button>
+              <button
+                onClick={handlePlaceOrder}
+                disabled={orderMutation.isPending}
+                className="bg-[#f6b100] py-3 rounded-lg text-[#1a1a1a] font-black text-[11px] uppercase tracking-wide disabled:opacity-50"
+              >
+                {orderMutation.isPending ? "..." : "Order"}
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={handlePlaceOrder}
+              disabled={orderMutation.isPending}
+              className="bg-[#f6b100] col-span-2 py-3 rounded-lg text-[#1a1a1a] font-black text-[11px] uppercase tracking-wide disabled:opacity-50"
+            >
+              {orderMutation.isPending ? "Placing Order..." : "Place Order"}
+            </button>
+          )}
         </div>
       </div>
 

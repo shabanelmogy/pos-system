@@ -57,7 +57,7 @@ const updateOrder = async (req, res, next) => {
 
     const order = await Order.findByIdAndUpdate(
       id,
-      { orderStatus },
+      { ...req.body },
       { new: true }
     );
 

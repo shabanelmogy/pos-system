@@ -15,7 +15,7 @@ const customerSlice = createSlice({
     reducers : {
         setCustomer: (state, action) => {
             const { name, phone, guests } = action.payload;
-            state.orderId = `${Date.now()}`;
+            state.orderId = 'new-' + Date.now();
             state.customerName = name;
             state.customerPhone = phone;
             state.guests = guests;
@@ -31,11 +31,19 @@ const customerSlice = createSlice({
 
         updateTable: (state, action) => {
             state.table = action.payload.table;
+        },
+
+        setOrder: (state, action) => {
+            const { customerName, customerPhone, table, orderId } = action.payload;
+            state.customerName = customerName;
+            state.customerPhone = customerPhone;
+            state.table = table;
+            state.orderId = orderId;
         }
 
     }
 })
 
 
-export const { setCustomer, removeCustomer, updateTable } = customerSlice.actions;
+export const { setCustomer, removeCustomer, updateTable, setOrder } = customerSlice.actions;
 export default customerSlice.reducer;

@@ -1,9 +1,23 @@
 import React, { useRef } from "react";
 import { motion } from "framer-motion";
 import { FaCheck } from "react-icons/fa6";
+import { useDispatch } from "react-redux";
+import { removeAllItems } from "../../redux/slices/cartSlice";
+import { removeCustomer } from "../../redux/slices/customerSlice";
+import { useNavigate } from "react-router-dom";
 
 const Invoice = ({ orderInfo, setShowInvoice }) => {
   const invoiceRef = useRef(null);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const handleClose = () => {
+    dispatch(removeAllItems());
+    dispatch(removeCustomer());
+    setShowInvoice(false);
+    navigate("/");
+  };
+
   const handlePrint = () => {
     const printContent = invoiceRef.current.innerHTML;
     const WinPrint = window.open("", "", "width=900,height=650");
@@ -164,7 +178,7 @@ const Invoice = ({ orderInfo, setShowInvoice }) => {
             Print Receipt
           </button>
           <button
-            onClick={() => setShowInvoice(false)}
+            onClick={handleClose}
             className="text-red-500 hover:underline text-xs px-4 py-2 rounded-lg"
           >
             Close

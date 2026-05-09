@@ -16,8 +16,8 @@ const BottomNav = () => {
   const dispatch = useDispatch();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [guestCount, setGuestCount] = useState(0);
-  const [name, setName] = useState();
-  const [phone, setPhone] = useState();
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
 
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
@@ -61,6 +61,8 @@ const BottomNav = () => {
     navigate("/tables");
   };
 
+  const { canCompleteOrders } = useAuth();
+
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-[#262626] p-2 h-16 flex justify-around">
       <button
@@ -71,6 +73,7 @@ const BottomNav = () => {
       >
         <FaHome className="inline mr-2" size={20} /> <p>Home</p>
       </button>
+      
       <button
         onClick={() => navigate("/orders")}
         className={`flex items-center justify-center font-bold ${
@@ -79,6 +82,7 @@ const BottomNav = () => {
       >
         <MdOutlineReorder className="inline mr-2" size={20} /> <p>Orders</p>
       </button>
+
       <button
         onClick={() => navigate("/tables")}
         className={`flex items-center justify-center font-bold ${
@@ -91,14 +95,16 @@ const BottomNav = () => {
         <CiCircleMore className="inline mr-2" size={20} /> <p>More</p>
       </button>
 
-      <button
-        disabled={isActive("/tables") || isActive("/menu")}
-        onClick={openModal}
-        className="absolute bottom-6 bg-[#F6B100] text-[#f5f5f5] rounded-full p-4 items-center"
-      >
-        <BiSolidDish size={40} />
-        <span className="absolute -bottom-5 left-1/2 -translate-x-1/2 text-[#f6b100] text-[10px] font-bold whitespace-nowrap">NEW ORDER</span>
-      </button>
+      {canCompleteOrders && (
+        <button
+          disabled={isActive("/tables") || isActive("/menu")}
+          onClick={openModal}
+          className="absolute bottom-6 bg-[#F6B100] text-[#1a1a1a] rounded-full p-4 items-center shadow-2xl hover:scale-105 transition-transform"
+        >
+          <BiSolidDish size={40} />
+          <span className="absolute -bottom-5 left-1/2 -translate-x-1/2 text-[#f6b100] text-[10px] font-black whitespace-nowrap">NEW ORDER</span>
+        </button>
+      )}
 
       <Modal isOpen={isModalOpen} onClose={closeModal} title="Create Order">
         <div>

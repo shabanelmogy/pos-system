@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { menus } from "../../constants";
-import { GrRadialSelected } from "react-icons/gr";
-import { FaShoppingCart } from "react-icons/fa";
+import { FaShoppingCart, FaSearch } from "react-icons/fa";
+import { MdRestaurantMenu } from "react-icons/md";
 import { useDispatch } from "react-redux";
 import { addItems } from "../../redux/slices/cartSlice";
 
@@ -10,6 +10,7 @@ const MenuContainer = () => {
   const [selected, setSelected] = useState(menus[0]);
   const [itemCount, setItemCount] = useState(0);
   const [itemId, setItemId] = useState();
+  const [searchTerm, setSearchTerm] = useState("");
   const dispatch = useDispatch();
 
   const increment = (id) => {
@@ -28,48 +29,68 @@ const MenuContainer = () => {
     if(itemCount === 0) return;
 
     const {name, price} = item;
-    const newObj = { id: new Date(), name, pricePerQuantity: price, quantity: itemCount, price: price * itemCount };
+    const newObj = { id: Date.now(), name, pricePerQuantity: price, quantity: itemCount, price: price * itemCount };
 
     dispatch(addItems(newObj));
     setItemCount(0);
   }
 
+  // Filter items based on search
+  const filteredItems = selected?.items.filter(item => 
+    item.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <>
+      {/* Category List */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 px-10 py-4 w-[100%]">
         {menus.map((menu) => {
           return (
             <div
               key={menu.id}
-              className="flex flex-col items-start justify-between p-4 rounded-lg min-h-[100px] cursor-pointer"
+              className={`flex flex-col items-start justify-between p-4 rounded-lg min-h-[100px] cursor-pointer transition-all ${
+                selected?.id === menu.id ? "ring-4 ring-[#f6b100] scale-95" : "opacity-80 hover:opacity-100"
+              }`}
               style={{ backgroundColor: menu.bgColor }}
               onClick={() => {
                 setSelected(menu);
                 setItemId(0);
                 setItemCount(0);
+                setSearchTerm(""); // Reset search when category changes
               }}
             >
               <div className="flex items-center justify-between w-full">
-                <h1 className="text-[#f5f5f5] text-lg font-semibold">
-                  {menu.icon} {menu.name}
-                </h1>
-                {selected.id === menu.id && (
-                  <GrRadialSelected className="text-white" size={20} />
-                )}
+                <div className="flex flex-col items-start text-white">
+                  <h1 className="text-xl font-bold">{menu.name}</h1>
+                  <p className="text-xs font-medium opacity-80">{menu.items.length} items</p>
+                </div>
+                <MdRestaurantMenu className="text-3xl text-white opacity-50" />
               </div>
-              <p className="text-[#ababab] text-sm font-semibold">
-                {menu.items.length} Items
-              </p>
             </div>
           );
         })}
       </div>
 
-      <hr className="border-[#2a2a2a] border-t-2 mt-4" />
+      <div className="px-10 py-2 flex items-center justify-between gap-4">
+        <h2 className="text-[#f5f5f5] text-xl font-bold tracking-wider">
+          {selected?.name} Items
+        </h2>
+        <div className="bg-[#1a1a1a] flex items-center gap-3 px-4 py-2 rounded-lg border border-[#333] w-full max-w-[300px]">
+          <FaSearch className="text-[#ababab] text-sm" />
+          <input 
+            type="text" 
+            placeholder="Search dish..." 
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="bg-transparent outline-none text-[#f5f5f5] text-sm w-full"
+          />
+        </div>
+      </div>
+
+      <hr className="border-[#2a2a2a] border-t-2 mx-10" />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 px-10 py-4 w-[100%] overflow-y-auto">
-        {selected?.items.map((item) => {
+        {filteredItems?.map((item) => {
           return (
             <div
               key={item.id}

@@ -5,80 +5,168 @@ import TableCard from "../components/tables/TableCard";
 import { tables } from "../constants";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { getTables } from "../https";
+import { MdTableBar } from "react-icons/md";
 
 import { useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useSnackbar } from "notistack";
+import FullScreenLoader from "../components/shared/FullScreenLoader";
+import OrderSummaryModal from "../components/tables/OrderSummaryModal";
+import { setOrder } from "../redux/slices/customerSlice";
+import { setCart } from "../redux/slices/cartSlice";
+import { useDispatch, useSelector } from "react-redux";
 
 const Tables = () => {
-  const [status, setStatus] = useState("all");
-  const navigate = useNavigate();
+  const dispatch = useDispatch();
   const customerData = useSelector((state) => state.customer);
+  const isNewOrderFlow = customerData.customerName && customerData.customerPhone;
+  
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [isSummaryModalOpen, setIsSummaryModalOpen] = useState(false);
+
+  const navigate = useNavigate();
+  const { enqueueSnackbar } = useSnackbar();
+
+  const handleViewOrder = (order) => {
+    setSelectedOrder(order);
+    setIsSummaryModalOpen(true);
+  };
+
+  const handleUpdateOrder = (order) => {
+    dispatch(setOrder({
+      customerName: order.customerDetails.name,
+      customerPhone: order.customerDetails.phone,
+      table: { tableId: order.table._id, tableNo: order.table.tableNo },
+      orderId: order._id,
+      guests: order.customerDetails.guests
+    }));
+    
+    dispatch(setCart(order.items));
+    navigate(`/menu`);
+  };
+
+  const { data: resData, isError, isLoading } = useQuery({
+    queryKey: ["tables"],
+    queryFn: async () => {
+      const response = await getTables();
+      return response.data.data; 
+    },
+    placeholderData: keepPreviousData,
+    refetchInterval: 5000, 
+  });
 
   useEffect(() => {
     document.title = "POS | Tables";
+  }, []);
 
-    // Safety Check: Redirect if customer info is missing
-    if (!customerData.customerName || !customerData.customerPhone) {
-      navigate("/");
-    }
-  }, [customerData, navigate]);
+  if (isLoading) return <FullScreenLoader />;
 
-  const { data: resData, isError } = useQuery({
-    queryKey: ["tables"],
-    queryFn: async () => {
-      return await getTables();
-    },
-    placeholderData: keepPreviousData,
-  });
-
-  if(isError) {
-    enqueueSnackbar("Something went wrong!", { variant: "error" })
+  if (isError) {
+    enqueueSnackbar("Failed to load tables. Please try again.", { variant: "error" });
   }
 
-  console.log(resData);
+  // Separate tables into Active and Free
+  const activeTables = resData?.filter(table => table.status === "Booked") || [];
+  const freeTables = resData?.filter(table => table.status !== "Booked") || [];
 
   return (
-    <section className="bg-[#1f1f1f]  h-[calc(100vh-5rem)] overflow-hidden">
-      <div className="flex items-center justify-between px-10 py-4">
+    <section className="bg-[#1f1f1f] h-[calc(100vh-5rem)] flex flex-col overflow-hidden">
+      {/* Header Area */}
+      <div className="flex items-center justify-between px-8 py-4 bg-[#1a1a1a] border-b border-[#333]">
         <div className="flex items-center gap-4">
           <BackButton />
-          <h1 className="text-[#f5f5f5] text-2xl font-bold tracking-wider">
-            Tables
-          </h1>
+          <div>
+            <h1 className="text-[#f5f5f5] text-2xl font-black tracking-tighter uppercase">Floor Plan</h1>
+            <p className="text-[#ababab] text-xs font-medium">Manage your tables and active orders</p>
+          </div>
         </div>
-        <div className="flex items-center justify-around gap-4">
-          <button
-            onClick={() => setStatus("all")}
-            className={`text-[#ababab] text-lg ${
-              status === "all" && "bg-[#383838] rounded-lg px-5 py-2"
-            }  rounded-lg px-5 py-2 font-semibold`}
-          >
-            All
-          </button>
-          <button
-            onClick={() => setStatus("booked")}
-            className={`text-[#ababab] text-lg ${
-              status === "booked" && "bg-[#383838] rounded-lg px-5 py-2"
-            }  rounded-lg px-5 py-2 font-semibold`}
-          >
-            Booked
-          </button>
+        <div className="flex items-center gap-6">
+          <div className="flex items-center gap-2">
+            <span className="w-3 h-3 rounded-full bg-[#2e4a40] border border-green-500"></span>
+            <span className="text-[#f5f5f5] text-xs font-bold">{activeTables.length} Active</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="w-3 h-3 rounded-full bg-[#333] border border-[#555]"></span>
+            <span className="text-[#f5f5f5] text-xs font-bold">{freeTables.length} Free</span>
+          </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-5 gap-3 px-16 py-4 h-[650px] overflow-y-scroll scrollbar-hide">
-        {resData?.data.data.map((table) => {
-          return (
-            <TableCard
-              id={table._id}
-              name={table.tableNo}
-              status={table.status}
-              initials={table?.currentOrder?.customerDetails.name}
-              seats={table.seats}
-            />
-          );
-        })}
+      {/* Split Layout Container */}
+      <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
+        
+        {/* LEFT SIDE: ACTIVE ORDERS (Main Area) */}
+        <div className="flex-[1.5] border-r border-[#333] flex flex-col bg-[#1f1f1f]">
+          <div className="px-8 py-4 bg-[#262626] border-b border-[#333] flex justify-between items-center">
+             <h2 className="text-[#f6b100] text-sm font-black uppercase tracking-widest flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-[#f6b100] animate-pulse"></span>
+                Active Service
+             </h2>
+             <span className="text-[#ababab] text-[10px] font-bold bg-[#1a1a1a] px-2 py-1 rounded">
+               {activeTables.length} Tables
+             </span>
+          </div>
+          <div className="flex-1 overflow-y-auto p-8 scrollbar-hide">
+             {activeTables.length > 0 ? (
+               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+                 {activeTables.map((table) => (
+                   <TableCard
+                     key={table._id}
+                     id={table._id}
+                     name={table.tableNo}
+                     status={table.status}
+                     initials={table?.currentOrder?.customerDetails?.name}
+                     seats={table.seats}
+                     order={table.currentOrder}
+                     onViewOrder={handleViewOrder}
+                   />
+                 ))}
+               </div>
+             ) : (
+               <div className="h-full flex flex-col items-center justify-center opacity-30">
+                  <MdTableBar size={80} className="text-[#ababab] mb-4" />
+                  <p className="text-[#f5f5f5] text-lg font-bold">No Active Tables</p>
+                  <p className="text-[#ababab] text-sm">Start an order to see tables here</p>
+               </div>
+             )}
+          </div>
+        </div>
+
+        {/* RIGHT SIDE: AVAILABLE TABLES (Side Panel) */}
+        <div className="flex-1 flex flex-col bg-[#1a1a1a]">
+          <div className="px-8 py-4 bg-[#222] border-b border-[#333] flex justify-between items-center">
+             <h2 className="text-[#ababab] text-sm font-black uppercase tracking-widest">
+                Available Tables
+             </h2>
+             <span className="text-[#ababab] text-[10px] font-bold bg-[#1a1a1a] px-2 py-1 rounded">
+               {freeTables.length} Free
+             </span>
+          </div>
+          <div className="flex-1 overflow-y-auto p-8 scrollbar-hide">
+             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {freeTables.map((table) => (
+                  <TableCard
+                    key={table._id}
+                    id={table._id}
+                    name={table.tableNo}
+                    status={table.status}
+                    initials={null}
+                    seats={table.seats}
+                    order={null}
+                    onViewOrder={handleViewOrder}
+                  />
+                ))}
+             </div>
+          </div>
+        </div>
+
       </div>
+
+      <OrderSummaryModal 
+        isOpen={isSummaryModalOpen} 
+        onClose={() => setIsSummaryModalOpen(false)} 
+        order={selectedOrder}
+        onUpdate={handleUpdateOrder}
+      />
 
       <BottomNav />
     </section>
