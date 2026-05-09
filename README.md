@@ -55,6 +55,52 @@ In Render, create a new Blueprint from this repo and provide these secret values
 
 ---
 
+## MongoDB Migration
+
+To initialize a new MongoDB database for this app, set `MONGODB_URI` in `pos-backend/.env`, then run:
+
+```bash
+cd pos-backend
+npm run migrate
+```
+
+The migration syncs Mongoose indexes and can optionally create a default admin user and tables. Set these variables before running it:
+
+```env
+ADMIN_NAME=Admin
+ADMIN_EMAIL=admin@example.com
+ADMIN_PHONE=9999999999
+ADMIN_PASSWORD=change_this_password
+ADMIN_ROLE=Admin
+SEED_TABLE_COUNT=10
+SEED_TABLE_SEATS=4
+```
+
+To copy an existing database to another MongoDB instance, use MongoDB Database Tools:
+
+```bash
+mongodump --uri="mongodb://localhost:27017/pos-db" --out=./mongo-backup
+mongorestore --uri="your_production_mongodb_uri" ./mongo-backup/pos-db
+```
+
+---
+
+## Swagger API Docs
+
+After starting the backend, open:
+
+```text
+http://localhost:8000/api-docs
+```
+
+The OpenAPI JSON is available at:
+
+```text
+http://localhost:8000/api-docs.json
+```
+
+---
+
 ## 📺 **YouTube Playlist**
 
 🎬 Follow the complete tutorial series on building this Restaurant POS System on YouTube:  
