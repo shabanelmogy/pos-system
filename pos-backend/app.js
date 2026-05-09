@@ -47,12 +47,18 @@ app.use(globalErrorHandler);
 // Server
 const startServer = async () => {
     try {
-        await connectDB();
-
+        // Start listening FIRST so IIS doesn't timeout
         app.listen(PORT, () => {
             console.log(`POS Server is listening on port ${PORT}`);
-            console.log(`Swagger docs: http://localhost:${PORT}/api-docs`);
-        })
+        });
+
+        // Then connect to DB in the background
+        connectDB().then(() => {
+            console.log("Database connected successfully");
+        }).catch((err) => {
+            console.error("Delayed Database Connection Failed:", err.message);
+        });
+
     } catch (error) {
         console.error(`Server startup failed: ${error.message}`);
         process.exit(1);
