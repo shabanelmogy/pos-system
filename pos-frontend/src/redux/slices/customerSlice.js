@@ -27,6 +27,7 @@ const customerSlice = createSlice({
             state.customerPhone = "";
             state.guests = 0;
             state.table = null;
+            state.orderId = "";
         },
 
         updateTable: (state, action) => {

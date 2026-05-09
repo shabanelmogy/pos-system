@@ -27,12 +27,16 @@ const TableCard = ({id, name, status, initials, seats, order, onViewOrder}) => {
 
     // 3. If Table is Free and user is Cashier, allow creating order
     if (!customerData.customerName || !customerData.customerPhone) {
+      // Clear cart just in case something was left over
+      dispatch(setCart([])); 
       window.dispatchEvent(new CustomEvent("open-create-order-modal"));
       return;
     }
 
     const table = { tableId: id, tableNo: name }
     dispatch(updateTable({ table }))
+    // FINAL SAFETY: Clear cart before going to a fresh table menu
+    dispatch(setCart([])); 
     navigate(`/menu`);
   };
 
