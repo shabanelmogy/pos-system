@@ -1,0 +1,12 @@
+{
+  "installCommand": "cd pos-frontend && npm ci",
+  "buildCommand": "cd pos-frontend && npm run build",
+  "outputDirectory": "pos-frontend/dist",
+  "framework": "vite",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
