@@ -4,6 +4,12 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const config = require("../config/config");
 
+const sanitizeUser = (user) => {
+    const safeUser = user.toObject ? user.toObject() : { ...user };
+    delete safeUser.password;
+    return safeUser;
+}
+
 const register = async (req, res, next) => {
     try {
 
@@ -25,7 +31,7 @@ const register = async (req, res, next) => {
         const newUser = User(user);
         await newUser.save();
 
-        res.status(201).json({success: true, message: "New user created!", data: newUser});
+        res.status(201).json({success: true, message: "New user created!", data: sanitizeUser(newUser)});
 
 
     } catch (error) {
@@ -69,7 +75,7 @@ const login = async (req, res, next) => {
         })
 
         res.status(200).json({success: true, message: "User login successfully!", 
-            data: isUserPresent
+            data: sanitizeUser(isUserPresent)
         });
 
 
@@ -83,7 +89,7 @@ const getUserData = async (req, res, next) => {
     try {
         
         const user = await User.findById(req.user._id);
-        res.status(200).json({success: true, data: user});
+        res.status(200).json({success: true, data: sanitizeUser(user)});
 
     } catch (error) {
         next(error);

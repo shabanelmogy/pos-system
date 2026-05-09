@@ -34,8 +34,9 @@ const Login = () => {
           navigate("/");
       },
       onError: (error) => {
-        const { response } = error;
-        enqueueSnackbar(response.data.message, { variant: "error" });
+        const message = error.response?.data?.message || "Something went wrong. Please check your connection or CORS settings.";
+        enqueueSnackbar(message, { variant: "error" });
+        console.error("Login error:", error);
       }
     })
 

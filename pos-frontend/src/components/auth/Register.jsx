@@ -43,9 +43,9 @@ const Register = ({setIsRegister}) => {
       }, 1500);
     },
     onError: (error) => {
-      const { response } = error;
-      const message = response.data.message;
+      const message = error.response?.data?.message || "Something went wrong. Please check your connection or CORS settings.";
       enqueueSnackbar(message, { variant: "error" });
+      console.error("Registration error:", error);
     },
   });
 

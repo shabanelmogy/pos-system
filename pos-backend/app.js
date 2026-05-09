@@ -1,3 +1,5 @@
+console.log("Starting POS Backend Server...");
+try {
 const express = require("express");
 const connectDB = require("./config/database");
 const config = require("./config/config");
@@ -8,12 +10,12 @@ const swaggerUi = require("swagger-ui-express");
 const swaggerSpec = require("./config/swagger");
 const app = express();
 
-const PORT = config.port;
+const PORT = config.port || 8000;
 const corsOptions = {
     credentials: true,
-    origin: config.corsOrigin.split(",").map((url) => url.trim()),
+    origin: (config.corsOrigin || "").split(",").map((url) => url.trim()),
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"]
+    allowedHeaders: ["Content-Type", "Authorization", "Accept"]
 };
 
 // Middlewares
@@ -58,3 +60,7 @@ const startServer = async () => {
 }
 
 startServer();
+} catch (startupError) {
+    console.error("CRITICAL STARTUP ERROR:", startupError);
+    process.exit(1);
+}
