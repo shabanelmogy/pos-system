@@ -1,11 +1,19 @@
 {
   "name": "pos-backend",
   "version": "1.0.0",
+  "type": "module",
   "main": "index.js",
   "scripts": {
+    "predev": "npx kill-port 8000",
+
     "dev": "nodemon app.js",
     "migrate": "node scripts/migrate.js",
-    "start": "node app.js"
+    "start": "node app.js",
+    "db:generate": "drizzle-kit generate",
+    "db:push": "drizzle-kit push",
+    "db:migrate": "node src/db/migrate.js",
+    "db:seed": "node scripts/migrate.js",
+    "db:studio": "drizzle-kit studio"
   },
   "keywords": [],
   "author": "",
@@ -17,15 +25,22 @@
     "cors": "^2.8.5",
     "crypto": "^1.0.1",
     "dotenv": "^16.4.7",
+    "drizzle-orm": "^0.45.2",
     "express": "^4.21.2",
     "http-errors": "^2.0.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.9.5",
+    "pg": "^8.20.0",
     "razorpay": "^2.9.5",
     "swagger-jsdoc": "^6.2.8",
-    "swagger-ui-express": "^5.0.1"
+    "swagger-ui-express": "^5.0.1",
+    "uuid": "^14.0.0",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@types/pg": "^8.20.0",
+    "drizzle-kit": "^0.31.10",
+    "kill-port": "^2.0.1",
     "nodemon": "^3.1.9"
   }
 }

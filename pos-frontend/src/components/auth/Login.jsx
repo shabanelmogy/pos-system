@@ -29,8 +29,9 @@ const Login = () => {
       onSuccess: (res) => {
           const { data } = res;
           console.log(data);
-          const { _id, name, email, phone, role } = data.data;
-          dispatch(setUser({ _id, name, email, phone, role }));
+          const { id, name, email, phone, role } = data.data;
+          dispatch(setUser({ id, name, email, phone, role }));
+
           navigate("/");
       },
       onError: (error) => {

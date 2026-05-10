@@ -15,7 +15,7 @@ const Invoice = ({ orderInfo, setShowInvoice }) => {
     dispatch(removeAllItems());
     dispatch(removeCustomer());
     setShowInvoice(false);
-    navigate("/");
+    navigate("/tables"); // Navigate back to tables
   };
 
   const handlePrint = () => {
@@ -57,129 +57,99 @@ const Invoice = ({ orderInfo, setShowInvoice }) => {
     WinPrint.document.close();
     WinPrint.focus();
     
-    // Use a small delay to ensure styles are applied before printing
     setTimeout(() => {
       WinPrint.print();
       WinPrint.close();
     }, 500);
   };
 
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-      <div className="bg-white p-4 rounded-lg shadow-lg w-[400px]">
-        {/* Receipt Content for Printing */}
+  // Helper to safely format numbers
+  const formatNum = (val) => {
+    const num = parseFloat(val);
+    return isNaN(num) ? "0.00" : num.toFixed(2);
+  };
 
-        <div ref={invoiceRef} className="p-4">
-          {/* Receipt Header */}
-          <div className="flex justify-center mb-4">
+  return (
+    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex justify-center items-center z-50 p-4">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-300">
+        <div ref={invoiceRef} className="p-8">
+          <div className="flex justify-center mb-6">
             <motion.div
               initial={{ scale: 0, opacity: 0 }}
-              animate={{ scale: 1.2, opacity: 1 }}
+              animate={{ scale: 1, opacity: 1 }}
               transition={{ duration: 0.5, type: "spring", stiffness: 150 }}
-              className="w-12 h-12 border-8 border-green-500 rounded-full flex items-center justify-center shadow-lg bg-green-500"
+              className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center shadow-lg shadow-green-500/20"
             >
-              <motion.span
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ delay: 0.3, duration: 0.3 }}
-                className="text-2xl"
-              >
-                <FaCheck className="text-white" />
-              </motion.span>
+              <FaCheck className="text-white text-3xl" />
             </motion.div>
           </div>
 
-          <h2 className="text-xl font-bold text-center mb-2">Order Receipt</h2>
-          <p className="text-gray-600 text-center">Thank you for your order!</p>
+          <h2 className="text-2xl font-black text-center text-gray-900 mb-1">Order Success</h2>
+          <p className="text-gray-500 text-center text-sm mb-8 italic">Receipt Generated Successfully</p>
 
-          {/* Order Details */}
-
-          <div className="mt-4 border-t pt-4 text-sm text-gray-700">
-            <p>
-              <strong>Order ID:</strong>{" "}
-              {Math.floor(new Date(orderInfo.orderDate).getTime())}
-            </p>
-            <p>
-              <strong>Name:</strong> {orderInfo.customerDetails.name}
-            </p>
-            <p>
-              <strong>Phone:</strong> {orderInfo.customerDetails.phone}
-            </p>
-            <p>
-              <strong>Guests:</strong> {orderInfo.customerDetails.guests}
-            </p>
+          <div className="space-y-3 py-6 border-y border-dashed border-gray-200 text-sm">
+            <div className="flex justify-between">
+              <span className="text-gray-500">Order ID</span>
+              <span className="font-bold text-gray-900">#{Math.floor(new Date(orderInfo.orderDate).getTime() / 1000)}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-500">Customer</span>
+              <span className="font-bold text-gray-900">{orderInfo.customerDetails?.name}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-500">Phone</span>
+              <span className="font-bold text-gray-900">{orderInfo.customerDetails?.phone}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-500">Guests</span>
+              <span className="font-bold text-gray-900">{orderInfo.customerDetails?.guests}</span>
+            </div>
           </div>
 
-          {/* Items Summary */}
-
-          <div className="mt-4 border-t pt-4">
-            <h3 className="text-sm font-semibold">Items Ordered</h3>
-            <ul className="text-sm text-gray-700">
+          <div className="mt-6">
+            <h3 className="text-xs font-black uppercase tracking-widest text-gray-400 mb-4">Items Ordered</h3>
+            <div className="space-y-3 max-h-40 overflow-y-auto pr-2 custom-scrollbar">
               {orderInfo.items.map((item, index) => (
-                <li
-                  key={index}
-                  className="flex justify-between items-center text-xs"
-                >
-                  <span>
-                    {item.name} x{item.quantity}
+                <div key={index} className="flex justify-between items-center text-sm">
+                  <span className="text-gray-700 font-medium">
+                    {item.name} <span className="text-gray-400 text-xs">x{item.quantity}</span>
                   </span>
-                  <span>₹{item.price.toFixed(2)}</span>
-                </li>
+                  <span className="font-bold text-gray-900">₹{formatNum(item.price)}</span>
+                </div>
               ))}
-            </ul>
+            </div>
           </div>
 
-          {/* Bills Summary */}
-
-          <div className="mt-4 border-t pt-4 text-sm">
-            <p>
-              <strong>Subtotal:</strong> ₹{orderInfo.bills.total.toFixed(2)}
-            </p>
-            <p>
-              <strong>Tax:</strong> ₹{orderInfo.bills.tax.toFixed(2)}
-            </p>
-            <p className="text-md font-semibold">
-              <strong>Grand Total:</strong> ₹
-              {orderInfo.bills.totalWithTax.toFixed(2)}
-            </p>
+          <div className="mt-8 pt-6 border-t border-gray-100 space-y-2">
+            <div className="flex justify-between text-sm text-gray-500">
+              <span>Subtotal</span>
+              <span>₹{formatNum(orderInfo.bills?.total)}</span>
+            </div>
+            <div className="flex justify-between text-sm text-gray-500">
+              <span>Tax (5%)</span>
+              <span>₹{formatNum(orderInfo.bills?.tax)}</span>
+            </div>
+            <div className="flex justify-between items-center pt-2">
+              <span className="text-lg font-black text-gray-900 uppercase">Grand Total</span>
+              <span className="text-2xl font-black text-green-600">₹{formatNum(orderInfo.bills?.totalWithTax)}</span>
+            </div>
           </div>
 
-          {/* Payment Details */}
-
-          <div className="mb-2 mt-2 text-xs">
-            {orderInfo.paymentMethod === "Cash" ? (
-              <p>
-                <strong>Payment Method:</strong> {orderInfo.paymentMethod}
-              </p>
-            ) : (
-              <>
-                <p>
-                  <strong>Payment Method:</strong> {orderInfo.paymentMethod}
-                </p>
-                <p>
-                  <strong>Razorpay Order ID:</strong>{" "}
-                  {orderInfo.paymentData?.razorpay_order_id}
-                </p>
-                <p>
-                  <strong>Razorpay Payment ID:</strong>{" "}
-                  {orderInfo.paymentData?.razorpay_payment_id}
-                </p>
-              </>
-            )}
+          <div className="mt-6 p-3 bg-gray-50 rounded-xl text-[10px] text-gray-400 text-center uppercase tracking-widest font-bold">
+            Paid via {orderInfo.paymentMethod}
           </div>
         </div>
 
-        {/* Buttons */}
-        <div className="flex justify-between mt-4 no-print">
+        <div className="bg-gray-50 p-6 flex gap-4 no-print">
           <button
             onClick={handlePrint}
-            className="text-blue-500 hover:underline text-xs px-4 py-2 rounded-lg"
+            className="flex-1 bg-gray-900 text-white font-bold py-3 rounded-xl hover:bg-gray-800 transition-all shadow-lg shadow-gray-900/10"
           >
             Print Receipt
           </button>
           <button
             onClick={handleClose}
-            className="text-red-500 hover:underline text-xs px-4 py-2 rounded-lg"
+            className="flex-1 bg-white border border-gray-200 text-gray-500 font-bold py-3 rounded-xl hover:bg-gray-100 transition-all"
           >
             Close
           </button>

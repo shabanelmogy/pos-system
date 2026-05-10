@@ -2,8 +2,8 @@ import React, { useState, useEffect } from "react";
 import BottomNav from "../components/shared/BottomNav";
 import BackButton from "../components/shared/BackButton";
 import TableCard from "../components/tables/TableCard";
-import { tables } from "../constants";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
+
 import { getTables } from "../https";
 import { MdTableBar } from "react-icons/md";
 
@@ -36,8 +36,8 @@ const Tables = () => {
     dispatch(setOrder({
       customerName: order.customerDetails.name,
       customerPhone: order.customerDetails.phone,
-      table: { tableId: order.table._id, tableNo: order.table.tableNo },
-      orderId: order._id,
+      table: { tableId: order.table.id, tableNo: order.table.tableNo },
+      orderId: order.id,
       guests: order.customerDetails.guests
     }));
     
@@ -145,8 +145,8 @@ const Tables = () => {
                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
                  {activeTables.map((table) => (
                    <TableCard
-                     key={table._id}
-                     id={table._id}
+                     key={table.id}
+                     id={table.id}
                      name={table.tableNo}
                      status={table.status}
                      initials={table?.currentOrder?.customerDetails?.name}
@@ -180,8 +180,8 @@ const Tables = () => {
              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {freeTables.map((table) => (
                   <TableCard
-                    key={table._id}
-                    id={table._id}
+                    key={table.id}
+                    id={table.id}
                     name={table.tableNo}
                     status={table.status}
                     initials={null}

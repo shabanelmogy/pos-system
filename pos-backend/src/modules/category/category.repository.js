@@ -1,0 +1,39 @@
+import { eq } from "drizzle-orm";
+import { categories } from "./category.schema.js";
+import { db } from "../../config/database.js";
+
+const categoryRepository = {
+  async findAll() {
+    return await db.select().from(categories);
+  },
+
+  async findById(id) {
+    const result = await db.select().from(categories).where(eq(categories.id, id)).limit(1);
+    return result[0];
+  },
+
+  async findByName(name) {
+    const result = await db.select().from(categories).where(eq(categories.name, name)).limit(1);
+    return result[0];
+  },
+
+  async create(categoryData) {
+    const result = await db.insert(categories).values(categoryData).returning();
+    return result[0];
+  },
+
+  async update(id, categoryData) {
+    const result = await db.update(categories)
+      .set({ ...categoryData, updatedAt: new Date() })
+      .where(eq(categories.id, id))
+      .returning();
+    return result[0];
+  },
+
+  async delete(id) {
+    const result = await db.delete(categories).where(eq(categories.id, id)).returning();
+    return result[0];
+  }
+};
+
+export default categoryRepository;

@@ -27,8 +27,8 @@ const useLoadData = () => {
     const fetchUser = async () => {
       try {
         const { data } = await getUserData();
-        const { _id, name, email, phone, role } = data.data;
-        dispatch(setUser({ _id, name, email, phone, role }));
+        const { id, name, email, phone, role } = data.data;
+        dispatch(setUser({ id, name, email, phone, role }));
       } catch (error) {
         dispatch(removeUser());
         if (window.location.pathname !== "/auth") {

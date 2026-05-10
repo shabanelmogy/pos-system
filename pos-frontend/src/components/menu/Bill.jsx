@@ -1,120 +1,65 @@
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getTotalPrice } from "../../redux/slices/cartSlice";
-import {
-  addOrder,
-  createOrderRazorpay,
-  updateTable,
-  verifyPaymentRazorpay,
-} from "../../https/index";
-import { enqueueSnackbar } from "notistack";
 import { useMutation } from "@tanstack/react-query";
+import { addOrder, createOrderRazorpay, updateTable, verifyPaymentRazorpay } from "../../https";
+import { useSnackbar } from "notistack";
 import { removeAllItems } from "../../redux/slices/cartSlice";
 import { removeCustomer } from "../../redux/slices/customerSlice";
 import Invoice from "../invoice/Invoice";
-import { useNavigate } from "react-router-dom";
-import { FaTrash } from "react-icons/fa";
-import useAuth from "../../hooks/useAuth";
-
-function loadScript(src) {
-  return new Promise((resolve) => {
-    const script = document.createElement("script");
-    script.src = src;
-    script.onload = () => {
-      resolve(true);
-    };
-    script.onerror = () => {
-      resolve(false);
-    };
-    document.body.appendChild(script);
-  });
-}
 
 const Bill = () => {
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-  const { canCompleteOrders } = useAuth();
-
+  const cartItems = useSelector((state) => state.cart);
   const customerData = useSelector((state) => state.customer);
-  const cartData = useSelector((state) => state.cart);
-  const total = useSelector(getTotalPrice);
-  const taxRate = 5.25;
-  const tax = (total * taxRate) / 100;
-  const totalPriceWithTax = total + tax;
-
-  const [paymentMethod, setPaymentMethod] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState("Cash");
   const [showInvoice, setShowInvoice] = useState(false);
-  const [orderInfo, setOrderInfo] = useState();
+  const [orderInfo, setOrderInfo] = useState(null);
+  
+  const { enqueueSnackbar } = useSnackbar();
+  const dispatch = useDispatch();
 
-  const handleCancelOrder = () => {
-    if (window.confirm("Are you sure you want to cancel this draft order?")) {
-      dispatch(removeAllItems());
-      dispatch(removeCustomer());
-      enqueueSnackbar("Order cancelled", { variant: "info" });
-      navigate("/");
-    }
-  };
+  const total = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
+  const tax = total * 0.05;
+  const totalWithTax = total + tax;
 
-  const handlePlaceOrder = async () => {
-    if (!paymentMethod) {
-      enqueueSnackbar("Please select a payment method!", {
-        variant: "warning",
+  const tableMutation = useMutation({
+    mutationFn: (data) => updateTable(data),
+  });
+
+  const orderMutation = useMutation({
+    mutationFn: (data) => addOrder(data),
+    onSuccess: (res) => {
+      const order = res.data.data;
+      // Update Table
+      const tableData = {
+        status: "Booked",
+        orderId: order.id,
+        tableId: order.tableId,
+      };
+
+      tableMutation.mutate(tableData, {
+        onSuccess: () => {
+          enqueueSnackbar("Order Placed Successfully", { variant: "success" });
+          setOrderInfo(order);
+          setShowInvoice(true);
+        },
       });
+    },
+  });
 
-      return;
-    }
-
-    if (paymentMethod === "Online") {
-      // load the script
-      try {
-        const res = await loadScript(
-          "https://checkout.razorpay.com/v1/checkout.js"
-        );
-
-        if (!res) {
-          enqueueSnackbar("Razorpay SDK failed to load. Are you online?", {
-            variant: "warning",
-          });
-          return;
-        }
-
-        if (!customerData.table) {
-          enqueueSnackbar("Table information missing! Please select a table again.", {
-            variant: "error",
-          });
-          navigate("/tables");
-          return;
-        }
-
-        console.log("[Bill] Checking Customer Data:", customerData);
-        if (!customerData.customerName || !customerData.customerPhone) {
-          enqueueSnackbar("Customer details missing! Please restart the order.", {
-            variant: "error",
-          });
-          navigate("/");
-          return;
-        }
-
-        // create order
-        const reqData = {
-          amount: totalPriceWithTax.toFixed(2),
-        };
-
-        const { data } = await createOrderRazorpay(reqData);
-
-        const options = {
-          key: `${import.meta.env.VITE_RAZORPAY_KEY_ID}`,
-          amount: data.order.amount,
-          currency: data.order.currency,
-          name: "RESTRO",
-          description: "Secure Payment for Your Meal",
-          order_id: data.order.id,
-          handler: async function (response) {
-            const verification = await verifyPaymentRazorpay(response);
-            console.log(verification);
-            enqueueSnackbar(verification.data.message, { variant: "success" });
-
-            // Place the order
+  const razorpayMutation = useMutation({
+    mutationFn: (data) => createOrderRazorpay(data),
+    onSuccess: (res) => {
+      const { data } = res;
+      const options = {
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+        amount: data.order.amount,
+        currency: data.order.currency,
+        name: "RESTRO",
+        description: "Secure Payment for Your Meal",
+        order_id: data.order.id,
+        handler: async function (response) {
+          try {
+            await verifyPaymentRazorpay(response);
             const orderData = {
               customerDetails: {
                 name: customerData.customerName,
@@ -123,58 +68,43 @@ const Bill = () => {
               },
               orderStatus: "In Progress",
               bills: {
-                total: total,
-                tax: tax,
-                totalWithTax: totalPriceWithTax,
+                total,
+                tax,
+                totalWithTax,
               },
-              items: cartData,
-              table: customerData.table?.tableId,
+              items: cartItems,
+              tableId: customerData.table?.tableId,
               paymentMethod: paymentMethod,
               paymentData: {
                 razorpay_order_id: response.razorpay_order_id,
                 razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
               },
             };
 
-            setTimeout(() => {
-              orderMutation.mutate(orderData);
-            }, 1500);
-          },
-          prefill: {
-            name: customerData.customerName,
-            email: "",
-            contact: customerData.customerPhone,
-          },
-          theme: { color: "#025cca" },
-        };
+            orderMutation.mutate(orderData);
+          } catch (error) {
+            enqueueSnackbar("Payment Verification Failed", { variant: "error" });
+          }
+        },
+        prefill: {
+          name: customerData.customerName,
+          contact: customerData.customerPhone,
+        },
+        theme: {
+          color: "#f6b100",
+        },
+      };
 
-        const rzp = new window.Razorpay(options);
-        rzp.open();
-      } catch (error) {
-        console.log(error);
-        enqueueSnackbar("Payment Failed!", {
-          variant: "error",
-        });
-      }
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+    },
+  });
+
+  const handlePlaceOrder = () => {
+    if (paymentMethod === "Razorpay") {
+      razorpayMutation.mutate({ amount: totalWithTax });
     } else {
-      if (!customerData.table) {
-        enqueueSnackbar("Table information missing! Please select a table again.", {
-          variant: "error",
-        });
-        navigate("/tables");
-        return;
-      }
-
-      console.log("[Bill-Cash] Checking Customer Data:", customerData);
-      if (!customerData.customerName || !customerData.customerPhone) {
-        enqueueSnackbar("Customer details missing! Please restart the order.", {
-          variant: "error",
-        });
-        navigate("/");
-        return;
-      }
-
-      // Place or Update the order
       const orderData = {
         customerDetails: {
           name: customerData.customerName,
@@ -183,165 +113,76 @@ const Bill = () => {
         },
         orderStatus: "In Progress",
         bills: {
-          total: total,
-          tax: tax,
-          totalWithTax: totalPriceWithTax,
+          total,
+          tax,
+          totalWithTax,
         },
-        items: cartData,
-        table: customerData.table?.tableId,
+        items: cartItems,
+        tableId: customerData.table?.tableId,
         paymentMethod: paymentMethod,
       };
 
-      if (customerData.orderId && !customerData.orderId.includes("new")) {
-        // Update existing order
-        orderMutation.mutate({ orderId: customerData.orderId, ...orderData });
-      } else {
-        // Create new order
-        orderMutation.mutate(orderData);
-      }
+      orderMutation.mutate(orderData);
     }
   };
 
-  const orderMutation = useMutation({
-    mutationFn: (reqData) => {
-      if (reqData.orderId) {
-        return updateOrder(reqData);
-      }
-      return addOrder(reqData);
-    },
-    onSuccess: (resData) => {
-      const { data } = resData.data;
-      console.log(data);
-      enqueueSnackbar(customerData.orderId ? "Order Updated!" : "Order Placed!", {
-        variant: "success",
-      });
-
-      setOrderInfo(data);
-
-      // Update Table
-      const tableData = {
-        status: "Booked",
-        orderId: data._id,
-        tableId: data.table,
-      };
-
-      setTimeout(() => {
-        tableUpdateMutation.mutate(tableData);
-      }, 1500);
-
-      enqueueSnackbar("Order Placed!", {
-        variant: "success",
-      });
-      setShowInvoice(true);
-    },
-    onError: (error) => {
-      console.log(error);
-    },
-  });
-
-  const tableUpdateMutation = useMutation({
-    mutationFn: (reqData) => updateTable(reqData),
-    onSuccess: (resData) => {
-      console.log(resData);
-    },
-    onError: (error) => {
-      console.log(error);
-    },
-  });
+  if (showInvoice && orderInfo) {
+    return <Invoice orderInfo={orderInfo} setShowInvoice={setShowInvoice} />;
+  }
 
   return (
-    <div className="w-full">
-      <div className="flex justify-between items-center px-5 py-2">
-        <h1 className="text-[#f5f5f5] text-lg font-bold tracking-wider">
-          Bill
-        </h1>
-        <button 
-          onClick={handleCancelOrder}
-          className="text-red-500 hover:text-red-600 flex items-center gap-1 text-[10px] font-semibold uppercase tracking-tighter"
-        >
-          <FaTrash size={10} /> Cancel
-        </button>
-      </div>
-
-      <div className="space-y-1 px-5">
-        <div className="flex items-center justify-between text-[13px]">
-          <p className="text-[#ababab] font-medium">
-            Items({cartData.length})
-          </p>
-          <h1 className="text-[#f5f5f5] font-bold">
-            ₹{total.toFixed(2)}
-          </h1>
+    <div className="bg-[#262626] p-6 rounded-lg h-full flex flex-col">
+      <h2 className="text-[#f5f5f5] text-xl font-black uppercase tracking-tighter mb-6">Bill Summary</h2>
+      
+      <div className="flex-1 space-y-4">
+        <div className="flex justify-between text-[#ababab]">
+          <span className="font-medium">Subtotal</span>
+          <span className="font-bold text-[#f5f5f5]">₹{total.toFixed(2)}</span>
         </div>
-        <div className="flex items-center justify-between text-[13px]">
-          <p className="text-[#ababab] font-medium">Tax (5.25%)</p>
-          <h1 className="text-[#f5f5f5] font-bold">₹{tax.toFixed(2)}</h1>
+        <div className="flex justify-between text-[#ababab]">
+          <span className="font-medium">Tax (5%)</span>
+          <span className="font-bold text-[#f5f5f5]">₹{tax.toFixed(2)}</span>
         </div>
-        <div className="flex items-center justify-between pt-1 border-t border-[#2a2a2a] mt-1">
-          <p className="text-[#f5f5f5] text-sm font-semibold">Total</p>
-          <h1 className="text-[#f6b100] text-lg font-black">
-            ₹{totalPriceWithTax.toFixed(2)}
-          </h1>
+        <div className="h-px bg-[#333] my-4"></div>
+        <div className="flex justify-between text-[#f6b100]">
+          <span className="text-lg font-black uppercase">Total</span>
+          <span className="text-xl font-black">₹{totalWithTax.toFixed(2)}</span>
         </div>
       </div>
 
-      <div className="px-5 mt-3 space-y-2 pb-3">
-        {canCompleteOrders && (
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setPaymentMethod("Cash")}
-              className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all ${
-                paymentMethod === "Cash"
-                  ? "bg-[#f6b100] text-[#1a1a1a]"
-                  : "bg-[#262626] text-[#ababab]"
-              }`}
-            >
-              Cash
-            </button>
-            <button
-              onClick={() => setPaymentMethod("Online")}
-              className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all ${
-                paymentMethod === "Online"
-                  ? "bg-[#f6b100] text-[#1a1a1a]"
-                  : "bg-[#262626] text-[#ababab]"
-              }`}
-            >
-              Online
-            </button>
-          </div>
-        )}
-        
-        <div className="grid grid-cols-2 gap-2">
-          {canCompleteOrders ? (
-            <>
-              <button 
-                onClick={() => orderInfo ? setShowInvoice(true) : enqueueSnackbar("Place order first!", { variant: "info" })}
-                className="bg-[#025cca] py-3 rounded-lg text-[#f5f5f5] font-bold text-[11px] uppercase tracking-wide"
-              >
-                Print
-              </button>
-              <button
-                onClick={handlePlaceOrder}
-                disabled={orderMutation.isPending}
-                className="bg-[#f6b100] py-3 rounded-lg text-[#1a1a1a] font-black text-[11px] uppercase tracking-wide disabled:opacity-50"
-              >
-                {orderMutation.isPending ? "..." : "Order"}
-              </button>
-            </>
-          ) : (
-            <button
-              onClick={handlePlaceOrder}
-              disabled={orderMutation.isPending}
-              className="bg-[#f6b100] col-span-2 py-3 rounded-lg text-[#1a1a1a] font-black text-[11px] uppercase tracking-wide disabled:opacity-50"
-            >
-              {orderMutation.isPending ? "Placing Order..." : "Place Order"}
-            </button>
-          )}
+      <div className="mt-8">
+        <p className="text-[#ababab] text-xs font-bold uppercase tracking-widest mb-3">Payment Method</p>
+        <div className="grid grid-cols-2 gap-3">
+          <button
+            onClick={() => setPaymentMethod("Cash")}
+            className={`py-3 rounded-lg font-bold text-sm transition-all border-2 ${
+              paymentMethod === "Cash"
+                ? "bg-[#f6b100]/10 border-[#f6b100] text-[#f6b100]"
+                : "bg-[#1a1a1a] border-[#333] text-[#ababab] hover:border-[#444]"
+            }`}
+          >
+            Cash
+          </button>
+          <button
+            onClick={() => setPaymentMethod("Razorpay")}
+            className={`py-3 rounded-lg font-bold text-sm transition-all border-2 ${
+              paymentMethod === "Razorpay"
+                ? "bg-[#f6b100]/10 border-[#f6b100] text-[#f6b100]"
+                : "bg-[#1a1a1a] border-[#333] text-[#ababab] hover:border-[#444]"
+            }`}
+          >
+            Online
+          </button>
         </div>
       </div>
 
-      {showInvoice && (
-        <Invoice orderInfo={orderInfo} setShowInvoice={setShowInvoice} />
-      )}
+      <button
+        onClick={handlePlaceOrder}
+        disabled={cartItems.length === 0 || orderMutation.isPending || razorpayMutation.isPending}
+        className="w-full bg-[#f6b100] hover:bg-[#e5a600] disabled:opacity-50 disabled:cursor-not-allowed text-[#1a1a1a] font-black uppercase tracking-widest py-4 rounded-lg mt-8 transition-all transform active:scale-[0.98]"
+      >
+        {orderMutation.isPending || razorpayMutation.isPending ? "Processing..." : "Place Order"}
+      </button>
     </div>
   );
 };

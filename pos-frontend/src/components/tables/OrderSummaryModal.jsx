@@ -26,7 +26,7 @@ const OrderSummaryModal = ({ isOpen, onClose, order, onUpdate }) => {
   if (!order) return null;
 
   const handleMarkAsReady = () => {
-    statusMutation.mutate({ orderId: order._id, orderStatus: "Ready" });
+    statusMutation.mutate({ orderId: order.id, orderStatus: "Ready" });
   };
 
   return (

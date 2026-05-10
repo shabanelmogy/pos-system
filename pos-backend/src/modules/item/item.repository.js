@@ -1,0 +1,38 @@
+import { eq } from "drizzle-orm";
+import { items } from "./item.schema.js";
+import { db } from "../../config/database.js";
+
+const itemRepository = {
+  async findAll() {
+    return await db.select().from(items);
+  },
+
+  async findByCategoryId(categoryId) {
+    return await db.select().from(items).where(eq(items.categoryId, categoryId));
+  },
+
+  async findById(id) {
+    const result = await db.select().from(items).where(eq(items.id, id)).limit(1);
+    return result[0];
+  },
+
+  async create(itemData) {
+    const result = await db.insert(items).values(itemData).returning();
+    return result[0];
+  },
+
+  async update(id, itemData) {
+    const result = await db.update(items)
+      .set({ ...itemData, updatedAt: new Date() })
+      .where(eq(items.id, id))
+      .returning();
+    return result[0];
+  },
+
+  async delete(id) {
+    const result = await db.delete(items).where(eq(items.id, id)).returning();
+    return result[0];
+  }
+};
+
+export default itemRepository;

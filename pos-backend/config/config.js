@@ -1,9 +1,10 @@
-require("dotenv").config();
+import "dotenv/config";
 
 const config = Object.freeze({
     port: process.env.PORT || 3000,
     databaseURI: process.env.MONGODB_URI || "mongodb://localhost:27017/pos-db",
-    nodeEnv : process.env.NODE_ENV || "development",
+    databaseURL: process.env.DATABASE_URL,
+    nodeEnv: process.env.NODE_ENV || "development",
     frontendUrl: process.env.FRONTEND_URL || "http://localhost:5173",
     corsOrigin: process.env.CORS_ORIGIN || process.env.FRONTEND_URL || "http://localhost:5173",
     accessTokenSecret: process.env.JWT_SECRET,
@@ -12,4 +13,4 @@ const config = Object.freeze({
     razorpyWebhookSecret: process.env.RAZORPAY_WEBHOOK_SECRET
 });
 
-module.exports = config;
+export default config;

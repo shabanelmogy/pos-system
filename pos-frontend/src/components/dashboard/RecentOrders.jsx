@@ -1,5 +1,5 @@
 import React from "react";
-import { orders } from "../../constants";
+
 import { GrUpdate } from "react-icons/gr";
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { enqueueSnackbar } from "notistack";
@@ -73,7 +73,7 @@ const RecentOrders = () => {
                         : "text-yellow-500"
                     }`}
                     value={order.orderStatus}
-                    onChange={(e) => handleStatusChange({orderId: order._id, orderStatus: e.target.value})}
+                    onChange={(e) => handleStatusChange({orderId: order.id, orderStatus: e.target.value})}
                   >
                     <option className="text-yellow-500" value="In Progress">
                       In Progress
@@ -85,8 +85,8 @@ const RecentOrders = () => {
                 </td>
                 <td className="p-4">{formatDateAndTime(order.orderDate)}</td>
                 <td className="p-4">{order.items.length} Items</td>
-                <td className="p-4">Table - {order.table.tableNo}</td>
-                <td className="p-4">₹{order.bills.totalWithTax}</td>
+                <td className="p-4">Table - {order.table?.tableNo || "N/A"}</td>
+                <td className="p-4">₹{parseFloat(order.bills.totalWithTax).toFixed(2)}</td>
                 <td className="p-4">
                   {order.paymentMethod}
                 </td>

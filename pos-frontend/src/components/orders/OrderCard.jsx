@@ -18,9 +18,9 @@ const OrderCard = ({ order }) => {
       enqueueSnackbar("Order Completed!", { variant: "success" });
       
       // If completed, also free the table
-      if (order.table?._id) {
+      if (order.table?.id) {
         tableMutation.mutate({ 
-          tableId: order.table._id, 
+          tableId: order.table.id, 
           status: "Available" 
         });
       }
@@ -38,10 +38,10 @@ const OrderCard = ({ order }) => {
   });
 
   const handleCompleteOrder = () => {
-    statusMutation.mutate({ orderId: order._id, orderStatus: "Completed" });
+    statusMutation.mutate({ orderId: order.id, orderStatus: "Completed" });
   };
   return (
-    <div className="w-[500px] bg-[#262626] p-4 rounded-lg mb-4">
+    <div className="w-full bg-[#262626] p-4 rounded-lg mb-4 shadow-xl border border-[#333]">
       <div className="flex items-center gap-5">
         <button className="bg-[#f6b100] p-3 text-xl font-bold rounded-lg">
           {getAvatarName(order.customerDetails.name)}
@@ -52,7 +52,7 @@ const OrderCard = ({ order }) => {
               {order.customerDetails.name}
             </h1>
             <p className="text-[#ababab] text-sm">#{Math.floor(new Date(order.orderDate).getTime())} / Dine in</p>
-            <p className="text-[#ababab] text-sm">Table <FaLongArrowAltRight className="text-[#ababab] ml-2 inline" /> {order.table.tableNo}</p>
+            <p className="text-[#ababab] text-sm">Table <FaLongArrowAltRight className="text-[#ababab] ml-2 inline" /> {order.table?.tableNo || "N/A"}</p>
           </div>
           <div className="flex flex-col items-end gap-2">
             {order.orderStatus === "Ready" ? (
@@ -85,7 +85,7 @@ const OrderCard = ({ order }) => {
       <hr className="w-full mt-4 border-t-1 border-gray-500" />
       <div className="flex items-center justify-between mt-4">
         <h1 className="text-[#f5f5f5] text-lg font-semibold">Total</h1>
-        <p className="text-[#f5f5f5] text-lg font-semibold">₹{order.bills.totalWithTax.toFixed(2)}</p>
+        <p className="text-[#f5f5f5] text-lg font-semibold">₹{parseFloat(order.bills.totalWithTax).toFixed(2)}</p>
       </div>
 
       {canCompleteOrders && order.orderStatus !== "Completed" && (

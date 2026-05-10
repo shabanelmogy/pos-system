@@ -1,34 +1,26 @@
-const createHttpError = require("http-errors");
-const jwt = require("jsonwebtoken");
-const config = require("../config/config");
-const User = require("../models/userModel");
+import jwt from "jsonwebtoken";
+import config from "../config/config.js";
+import userRepository from "../src/modules/user/user.repository.js";
+import { fail } from "../src/utils/errorHandler.js";
 
-
-const isVerifiedUser = async (req, res, next) => {
-    try{
-
+export const isVerifiedUser = async (req, res, next) => {
+    try {
         const { accessToken } = req.cookies;
         
-        if(!accessToken){
-            const error = createHttpError(401, "Please provide token!");
-            return next(error);
+        if (!accessToken) {
+            fail("Please provide token!", 401);
         }
 
         const decodeToken = jwt.verify(accessToken, config.accessTokenSecret);
 
-        const user = await User.findById(decodeToken._id);
-        if(!user){
-            const error = createHttpError(401, "User not exist!");
-            return next(error);
+        const user = await userRepository.findById(decodeToken._id);
+        if (!user) {
+            fail("User does not exist!", 401);
         }
 
-        req.user = user;
+        req.user = { ...user, _id: user.id }; 
         next();
-
-    }catch (error) {
-        const err = createHttpError(401, "Invalid Token!");
-        next(err);
+    } catch (error) {
+        next(error);
     }
 }
-
-module.exports = { isVerifiedUser };
