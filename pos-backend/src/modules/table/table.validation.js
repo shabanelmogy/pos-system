@@ -1,8 +1,8 @@
 import { z } from "zod";
 
 export const createTableSchema = z.object({
-  tableNo: z.number().int().positive(),
-  seats: z.number().int().positive(),
+  tableNo: z.coerce.number().int().positive(),
+  seats: z.coerce.number().int().positive(),
 });
 
 export const updateTableSchema = z.object({

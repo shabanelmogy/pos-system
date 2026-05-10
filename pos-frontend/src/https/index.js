@@ -13,6 +13,7 @@ export const addTable = (data) => axiosWrapper.post("/api/table", data);
 export const getTables = () => axiosWrapper.get("/api/table");
 export const updateTable = ({ tableId, ...tableData }) =>
   axiosWrapper.put(`/api/table/${tableId}`, tableData);
+export const deleteTable = (tableId) => axiosWrapper.delete(`/api/table/${tableId}`);
 
 // Category Endpoints
 export const getCategories = () => axiosWrapper.get("/api/category");
@@ -39,3 +40,15 @@ export const updateOrder = ({ orderId, ...orderData }) =>
   axiosWrapper.put(`/api/order/${orderId}`, orderData);
 export const updateOrderStatus = ({ orderId, orderStatus }) =>
   axiosWrapper.put(`/api/order/${orderId}`, { orderStatus });
+
+// Customer Endpoints
+export const getCustomers = () => axiosWrapper.get("/api/customer");
+export const getCustomerById = (id) => axiosWrapper.get(`/api/customer/${id}`);
+export const addCustomer = (data) => axiosWrapper.post("/api/customer", data);
+export const updateCustomer = ({ id, ...data }) => axiosWrapper.put(`/api/customer/${id}`, data);
+
+// Bill Endpoints
+export const getBills = () => axiosWrapper.get("/api/bill");
+export const getBillById = (id) => axiosWrapper.get(`/api/bill/${id}`);
+export const getBillByOrderId = (orderId) => axiosWrapper.get(`/api/bill/order/${orderId}`);
+export const updateBillStatus = ({ id, status }) => axiosWrapper.patch(`/api/bill/status/${id}`, { status });

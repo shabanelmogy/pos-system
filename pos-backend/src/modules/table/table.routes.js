@@ -9,5 +9,6 @@ router.use(isVerifiedUser);
 router.get("/", tableController.getAll);
 router.post("/", tableController.create);
 router.put("/:id", tableController.update);
+router.delete("/:id", tableController.delete);
 
 export default router;

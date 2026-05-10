@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { categories } from "./category.schema.js";
 import { db } from "../../config/database.js";
 
@@ -28,6 +28,11 @@ const categoryRepository = {
       .where(eq(categories.id, id))
       .returning();
     return result[0];
+  },
+
+  async hasItems(id) {
+    const result = await db.execute(sql`SELECT 1 FROM items WHERE category_id = ${id} LIMIT 1`);
+    return result.rows.length > 0;
   },
 
   async delete(id) {

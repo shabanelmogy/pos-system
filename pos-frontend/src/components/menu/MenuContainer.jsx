@@ -62,7 +62,7 @@ const MenuContainer = () => {
     const { name, price } = item;
     const priceNum = parseFloat(price);
     const newObj = { 
-      id: Date.now(), 
+      id: item.id, // Keep the real database UUID
       name, 
       pricePerQuantity: priceNum, 
       quantity: itemCount, 

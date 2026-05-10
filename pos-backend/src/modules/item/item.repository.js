@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { items } from "./item.schema.js";
 import { db } from "../../config/database.js";
 
@@ -27,6 +27,11 @@ const itemRepository = {
       .where(eq(items.id, id))
       .returning();
     return result[0];
+  },
+
+  async hasRelations(id) {
+    const result = await db.execute(sql`SELECT 1 FROM order_items WHERE menu_item_id = ${id} LIMIT 1`);
+    return result.rows.length > 0;
   },
 
   async delete(id) {

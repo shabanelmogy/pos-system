@@ -67,12 +67,12 @@ const Bill = () => {
                 guests: customerData.guests,
               },
               orderStatus: "In Progress",
-              bills: {
-                total,
-                tax,
-                totalWithTax,
-              },
-              items: cartItems,
+              items: cartItems.map(item => ({
+                menuItemId: item.id,
+                quantity: item.quantity,
+                unitPrice: item.price,
+                name: item.name
+              })),
               tableId: customerData.table?.tableId,
               paymentMethod: paymentMethod,
               paymentData: {
@@ -102,6 +102,13 @@ const Bill = () => {
   });
 
   const handlePlaceOrder = () => {
+    const preparedItems = cartItems.map(item => ({
+      menuItemId: item.id,
+      quantity: item.quantity,
+      unitPrice: item.price,
+      name: item.name
+    }));
+
     if (paymentMethod === "Razorpay") {
       razorpayMutation.mutate({ amount: totalWithTax });
     } else {
@@ -112,12 +119,7 @@ const Bill = () => {
           guests: customerData.guests,
         },
         orderStatus: "In Progress",
-        bills: {
-          total,
-          tax,
-          totalWithTax,
-        },
-        items: cartItems,
+        items: preparedItems,
         tableId: customerData.table?.tableId,
         paymentMethod: paymentMethod,
       };

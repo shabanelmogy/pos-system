@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { FaHome } from "react-icons/fa";
+import { FaHome, FaUsers, FaChartBar } from "react-icons/fa";
 import { MdOutlineReorder, MdTableBar } from "react-icons/md";
-import { CiCircleMore } from "react-icons/ci";
 import { BiSolidDish } from "react-icons/bi";
 import { useNavigate, useLocation } from "react-router-dom";
 import Modal from "./Modal";
@@ -61,48 +60,71 @@ const BottomNav = () => {
     navigate("/tables");
   };
 
-  const { canCompleteOrders } = useAuth();
+  const { canCompleteOrders, isAdmin } = useAuth();
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-[#262626] p-2 h-16 flex justify-around">
+    <div className="fixed bottom-0 left-0 right-0 bg-[#262626] p-2 h-16 flex justify-around border-t border-[#333] z-40">
       <button
         onClick={() => navigate("/")}
-        className={`flex items-center justify-center font-bold ${
-          isActive("/") ? "text-[#f5f5f5] bg-[#343434]" : "text-[#ababab]"
-        } w-[300px] rounded-[20px]`}
+        className={`flex flex-col items-center justify-center font-bold transition-all ${
+          isActive("/") ? "text-[#f6b100]" : "text-[#ababab] hover:text-white"
+        } w-full`}
       >
-        <FaHome className="inline mr-2" size={20} /> <p>Home</p>
+        <FaHome size={20} />
+        <span className="text-[10px] mt-1">Home</span>
       </button>
       
       <button
         onClick={() => navigate("/orders")}
-        className={`flex items-center justify-center font-bold ${
-          isActive("/orders") ? "text-[#f5f5f5] bg-[#343434]" : "text-[#ababab]"
-        } w-[300px] rounded-[20px]`}
+        className={`flex flex-col items-center justify-center font-bold transition-all ${
+          isActive("/orders") ? "text-[#f6b100]" : "text-[#ababab] hover:text-white"
+        } w-full`}
       >
-        <MdOutlineReorder className="inline mr-2" size={20} /> <p>Orders</p>
+        <MdOutlineReorder size={20} />
+        <span className="text-[10px] mt-1">Orders</span>
       </button>
 
       <button
         onClick={() => navigate("/tables")}
-        className={`flex items-center justify-center font-bold ${
-          isActive("/tables") ? "text-[#f5f5f5] bg-[#343434]" : "text-[#ababab]"
-        } w-[300px] rounded-[20px]`}
+        className={`flex flex-col items-center justify-center font-bold transition-all ${
+          isActive("/tables") ? "text-[#f6b100]" : "text-[#ababab] hover:text-white"
+        } w-full`}
       >
-        <MdTableBar className="inline mr-2" size={20} /> <p>Tables</p>
+        <MdTableBar size={20} />
+        <span className="text-[10px] mt-1">Tables</span>
       </button>
-      <button className="flex items-center justify-center font-bold text-[#ababab] w-[300px]">
-        <CiCircleMore className="inline mr-2" size={20} /> <p>More</p>
-      </button>
+
+      {isAdmin && (
+        <>
+          <button
+            onClick={() => navigate("/customers")}
+            className={`flex flex-col items-center justify-center font-bold transition-all ${
+              isActive("/customers") ? "text-[#f6b100]" : "text-[#ababab] hover:text-white"
+            } w-full`}
+          >
+            <FaUsers size={20} />
+            <span className="text-[10px] mt-1">Customers</span>
+          </button>
+          <button
+            onClick={() => navigate("/dashboard")}
+            className={`flex flex-col items-center justify-center font-bold transition-all ${
+              isActive("/dashboard") ? "text-[#f6b100]" : "text-[#ababab] hover:text-white"
+            } w-full`}
+          >
+            <FaChartBar size={20} />
+            <span className="text-[10px] mt-1">Admin</span>
+          </button>
+        </>
+      )}
 
       {canCompleteOrders && (
         <button
           disabled={isActive("/tables") || isActive("/menu")}
           onClick={openModal}
-          className="absolute bottom-6 bg-[#F6B100] text-[#1a1a1a] rounded-full p-4 items-center shadow-2xl hover:scale-105 transition-transform"
+          className="absolute -top-6 bg-[#f6b100] text-[#1a1a1a] rounded-full p-4 items-center shadow-2xl hover:scale-105 transition-transform border-4 border-[#1f1f1f] disabled:opacity-50 disabled:grayscale"
         >
-          <BiSolidDish size={40} />
-          <span className="absolute -bottom-5 left-1/2 -translate-x-1/2 text-[#f6b100] text-[10px] font-black whitespace-nowrap">NEW ORDER</span>
+          <BiSolidDish size={30} />
+          <span className="absolute -bottom-8 left-1/2 -translate-x-1/2 text-[#f6b100] text-[8px] font-black whitespace-nowrap bg-[#1f1f1f] px-2 py-0.5 rounded uppercase tracking-widest">Create Order</span>
         </button>
       )}
 
@@ -120,15 +142,15 @@ const BottomNav = () => {
           </div>
         </div>
         <div>
-          <label className="block mb-2 mt-3 text-sm font-medium text-[#ababab]">Guest</label>
+          <label className="block mb-2 mt-3 text-sm font-medium text-[#ababab]">Guest Count</label>
           <div className="flex items-center justify-between bg-[#1f1f1f] px-4 py-3 rounded-lg">
-            <button onClick={decrement} className="text-yellow-500 text-2xl">&minus;</button>
-            <span className="text-white">{guestCount} Person</span>
-            <button onClick={increment} className="text-yellow-500 text-2xl">&#43;</button>
+            <button onClick={decrement} className="text-yellow-500 text-2xl font-bold px-2">&minus;</button>
+            <span className="text-white font-bold">{guestCount} {guestCount === 1 ? 'Person' : 'People'}</span>
+            <button onClick={increment} className="text-yellow-500 text-2xl font-bold px-2">&#43;</button>
           </div>
         </div>
-        <button onClick={handleCreateOrder} className="w-full bg-[#F6B100] text-[#f5f5f5] rounded-lg py-3 mt-8 hover:bg-yellow-700">
-          Create Order
+        <button onClick={handleCreateOrder} className="w-full bg-[#f6b100] text-[#1a1a1a] font-black rounded-xl py-4 mt-8 hover:bg-yellow-600 transition-all uppercase tracking-widest shadow-lg shadow-yellow-500/20">
+          Start Placing Order
         </button>
       </Modal>
     </div>

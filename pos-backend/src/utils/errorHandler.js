@@ -18,13 +18,20 @@ export const fail = (message, status = 400) => {
 export const handleError = (res, error, context) => {
     console.error(`[ERROR] ${context}:`, error);
     
-    const statusCode = error.statusCode || 500;
-    const message = error.message || "Internal Server Error";
+    let statusCode = error.statusCode || 500;
+    let message = error.message || "Internal Server Error";
+    
+    // Handle Zod validation errors
+    if (error.name === "ZodError" || error.issues) {
+        statusCode = 400;
+        const issues = error.issues || error.errors || [];
+        message = issues.map(e => `${e.path.join('.')}: ${e.message}`).join(', ');
+    }
     
     return res.status(statusCode).json({
         success: false,
         message,
-        error: error.name !== 'Error' ? error.name : undefined,
+        details: error.name === "ZodError" ? error.errors : undefined,
         context: process.env.NODE_ENV === 'development' ? context : undefined
     });
 };

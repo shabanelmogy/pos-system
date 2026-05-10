@@ -35,6 +35,12 @@ const categoryService = {
     if (!category) {
       fail("Category not found", 404);
     }
+
+    const hasItems = await categoryRepository.hasItems(id);
+    if (hasItems) {
+      fail("Cannot delete category while it still contains dishes. Please delete or reassign all dishes first.", 400);
+    }
+
     return await categoryRepository.delete(id);
   }
 };

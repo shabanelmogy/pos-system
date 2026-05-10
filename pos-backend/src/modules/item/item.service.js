@@ -35,6 +35,12 @@ const itemService = {
     if (!item) {
       fail("Item not found", 404);
     }
+
+    const hasRelations = await itemRepository.hasRelations(id);
+    if (hasRelations) {
+      fail("Cannot delete item as it is linked to existing orders. Consider making it inactive instead.", 400);
+    }
+
     return await itemRepository.delete(id);
   }
 };

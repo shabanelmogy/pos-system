@@ -31,6 +31,16 @@ const tableController = {
     } catch (error) {
       handleError(res, error, "tableController.update");
     }
+  },
+
+  async delete(req, res) {
+    try {
+      const { id } = req.params;
+      await tableService.deleteTable(id);
+      res.status(200).json({ success: true, message: "Table deleted successfully" });
+    } catch (error) {
+      handleError(res, error, "tableController.delete");
+    }
   }
 };
 
