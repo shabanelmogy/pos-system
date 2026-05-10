@@ -33,22 +33,29 @@ const Bill = () => {
     mutationFn: (data) => addOrder(data),
     onSuccess: (res) => {
       const order = res.data.data;
-      // Update Table
-      const tableData = {
-        status: "Booked",
-        orderId: order.id,
-        tableId: order.tableId,
+      
+      const handleSuccess = () => {
+        queryClient.invalidateQueries(["orders"]);
+        enqueueSnackbar("Order Placed Successfully", { variant: "success" });
+        setOrderInfo(order);
+        setShowInvoice(true);
       };
 
-      tableMutation.mutate(tableData, {
-        onSuccess: () => {
-          queryClient.invalidateQueries(["orders"]);
-          enqueueSnackbar("Order Placed Successfully", { variant: "success" });
-          setOrderInfo(order);
-          setShowInvoice(true);
-          // Cleanup is now handled in Invoice.jsx when dismissed
-        },
-      });
+      if (order.tableId) {
+        // Update Table
+        const tableData = {
+          status: "Booked",
+          orderId: order.id,
+          tableId: order.tableId,
+        };
+
+        tableMutation.mutate(tableData, {
+          onSuccess: handleSuccess,
+        });
+      } else {
+        // Skip table update if no table was selected
+        handleSuccess();
+      }
     },
     onError: (error) => {
       enqueueSnackbar(error.response?.data?.message || "Failed to place order", { variant: "error" });
@@ -81,7 +88,7 @@ const Bill = () => {
         phone: customerData.customerPhone,
         guests: customerData.guests,
       },
-      orderStatus: "In Progress",
+      orderStatus: selectedPOSPoint?.settings?.enableTables !== false ? "In Progress" : "Completed",
       items: preparedItems,
       tableId: customerData.table?.tableId,
       paymentMethod: paymentMethod,
@@ -119,7 +126,7 @@ const Bill = () => {
                 phone: customerData.customerPhone,
                 guests: customerData.guests,
               },
-              orderStatus: "In Progress",
+              orderStatus: selectedPOSPoint?.settings?.enableTables !== false ? "In Progress" : "Completed",
               items: cartItems.map(item => ({
                 menuItemId: item.id,
                 quantity: item.quantity,

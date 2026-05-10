@@ -11,6 +11,7 @@ const posSettingsService = {
         const defaultSettings = await posSettingsRepository.upsert(item.id, {
           autoPrintReceipt: true,
           allowDiscounts: false,
+          enableTables: true,
           requireCustomerOnOrder: false,
           receiptPrinterName: "Default",
           kitchenPrinterName: "Kitchen"
@@ -31,6 +32,7 @@ const posSettingsService = {
       settings = await posSettingsRepository.upsert(posPointId, {
         autoPrintReceipt: true,
         allowDiscounts: false,
+        enableTables: true,
         requireCustomerOnOrder: false,
         receiptPrinterName: "Default",
         kitchenPrinterName: "Kitchen"

@@ -1,4 +1,4 @@
-import { eq, desc, and, sql } from "drizzle-orm";
+import { eq, desc, and, sql, inArray } from "drizzle-orm";
 import { orders } from "./order.schema.js";
 import { orderItems } from "./orderItem.schema.js";
 import { customers } from "../customer/customer.schema.js";
@@ -44,13 +44,26 @@ const orderRepository = {
       })
       .orderBy(desc(orders.createdAt));
 
+    const orderIds = rows.map(r => r.order.id);
+    const itemsMap = {};
+    
+    if (orderIds.length > 0) {
+      const items = await db.select().from(orderItems).where(inArray(orderItems.orderId, orderIds));
+      items.forEach(item => {
+        if (!itemsMap[item.orderId]) {
+          itemsMap[item.orderId] = [];
+        }
+        itemsMap[item.orderId].push(item);
+      });
+    }
+
     return rows.map(r => ({
       ...r.order,
       customer: r.customer,
       branch: r.branch,
       posPoint: r.posPoint,
       shift: r.shift,
-      orderItems: [] // Initially empty, can be fetched if necessary
+      orderItems: itemsMap[r.order.id] || []
     }));
   },
 

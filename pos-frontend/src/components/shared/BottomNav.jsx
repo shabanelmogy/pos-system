@@ -4,7 +4,7 @@ import { MdOutlineReorder, MdTableBar } from "react-icons/md";
 import { BiSolidDish } from "react-icons/bi";
 import { useNavigate, useLocation } from "react-router-dom";
 import Modal from "./Modal";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setCustomer } from "../../redux/slices/customerSlice";
 import { removeAllItems } from "../../redux/slices/cartSlice";
 import useAuth from "../../hooks/useAuth";
@@ -13,6 +13,9 @@ const BottomNav = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
+  const { selectedPOSPoint } = useSelector((state) => state.pos);
+  const enableTables = selectedPOSPoint?.settings?.enableTables !== false;
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [guestCount, setGuestCount] = useState(0);
   const [name, setName] = useState("");
@@ -57,7 +60,11 @@ const BottomNav = () => {
     setGuestCount(0);
 
     closeModal();
-    navigate("/tables");
+    if (!enableTables) {
+      navigate("/menu");
+    } else {
+      navigate("/tables");
+    }
   };
 
   const { canCompleteOrders, isAdmin } = useAuth();
@@ -82,14 +89,16 @@ const BottomNav = () => {
         <span className="text-[10px] mt-1">Orders</span>
       </button>
 
-      <button
-        onClick={() => navigate("/tables")}
-        className={`flex flex-col items-center justify-center font-bold transition-all ${isActive("/tables") ? "text-[#f6b100]" : "text-[#ababab] hover:text-white"
-          } w-full`}
-      >
-        <MdTableBar size={20} />
-        <span className="text-[10px] mt-1">Tables</span>
-      </button>
+      {enableTables && (
+        <button
+          onClick={() => navigate("/tables")}
+          className={`flex flex-col items-center justify-center font-bold transition-all ${isActive("/tables") ? "text-[#f6b100]" : "text-[#ababab] hover:text-white"
+            } w-full`}
+        >
+          <MdTableBar size={20} />
+          <span className="text-[10px] mt-1">Tables</span>
+        </button>
+      )}
 
       {isAdmin && (
         <>

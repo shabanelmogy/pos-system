@@ -19,6 +19,8 @@ const formatOrder = (order) => {
     branch: order.branch,
     posPoint: order.posPoint,
     shift: order.shift,
+    orderDate: order.createdAt || order.created_at || new Date(),
+    customerDetails: order.customerSnapshot || order.customer_snapshot,
     bills: {
       total: order.subtotal,
       tax: order.tax,

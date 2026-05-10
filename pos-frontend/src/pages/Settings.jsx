@@ -202,6 +202,16 @@ const Settings = () => {
                                                         <div className={`absolute top-1 w-3 h-3 rounded-full bg-white transition-all ${localSettings.allowDiscounts ? 'left-6' : 'left-1'}`} />
                                                     </button>
                                                 </div>
+
+                                                <div className="flex items-center justify-between bg-[#1f1f1f] p-4 rounded-2xl border border-[#333]">
+                                                    <span className="text-xs text-[#ababab] font-bold uppercase">Enable Tables</span>
+                                                    <button 
+                                                        onClick={() => handleToggle('enableTables')}
+                                                        className={`w-10 h-5 rounded-full relative transition-all ${localSettings.enableTables !== false ? 'bg-[#f6b100]' : 'bg-[#333]'}`}
+                                                    >
+                                                        <div className={`absolute top-1 w-3 h-3 rounded-full bg-white transition-all ${localSettings.enableTables !== false ? 'left-6' : 'left-1'}`} />
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>

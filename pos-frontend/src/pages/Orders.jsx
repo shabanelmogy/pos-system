@@ -18,6 +18,7 @@ const Orders = () => {
   const [showReprintModal, setShowReprintModal] = useState(false);
   
   const { selectedPOSPoint } = useSelector((state) => state.pos);
+  const enableTables = selectedPOSPoint?.settings?.enableTables !== false;
   const user = useSelector((state) => state.user);
 
   useEffect(() => {
@@ -99,26 +100,28 @@ const Orders = () => {
             </div>
         </div>
 
-        <div className="flex items-center bg-[#1a1a1a] p-1 rounded-xl border border-[#333] overflow-x-auto whitespace-nowrap scrollbar-hide max-w-fit">
-          {[
-            { id: "all", label: "All Status" },
-            { id: "progress", label: "In Progress" },
-            { id: "ready", label: "Ready" },
-            { id: "completed", label: "Completed" }
-          ].map((tab) => (
-            <button 
-              key={tab.id}
-              onClick={() => setStatus(tab.id)} 
-              className={`px-6 py-2 rounded-lg font-bold text-sm transition-all ${
-                status === tab.id 
-                  ? "bg-[#f6b100] text-[#1a1a1a] shadow-lg shadow-[#f6b100]/20" 
-                  : "text-[#ababab] hover:text-[#f5f5f5]"
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
+        {enableTables && (
+          <div className="flex items-center bg-[#1a1a1a] p-1 rounded-xl border border-[#333] overflow-x-auto whitespace-nowrap scrollbar-hide max-w-fit">
+            {[
+              { id: "all", label: "All Status" },
+              { id: "progress", label: "In Progress" },
+              { id: "ready", label: "Ready" },
+              { id: "completed", label: "Completed" }
+            ].map((tab) => (
+              <button 
+                key={tab.id}
+                onClick={() => setStatus(tab.id)} 
+                className={`px-6 py-2 rounded-lg font-bold text-sm transition-all ${
+                  status === tab.id 
+                    ? "bg-[#f6b100] text-[#1a1a1a] shadow-lg shadow-[#f6b100]/20" 
+                    : "text-[#ababab] hover:text-[#f5f5f5]"
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="flex-1 overflow-y-auto px-10 pb-20 custom-scrollbar">

@@ -15,6 +15,13 @@
       "when": 1778412617658,
       "tag": "0001_loose_plazm",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1778442968323,
+      "tag": "0002_steep_skullbuster",
+      "breakpoints": true
     }
   ]
 }

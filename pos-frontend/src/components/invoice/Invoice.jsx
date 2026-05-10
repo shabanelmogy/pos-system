@@ -17,7 +17,8 @@ const Invoice = ({ orderInfo, setShowInvoice, isReprint = false }) => {
     
     // Only navigate away if we are in the primary checkout flow
     if (!isReprint) {
-      navigate("/tables"); 
+      const enableTables = selectedPOSPoint?.settings?.enableTables !== false;
+      navigate(enableTables ? "/tables" : "/menu"); 
     }
     
     // Only clear session data if we are in the primary checkout flow

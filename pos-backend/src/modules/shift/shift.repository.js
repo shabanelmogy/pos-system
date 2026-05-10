@@ -3,6 +3,7 @@ import { shifts } from "./shift.schema.js";
 import { orders } from "../order/order.schema.js";
 import { branches } from "../branch/branch.schema.js";
 import { posPoints } from "../posPoint/posPoint.schema.js";
+import { posSettings } from "../posSettings/posSettings.schema.js";
 import { users } from "../user/user.schema.js";
 import { db } from "../../config/database.js";
 
@@ -35,11 +36,17 @@ const shiftRepository = {
       const branchRes = bId ? await db.select().from(branches).where(eq(branches.id, bId)).limit(1) : [];
       const posRes = pId ? await db.select().from(posPoints).where(eq(posPoints.id, pId)).limit(1) : [];
       const cashierRes = cId ? await db.select().from(users).where(eq(users.id, cId)).limit(1) : [];
+      
+      const pointData = posRes[0] || null;
+      if (pointData) {
+          const setRes = await db.select().from(posSettings).where(eq(posSettings.posPointId, pointData.id)).limit(1);
+          pointData.settings = setRes[0] || null;
+      }
 
       return { 
         ...shift, 
         branch: branchRes[0] || null, 
-        posPoint: posRes[0] || null, 
+        posPoint: pointData, 
         cashier: cashierRes[0] || null 
       };
     } catch (error) {
@@ -78,11 +85,17 @@ const shiftRepository = {
     const branchRes = bId ? await db.select().from(branches).where(eq(branches.id, bId)).limit(1) : [];
     const posRes = pId ? await db.select().from(posPoints).where(eq(posPoints.id, pId)).limit(1) : [];
     const cashierRes = cId ? await db.select().from(users).where(eq(users.id, cId)).limit(1) : [];
+    
+    const pointData = posRes[0] || null;
+    if (pointData) {
+        const setRes = await db.select().from(posSettings).where(eq(posSettings.posPointId, pointData.id)).limit(1);
+        pointData.settings = setRes[0] || null;
+    }
 
     return { 
       ...shift, 
       branch: branchRes[0] || null, 
-      posPoint: posRes[0] || null, 
+      posPoint: pointData, 
       cashier: cashierRes[0] || null 
     };
   },

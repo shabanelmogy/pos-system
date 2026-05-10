@@ -2,6 +2,7 @@ import { eq } from "drizzle-orm";
 import { users, userPosPermissions } from "./user.schema.js";
 import { branches } from "../branch/branch.schema.js";
 import { posPoints } from "../posPoint/posPoint.schema.js";
+import { posSettings } from "../posSettings/posSettings.schema.js";
 import { db } from "../../config/database.js";
 
 const userRepository = {
@@ -23,7 +24,14 @@ const userRepository = {
     const posPermissions = [];
     for (const p of perms) {
       const ptRes = await db.select().from(posPoints).where(eq(posPoints.id, p.posPointId)).limit(1);
-      posPermissions.push({ ...p, posPoint: ptRes[0] || null });
+      const setRes = await db.select().from(posSettings).where(eq(posSettings.posPointId, p.posPointId)).limit(1);
+      
+      const pointData = ptRes[0] || null;
+      if (pointData) {
+          pointData.settings = setRes[0] || null;
+      }
+      
+      posPermissions.push({ ...p, posPoint: pointData });
     }
 
     return { ...user, branch, posPermissions };
@@ -47,7 +55,14 @@ const userRepository = {
     const posPermissions = [];
     for (const p of perms) {
       const ptRes = await db.select().from(posPoints).where(eq(posPoints.id, p.posPointId)).limit(1);
-      posPermissions.push({ ...p, posPoint: ptRes[0] || null });
+      const setRes = await db.select().from(posSettings).where(eq(posSettings.posPointId, p.posPointId)).limit(1);
+      
+      const pointData = ptRes[0] || null;
+      if (pointData) {
+          pointData.settings = setRes[0] || null;
+      }
+      
+      posPermissions.push({ ...p, posPoint: pointData });
     }
 
     return { ...user, branch, posPermissions };

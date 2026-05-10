@@ -6,6 +6,7 @@ export const posSettings = pgTable("pos_settings", {
   posPointId: uuid("pos_point_id").references(() => posPoints.id).unique().notNull(),
   autoPrintReceipt: boolean("auto_print_receipt").default(true),
   allowDiscounts: boolean("allow_discounts").default(false),
+  enableTables: boolean("enable_tables").default(true),
   requireCustomerOnOrder: boolean("require_customer_on_order").default(false),
   receiptPrinterName: text("receipt_printer_name"),
   kitchenPrinterName: text("kitchen_printer_name"),

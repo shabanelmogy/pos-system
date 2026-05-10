@@ -9,8 +9,8 @@ import { enqueueSnackbar } from "notistack";
 const ShiftManager = () => {
   const dispatch = useDispatch();
   const { activeShift, selectedBranch, selectedPOSPoint } = useSelector((state) => state.pos);
-  const [openingBalance, setOpeningBalance] = useState("");
-  const [closingBalance, setClosingBalance] = useState("");
+  const [openingBalance, setOpeningBalance] = useState("0");
+  const [closingBalance, setClosingBalance] = useState("0");
   const [loading, setLoading] = useState(false);
 
   const handleOpenShift = async (e) => {
@@ -20,7 +20,7 @@ const ShiftManager = () => {
       const res = await openShift({
         branchId: selectedBranch.id,
         posPointId: selectedPOSPoint.id,
-        openingBalance: parseFloat(openingBalance)
+        openingBalance: parseFloat(openingBalance || 0)
       });
       dispatch(setActiveShift(res.data.data));
       dispatch(setShowShiftModal(false));
@@ -37,7 +37,7 @@ const ShiftManager = () => {
     try {
       setLoading(true);
       const res = await closeShift(activeShift.id, {
-        closingBalance: parseFloat(closingBalance)
+        closingBalance: parseFloat(closingBalance || 0)
       });
       dispatch(setActiveShift(null));
       dispatch(setShowShiftModal(false));
@@ -86,7 +86,6 @@ const ShiftManager = () => {
                   type="number" 
                   value={openingBalance}
                   onChange={(e) => setOpeningBalance(e.target.value)}
-                  required
                   placeholder="0.00"
                   className="w-full bg-[#111] border border-[#333] rounded-[1.5rem] p-6 pl-16 text-white text-3xl font-black focus:outline-none focus:border-[#f6b100] transition-all shadow-inner tracking-tighter"
                 />
@@ -101,24 +100,7 @@ const ShiftManager = () => {
                 {loading ? "Validating Ledger..." : "Open Terminal Session"}
               </button>
 
-              <div className="relative flex items-center py-4">
-                <div className="flex-grow border-t border-[#222]"></div>
-                <span className="flex-shrink mx-4 text-[9px] text-[#333] font-black uppercase tracking-widest">or</span>
-                <div className="flex-grow border-t border-[#222]"></div>
-              </div>
 
-              <button 
-                type="button"
-                onClick={() => {
-                   setLoading(true);
-                   checkActiveShift(selectedPOSPoint.id);
-                   setTimeout(() => setLoading(false), 1000);
-                }}
-                disabled={loading}
-                className="w-full bg-white/5 border border-white/5 text-[#ababab] font-black py-5 rounded-[1.5rem] text-[10px] uppercase tracking-[0.15em] hover:bg-white/10 hover:text-white transition-all"
-              >
-                Resume Active Session
-              </button>
             </div>
           </form>
 
@@ -152,27 +134,7 @@ const ShiftManager = () => {
           <p className="text-[#555] text-xs font-bold uppercase tracking-widest mt-2">Finalize your counts before drawer handoff</p>
         </header>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
-           <div className="bg-[#111] p-8 rounded-[2rem] border border-[#222]">
-              <span className="text-[9px] text-amber-500 font-black uppercase tracking-widest block mb-4">Initial Ledger</span>
-              <div className="flex items-baseline gap-1">
-                 <span className="text-gray-500 text-sm font-black">₹</span>
-                 <span className="text-4xl font-black text-white tracking-tighter">{parseFloat(activeShift.openingBalance).toFixed(2)}</span>
-              </div>
-              <p className="text-[9px] text-[#333] font-black uppercase mt-4 tracking-widest flex items-center gap-2">
-                 <MdHistory size={12} /> Opened at {new Date(activeShift.openedAt).toLocaleTimeString()}
-              </p>
-           </div>
 
-           <div className="bg-[#111] p-8 rounded-[2rem] border border-[#222]">
-              <span className="text-[9px] text-emerald-500 font-black uppercase tracking-widest block mb-4">Current Session Flow</span>
-              <div className="flex items-baseline gap-1 text-emerald-500">
-                 <span className="text-sm font-black">+ ₹</span>
-                 <span className="text-4xl font-black tracking-tighter">--.--</span>
-              </div>
-              <p className="text-[9px] text-[#333] font-black uppercase mt-4 tracking-widest">Sales will be tallied on close</p>
-           </div>
-        </div>
 
         <form onSubmit={handleCloseShift} className="space-y-8">
            <div className="group">
@@ -185,7 +147,6 @@ const ShiftManager = () => {
                   type="number" 
                   value={closingBalance}
                   onChange={(e) => setClosingBalance(e.target.value)}
-                  required
                   placeholder="0.00"
                   className="w-full bg-[#222] border border-[#333] rounded-[1.5rem] p-6 pl-16 text-white text-3xl font-black focus:outline-none focus:border-[#f6b100] transition-all tracking-tighter shadow-inner"
                 />

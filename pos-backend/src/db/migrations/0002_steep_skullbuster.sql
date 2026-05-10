@@ -1,0 +1,1 @@
+ALTER TABLE "pos_settings" ADD COLUMN "enable_tables" boolean DEFAULT true;

@@ -27,6 +27,9 @@ const posSettingsRepository = {
   },
 
   async upsert(posPointId, data) {
+    // Sanitize data to prevent updating read-only or primary key fields
+    const { id, createdAt, updatedAt, posPointId: _, ...safeData } = data;
+
     // Check if exists first using the local method
     const results = await db.select().from(posSettings).where(eq(posSettings.posPointId, posPointId));
     const existing = results[0];
@@ -34,14 +37,14 @@ const posSettingsRepository = {
     if (existing) {
       console.log(`[DB] Updating existing settings for POS: ${posPointId}`);
       const updated = await db.update(posSettings)
-        .set({ ...data, updatedAt: new Date() })
+        .set({ ...safeData, updatedAt: new Date() })
         .where(eq(posSettings.posPointId, posPointId))
         .returning();
       return updated[0];
     } else {
       console.log(`[DB] Creating new default settings for POS: ${posPointId}`);
       const inserted = await db.insert(posSettings)
-        .values({ ...data, posPointId })
+        .values({ ...safeData, posPointId })
         .returning();
       return inserted[0];
     }

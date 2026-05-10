@@ -16,9 +16,10 @@ import ShiftManager from "./components/shared/ShiftManager";
 function Layout() {
   const isLoading = useLoadData();
   const { isAuth, isAdmin } = useAuth();
-  const { activeShift, showShiftModal } = useSelector((state) => state.pos);
+  const { activeShift, showShiftModal, selectedPOSPoint } = useSelector((state) => state.pos);
   const location = useLocation();
   const hideHeaderRoutes = ["/auth"];
+  const enableTables = selectedPOSPoint?.settings?.enableTables !== false;
 
   // 1. Loading Check
   if (isLoading) return <FullScreenLoader />;
@@ -61,7 +62,7 @@ function Layout() {
           path="/tables"
           element={
             <ProtectedRoutes>
-              <Tables />
+              {enableTables ? <Tables /> : <Navigate to="/menu" />}
             </ProtectedRoutes>
           }
         />
