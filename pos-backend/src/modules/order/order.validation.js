@@ -20,6 +20,12 @@ export const createOrderSchema = z.object({
   tableId: z.string().uuid().optional(),
   paymentMethod: z.string().optional(),
   notes: z.string().optional(),
+  
+  // Enterprise fields
+  branchId: z.string().uuid().optional().nullable(),
+  posPointId: z.string().uuid().optional().nullable(),
+  shiftId: z.string().uuid().optional().nullable(),
+  cashierId: z.string().uuid()
 });
 
 export const updateOrderStatusSchema = z.object({

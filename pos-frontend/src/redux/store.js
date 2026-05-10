@@ -2,6 +2,7 @@ import { configureStore } from "@reduxjs/toolkit";
 import customerSlice from "./slices/customerSlice"
 import cartSlice from "./slices/cartSlice";
 import userSlice from "./slices/userSlice";
+import posSlice from "./slices/posSlice";
 import { loadState, saveState } from "./persist";
 
 const persistedCustomer = loadState("customer");
@@ -11,7 +12,8 @@ const store = configureStore({
     reducer: {
         customer: customerSlice,
         cart : cartSlice,
-        user : userSlice
+        user : userSlice,
+        pos  : posSlice
     },
     preloadedState: {
         customer: persistedCustomer,

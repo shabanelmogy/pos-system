@@ -17,21 +17,24 @@ const billRepository = {
     return result[0];
   },
 
-  async create(data) {
-    const result = await db.insert(bills).values(data).returning();
+  async create(data, externalTx = null) {
+    const tx = externalTx || db;
+    const result = await tx.insert(bills).values(data).returning();
     return result[0];
   },
 
-  async update(id, data) {
-    const result = await db.update(bills)
+  async update(id, data, externalTx = null) {
+    const tx = externalTx || db;
+    const result = await tx.update(bills)
       .set({ ...data, updatedAt: new Date() })
       .where(eq(bills.id, id))
       .returning();
     return result[0];
   },
 
-  async delete(id) {
-    return await db.delete(bills).where(eq(bills.id, id)).returning();
+  async delete(id, externalTx = null) {
+    const tx = externalTx || db;
+    return await tx.delete(bills).where(eq(bills.id, id)).returning();
   }
 };
 

@@ -9,4 +9,11 @@ router.post("/login", userController.login);
 router.get("/me", isVerifiedUser, userController.getUserData);
 router.post("/logout", isVerifiedUser, userController.logout);
 
+// User Management
+router.get("/", isVerifiedUser, userController.getUsers);
+router.post("/", isVerifiedUser, userController.createUser);
+router.put("/:userId", isVerifiedUser, userController.updateUser);
+router.delete("/:userId", isVerifiedUser, userController.deleteUser);
+router.post("/assign-pos", isVerifiedUser, userController.assignPOS);
+
 export default router;

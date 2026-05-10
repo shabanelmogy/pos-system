@@ -5,7 +5,12 @@ import { fail } from "../src/utils/errorHandler.js";
 
 export const isVerifiedUser = async (req, res, next) => {
     try {
-        const { accessToken } = req.cookies;
+        let accessToken = req.cookies.accessToken;
+
+        // Fallback to Authorization header if cookie is missing
+        if (!accessToken && req.headers.authorization) {
+            accessToken = req.headers.authorization.split(" ")[1]; // Get token from "Bearer TOKEN"
+        }
         
         if (!accessToken) {
             fail("Please provide token!", 401);

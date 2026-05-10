@@ -18,7 +18,8 @@ const Menu = () => {
     document.title = "POS | Menu";
     
     // Safety Check: Redirect if order flow wasn't started correctly
-    if (!customerData.customerName || !customerData.customerPhone || !customerData.table) {
+    // But don't redirect if we are in the middle of a transaction (order might be completed)
+    if (!customerData.customerName && !customerData.table) {
       navigate("/");
     }
   }, [customerData, navigate]);

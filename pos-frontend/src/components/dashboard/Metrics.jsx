@@ -1,52 +1,58 @@
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getOrders, getCustomers, getItems, getCategories, getTables } from "../../https";
-import { FaArrowUp, FaArrowDown, FaUsers, FaUtensils, FaChartLine, FaCheckCircle } from "react-icons/fa";
+import { FaArrowUp, FaArrowDown, FaUsers, FaUtensils, FaChartLine, FaCheckCircle, FaMoneyBillWave } from "react-icons/fa";
 import { motion } from "framer-motion";
 
-const MetricCard = ({ title, value, percentage, icon, color, isIncrease }) => (
+const MetricCard = ({ title, value, percentage, icon, color, isIncrease, delay }) => (
   <motion.div 
-    whileHover={{ y: -5 }}
-    className="bg-[#1a1a1a] border border-[#333] p-6 rounded-3xl relative overflow-hidden group hover:border-[#444] transition-all"
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ delay }}
+    whileHover={{ y: -8, scale: 1.02 }}
+    className="bg-[#1a1a1a] border border-[#333] p-8 rounded-[2.5rem] relative overflow-hidden group hover:border-[#f6b100]/30 transition-all shadow-xl"
   >
-    <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${color} opacity-5 blur-2xl group-hover:opacity-10 transition-opacity`} />
+    <div className={`absolute top-0 right-0 w-48 h-48 bg-gradient-to-br ${color} opacity-[0.03] blur-3xl group-hover:opacity-10 transition-opacity`} />
     
-    <div className="flex justify-between items-start">
-      <div className={`p-3 rounded-2xl bg-gradient-to-br ${color} text-white shadow-lg`}>
+    <div className="flex justify-between items-start relative z-10">
+      <div className={`p-5 rounded-2xl bg-gradient-to-br ${color} text-white shadow-2xl transform group-hover:rotate-6 transition-transform`}>
         {icon}
       </div>
-      <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-bold ${isIncrease ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'}`}>
+      <div className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-[10px] font-black tracking-widest uppercase ${isIncrease ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'}`}>
         {isIncrease ? <FaArrowUp /> : <FaArrowDown />}
         {percentage}
       </div>
     </div>
     
-    <div className="mt-6">
-      <p className="text-[#ababab] text-xs font-bold uppercase tracking-widest">{title}</p>
-      <h3 className="text-white text-3xl font-black mt-1 tracking-tighter">{value}</h3>
+    <div className="mt-10 relative z-10">
+      <p className="text-[#ababab] text-[10px] font-black uppercase tracking-[0.2em]">{title}</p>
+      <h3 className="text-white text-4xl font-black mt-2 tracking-tighter group-hover:text-[#f6b100] transition-colors">{value}</h3>
     </div>
     
-    <div className="mt-4 w-full h-1 bg-[#262626] rounded-full overflow-hidden">
+    <div className="mt-6 w-full h-1.5 bg-[#262626] rounded-full overflow-hidden relative z-10">
       <motion.div 
         initial={{ width: 0 }}
-        animate={{ width: "70%" }}
-        transition={{ duration: 1, delay: 0.5 }}
-        className={`h-full bg-gradient-to-r ${color}`} 
+        animate={{ width: "75%" }}
+        transition={{ duration: 1.5, delay: delay + 0.5 }}
+        className={`h-full bg-gradient-to-r ${color} rounded-full`} 
       />
     </div>
   </motion.div>
 );
 
-const Metrics = () => {
-  // Fetch Real Data
+const Metrics = ({ branchId = "all" }) => {
   const { data: orders } = useQuery({ queryKey: ["orders"], queryFn: async () => (await getOrders()).data.data });
   const { data: customers } = useQuery({ queryKey: ["customers"], queryFn: async () => (await getCustomers()).data.data });
   const { data: items } = useQuery({ queryKey: ["items"], queryFn: async () => (await getItems()).data.data });
   const { data: categories } = useQuery({ queryKey: ["categories"], queryFn: async () => (await getCategories()).data.data });
   const { data: tables } = useQuery({ queryKey: ["tables"], queryFn: async () => (await getTables()).data.data });
 
-  // Calculations
-  const ordersList = Array.isArray(orders) ? orders : [];
+  const fullOrdersList = Array.isArray(orders) ? orders : [];
+  const ordersList = fullOrdersList.filter(order => {
+    if (branchId === "all") return true;
+    return order.branchId === branchId;
+  });
+
   const customersList = Array.isArray(customers) ? customers : [];
   const itemsList = Array.isArray(items) ? items : [];
   const categoriesList = Array.isArray(categories) ? categories : [];
@@ -60,109 +66,147 @@ const Metrics = () => {
     { 
       title: "Gross Revenue", 
       value: `₹${totalRevenue.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`, 
-      percentage: "12%", 
-      icon: <FaChartLine size={20} />, 
-      color: "from-green-500 to-emerald-600", 
+      percentage: "12.5%", 
+      icon: <FaMoneyBillWave size={24} />, 
+      color: "from-emerald-500 to-green-600", 
       isIncrease: true 
     },
     { 
-      title: "Total Orders", 
+      title: "Total Volume", 
       value: ordersList.length.toString(), 
-      percentage: "8%", 
-      icon: <FaUtensils size={20} />, 
+      percentage: "4.2%", 
+      icon: <FaChartLine size={24} />, 
       color: "from-blue-500 to-indigo-600", 
       isIncrease: true 
     },
     { 
-      title: "Active Customers", 
+      title: "Active Users", 
       value: customersList.length.toString(), 
-      percentage: "15%", 
-      icon: <FaUsers size={20} />, 
-      color: "from-orange-500 to-red-600", 
+      percentage: "18%", 
+      icon: <FaUsers size={24} />, 
+      color: "from-orange-500 to-amber-600", 
       isIncrease: true 
     },
     { 
-      title: "Completed", 
-      value: completedOrders.toString(), 
-      percentage: "95%", 
-      icon: <FaCheckCircle size={20} />, 
-      color: "from-purple-500 to-violet-600", 
+      title: "Success Rate", 
+      value: `${ordersList.length > 0 ? Math.round((completedOrders / ordersList.length) * 100) : 0}%`, 
+      percentage: "2%", 
+      icon: <FaCheckCircle size={24} />, 
+      color: "from-violet-500 to-purple-600", 
       isIncrease: true 
     },
   ];
 
   const inventoryStats = [
-    { label: "Categories", value: categoriesList.length },
-    { label: "Dishes", value: itemsList.length },
-    { label: "Active Tables", value: tablesList.length },
-    { label: "Open Orders", value: activeOrders },
+    { label: "Total Categories", value: categoriesList.length, color: "bg-blue-500" },
+    { label: "Active Dishes", value: itemsList.length, color: "bg-orange-500" },
+    { label: "Table Capacity", value: tablesList.length, color: "bg-green-500" },
+    { label: "Pending Tickets", value: activeOrders, color: "bg-red-500" },
   ];
 
   return (
-    <div className="space-y-10">
-      {/* Performance Section */}
-      <div>
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h2 className="text-[#f5f5f5] text-xl font-bold tracking-tight">Business Intelligence</h2>
-            <p className="text-[#ababab] text-sm font-medium">Tracking your restaurant's growth and financial health.</p>
+    <div className="space-y-12">
+      {/* Header Section */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div>
+          <div className="flex items-center gap-2 mb-3">
+             <div className="h-1 w-8 bg-[#f6b100] rounded-full"></div>
+             <span className="text-[#f6b100] text-[10px] font-black uppercase tracking-[0.3em]">Operational Insights</span>
           </div>
-          <div className="bg-[#1a1a1a] border border-[#333] px-4 py-2 rounded-xl text-[#f5f5f5] text-xs font-bold">
-            LIVE UPDATE
-          </div>
+          <h2 className="text-white text-3xl font-black tracking-tighter uppercase">
+            {branchId === "all" ? "Enterprise Pulse" : "Branch Performance"}
+          </h2>
+          <p className="text-[#ababab] text-sm mt-1 font-medium">Real-time financial telemetry and growth metrics.</p>
         </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {performanceMetrics.map((metric, index) => (
-            <MetricCard key={index} {...metric} />
-          ))}
+        <div className="flex items-center gap-4 bg-[#1a1a1a] p-2 rounded-2xl border border-[#333]">
+           <div className="px-4 py-2 bg-[#262626] rounded-xl text-white text-[10px] font-black uppercase tracking-widest border border-[#444]">
+              Data Stream: Active
+           </div>
+           <div className="w-10 h-10 rounded-xl bg-green-500/10 flex items-center justify-center">
+              <div className="w-2.5 h-2.5 bg-green-500 rounded-full animate-ping"></div>
+           </div>
         </div>
       </div>
 
+      {/* Grid Section */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        {performanceMetrics.map((metric, index) => (
+          <MetricCard key={index} {...metric} delay={index * 0.1} />
+        ))}
+      </div>
+
       {/* Secondary Stats Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
         {/* Inventory Summary */}
-        <div className="bg-[#1a1a1a] border border-[#333] p-8 rounded-3xl lg:col-span-1">
-          <h3 className="text-white text-lg font-bold mb-6">Operations Hub</h3>
-          <div className="space-y-6">
+        <div className="bg-[#1a1a1a] border border-[#333] p-10 rounded-[3rem] lg:col-span-1 shadow-2xl">
+          <div className="flex items-center gap-4 mb-10">
+             <div className="p-3 bg-[#262626] rounded-2xl text-[#f6b100]">
+                <FaUtensils size={24} />
+             </div>
+             <h3 className="text-white text-xl font-black uppercase tracking-tighter">Infrastructure</h3>
+          </div>
+          <div className="space-y-8">
             {inventoryStats.map((stat, idx) => (
-              <div key={idx} className="flex items-center justify-between">
-                <span className="text-[#ababab] font-medium">{stat.label}</span>
-                <div className="flex items-center gap-3">
-                  <div className="h-1.5 w-24 bg-[#262626] rounded-full overflow-hidden">
-                    <div className="h-full bg-[#f6b100] w-2/3" />
-                  </div>
-                  <span className="text-white font-black text-lg">{stat.value}</span>
+              <div key={idx} className="group">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-[#ababab] text-xs font-bold uppercase tracking-widest group-hover:text-white transition-colors">{stat.label}</span>
+                  <span className="text-white font-black text-2xl group-hover:text-[#f6b100] transition-colors">{stat.value}</span>
+                </div>
+                <div className="h-1.5 w-full bg-[#262626] rounded-full overflow-hidden">
+                  <motion.div 
+                    initial={{ width: 0 }}
+                    animate={{ width: "65%" }}
+                    transition={{ duration: 1.5, delay: idx * 0.2 }}
+                    className={`h-full ${stat.color} rounded-full`} 
+                  />
                 </div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Visual Placeholder for Growth Chart */}
-        <div className="bg-[#1a1a1a] border border-[#333] p-8 rounded-3xl lg:col-span-2 relative overflow-hidden group">
-          <div className="flex items-center justify-between mb-8">
-            <h3 className="text-white text-lg font-bold">Revenue Growth</h3>
-            <div className="flex gap-2">
-              <span className="w-3 h-3 rounded-full bg-green-500" />
-              <span className="w-3 h-3 rounded-full bg-blue-500" />
+        {/* Growth Chart */}
+        <div className="bg-[#1a1a1a] border border-[#333] p-10 rounded-[3rem] lg:col-span-2 relative overflow-hidden group shadow-2xl hover:border-[#f6b100]/20 transition-all">
+          <div className="flex items-center justify-between mb-12">
+            <div>
+              <h3 className="text-white text-xl font-black uppercase tracking-tighter">Revenue Trajectory</h3>
+              <p className="text-[#555] text-[10px] font-bold uppercase tracking-widest mt-1">Rolling 10-period cycle</p>
+            </div>
+            <div className="flex gap-4">
+              <div className="flex items-center gap-2">
+                 <span className="w-3 h-3 rounded-full bg-[#f6b100] shadow-[0_0_10px_#f6b100]" />
+                 <span className="text-[10px] text-white font-black uppercase">Current</span>
+              </div>
+              <div className="flex items-center gap-2">
+                 <span className="w-3 h-3 rounded-full bg-[#333]" />
+                 <span className="text-[10px] text-[#555] font-black uppercase">Goal</span>
+              </div>
             </div>
           </div>
           
-          <div className="h-40 flex items-end justify-between gap-2 px-4">
-            {[40, 70, 45, 90, 65, 80, 50, 85, 60, 100].map((h, i) => (
-              <motion.div 
-                key={i}
-                initial={{ height: 0 }}
-                animate={{ height: `${h}%` }}
-                transition={{ duration: 1, delay: i * 0.1 }}
-                className="w-full bg-gradient-to-t from-[#f6b100]/20 to-[#f6b100] rounded-t-md opacity-80 hover:opacity-100 transition-opacity"
-              />
+          <div className="h-48 flex items-end justify-between gap-3 px-2">
+            {[45, 65, 50, 85, 70, 95, 60, 100, 80, 110].map((h, i) => (
+              <div key={i} className="relative flex-1 group/bar">
+                <motion.div 
+                  initial={{ height: 0 }}
+                  animate={{ height: `${(h/120)*100}%` }}
+                  transition={{ duration: 1.5, delay: i * 0.05, ease: "circOut" }}
+                  className="w-full bg-gradient-to-t from-[#f6b100]/10 via-[#f6b100]/40 to-[#f6b100] rounded-xl relative z-10"
+                />
+                <motion.div 
+                   initial={{ height: 0 }}
+                   animate={{ height: "100%" }}
+                   className="absolute bottom-0 left-0 right-0 bg-[#262626] rounded-xl opacity-20 border border-[#333]"
+                />
+                <div className="absolute -top-8 left-1/2 -translate-x-1/2 opacity-0 group-hover/bar:opacity-100 transition-opacity bg-white text-black px-2 py-1 rounded text-[10px] font-black z-20">
+                   ₹{h}k
+                </div>
+              </div>
             ))}
           </div>
           
-          <div className="mt-6 flex justify-between text-[#555] text-[10px] font-black uppercase tracking-tighter">
-            <span>Jan</span><span>Feb</span><span>Mar</span><span>Apr</span><span>May</span><span>Jun</span><span>Jul</span><span>Aug</span><span>Sep</span><span>Oct</span>
+          <div className="mt-8 flex justify-between text-[#444] text-[9px] font-black uppercase tracking-widest border-t border-[#262626] pt-6">
+            <span>Cycle 01</span><span>Cycle 02</span><span>Cycle 03</span><span>Cycle 04</span><span>Cycle 05</span><span>Cycle 06</span><span>Cycle 07</span><span>Cycle 08</span><span>Cycle 09</span><span>Cycle 10</span>
           </div>
         </div>
       </div>

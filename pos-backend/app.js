@@ -1,5 +1,6 @@
 console.log("Starting POS Backend Server...");
 import express from "express";
+import { exec } from "child_process";
 import config from "./config/config.js";
 import globalErrorHandler from "./middlewares/globalErrorHandler.js";
 import cookieParser from "cookie-parser";
@@ -28,7 +29,9 @@ app.use(cookieParser());
 // Debug Middleware
 app.use((req, res, next) => {
   if (req.method === "OPTIONS" || req.originalUrl.includes("/api/")) {
-    console.log(`[DEBUG] Incoming ${req.method} request from Origin: ${req.headers.origin}`);
+    console.log(`[DEBUG] Incoming ${req.method} request to ${req.originalUrl}`);
+    console.log(`[DEBUG] Cookies present:`, req.cookies ? Object.keys(req.cookies) : "None");
+    console.log(`[DEBUG] Origin: ${req.headers.origin}`);
   }
   next();
 });
@@ -63,24 +66,51 @@ app.use("/api", modularRoutes);
 // Global Error Handler
 app.use(globalErrorHandler);
 
-// Server
-const startServer = async () => {
-  try {
-    app.listen(PORT, () => {
-      console.log(`POS Server is listening on port ${PORT}`);
-      console.log(`Swagger Docs available at: http://localhost:${PORT}/api-docs`);
-    });
+// Server — Self-Healing Startup
 
+const killPort = (port) => {
+  return new Promise((resolve) => {
+    // Windows command to find and kill the process on the port
+    exec(
+      `FOR /F "tokens=5" %i IN ('netstat -ano ^| findstr :${port} ^| findstr LISTENING') DO taskkill /PID %i /F`,
+      (err) => {
+        if (err) {
+          // Port might already be free — that's fine
+        }
+        setTimeout(resolve, 800); // Wait for OS to release the port
+      }
+    );
+  });
+};
+
+const startServer = async () => {
+  const server = app.listen(PORT);
+
+  server.on("listening", () => {
+    console.log(`✅ POS Server is running on port ${PORT}`);
+    console.log(`📚 Swagger Docs: http://localhost:${PORT}/api-docs`);
 
     // Test DB connection
     pool.connect()
-      .then(() => console.log("PostgreSQL connected successfully"))
-      .catch(err => console.error("PostgreSQL Connection Failed:", err.message));
+      .then(() => console.log("✅ PostgreSQL connected successfully"))
+      .catch(err => console.error("❌ PostgreSQL Connection Failed:", err.message));
+  });
 
-  } catch (error) {
-    console.error(`Server startup failed: ${error.message}`);
-    process.exit(1);
-  }
+  server.on("error", async (err) => {
+    if (err.code === "EADDRINUSE") {
+      console.warn(`⚠️  Port ${PORT} is in use. Killing occupying process and retrying...`);
+      server.close();
+      await killPort(PORT);
+      console.log(`🔄 Retrying on port ${PORT}...`);
+      // Retry after killing
+      app.listen(PORT, () => {
+        console.log(`✅ POS Server is running on port ${PORT} (after retry)`);
+      });
+    } else {
+      console.error(`❌ Server error: ${err.message}`);
+      process.exit(1);
+    }
+  });
 };
 
 startServer();

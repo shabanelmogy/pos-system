@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { addOrder, createOrderRazorpay, updateTable, verifyPaymentRazorpay } from "../../https";
 import { useSnackbar } from "notistack";
 import { removeAllItems } from "../../redux/slices/cartSlice";
@@ -10,12 +10,16 @@ import Invoice from "../invoice/Invoice";
 const Bill = () => {
   const cartItems = useSelector((state) => state.cart);
   const customerData = useSelector((state) => state.customer);
+  const user = useSelector((state) => state.user);
+  const { selectedBranch, selectedPOSPoint, activeShift } = useSelector((state) => state.pos);
+  
   const [paymentMethod, setPaymentMethod] = useState("Cash");
   const [showInvoice, setShowInvoice] = useState(false);
   const [orderInfo, setOrderInfo] = useState(null);
   
   const { enqueueSnackbar } = useSnackbar();
   const dispatch = useDispatch();
+  const queryClient = useQueryClient();
 
   const total = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
   const tax = total * 0.05;
@@ -38,13 +42,62 @@ const Bill = () => {
 
       tableMutation.mutate(tableData, {
         onSuccess: () => {
+          queryClient.invalidateQueries(["orders"]);
           enqueueSnackbar("Order Placed Successfully", { variant: "success" });
           setOrderInfo(order);
           setShowInvoice(true);
+          // Cleanup is now handled in Invoice.jsx when dismissed
         },
       });
     },
+    onError: (error) => {
+      enqueueSnackbar(error.response?.data?.message || "Failed to place order", { variant: "error" });
+    }
   });
+
+  const handlePlaceOrder = () => {
+    const isAdmin = user?.role?.toLowerCase() === "admin";
+
+    if (!activeShift && !isAdmin) {
+      enqueueSnackbar("No active shift found. Please start a shift first.", { variant: "error" });
+      return;
+    }
+
+    if (!user || !user.id) {
+      enqueueSnackbar("User session invalid. Please re-login.", { variant: "error" });
+      return;
+    }
+
+    const preparedItems = cartItems.map(item => ({
+      menuItemId: item.id,
+      quantity: item.quantity,
+      unitPrice: item.price,
+      name: item.name
+    }));
+
+    const baseOrderData = {
+      customerDetails: {
+        name: customerData.customerName,
+        phone: customerData.customerPhone,
+        guests: customerData.guests,
+      },
+      orderStatus: "In Progress",
+      items: preparedItems,
+      tableId: customerData.table?.tableId,
+      paymentMethod: paymentMethod,
+      // Enterprise context
+      branchId: selectedBranch?.id,
+      posPointId: selectedPOSPoint?.id,
+      shiftId: activeShift?.id,
+      cashierId: user.id,
+    };
+
+    if (paymentMethod === "Razorpay") {
+      razorpayMutation.mutate({ amount: totalWithTax });
+    } else {
+      orderMutation.mutate(baseOrderData);
+    }
+  };
 
   const razorpayMutation = useMutation({
     mutationFn: (data) => createOrderRazorpay(data),
@@ -54,8 +107,8 @@ const Bill = () => {
         key: import.meta.env.VITE_RAZORPAY_KEY_ID,
         amount: data.order.amount,
         currency: data.order.currency,
-        name: "RESTRO",
-        description: "Secure Payment for Your Meal",
+        name: selectedBranch?.name || "POS Order",
+        description: `POS Order - ${selectedPOSPoint?.name || "Terminal"}`,
         order_id: data.order.id,
         handler: async function (response) {
           try {
@@ -80,6 +133,10 @@ const Bill = () => {
                 razorpay_payment_id: response.razorpay_payment_id,
                 razorpay_signature: response.razorpay_signature,
               },
+              branchId: selectedBranch?.id,
+              posPointId: selectedPOSPoint?.id,
+              shiftId: activeShift?.id,
+              cashierId: user.id,
             };
 
             orderMutation.mutate(orderData);
@@ -101,39 +158,12 @@ const Bill = () => {
     },
   });
 
-  const handlePlaceOrder = () => {
-    const preparedItems = cartItems.map(item => ({
-      menuItemId: item.id,
-      quantity: item.quantity,
-      unitPrice: item.price,
-      name: item.name
-    }));
-
-    if (paymentMethod === "Razorpay") {
-      razorpayMutation.mutate({ amount: totalWithTax });
-    } else {
-      const orderData = {
-        customerDetails: {
-          name: customerData.customerName,
-          phone: customerData.customerPhone,
-          guests: customerData.guests,
-        },
-        orderStatus: "In Progress",
-        items: preparedItems,
-        tableId: customerData.table?.tableId,
-        paymentMethod: paymentMethod,
-      };
-
-      orderMutation.mutate(orderData);
-    }
-  };
-
   if (showInvoice && orderInfo) {
     return <Invoice orderInfo={orderInfo} setShowInvoice={setShowInvoice} />;
   }
 
   return (
-    <div className="bg-[#262626] p-6 rounded-lg h-full flex flex-col">
+    <div className="bg-[#262626] p-6 rounded-2xl h-full flex flex-col border border-[#333] shadow-xl">
       <h2 className="text-[#f5f5f5] text-xl font-black uppercase tracking-tighter mb-6">Bill Summary</h2>
       
       <div className="flex-1 space-y-4">
@@ -157,7 +187,7 @@ const Bill = () => {
         <div className="grid grid-cols-2 gap-3">
           <button
             onClick={() => setPaymentMethod("Cash")}
-            className={`py-3 rounded-lg font-bold text-sm transition-all border-2 ${
+            className={`py-3 rounded-xl font-bold text-sm transition-all border-2 ${
               paymentMethod === "Cash"
                 ? "bg-[#f6b100]/10 border-[#f6b100] text-[#f6b100]"
                 : "bg-[#1a1a1a] border-[#333] text-[#ababab] hover:border-[#444]"
@@ -167,7 +197,7 @@ const Bill = () => {
           </button>
           <button
             onClick={() => setPaymentMethod("Razorpay")}
-            className={`py-3 rounded-lg font-bold text-sm transition-all border-2 ${
+            className={`py-3 rounded-xl font-bold text-sm transition-all border-2 ${
               paymentMethod === "Razorpay"
                 ? "bg-[#f6b100]/10 border-[#f6b100] text-[#f6b100]"
                 : "bg-[#1a1a1a] border-[#333] text-[#ababab] hover:border-[#444]"
@@ -181,7 +211,7 @@ const Bill = () => {
       <button
         onClick={handlePlaceOrder}
         disabled={cartItems.length === 0 || orderMutation.isPending || razorpayMutation.isPending}
-        className="w-full bg-[#f6b100] hover:bg-[#e5a600] disabled:opacity-50 disabled:cursor-not-allowed text-[#1a1a1a] font-black uppercase tracking-widest py-4 rounded-lg mt-8 transition-all transform active:scale-[0.98]"
+        className="w-full bg-[#f6b100] hover:bg-[#e5a600] disabled:opacity-50 disabled:cursor-not-allowed text-[#1a1a1a] font-black uppercase tracking-widest py-5 rounded-2xl mt-8 transition-all transform active:scale-[0.98] shadow-2xl shadow-yellow-500/10"
       >
         {orderMutation.isPending || razorpayMutation.isPending ? "Processing..." : "Place Order"}
       </button>

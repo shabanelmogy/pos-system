@@ -7,6 +7,9 @@ import categoryRouter from "./category/category.routes.js";
 import itemRouter from "./item/item.routes.js";
 import customerRouter from "./customer/customer.routes.js";
 import billRouter from "./bill/bill.routes.js";
+import shiftRouter from "./shift/shift.routes.js";
+import branchRouter from "./branch/branch.routes.js";
+import posPointRouter from "./posPoint/posPoint.routes.js";
 
 const router = express.Router();
 
@@ -18,5 +21,8 @@ router.use("/category", categoryRouter);
 router.use("/item", itemRouter);
 router.use("/customer", customerRouter);
 router.use("/bill", billRouter);
+router.use("/shift", shiftRouter);
+router.use("/branch", branchRouter);
+router.use("/pos-point", posPointRouter);
 
 export default router;

@@ -1,22 +1,25 @@
 import { useSelector } from 'react-redux';
 
 const useAuth = () => {
-    const { role, isAuth, name, id } = useSelector((state) => state.user);
+    const { role, isAuth, name, id, branchId, posPermissions } = useSelector((state) => state.user);
 
     return {
         isAuth,
         role,
         name,
         id,
+        branchId,
+        posPermissions,
 
-        isAdmin: role === 'Admin',
-        isCashier: role === 'Cashier',
-        isWaiter: role === 'Waiter',
-        // Combined roles
-        canManageOrders: role === 'Admin' || role === 'Cashier' || role === 'Waiter',
-        canCompleteOrders: role === 'Admin' || role === 'Cashier',
-        canAccessDashboard: role === 'Admin' || role === 'Cashier',
-        canManageSettings: role === 'Admin'
+        isAdmin: role === 'admin' || role === 'Admin',
+        isManager: role === 'manager',
+        isCashier: role === 'cashier' || role === 'Cashier',
+        isWaiter: role === 'waiter' || role === 'Waiter',
+        
+        canManageOrders: ['admin', 'manager', 'cashier', 'waiter'].includes(role.toLowerCase()),
+        canCompleteOrders: ['admin', 'manager', 'cashier'].includes(role.toLowerCase()),
+        canAccessDashboard: ['admin', 'manager'].includes(role.toLowerCase()),
+        canManageSettings: role.toLowerCase() === 'admin'
     };
 };
 

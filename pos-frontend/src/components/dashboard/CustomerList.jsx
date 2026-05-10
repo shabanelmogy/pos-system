@@ -1,8 +1,9 @@
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getCustomers } from "../../https";
-import { FaUserCircle, FaPhone, FaHistory, FaCrown } from "react-icons/fa";
+import { FaUserCircle, FaPhone, FaHistory, FaCrown, FaUsers } from "react-icons/fa";
 import { formatDateAndTime } from "../../utils";
+import { motion } from "framer-motion";
 
 const CustomerList = () => {
   const { data: resData, isLoading } = useQuery({
@@ -14,60 +15,96 @@ const CustomerList = () => {
   });
 
   if (isLoading) {
-    return <div className="text-center py-20 text-[#ababab]">Loading customer database...</div>;
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+        {[1,2,3].map(i => (
+          <div key={i} className="bg-[#1a1a1a] h-64 rounded-[2.5rem] border border-[#333] animate-pulse" />
+        ))}
+      </div>
+    );
+  }
+
+  if (resData?.length === 0) {
+    return (
+      <div className="py-40 flex flex-col items-center justify-center text-center">
+        <div className="w-24 h-24 bg-[#1a1a1a] rounded-full flex items-center justify-center mb-6 border border-[#333] text-[#444]">
+          <FaUsers size={40} />
+        </div>
+        <h3 className="text-white text-xl font-black uppercase tracking-tighter">No Customers Yet</h3>
+        <p className="text-[#ababab] text-sm mt-2 max-w-xs font-medium">When guests place orders, their details and loyalty points will appear here.</p>
+      </div>
+    );
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-      {(resData || []).map((customer) => {
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8"
+    >
+      {(resData || []).map((customer, index) => {
         const isLoyal = customer.totalOrders >= 5;
         return (
-          <div key={customer.id} className="bg-[#1a1a1a] p-6 rounded-3xl border border-[#333] hover:border-[#444] transition-all shadow-xl group">
-            <div className="flex items-start justify-between">
-              <div className="flex items-center gap-4">
-                <div className={`p-4 rounded-2xl ${isLoyal ? 'bg-yellow-500/10 text-yellow-500' : 'bg-blue-500/10 text-blue-500'}`}>
-                  <FaUserCircle size={32} />
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.05 }}
+            whileHover={{ y: -8 }}
+            key={customer.id} 
+            className="bg-[#1a1a1a] p-8 rounded-[2.5rem] border border-[#333] hover:border-[#f6b100]/30 transition-all shadow-2xl group relative overflow-hidden"
+          >
+            <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${isLoyal ? 'from-yellow-500' : 'from-blue-500'} opacity-[0.02] blur-2xl`} />
+            
+            <div className="flex items-start justify-between relative z-10">
+              <div className="flex items-center gap-5">
+                <div className={`p-5 rounded-2xl ${isLoyal ? 'bg-yellow-500/10 text-yellow-500' : 'bg-blue-500/10 text-blue-500'} shadow-inner`}>
+                  <FaUserCircle size={36} />
                 </div>
                 <div>
-                  <h2 className="text-[#f5f5f5] text-lg font-bold flex items-center gap-2">
+                  <h2 className="text-white text-xl font-black tracking-tighter flex items-center gap-2 uppercase">
                     {customer.name}
-                    {isLoyal && <FaCrown className="text-yellow-500" size={14} />}
+                    {isLoyal && <FaCrown className="text-yellow-500 drop-shadow-[0_0_5px_rgba(234,179,8,0.5)]" size={16} />}
                   </h2>
-                  <div className="flex items-center gap-2 text-[#ababab] text-sm mt-1">
-                    <FaPhone size={12} />
+                  <div className="flex items-center gap-2 text-[#ababab] text-xs font-bold mt-1.5 uppercase tracking-widest">
+                    <FaPhone className="text-[#444]" size={10} />
                     <span>{customer.phone}</span>
                   </div>
                 </div>
               </div>
               {isLoyal && (
-                <span className="text-[10px] bg-yellow-500 text-black px-2 py-1 rounded font-black uppercase tracking-widest">
+                <span className="text-[9px] bg-yellow-500 text-black px-3 py-1 rounded-full font-black uppercase tracking-[0.2em] shadow-lg shadow-yellow-500/20">
                   Premium
                 </span>
               )}
             </div>
 
-            <div className="grid grid-cols-2 gap-4 mt-8">
-              <div className="bg-[#121212] p-3 rounded-2xl border border-[#333]">
-                <p className="text-[#ababab] text-[10px] uppercase font-bold tracking-widest">Total Orders</p>
-                <p className="text-[#f5f5f5] text-xl font-black mt-1">{customer.totalOrders}</p>
+            <div className="grid grid-cols-2 gap-5 mt-10 relative z-10">
+              <div className="bg-[#121212] p-5 rounded-3xl border border-[#262626] group-hover:border-[#333] transition-colors">
+                <p className="text-[#ababab] text-[10px] uppercase font-black tracking-[0.2em]">Visits</p>
+                <p className="text-white text-3xl font-black mt-2 tracking-tighter">{customer.totalOrders}</p>
               </div>
-              <div className="bg-[#121212] p-3 rounded-2xl border border-[#333]">
-                <p className="text-[#ababab] text-[10px] uppercase font-bold tracking-widest">Total Spent</p>
-                <p className="text-[#f6b100] text-xl font-black mt-1">₹{parseFloat(customer.totalSpent).toFixed(0)}</p>
+              <div className="bg-[#121212] p-5 rounded-3xl border border-[#262626] group-hover:border-[#333] transition-colors">
+                <p className="text-[#ababab] text-[10px] uppercase font-black tracking-[0.2em]">Spent</p>
+                <p className="text-[#f6b100] text-3xl font-black mt-2 tracking-tighter">₹{parseFloat(customer.totalSpent).toFixed(0)}</p>
               </div>
             </div>
 
-            <div className="mt-6 pt-6 border-t border-[#333] flex items-center justify-between text-[#ababab] text-xs">
-              <div className="flex items-center gap-2">
-                <FaHistory size={12} />
-                <span>Last Visit: {customer.lastOrderAt ? formatDateAndTime(customer.lastOrderAt).split(',')[0] : 'N/A'}</span>
+            <div className="mt-8 pt-8 border-t border-[#262626] flex items-center justify-between relative z-10">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-[#121212] flex items-center justify-center border border-[#262626]">
+                   <FaHistory className="text-[#444]" size={12} />
+                </div>
+                <div className="flex flex-col">
+                   <span className="text-[9px] text-[#555] font-black uppercase tracking-widest">Last Visit</span>
+                   <span className="text-[11px] text-[#ababab] font-bold">{customer.lastOrderAt ? formatDateAndTime(customer.lastOrderAt).split(',')[0] : 'First Timer'}</span>
+                </div>
               </div>
-              <button className="text-blue-500 font-bold hover:underline">View History</button>
+              <button className="bg-[#262626] hover:bg-[#333] px-4 py-2 rounded-xl text-[10px] text-white font-black uppercase tracking-widest transition-all">Details</button>
             </div>
-          </div>
+          </motion.div>
         );
       })}
-    </div>
+    </motion.div>
   );
 };
 

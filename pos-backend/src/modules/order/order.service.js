@@ -1,8 +1,11 @@
 import orderRepository from "./order.repository.js";
 import customerService from "../customer/customer.service.js";
 import customerRepository from "../customer/customer.repository.js";
-import billService from "../bill/bill.service.js";
+import billRepository from "../bill/bill.repository.js";
+import shiftRepository from "../shift/shift.repository.js";
+import userRepository from "../user/user.repository.js";
 import { fail } from "../../utils/errorHandler.js";
+import { db } from "../../config/database.js";
 
 const formatOrder = (order) => {
   if (!order) return null;
@@ -13,6 +16,9 @@ const formatOrder = (order) => {
       name: oi.itemSnapshot?.name || "Unknown Item",
       price: oi.unitPrice,
     })),
+    branch: order.branch,
+    posPoint: order.posPoint,
+    shift: order.shift,
     bills: {
       total: order.subtotal,
       tax: order.tax,
@@ -36,83 +42,108 @@ const orderService = {
   },
 
   async createOrder(data) {
-    const { items, customerDetails, ...orderHeader } = data;
+    const { items, customerDetails, branchId, posPointId, shiftId, cashierId, ...orderHeader } = data;
 
-    // 1. Handle Customer
-    let customerId = orderHeader.customerId;
-    if (!customerId && customerDetails?.phone) {
-      const customer = await customerService.findOrCreateByPhone(
-        customerDetails.name,
-        customerDetails.phone
-      );
-      customerId = customer.id;
+    // 1. Role-Based Validation
+    const user = await userRepository.findById(cashierId);
+    const isAdmin = user?.role?.toLowerCase() === "admin";
+
+    // Shift check is mandatory for Cashiers/Waiters, optional for Admins
+    if (!isAdmin) {
+      if (!shiftId) {
+        fail("An active shift is required to create an order.", 400);
+      }
+      const activeShift = await shiftRepository.findById(shiftId);
+      if (!activeShift || activeShift.status !== "open") {
+        fail("The current shift is not open or does not exist.", 400);
+      }
     }
 
-    // 2. Prepare Order Items
-    let subtotal = 0;
-    const orderItemsData = items.map(item => {
-      const unitPrice = parseFloat(item.unitPrice);
-      const quantity = parseInt(item.quantity);
-      const totalPrice = unitPrice * quantity;
-      subtotal += totalPrice;
+    // 2. Start Transaction
+    return await db.transaction(async (tx) => {
+      // Handle Customer
+      let currentCustomerId = orderHeader.customerId;
+      if (!currentCustomerId && customerDetails?.phone) {
+        const customer = await customerService.findOrCreateByPhone(
+          customerDetails.name,
+          customerDetails.phone
+        );
+        currentCustomerId = customer.id;
+      }
 
-      return {
-        menuItemId: item.menuItemId,
-        quantity,
-        unitPrice: unitPrice.toFixed(2),
-        totalPrice: totalPrice.toFixed(2),
-        notes: item.notes,
-        itemSnapshot: {
-          name: item.name,
-          price: unitPrice.toFixed(2)
-        }
-      };
-    });
+      // Prepare Order Items & Totals
+      let subtotal = 0;
+      const orderItemsData = items.map(item => {
+        const unitPrice = parseFloat(item.unitPrice);
+        const quantity = parseInt(item.quantity);
+        const totalPrice = unitPrice * quantity;
+        subtotal += totalPrice;
 
-    const tax = subtotal * 0.05; 
-    const total = subtotal + tax;
-
-    const finalOrderData = {
-      ...orderHeader,
-      customerId,
-      customerSnapshot: customerDetails,
-      subtotal: subtotal.toFixed(2),
-      tax: tax.toFixed(2),
-      total: total.toFixed(2),
-    };
-
-    // 3. Create Order
-    const newOrder = await orderRepository.create(finalOrderData, orderItemsData);
-
-    // 4. Auto-generate Bill
-    try {
-      await billService.createBill({
-        orderId: newOrder.id,
-        totalAmount: subtotal,
-        taxAmount: tax,
-        status: "Unpaid"
+        return {
+          menuItemId: item.menuItemId,
+          quantity,
+          unitPrice: unitPrice.toFixed(2),
+          totalPrice: totalPrice.toFixed(2),
+          notes: item.notes,
+          itemSnapshot: {
+            name: item.name,
+            price: unitPrice.toFixed(2)
+          }
+        };
       });
-    } catch (billError) {
-      console.error("Failed to auto-generate bill:", billError);
-      // We don't fail the order if the bill fails, but we should log it
-    }
-    
-    return formatOrder(newOrder);
+
+      const tax = subtotal * 0.05; 
+      const total = subtotal + tax;
+
+      const finalOrderData = {
+        ...orderHeader,
+        branchId: branchId || null,
+        posPointId: posPointId || null,
+        shiftId: shiftId || null,
+        cashierId,
+        customerId: currentCustomerId,
+        customerSnapshot: customerDetails,
+        subtotal: subtotal.toFixed(2),
+        tax: tax.toFixed(2),
+        total: total.toFixed(2),
+      };
+
+      // 3. Create Order & Items
+      const newOrder = await orderRepository.create(finalOrderData, orderItemsData, tx);
+
+      // 4. Generate Bill
+      const totalAmountNum = parseFloat(subtotal.toFixed(2));
+      const taxAmountNum = parseFloat(tax.toFixed(2));
+      const payableAmount = (totalAmountNum + taxAmountNum).toFixed(2);
+
+      await billRepository.create({
+        orderId: newOrder.id,
+        billNo: `BILL-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+        totalAmount: subtotal.toFixed(2),
+        taxAmount: tax.toFixed(2),
+        payableAmount: payableAmount,
+        status: "Unpaid"
+      }, tx);
+      
+      return formatOrder(newOrder);
+    });
   },
 
   async updateOrderStatus(id, status) {
-    const order = await orderRepository.findById(id);
-    if (!order) {
-      fail("Order not found", 404);
-    }
+    return await db.transaction(async (tx) => {
+      const order = await orderRepository.findById(id);
+      if (!order) {
+        fail("Order not found", 404);
+      }
 
-    const updatedOrder = await orderRepository.update(id, { orderStatus: status });
+      const updatedOrder = await orderRepository.update(id, { orderStatus: status }, tx);
 
-    if (status === "Completed" && order.customerId) {
-      await customerRepository.updateStats(order.customerId, order.total);
-    }
+      if (status === "Completed" && order.customerId) {
+        await customerRepository.updateStats(order.customerId, order.total, tx);
+      }
 
-    return updatedOrder;
+      return updatedOrder;
+    });
   }
 };
 

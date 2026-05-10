@@ -5,6 +5,9 @@ import { enqueueSnackbar } from "notistack";
 import { useDispatch } from "react-redux";
 import { setUser } from "../../redux/slices/userSlice";
 import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import { MdEmail, MdLock, MdLogin } from "react-icons/md";
+import { setActiveShift, setSelectedBranch, setSelectedPOSPoint } from "../../redux/slices/posSlice";
  
 const Login = () => {
     const navigate = useNavigate();
@@ -18,7 +21,6 @@ const Login = () => {
       setFormData({...formData, [e.target.name]: e.target.value});
     }
 
-  
     const handleSubmit = (e) => {
       e.preventDefault();
       loginMutation.mutate(formData);
@@ -26,65 +28,97 @@ const Login = () => {
 
     const loginMutation = useMutation({
       mutationFn: (reqData) => login(reqData),
-      onSuccess: (res) => {
-          const { data } = res;
-          console.log(data);
-          const { id, name, email, phone, role } = data.data;
-          dispatch(setUser({ id, name, email, phone, role }));
+        onSuccess: (res) => {
+          const { token, activeShift, data: userData } = res.data;
+          
+          if (token) localStorage.setItem("accessToken", token);
 
+          // One shot update: Shift then User
+          if (activeShift) {
+            dispatch(setActiveShift(activeShift));
+            
+            // Auto-assign branch and POS if present in shift
+            if (activeShift.branch) dispatch(setSelectedBranch(activeShift.branch));
+            if (activeShift.posPoint) dispatch(setSelectedPOSPoint(activeShift.posPoint));
+          } else {
+             // Fallback to user permissions if no active shift
+             if (userData.branch) dispatch(setSelectedBranch(userData.branch));
+             const assignedPOS = userData.posPermissions?.[0]?.posPoint;
+             if (assignedPOS) dispatch(setSelectedPOSPoint(assignedPOS));
+          }
+
+          dispatch(setUser(userData));
+
+          enqueueSnackbar(`Welcome back, ${userData.name}`, { variant: "success" });
           navigate("/");
-      },
+        },
       onError: (error) => {
-        const message = error.response?.data?.message || "Something went wrong. Please check your connection or CORS settings.";
+        const message = error.response?.data?.message || "Invalid credentials or server error.";
         enqueueSnackbar(message, { variant: "error" });
-        console.error("Login error:", error);
       }
     })
 
   return (
-    <div>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label className="block text-[#ababab] mb-2 mt-3 text-sm font-medium">
-            Employee Email
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+    >
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="space-y-2">
+          <label className="flex items-center gap-2 text-[#ababab] text-[10px] font-black uppercase tracking-[0.2em] ml-1">
+            <MdEmail className="text-[#f6b100]" /> Terminal Email
           </label>
-          <div className="flex item-center rounded-lg p-5 px-4 bg-[#1f1f1f]">
+          <div className="group relative">
             <input
               type="email"
               name="email"
               value={formData.email}
               onChange={handleChange}
-              placeholder="Enter employee email"
-              className="bg-transparent flex-1 text-white focus:outline-none"
-              required
-            />
-          </div>
-        </div>
-        <div>
-          <label className="block text-[#ababab] mb-2 mt-3 text-sm font-medium">
-            Password
-          </label>
-          <div className="flex item-center rounded-lg p-5 px-4 bg-[#1f1f1f]">
-            <input
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              placeholder="Enter password"
-              className="bg-transparent flex-1 text-white focus:outline-none"
+              placeholder="e.g. cashier01@enterprise.com"
+              className="w-full bg-[#1a1a1a] border border-[#333] focus:border-[#f6b100] rounded-2xl p-5 text-white focus:outline-none transition-all placeholder:text-[#333] font-bold"
               required
             />
           </div>
         </div>
 
-        <button
+        <div className="space-y-2">
+          <label className="flex items-center gap-2 text-[#ababab] text-[10px] font-black uppercase tracking-[0.2em] ml-1">
+            <MdLock className="text-[#f6b100]" /> Security Code
+          </label>
+          <div className="group relative">
+            <input
+              type="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              placeholder="••••••••"
+              className="w-full bg-[#1a1a1a] border border-[#333] focus:border-[#f6b100] rounded-2xl p-5 text-white focus:outline-none transition-all placeholder:text-[#333] font-bold tracking-[0.5em]"
+              required
+            />
+          </div>
+        </div>
+
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
           type="submit"
-          className="w-full rounded-lg mt-6 py-3 text-lg bg-yellow-400 text-gray-900 font-bold"
+          disabled={loginMutation.isPending}
+          className="w-full bg-[#f6b100] text-[#1a1a1a] font-black py-5 rounded-2xl mt-4 flex items-center justify-center gap-3 shadow-2xl shadow-yellow-500/10 hover:bg-yellow-600 transition-all uppercase tracking-[0.3em] text-xs disabled:opacity-50"
         >
-          Sign in
-        </button>
+          {loginMutation.isPending ? (
+            <span className="flex items-center gap-2">
+               <div className="w-4 h-4 border-2 border-black/20 border-t-black rounded-full animate-spin" />
+               Verifying...
+            </span>
+          ) : (
+            <>
+               <MdLogin size={20} /> Authorize Access
+            </>
+          )}
+        </motion.button>
       </form>
-    </div>
+    </motion.div>
   );
 };
 

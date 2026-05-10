@@ -4,7 +4,7 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "predev": "npx kill-port 8000",
+    "predev": "npx kill-port 3001",
 
     "dev": "nodemon app.js",
     "migrate": "node scripts/migrate.js",

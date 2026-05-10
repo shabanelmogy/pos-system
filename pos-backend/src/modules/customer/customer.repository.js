@@ -17,21 +17,24 @@ const customerRepository = {
     return result[0];
   },
 
-  async create(data) {
-    const result = await db.insert(customers).values(data).returning();
+  async create(data, externalTx = null) {
+    const tx = externalTx || db;
+    const result = await tx.insert(customers).values(data).returning();
     return result[0];
   },
 
-  async update(id, data) {
-    const result = await db.update(customers)
+  async update(id, data, externalTx = null) {
+    const tx = externalTx || db;
+    const result = await tx.update(customers)
       .set({ ...data, updatedAt: new Date() })
       .where(eq(customers.id, id))
       .returning();
     return result[0];
   },
 
-  async updateStats(id, amount) {
-    return await db.update(customers)
+  async updateStats(id, amount, externalTx = null) {
+    const tx = externalTx || db;
+    return await tx.update(customers)
       .set({
         totalOrders: sql`${customers.totalOrders} + 1`,
         totalSpent: sql`${customers.totalSpent} + ${amount}`,

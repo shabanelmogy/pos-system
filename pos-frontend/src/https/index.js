@@ -1,12 +1,25 @@
 import { axiosWrapper } from "./axiosWrapper";
 
-// API Endpoints
-
 // Auth Endpoints
 export const login = (data) => axiosWrapper.post("/api/user/login", data);
 export const register = (data) => axiosWrapper.post("/api/user/register", data);
 export const getUserData = () => axiosWrapper.get("/api/user/me");
 export const logout = () => axiosWrapper.post("/api/user/logout");
+
+// Branch Endpoints
+export const getBranches = () => axiosWrapper.get("/api/branch");
+export const addBranch = (data) => axiosWrapper.post("/api/branch", data);
+export const updateBranch = ({ id, ...data }) => axiosWrapper.put(`/api/branch/${id}`, data);
+
+// POS Point Endpoints
+export const getPOSPoints = (branchId) => axiosWrapper.get(`/api/pos-point${branchId ? `?branchId=${branchId}` : ""}`);
+export const addPOSPoint = (data) => axiosWrapper.post("/api/pos-point", data);
+export const updatePOSPoint = ({ id, ...data }) => axiosWrapper.put(`/api/pos-point/${id}`, data);
+
+// Shift Endpoints
+export const openShift = (data) => axiosWrapper.post("/api/shift/open", data);
+export const closeShift = (shiftId, data) => axiosWrapper.post(`/api/shift/close/${shiftId}`, data);
+export const getActiveShift = (posPointId) => axiosWrapper.get(`/api/shift/active?posPointId=${posPointId}`);
 
 // Table Endpoints
 export const addTable = (data) => axiosWrapper.post("/api/table", data);
@@ -52,3 +65,10 @@ export const getBills = () => axiosWrapper.get("/api/bill");
 export const getBillById = (id) => axiosWrapper.get(`/api/bill/${id}`);
 export const getBillByOrderId = (orderId) => axiosWrapper.get(`/api/bill/order/${orderId}`);
 export const updateBillStatus = ({ id, status }) => axiosWrapper.patch(`/api/bill/status/${id}`, { status });
+
+// User Management Endpoints
+export const getUsers = () => axiosWrapper.get("/api/user");
+export const createUser = (data) => axiosWrapper.post("/api/user", data);
+export const updateUser = ({ userId, ...data }) => axiosWrapper.put(`/api/user/${userId}`, data);
+export const deleteUser = (userId) => axiosWrapper.delete(`/api/user/${userId}`);
+export const assignPOS = (data) => axiosWrapper.post("/api/user/assign-pos", data);
