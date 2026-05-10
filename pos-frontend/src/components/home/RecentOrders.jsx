@@ -14,9 +14,11 @@ const RecentOrders = () => {
   const { selectedPOSPoint } = useSelector((state) => state.pos);
 
   const { data: ordersList = [], isError, isLoading } = useQuery({
-    queryKey: ["orders", selectedPOSPoint?.id],
+    queryKey: ["recent-orders", selectedPOSPoint?.id],
     queryFn: async () => {
-      const res = await getOrders({ posPointId: selectedPOSPoint?.id });
+      const res = await getOrders({ 
+        posPointId: selectedPOSPoint?.id 
+      });
       return res.data.data;
     },
     placeholderData: keepPreviousData,

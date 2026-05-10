@@ -1,5 +1,5 @@
 import React from "react";
-import { FaCheckDouble, FaLongArrowAltRight, FaCrown } from "react-icons/fa";
+import { FaCheckDouble, FaLongArrowAltRight, FaCrown, FaPrint } from "react-icons/fa";
 import { FaCircle } from "react-icons/fa";
 import { formatDateAndTime, getAvatarName } from "../../utils/index";
 import useAuth from "../../hooks/useAuth";
@@ -7,7 +7,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { updateOrderStatus, updateTable } from "../../https";
 import { enqueueSnackbar } from "notistack";
 
-const OrderCard = ({ order }) => {
+const OrderCard = ({ order, onReprint }) => {
   const { canCompleteOrders } = useAuth();
   const queryClient = useQueryClient();
 
@@ -105,15 +105,28 @@ const OrderCard = ({ order }) => {
         <p className="text-[#f6b100] text-lg font-black">₹{parseFloat(order.bills?.totalWithTax || 0).toFixed(2)}</p>
       </div>
 
-      {canCompleteOrders && order.orderStatus !== "Completed" && (
+      <div className="grid grid-cols-2 gap-3 mt-4">
         <button
-          onClick={handleCompleteOrder}
-          disabled={statusMutation.isPending}
-          className="w-full mt-4 bg-[#f6b100] text-[#1a1a1a] font-bold py-2 rounded-lg hover:bg-yellow-600 transition-colors"
+            onClick={() => onReprint && onReprint(order)}
+            className="flex items-center justify-center gap-2 bg-[#333] text-[#f5f5f5] font-bold py-2 rounded-lg hover:bg-[#444] transition-colors border border-[#444]"
         >
-          {statusMutation.isPending ? "Updating..." : "Complete Order & Free Table"}
+            <FaPrint size={14} /> Reprint
         </button>
-      )}
+
+        {canCompleteOrders && order.orderStatus !== "Completed" ? (
+            <button
+            onClick={handleCompleteOrder}
+            disabled={statusMutation.isPending}
+            className="bg-[#f6b100] text-[#1a1a1a] font-bold py-2 rounded-lg hover:bg-yellow-600 transition-colors"
+            >
+            {statusMutation.isPending ? "Serving..." : "Serve Order"}
+            </button>
+        ) : (
+            <div className="bg-[#2e4a40]/50 text-green-500 font-bold py-2 rounded-lg text-center text-xs flex items-center justify-center gap-2">
+                <FaCheckDouble size={12} /> Served
+            </div>
+        )}
+      </div>
     </div>
   );
 };

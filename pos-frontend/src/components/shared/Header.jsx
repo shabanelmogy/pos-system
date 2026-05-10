@@ -7,7 +7,7 @@ import { useMutation } from "@tanstack/react-query";
 import { logout } from "../../https";
 import { removeUser } from "../../redux/slices/userSlice";
 import { useNavigate } from "react-router-dom";
-import { MdDashboard, MdStore, MdComputer, MdSwapHoriz, MdStop } from "react-icons/md";
+import { MdDashboard, MdStore, MdComputer, MdSwapHoriz, MdStop, MdSettings } from "react-icons/md";
 import { useSnackbar } from "notistack";
 import useAuth from "../../hooks/useAuth";
 import { clearPOS, setShowShiftModal } from "../../redux/slices/posSlice";
@@ -115,10 +115,13 @@ const Header = () => {
       {/* LOGGED USER DETAILS */}
       <div className="flex items-center gap-4">
         {canAccessDashboard && (
-          <div onClick={() => navigate("/dashboard")} className="bg-[#1f1f1f] border border-[#333] hover:border-[#f6b100] rounded-xl p-3 cursor-pointer transition-all">
+          <div onClick={() => navigate("/dashboard")} className="bg-[#1f1f1f] border border-[#333] hover:border-[#f6b100] rounded-xl p-3 cursor-pointer transition-all tooltip" title="Dashboard">
             <MdDashboard className="text-[#f5f5f5] text-2xl" />
           </div>
         )}
+        <div onClick={() => navigate("/settings")} className="bg-[#1f1f1f] border border-[#333] hover:border-[#f6b100] rounded-xl p-3 cursor-pointer transition-all tooltip" title="POS Settings">
+          <MdSettings className="text-[#f5f5f5] text-2xl" />
+        </div>
         <div className="bg-[#1f1f1f] border border-[#333] rounded-xl p-3 cursor-pointer relative group">
           <FaBell className="text-[#f5f5f5] text-2xl" />
           <span className="absolute top-3 right-3 w-2.5 h-2.5 bg-red-500 border-2 border-[#1f1f1f] rounded-full"></span>

@@ -5,19 +5,29 @@ import { db } from "../../config/database.js";
 
 const orderRepository = {
   async findAll(filters = {}) {
-    const { branchId, posPointId, shiftId } = filters;
+    const { branchId, posPointId, shiftId, cashierId, startDate, endDate } = filters;
 
     return await db.query.orders.findMany({
-      where: (fields, { eq, and }) => {
+      where: (fields, { eq, and, gte, lte }) => {
         const conditions = [];
         if (branchId) conditions.push(eq(fields.branchId, branchId));
         if (posPointId) conditions.push(eq(fields.posPointId, posPointId));
         if (shiftId) conditions.push(eq(fields.shiftId, shiftId));
+        if (cashierId) conditions.push(eq(fields.cashierId, cashierId));
+        
+        if (startDate) {
+            conditions.push(gte(fields.createdAt, new Date(startDate)));
+        }
+        if (endDate) {
+            conditions.push(lte(fields.createdAt, new Date(endDate)));
+        }
+
         return conditions.length > 0 ? and(...conditions) : undefined;
       },
       with: {
-        orderItems: true,
-        table: true,
+        orderItems: {
+            with: { menuItem: true }
+        },
         customer: true,
         branch: true,
         posPoint: true,

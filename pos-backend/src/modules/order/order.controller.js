@@ -1,12 +1,48 @@
 import orderService from "./order.service.js";
+import userService from "../user/user.service.js";
 import { handleError } from "../../utils/errorHandler.js";
 import { createOrderSchema, updateOrderStatusSchema } from "./order.validation.js";
 
 const orderController = {
   async getAll(req, res) {
     try {
-      const { branchId, posPointId, shiftId } = req.query;
-      const orders = await orderService.getAllOrders({ branchId, posPointId, shiftId });
+      let { branchId, posPointId, shiftId, cashierId, startDate, endDate } = req.query;
+      
+      // 1. Fetch full user to check role
+      const user = await userService.getUserById(req.user._id);
+      if (!user) {
+          return res.status(401).json({ success: false, message: "User session invalid" });
+      }
+
+      const role = (user.role || "").toLowerCase();
+
+      // 2. Security Enforcement: For non-admins, force filtering by their branch
+      if (role !== "admin") {
+          const permissions = user.posPermissions || [];
+          const assignedPosIds = permissions.map(p => p.posPointId);
+          
+          // Force Branch
+          branchId = user.branchId;
+
+          // Validate or Default POS ID
+          if (posPointId) {
+              if (!assignedPosIds.includes(posPointId)) {
+                  posPointId = assignedPosIds[0] || "none";
+              }
+          } else {
+              posPointId = assignedPosIds[0];
+          }
+      }
+
+      const orders = await orderService.getAllOrders({ 
+          branchId, 
+          posPointId, 
+          shiftId, 
+          cashierId,
+          startDate, 
+          endDate 
+      });
+
       res.status(200).json({ success: true, data: orders });
     } catch (error) {
       handleError(res, error, "orderController.getAll");

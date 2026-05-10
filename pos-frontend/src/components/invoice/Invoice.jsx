@@ -14,7 +14,11 @@ const Invoice = ({ orderInfo, setShowInvoice, isReprint = false }) => {
 
   const handleClose = () => {
     setShowInvoice(false);
-    navigate("/tables"); // Navigate first to prevent parent component redirect races
+    
+    // Only navigate away if we are in the primary checkout flow
+    if (!isReprint) {
+      navigate("/tables"); 
+    }
     
     // Only clear session data if we are in the primary checkout flow
     if (!isReprint) {

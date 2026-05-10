@@ -72,3 +72,8 @@ export const createUser = (data) => axiosWrapper.post("/api/user", data);
 export const updateUser = ({ userId, ...data }) => axiosWrapper.put(`/api/user/${userId}`, data);
 export const deleteUser = (userId) => axiosWrapper.delete(`/api/user/${userId}`);
 export const assignPOS = (data) => axiosWrapper.post("/api/user/assign-pos", data);
+
+// POS Settings Endpoints
+export const getAllPosSettings = () => axiosWrapper.get("/api/pos-settings");
+export const getPosSettings = (posPointId) => axiosWrapper.get(`/api/pos-settings/${posPointId}`);
+export const updatePosSettings = (posPointId, data) => axiosWrapper.patch(`/api/pos-settings/${posPointId}`, data);

@@ -10,6 +10,7 @@ import billRouter from "./bill/bill.routes.js";
 import shiftRouter from "./shift/shift.routes.js";
 import branchRouter from "./branch/branch.routes.js";
 import posPointRouter from "./posPoint/posPoint.routes.js";
+import posSettingsRouter from "./posSettings/posSettings.routes.js";
 
 const router = express.Router();
 
@@ -24,5 +25,6 @@ router.use("/bill", billRouter);
 router.use("/shift", shiftRouter);
 router.use("/branch", branchRouter);
 router.use("/pos-point", posPointRouter);
+router.use("/pos-settings", posSettingsRouter);
 
 export default router;
