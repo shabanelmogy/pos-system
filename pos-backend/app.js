@@ -1,6 +1,8 @@
 console.log("Starting POS Backend Server...");
 import express from "express";
 import { exec } from "child_process";
+import fs from "fs";
+import https from "https";
 import config from "./config/config.js";
 import globalErrorHandler from "./middlewares/globalErrorHandler.js";
 import cookieParser from "cookie-parser";
@@ -84,11 +86,24 @@ const killPort = (port) => {
 };
 
 const startServer = async () => {
-  const server = app.listen(PORT);
+  const certPath = "./.cert/server.crt";
+  const keyPath = "./.cert/server.key";
+  let server;
+
+  if (fs.existsSync(certPath) && fs.existsSync(keyPath)) {
+    const options = {
+      key: fs.readFileSync(keyPath),
+      cert: fs.readFileSync(certPath),
+    };
+    server = https.createServer(options, app).listen(PORT);
+    console.log(`🔒 POS Server is running on HTTPS port ${PORT}`);
+  } else {
+    server = app.listen(PORT);
+    console.log(`✅ POS Server is running on HTTP port ${PORT}`);
+  }
 
   server.on("listening", () => {
-    console.log(`✅ POS Server is running on port ${PORT}`);
-    console.log(`📚 Swagger Docs: http://localhost:${PORT}/api-docs`);
+    console.log(`📚 Swagger Docs: ${fs.existsSync(certPath) ? 'https' : 'http'}://localhost:${PORT}/api-docs`);
 
     // Test DB connection
     pool.connect()
@@ -103,9 +118,7 @@ const startServer = async () => {
       await killPort(PORT);
       console.log(`🔄 Retrying on port ${PORT}...`);
       // Retry after killing
-      app.listen(PORT, () => {
-        console.log(`✅ POS Server is running on port ${PORT} (after retry)`);
-      });
+      startServer();
     } else {
       console.error(`❌ Server error: ${err.message}`);
       process.exit(1);

@@ -27,10 +27,15 @@ const orderController = {
           // Validate or Default POS ID
           if (posPointId) {
               if (!assignedPosIds.includes(posPointId)) {
-                  posPointId = assignedPosIds[0] || "none";
+                  posPointId = assignedPosIds[0] || null;
               }
           } else {
-              posPointId = assignedPosIds[0];
+              posPointId = assignedPosIds[0] || null;
+          }
+
+          // If still no POS ID and not admin, return empty results early to avoid DB crash
+          if (!posPointId) {
+              return res.status(200).json({ success: true, data: [] });
           }
       }
 
