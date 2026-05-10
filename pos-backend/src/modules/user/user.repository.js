@@ -12,10 +12,16 @@ const userRepository = {
     const user = result[0];
     // Fetch relations manually for stability
     const branchRes = await db.select().from(branches).where(eq(branches.id, user.branchId)).limit(1);
-    const posPermissionsRes = await db.query.userPosPermissions.findMany({
-      where: eq(userPosPermissions.userId, user.id),
-      with: { posPoint: true }
-    });
+    const posPermissionsRes = await db
+      .select({
+        id: userPosPermissions.id,
+        userId: userPosPermissions.userId,
+        posPointId: userPosPermissions.posPointId,
+        posPoint: posPoints
+      })
+      .from(userPosPermissions)
+      .leftJoin(posPoints, eq(userPosPermissions.posPointId, posPoints.id))
+      .where(eq(userPosPermissions.userId, user.id));
 
     return { 
       ...user, 
@@ -30,10 +36,16 @@ const userRepository = {
 
     const user = result[0];
     const branchRes = await db.select().from(branches).where(eq(branches.id, user.branchId)).limit(1);
-    const posPermissionsRes = await db.query.userPosPermissions.findMany({
-      where: eq(userPosPermissions.userId, user.id),
-      with: { posPoint: true }
-    });
+    const posPermissionsRes = await db
+      .select({
+        id: userPosPermissions.id,
+        userId: userPosPermissions.userId,
+        posPointId: userPosPermissions.posPointId,
+        posPoint: posPoints
+      })
+      .from(userPosPermissions)
+      .leftJoin(posPoints, eq(userPosPermissions.posPointId, posPoints.id))
+      .where(eq(userPosPermissions.userId, user.id));
 
     return { 
       ...user, 

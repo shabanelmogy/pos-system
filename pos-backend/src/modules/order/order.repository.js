@@ -1,54 +1,68 @@
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, and, sql } from "drizzle-orm";
 import { orders } from "./order.schema.js";
 import { orderItems } from "./orderItem.schema.js";
+import { customers } from "../customer/customer.schema.js";
+import { branches } from "../branch/branch.schema.js";
+import { posPoints } from "../posPoint/posPoint.schema.js";
+import { shifts } from "../shift/shift.schema.js";
 import { db } from "../../config/database.js";
 
 const orderRepository = {
   async findAll(filters = {}) {
     const { branchId, posPointId, shiftId, cashierId, startDate, endDate } = filters;
 
-    return await db.query.orders.findMany({
-      where: (fields, { eq, and, gte, lte }) => {
+    const rows = await db
+      .select({
+        order: orders,
+        customer: customers,
+        branch: branches,
+        posPoint: posPoints,
+        shift: shifts,
+      })
+      .from(orders)
+      .leftJoin(customers, eq(orders.customerId, customers.id))
+      .leftJoin(branches, eq(orders.branchId, branches.id))
+      .leftJoin(posPoints, eq(orders.posPointId, posPoints.id))
+      .leftJoin(shifts, eq(orders.shiftId, shifts.id))
+      .where(() => {
         const conditions = [];
-        if (branchId) conditions.push(eq(fields.branchId, branchId));
-        if (posPointId) conditions.push(eq(fields.posPointId, posPointId));
-        if (shiftId) conditions.push(eq(fields.shiftId, shiftId));
-        if (cashierId) conditions.push(eq(fields.cashierId, cashierId));
+        if (branchId) conditions.push(eq(orders.branchId, branchId));
+        if (posPointId) conditions.push(eq(orders.posPointId, posPointId));
+        if (shiftId) conditions.push(eq(orders.shiftId, shiftId));
+        if (cashierId) conditions.push(eq(orders.cashierId, cashierId));
         
         if (startDate) {
-            conditions.push(gte(fields.createdAt, new Date(startDate)));
+            conditions.push(sql`${orders.createdAt} >= ${new Date(startDate)}`);
         }
         if (endDate) {
-            conditions.push(lte(fields.createdAt, new Date(endDate)));
+            conditions.push(sql`${orders.createdAt} <= ${new Date(endDate)}`);
         }
 
-        return conditions.length > 0 ? and(...conditions) : undefined;
-      },
-      with: {
-        orderItems: {
-            with: { menuItem: true }
-        },
-        customer: true,
-        branch: true,
-        posPoint: true,
-        shift: true,
-      },
-      orderBy: [desc(orders.createdAt)],
-    });
+        if (conditions.length === 0) return undefined;
+        if (conditions.length === 1) return conditions[0];
+        return and(...conditions);
+      })
+      .orderBy(desc(orders.createdAt));
+
+    return rows.map(r => ({
+      ...r.order,
+      customer: r.customer,
+      branch: r.branch,
+      posPoint: r.posPoint,
+      shift: r.shift,
+      orderItems: [] // Initially empty, can be fetched if necessary
+    }));
   },
 
   async findById(id) {
-    return await db.query.orders.findFirst({
-      where: eq(orders.id, id),
-      with: {
-        orderItems: true,
-        table: true,
-        customer: true,
-        branch: true,
-        posPoint: true,
-        shift: true,
-      },
-    });
+    const result = await db
+      .select()
+      .from(orders)
+      .where(eq(orders.id, id))
+      .limit(1);
+    
+    if (result.length === 0) return null;
+    return result[0];
   },
 
   async create(orderData, items, externalTx = null) {
