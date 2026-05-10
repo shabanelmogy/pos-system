@@ -28,11 +28,11 @@ const BottomNav = () => {
   }, []);
 
   const increment = () => {
-    if(guestCount >= 6) return;
+    if (guestCount >= 6) return;
     setGuestCount((prev) => prev + 1);
   }
   const decrement = () => {
-    if(guestCount <= 0) return;
+    if (guestCount <= 0) return;
     setGuestCount((prev) => prev - 1);
   }
 
@@ -50,12 +50,12 @@ const BottomNav = () => {
     // send the data to store
     dispatch(setCustomer({ name, phone, guests: guestCount }));
     dispatch(removeAllItems());
-    
+
     // Clear local state
     setName("");
     setPhone("");
     setGuestCount(0);
-    
+
     closeModal();
     navigate("/tables");
   };
@@ -66,19 +66,17 @@ const BottomNav = () => {
     <div className="fixed bottom-0 left-0 right-0 bg-[#262626] p-2 h-16 flex justify-around border-t border-[#333] z-40">
       <button
         onClick={() => navigate("/")}
-        className={`flex flex-col items-center justify-center font-bold transition-all ${
-          isActive("/") ? "text-[#f6b100]" : "text-[#ababab] hover:text-white"
-        } w-full`}
+        className={`flex flex-col items-center justify-center font-bold transition-all ${isActive("/") ? "text-[#f6b100]" : "text-[#ababab] hover:text-white"
+          } w-full`}
       >
         <FaHome size={20} />
         <span className="text-[10px] mt-1">Home</span>
       </button>
-      
+
       <button
         onClick={() => navigate("/orders")}
-        className={`flex flex-col items-center justify-center font-bold transition-all ${
-          isActive("/orders") ? "text-[#f6b100]" : "text-[#ababab] hover:text-white"
-        } w-full`}
+        className={`flex flex-col items-center justify-center font-bold transition-all ${isActive("/orders") ? "text-[#f6b100]" : "text-[#ababab] hover:text-white"
+          } w-full`}
       >
         <MdOutlineReorder size={20} />
         <span className="text-[10px] mt-1">Orders</span>
@@ -86,9 +84,8 @@ const BottomNav = () => {
 
       <button
         onClick={() => navigate("/tables")}
-        className={`flex flex-col items-center justify-center font-bold transition-all ${
-          isActive("/tables") ? "text-[#f6b100]" : "text-[#ababab] hover:text-white"
-        } w-full`}
+        className={`flex flex-col items-center justify-center font-bold transition-all ${isActive("/tables") ? "text-[#f6b100]" : "text-[#ababab] hover:text-white"
+          } w-full`}
       >
         <MdTableBar size={20} />
         <span className="text-[10px] mt-1">Tables</span>
@@ -98,18 +95,16 @@ const BottomNav = () => {
         <>
           <button
             onClick={() => navigate("/customers")}
-            className={`flex flex-col items-center justify-center font-bold transition-all ${
-              isActive("/customers") ? "text-[#f6b100]" : "text-[#ababab] hover:text-white"
-            } w-full`}
+            className={`flex flex-col items-center justify-center font-bold transition-all ${isActive("/customers") ? "text-[#f6b100]" : "text-[#ababab] hover:text-white"
+              } w-full`}
           >
             <FaUsers size={20} />
             <span className="text-[10px] mt-1">Customers</span>
           </button>
           <button
             onClick={() => navigate("/dashboard")}
-            className={`flex flex-col items-center justify-center font-bold transition-all ${
-              isActive("/dashboard") ? "text-[#f6b100]" : "text-[#ababab] hover:text-white"
-            } w-full`}
+            className={`flex flex-col items-center justify-center font-bold transition-all ${isActive("/dashboard") ? "text-[#f6b100]" : "text-[#ababab] hover:text-white"
+              } w-full`}
           >
             <FaChartBar size={20} />
             <span className="text-[10px] mt-1">Admin</span>
@@ -121,24 +116,23 @@ const BottomNav = () => {
         <button
           disabled={isActive("/tables") || isActive("/menu")}
           onClick={openModal}
-          className="absolute -top-6 bg-[#f6b100] text-[#1a1a1a] rounded-full p-4 items-center shadow-2xl hover:scale-105 transition-transform border-4 border-[#1f1f1f] disabled:opacity-50 disabled:grayscale"
+          className="absolute -top-14 bg-[#f6b100] text-[#1a1a1a] rounded-full p-4 items-center shadow-2xl hover:scale-105 transition-transform border-4 border-[#1f1f1f] disabled:opacity-50 disabled:grayscale"
         >
           <BiSolidDish size={30} />
-          <span className="absolute -bottom-8 left-1/2 -translate-x-1/2 text-[#f6b100] text-[8px] font-black whitespace-nowrap bg-[#1f1f1f] px-2 py-0.5 rounded uppercase tracking-widest">Create Order</span>
         </button>
       )}
 
-      <Modal isOpen={isModalOpen} onClose={closeModal} title="Create Order">
+      <Modal isOpen={isModalOpen} onClose={closeModal}>
         <div>
           <label className="block text-[#ababab] mb-2 text-sm font-medium">Customer Name</label>
           <div className="flex items-center rounded-lg p-3 px-4 bg-[#1f1f1f]">
-            <input value={name} onChange={(e) => setName(e.target.value)} type="text" name="" placeholder="Enter customer name" id="" className="bg-transparent flex-1 text-white focus:outline-none"  />
+            <input value={name} onChange={(e) => setName(e.target.value)} type="text" name="" placeholder="Enter customer name" id="" className="bg-transparent flex-1 text-white focus:outline-none" />
           </div>
         </div>
         <div>
           <label className="block text-[#ababab] mb-2 mt-3 text-sm font-medium">Customer Phone</label>
           <div className="flex items-center rounded-lg p-3 px-4 bg-[#1f1f1f]">
-            <input value={phone} onChange={(e) => setPhone(e.target.value)} type="number" name="" placeholder="+91-9999999999" id="" className="bg-transparent flex-1 text-white focus:outline-none"  />
+            <input value={phone} onChange={(e) => setPhone(e.target.value)} type="number" name="" placeholder="+91-9999999999" id="" className="bg-transparent flex-1 text-white focus:outline-none" />
           </div>
         </div>
         <div>

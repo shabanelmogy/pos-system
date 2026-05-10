@@ -16,7 +16,12 @@ export const isVerifiedUser = async (req, res, next) => {
             fail("Please provide token!", 401);
         }
 
-        const decodeToken = jwt.verify(accessToken, config.accessTokenSecret);
+        let decodeToken;
+        try {
+            decodeToken = jwt.verify(accessToken, config.accessTokenSecret);
+        } catch (err) {
+            return fail("Invalid or expired token!", 401);
+        }
 
         const user = await userRepository.findById(decodeToken._id);
         if (!user) {

@@ -6,52 +6,51 @@ import { db } from "../../config/database.js";
 
 const userRepository = {
   async findByEmail(email) {
+    // 1. Fetch User
     const result = await db.select().from(users).where(eq(users.email, email)).limit(1);
     if (!result[0]) return null;
-
     const user = result[0];
-    // Fetch relations manually for stability
-    const branchRes = await db.select().from(branches).where(eq(branches.id, user.branchId)).limit(1);
-    const posPermissionsRes = await db
-      .select({
-        id: userPosPermissions.id,
-        userId: userPosPermissions.userId,
-        posPointId: userPosPermissions.posPointId,
-        posPoint: posPoints
-      })
-      .from(userPosPermissions)
-      .leftJoin(posPoints, eq(userPosPermissions.posPointId, posPoints.id))
-      .where(eq(userPosPermissions.userId, user.id));
 
-    return { 
-      ...user, 
-      branch: branchRes[0] || null, 
-      posPermissions: posPermissionsRes 
-    };
+    // 2. Fetch Branch
+    let branch = null;
+    if (user.branchId) {
+      const branchRes = await db.select().from(branches).where(eq(branches.id, user.branchId)).limit(1);
+      branch = branchRes[0] || null;
+    }
+
+    // 3. Fetch Permissions
+    const perms = await db.select().from(userPosPermissions).where(eq(userPosPermissions.userId, user.id));
+    const posPermissions = [];
+    for (const p of perms) {
+      const ptRes = await db.select().from(posPoints).where(eq(posPoints.id, p.posPointId)).limit(1);
+      posPermissions.push({ ...p, posPoint: ptRes[0] || null });
+    }
+
+    return { ...user, branch, posPermissions };
   },
 
   async findById(id) {
+    // 1. Fetch User
     const result = await db.select().from(users).where(eq(users.id, id)).limit(1);
     if (!result[0]) return null;
-
     const user = result[0];
-    const branchRes = await db.select().from(branches).where(eq(branches.id, user.branchId)).limit(1);
-    const posPermissionsRes = await db
-      .select({
-        id: userPosPermissions.id,
-        userId: userPosPermissions.userId,
-        posPointId: userPosPermissions.posPointId,
-        posPoint: posPoints
-      })
-      .from(userPosPermissions)
-      .leftJoin(posPoints, eq(userPosPermissions.posPointId, posPoints.id))
-      .where(eq(userPosPermissions.userId, user.id));
 
-    return { 
-      ...user, 
-      branch: branchRes[0] || null, 
-      posPermissions: posPermissionsRes 
-    };
+    // 2. Fetch Branch
+    let branch = null;
+    if (user.branchId) {
+      const branchRes = await db.select().from(branches).where(eq(branches.id, user.branchId)).limit(1);
+      branch = branchRes[0] || null;
+    }
+
+    // 3. Fetch Permissions
+    const perms = await db.select().from(userPosPermissions).where(eq(userPosPermissions.userId, user.id));
+    const posPermissions = [];
+    for (const p of perms) {
+      const ptRes = await db.select().from(posPoints).where(eq(posPoints.id, p.posPointId)).limit(1);
+      posPermissions.push({ ...p, posPoint: ptRes[0] || null });
+    }
+
+    return { ...user, branch, posPermissions };
   },
 
   async create(userData) {
