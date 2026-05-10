@@ -28,8 +28,8 @@ const formatOrder = (order) => {
 };
 
 const orderService = {
-  async getAllOrders() {
-    const orders = await orderRepository.findAll();
+  async getAllOrders(filters = {}) {
+    const orders = await orderRepository.findAll(filters);
     return orders.map(formatOrder);
   },
 

@@ -5,18 +5,22 @@ import BackButton from "../components/shared/BackButton";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { getOrders } from "../https/index";
 import { enqueueSnackbar } from "notistack"
+import { useSelector } from "react-redux";
 
 const Orders = () => {
   const [status, setStatus] = useState("all");
+  const { selectedPOSPoint } = useSelector((state) => state.pos);
 
   useEffect(() => {
     document.title = "POS | Orders"
   }, [])
 
   const { data: resData, isError } = useQuery({
-    queryKey: ["orders"],
+    queryKey: ["orders", selectedPOSPoint?.id],
     queryFn: async () => {
-      return await getOrders();
+      console.log(`[DEBUG] Fetching orders for POS:`, selectedPOSPoint?.id);
+      const res = await getOrders({ posPointId: selectedPOSPoint?.id });
+      return res.data;
     },
     placeholderData: keepPreviousData
   })
@@ -26,7 +30,8 @@ const Orders = () => {
   }
 
   // Filter logic
-  const filteredOrders = resData?.data.data.filter((order) => {
+  const ordersList = resData?.data || [];
+  const filteredOrders = ordersList.filter((order) => {
     if (status === "all") return true;
     if (status === "progress") return order.orderStatus === "In Progress";
     if (status === "ready") return order.orderStatus === "Ready";

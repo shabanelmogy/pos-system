@@ -5,7 +5,8 @@ import { createOrderSchema, updateOrderStatusSchema } from "./order.validation.j
 const orderController = {
   async getAll(req, res) {
     try {
-      const orders = await orderService.getAllOrders();
+      const { branchId, posPointId, shiftId } = req.query;
+      const orders = await orderService.getAllOrders({ branchId, posPointId, shiftId });
       res.status(200).json({ success: true, data: orders });
     } catch (error) {
       handleError(res, error, "orderController.getAll");

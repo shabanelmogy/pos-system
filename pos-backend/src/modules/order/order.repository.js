@@ -4,8 +4,17 @@ import { orderItems } from "./orderItem.schema.js";
 import { db } from "../../config/database.js";
 
 const orderRepository = {
-  async findAll() {
+  async findAll(filters = {}) {
+    const { branchId, posPointId, shiftId } = filters;
+
     return await db.query.orders.findMany({
+      where: (fields, { eq, and }) => {
+        const conditions = [];
+        if (branchId) conditions.push(eq(fields.branchId, branchId));
+        if (posPointId) conditions.push(eq(fields.posPointId, posPointId));
+        if (shiftId) conditions.push(eq(fields.shiftId, shiftId));
+        return conditions.length > 0 ? and(...conditions) : undefined;
+      },
       with: {
         orderItems: true,
         table: true,

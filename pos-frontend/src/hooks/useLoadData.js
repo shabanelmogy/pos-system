@@ -3,6 +3,7 @@ import { getUserData } from "../https";
 import { useEffect, useState } from "react";
 import { removeUser, setUser } from "../redux/slices/userSlice";
 import { useNavigate } from "react-router-dom";
+import { setActiveShift, setSelectedBranch, setSelectedPOSPoint } from "../redux/slices/posSlice";
 
 const useLoadData = () => {
   const dispatch = useDispatch();
@@ -28,7 +29,17 @@ const useLoadData = () => {
       try {
         const { data } = await getUserData();
         const { id, name, email, phone, role, branchId, posPermissions } = data.data;
+        const serverShift = data.activeShift;
+
+        // 1. Set User
         dispatch(setUser({ id, name, email, phone, role, branchId, posPermissions }));
+
+        // 2. Restore Shift & Terminal if found
+        if (serverShift) {
+          dispatch(setActiveShift(serverShift));
+          if (serverShift.branch) dispatch(setSelectedBranch(serverShift.branch));
+          if (serverShift.posPoint) dispatch(setSelectedPOSPoint(serverShift.posPoint));
+        }
       } catch (error) {
         dispatch(removeUser());
         if (window.location.pathname !== "/auth") {

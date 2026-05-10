@@ -6,16 +6,18 @@ import { enqueueSnackbar } from "notistack";
 import { getOrders } from "../../https/index";
 import { motion, AnimatePresence } from "framer-motion";
 import Invoice from "../invoice/Invoice";
+import { useSelector } from "react-redux";
 
 const RecentOrders = () => {
   const [selectedOrderForReprint, setSelectedOrderForReprint] = useState(null);
   const [showReprintModal, setShowReprintModal] = useState(false);
+  const { selectedPOSPoint } = useSelector((state) => state.pos);
 
-  const { data: resData, isError, isLoading } = useQuery({
-    queryKey: ["orders"],
+  const { data: ordersList = [], isError, isLoading } = useQuery({
+    queryKey: ["orders", selectedPOSPoint?.id],
     queryFn: async () => {
-      const res = await getOrders();
-      return res.data; 
+      const res = await getOrders({ posPointId: selectedPOSPoint?.id });
+      return res.data.data;
     },
     placeholderData: keepPreviousData,
   });
@@ -31,7 +33,6 @@ const RecentOrders = () => {
     setShowReprintModal(true);
   };
 
-  const ordersList = resData?.data || [];
 
   return (
     <div className="px-8 mt-6 relative">
