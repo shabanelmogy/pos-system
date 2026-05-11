@@ -14,12 +14,12 @@ const Home = () => {
   }, [])
 
   return (
-    <section className="bg-[var(--bg-main)] min-h-screen overflow-y-auto custom-scrollbar">
-      <div className="flex flex-col lg:flex-row gap-2">
+    <section className="bg-[var(--bg-main)] h-[calc(100vh-5rem)] overflow-hidden">
+      <div className="flex flex-col lg:flex-row gap-4 lg:gap-2 2xl:gap-6 px-4 md:px-6 lg:px-4 2xl:px-8">
         {/* Left Div */}
         <div className="flex-[3] flex flex-col min-h-fit">
           <Greetings />
-          <div className="flex flex-col md:flex-row items-center w-full gap-2 px-6 mt-4">
+          <div className="flex flex-col md:flex-row items-center w-full gap-3 mt-4">
             <MiniCard title="Total Earnings" icon={<BsCashCoin />} number={512} footerNum={1.6} />
             <MiniCard title="In Progress" icon={<GrInProgress />} number={16} footerNum={3.6} />
           </div>
@@ -28,13 +28,13 @@ const Home = () => {
           </div>
         </div>
         {/* Right Div */}
-        <div className="flex-[2] pb-4 lg:pb-0">
+        <div className="flex-[2] pb-6 lg:pb-0">
           <PopularDishes />
         </div>
       </div>
 
-      {/* Large Spacer to ensure flow stops before bottom nav */}
-      <div className="h-40 w-full" />
+      {/* Spacer to ensure scrolling past the fixed nav */}
+      <div className="h-24 md:h-32 w-full shrink-0" />
       
       <BottomNav />
     </section>
