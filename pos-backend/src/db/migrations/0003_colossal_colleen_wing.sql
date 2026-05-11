@@ -1,0 +1,1 @@
+ALTER TABLE "pos_settings" ADD COLUMN "open_on_menu" boolean DEFAULT false;

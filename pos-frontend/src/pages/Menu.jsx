@@ -12,13 +12,15 @@ import { useNavigate } from "react-router-dom";
 const Menu = () => {
 
   const customerData = useSelector((state) => state.customer);
+  const { selectedPOSPoint } = useSelector((state) => state.pos);
   const navigate = useNavigate();
+
+  const requireCustomer = selectedPOSPoint?.settings?.requireCustomerOnOrder;
+  const isGuest = !customerData.customerName || customerData.customerName === "Guest";
 
   useEffect(() => {
     document.title = "POS | Menu";
-    
-    // Safety Check: Redirect if order flow wasn't started correctly
-    // But don't redirect if we are in the middle of a transaction (order might be completed)
+    // Redirect only if there's truly no order context at all
     if (!customerData.customerName && !customerData.table) {
       navigate("/");
     }
@@ -35,30 +37,34 @@ const Menu = () => {
               Menu
             </h1>
           </div>
-          <div className="flex items-center justify-around gap-4">
-            <div className="flex items-center gap-3 cursor-pointer">
-              <MdRestaurantMenu className="text-[#f5f5f5] text-4xl" />
-              <div className="flex flex-col items-start">
-                <h1 className="text-md text-[#f5f5f5] font-semibold tracking-wide">
-                  {customerData.customerName || "Customer Name"}
-                </h1>
-                <p className="text-xs text-[#ababab] font-medium">
-                  Table : {customerData.table?.tableNo || "N/A"}
-                </p>
+          {requireCustomer && !isGuest && (
+            <div className="flex items-center justify-around gap-4">
+              <div className="flex items-center gap-3 cursor-pointer">
+                <MdRestaurantMenu className="text-[#f5f5f5] text-4xl" />
+                <div className="flex flex-col items-start">
+                  <h1 className="text-md text-[#f5f5f5] font-semibold tracking-wide">
+                    {customerData.customerName}
+                  </h1>
+                  <p className="text-xs text-[#ababab] font-medium">
+                    Table : {customerData.table?.tableNo || "N/A"}
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
 
         <MenuContainer />
       </div>
       {/* Right Div */}
       <div className="flex-[1] bg-[#1a1a1a] lg:mt-4 lg:mb-4 lg:mr-3 h-[calc(100vh-10rem)] rounded-lg flex flex-col overflow-hidden">
-        {/* Customer Info - Fixed at top */}
-        <div className="flex-none">
-          <CustomerInfo />
-          <hr className="border-[#2a2a2a] border-t-2" />
-        </div>
+        {/* Customer Info - only shown when requireCustomer is ON */}
+        {requireCustomer && !isGuest && (
+          <div className="flex-none">
+            <CustomerInfo />
+            <hr className="border-[#2a2a2a] border-t-2" />
+          </div>
+        )}
 
         {/* Cart Items - Scrollable middle */}
         <div className="flex-1 overflow-y-auto custom-scrollbar">

@@ -8,6 +8,7 @@ export const posSettings = pgTable("pos_settings", {
   allowDiscounts: boolean("allow_discounts").default(false),
   enableTables: boolean("enable_tables").default(true),
   requireCustomerOnOrder: boolean("require_customer_on_order").default(false),
+  openOnMenu: boolean("open_on_menu").default(false),
   receiptPrinterName: text("receipt_printer_name"),
   kitchenPrinterName: text("kitchen_printer_name"),
   createdAt: timestamp("created_at").defaultNow(),

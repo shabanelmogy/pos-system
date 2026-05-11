@@ -7,19 +7,31 @@ import {
 } from "react-router-dom";
 import { Home, Auth, Orders, Tables, Menu, Dashboard, Customers, Settings } from "./pages";
 import Header from "./components/shared/Header";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import useLoadData from "./hooks/useLoadData";
 import FullScreenLoader from "./components/shared/FullScreenLoader"
 import useAuth from "./hooks/useAuth";
 import ShiftManager from "./components/shared/ShiftManager";
+import { setCustomer } from "./redux/slices/customerSlice";
+import { useEffect } from "react";
 
 function Layout() {
   const isLoading = useLoadData();
   const { isAuth, isAdmin } = useAuth();
   const { activeShift, showShiftModal, selectedPOSPoint } = useSelector((state) => state.pos);
+  const customer = useSelector((state) => state.customer);
+  const dispatch = useDispatch();
   const location = useLocation();
   const hideHeaderRoutes = ["/auth"];
   const enableTables = selectedPOSPoint?.settings?.enableTables !== false;
+  const openOnMenu = selectedPOSPoint?.settings?.openOnMenu === true;
+
+  // Auto-set guest customer when openOnMenu is on and no customer set yet
+  useEffect(() => {
+    if (openOnMenu && !isAdmin && isAuth && !customer.customerName) {
+      dispatch(setCustomer({ name: "Guest", phone: "N/A", guests: 1 }));
+    }
+  }, [openOnMenu, isAdmin, isAuth, customer.customerName, dispatch]);
 
   // 1. Loading Check
   if (isLoading) return <FullScreenLoader />;
@@ -43,9 +55,7 @@ function Layout() {
           path="/"
           element={
             <ProtectedRoutes>
-              {/* Admins can view Home but need a terminal to place orders. 
-                  We handle that inside Home/Menu components if needed. */}
-              <Home />
+              {openOnMenu && !isAdmin ? <Navigate to="/menu" /> : <Home />}
             </ProtectedRoutes>
           }
         />

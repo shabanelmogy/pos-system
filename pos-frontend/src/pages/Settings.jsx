@@ -81,7 +81,7 @@ const Settings = () => {
             </div>
 
             <div className="flex-1 overflow-hidden px-10 pb-20 flex gap-8">
-                
+
                 {/* Left Side: Terminal List */}
                 <div className="w-1/3 bg-[#1a1a1a] rounded-[2rem] border border-[#333] flex flex-col overflow-hidden">
                     <div className="p-6 border-b border-[#333]">
@@ -92,11 +92,10 @@ const Settings = () => {
                             <button
                                 key={term.id}
                                 onClick={() => handlePickTerminal(term)}
-                                className={`w-full flex items-center justify-between p-4 rounded-2xl transition-all border ${
-                                    selectedTerminal?.id === term.id 
-                                    ? "bg-[#f6b100] border-[#f6b100] text-[#1a1a1a]" 
-                                    : "bg-[#1f1f1f] border-transparent text-[#f5f5f5] hover:border-[#f6b100]/30"
-                                }`}
+                                className={`w-full flex items-center justify-between p-4 rounded-2xl transition-all border ${selectedTerminal?.id === term.id
+                                        ? "bg-[#f6b100] border-[#f6b100] text-[#1a1a1a]"
+                                        : "bg-[#1f1f1f] border-transparent text-[#f5f5f5] hover:border-[#f6b100]/30"
+                                    }`}
                             >
                                 <div className="flex items-center gap-3">
                                     <FaTerminal className={selectedTerminal?.id === term.id ? "text-[#1a1a1a]" : "text-[#f6b100]"} />
@@ -139,11 +138,11 @@ const Settings = () => {
                                                 <FaPrint className="text-[#f6b100]" />
                                                 <h3 className="text-[#f5f5f5] text-sm font-black uppercase tracking-widest">Printer Config</h3>
                                             </div>
-                                            
+
                                             <div className="space-y-6">
                                                 <div className="flex items-center justify-between bg-[#1f1f1f] p-4 rounded-2xl border border-[#333]">
                                                     <span className="text-xs text-[#ababab] font-bold uppercase">Auto-Print Receipt</span>
-                                                    <button 
+                                                    <button
                                                         onClick={() => handleToggle('autoPrintReceipt')}
                                                         className={`w-10 h-5 rounded-full relative transition-all ${localSettings.autoPrintReceipt ? 'bg-[#f6b100]' : 'bg-[#333]'}`}
                                                     >
@@ -153,8 +152,8 @@ const Settings = () => {
 
                                                 <div>
                                                     <label className="text-[10px] text-[#666] font-black uppercase tracking-widest block mb-2">Receipt Printer Name</label>
-                                                    <input 
-                                                        type="text" 
+                                                    <input
+                                                        type="text"
                                                         name="receiptPrinterName"
                                                         value={localSettings.receiptPrinterName || ""}
                                                         onChange={handleInputChange}
@@ -164,8 +163,8 @@ const Settings = () => {
 
                                                 <div>
                                                     <label className="text-[10px] text-[#666] font-black uppercase tracking-widest block mb-2">Kitchen Printer Name</label>
-                                                    <input 
-                                                        type="text" 
+                                                    <input
+                                                        type="text"
                                                         name="kitchenPrinterName"
                                                         value={localSettings.kitchenPrinterName || ""}
                                                         onChange={handleInputChange}
@@ -185,7 +184,7 @@ const Settings = () => {
                                             <div className="space-y-4">
                                                 <div className="flex items-center justify-between bg-[#1f1f1f] p-4 rounded-2xl border border-[#333]">
                                                     <span className="text-xs text-[#ababab] font-bold uppercase">Require Customer</span>
-                                                    <button 
+                                                    <button
                                                         onClick={() => handleToggle('requireCustomerOnOrder')}
                                                         className={`w-10 h-5 rounded-full relative transition-all ${localSettings.requireCustomerOnOrder ? 'bg-[#f6b100]' : 'bg-[#333]'}`}
                                                     >
@@ -195,7 +194,7 @@ const Settings = () => {
 
                                                 <div className="flex items-center justify-between bg-[#1f1f1f] p-4 rounded-2xl border border-[#333]">
                                                     <span className="text-xs text-[#ababab] font-bold uppercase">Allow Discounts</span>
-                                                    <button 
+                                                    <button
                                                         onClick={() => handleToggle('allowDiscounts')}
                                                         className={`w-10 h-5 rounded-full relative transition-all ${localSettings.allowDiscounts ? 'bg-[#f6b100]' : 'bg-[#333]'}`}
                                                     >
@@ -205,11 +204,24 @@ const Settings = () => {
 
                                                 <div className="flex items-center justify-between bg-[#1f1f1f] p-4 rounded-2xl border border-[#333]">
                                                     <span className="text-xs text-[#ababab] font-bold uppercase">Enable Tables</span>
-                                                    <button 
+                                                    <button
                                                         onClick={() => handleToggle('enableTables')}
                                                         className={`w-10 h-5 rounded-full relative transition-all ${localSettings.enableTables !== false ? 'bg-[#f6b100]' : 'bg-[#333]'}`}
                                                     >
                                                         <div className={`absolute top-1 w-3 h-3 rounded-full bg-white transition-all ${localSettings.enableTables !== false ? 'left-6' : 'left-1'}`} />
+                                                    </button>
+                                                </div>
+
+                                                <div className="flex items-center justify-between bg-[#1f1f1f] p-4 rounded-2xl border border-[#333]">
+                                                    <div>
+                                                        <span className="text-xs text-[#ababab] font-bold uppercase">Open On Menu</span>
+                                                        <p className="text-[10px] text-[#555] mt-0.5">App opens directly on Menu page on login</p>
+                                                    </div>
+                                                    <button
+                                                        onClick={() => handleToggle('openOnMenu')}
+                                                        className={`w-10 h-5 rounded-full relative transition-all ${localSettings.openOnMenu ? 'bg-[#f6b100]' : 'bg-[#333]'}`}
+                                                    >
+                                                        <div className={`absolute top-1 w-3 h-3 rounded-full bg-white transition-all ${localSettings.openOnMenu ? 'left-6' : 'left-1'}`} />
                                                     </button>
                                                 </div>
                                             </div>

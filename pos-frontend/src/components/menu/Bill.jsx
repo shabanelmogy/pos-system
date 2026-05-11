@@ -6,17 +6,19 @@ import { useSnackbar } from "notistack";
 import { removeAllItems } from "../../redux/slices/cartSlice";
 import { removeCustomer } from "../../redux/slices/customerSlice";
 import Invoice from "../invoice/Invoice";
+import { FaChevronDown, FaChevronUp } from "react-icons/fa";
 
 const Bill = () => {
   const cartItems = useSelector((state) => state.cart);
   const customerData = useSelector((state) => state.customer);
   const user = useSelector((state) => state.user);
   const { selectedBranch, selectedPOSPoint, activeShift } = useSelector((state) => state.pos);
-  
+
   const [paymentMethod, setPaymentMethod] = useState("Cash");
   const [showInvoice, setShowInvoice] = useState(false);
   const [orderInfo, setOrderInfo] = useState(null);
-  
+  const [isMinimized, setIsMinimized] = useState(true);
+
   const { enqueueSnackbar } = useSnackbar();
   const dispatch = useDispatch();
   const queryClient = useQueryClient();
@@ -33,7 +35,7 @@ const Bill = () => {
     mutationFn: (data) => addOrder(data),
     onSuccess: (res) => {
       const order = res.data.data;
-      
+
       const handleSuccess = () => {
         queryClient.invalidateQueries(["orders"]);
         enqueueSnackbar("Order Placed Successfully", { variant: "success" });
@@ -42,24 +44,19 @@ const Bill = () => {
       };
 
       if (order.tableId) {
-        // Update Table
         const tableData = {
           status: "Booked",
           orderId: order.id,
           tableId: order.tableId,
         };
-
-        tableMutation.mutate(tableData, {
-          onSuccess: handleSuccess,
-        });
+        tableMutation.mutate(tableData, { onSuccess: handleSuccess });
       } else {
-        // Skip table update if no table was selected
         handleSuccess();
       }
     },
     onError: (error) => {
       enqueueSnackbar(error.response?.data?.message || "Failed to place order", { variant: "error" });
-    }
+    },
   });
 
   const handlePlaceOrder = () => {
@@ -75,11 +72,11 @@ const Bill = () => {
       return;
     }
 
-    const preparedItems = cartItems.map(item => ({
+    const preparedItems = cartItems.map((item) => ({
       menuItemId: item.id,
       quantity: item.quantity,
       unitPrice: item.price,
-      name: item.name
+      name: item.name,
     }));
 
     const baseOrderData = {
@@ -92,7 +89,6 @@ const Bill = () => {
       items: preparedItems,
       tableId: customerData.table?.tableId,
       paymentMethod: paymentMethod,
-      // Enterprise context
       branchId: selectedBranch?.id,
       posPointId: selectedPOSPoint?.id,
       shiftId: activeShift?.id,
@@ -127,11 +123,11 @@ const Bill = () => {
                 guests: customerData.guests,
               },
               orderStatus: selectedPOSPoint?.settings?.enableTables !== false ? "In Progress" : "Completed",
-              items: cartItems.map(item => ({
+              items: cartItems.map((item) => ({
                 menuItemId: item.id,
                 quantity: item.quantity,
                 unitPrice: item.price,
-                name: item.name
+                name: item.name,
               })),
               tableId: customerData.table?.tableId,
               paymentMethod: paymentMethod,
@@ -145,7 +141,6 @@ const Bill = () => {
               shiftId: activeShift?.id,
               cashierId: user.id,
             };
-
             orderMutation.mutate(orderData);
           } catch (error) {
             enqueueSnackbar("Payment Verification Failed", { variant: "error" });
@@ -155,11 +150,8 @@ const Bill = () => {
           name: customerData.customerName,
           contact: customerData.customerPhone,
         },
-        theme: {
-          color: "#f6b100",
-        },
+        theme: { color: "#f6b100" },
       };
-
       const rzp = new window.Razorpay(options);
       rzp.open();
     },
@@ -170,58 +162,90 @@ const Bill = () => {
   }
 
   return (
-    <div className="bg-[#262626] p-6 rounded-2xl h-full flex flex-col border border-[#333] shadow-xl">
-      <h2 className="text-[#f5f5f5] text-xl font-black uppercase tracking-tighter mb-6">Bill Summary</h2>
-      
-      <div className="flex-1 space-y-4">
-        <div className="flex justify-between text-[#ababab]">
-          <span className="font-medium">Subtotal</span>
-          <span className="font-bold text-[#f5f5f5]">₹{total.toFixed(2)}</span>
-        </div>
-        <div className="flex justify-between text-[#ababab]">
-          <span className="font-medium">Tax (5%)</span>
-          <span className="font-bold text-[#f5f5f5]">₹{tax.toFixed(2)}</span>
-        </div>
-        <div className="h-px bg-[#333] my-4"></div>
-        <div className="flex justify-between text-[#f6b100]">
-          <span className="text-lg font-black uppercase">Total</span>
-          <span className="text-xl font-black">₹{totalWithTax.toFixed(2)}</span>
-        </div>
-      </div>
-
-      <div className="mt-8">
-        <p className="text-[#ababab] text-xs font-bold uppercase tracking-widest mb-3">Payment Method</p>
-        <div className="grid grid-cols-2 gap-3">
-          <button
-            onClick={() => setPaymentMethod("Cash")}
-            className={`py-3 rounded-xl font-bold text-sm transition-all border-2 ${
-              paymentMethod === "Cash"
-                ? "bg-[#f6b100]/10 border-[#f6b100] text-[#f6b100]"
-                : "bg-[#1a1a1a] border-[#333] text-[#ababab] hover:border-[#444]"
-            }`}
-          >
-            Cash
-          </button>
-          <button
-            onClick={() => setPaymentMethod("Razorpay")}
-            className={`py-3 rounded-xl font-bold text-sm transition-all border-2 ${
-              paymentMethod === "Razorpay"
-                ? "bg-[#f6b100]/10 border-[#f6b100] text-[#f6b100]"
-                : "bg-[#1a1a1a] border-[#333] text-[#ababab] hover:border-[#444]"
-            }`}
-          >
-            Online
-          </button>
-        </div>
-      </div>
-
-      <button
-        onClick={handlePlaceOrder}
-        disabled={cartItems.length === 0 || orderMutation.isPending || razorpayMutation.isPending}
-        className="w-full bg-[#f6b100] hover:bg-[#e5a600] disabled:opacity-50 disabled:cursor-not-allowed text-[#1a1a1a] font-black uppercase tracking-widest py-5 rounded-2xl mt-8 transition-all transform active:scale-[0.98] shadow-2xl shadow-yellow-500/10"
+    <div className="bg-[#262626] rounded-2xl border border-[#333] shadow-xl overflow-hidden">
+      {/* Header — always visible, click to toggle */}
+      <div
+        className="flex items-center justify-between px-5 py-3 cursor-pointer hover:bg-[#2e2e2e] transition-colors select-none"
+        onClick={() => setIsMinimized((prev) => !prev)}
       >
-        {orderMutation.isPending || razorpayMutation.isPending ? "Processing..." : "Place Order"}
-      </button>
+        <div className="flex items-center gap-3">
+          <h2 className="text-[#f5f5f5] text-sm font-black uppercase tracking-tighter">Bill Summary</h2>
+          {isMinimized && (
+            <span className="text-[#f6b100] text-sm font-black">₹{totalWithTax.toFixed(2)}</span>
+          )}
+        </div>
+        <div className="text-[#ababab] hover:text-[#f6b100] transition-colors">
+          {isMinimized ? <FaChevronUp size={12} /> : <FaChevronDown size={12} />}
+        </div>
+      </div>
+
+      {/* Expanded content */}
+      {!isMinimized && (
+        <div className="px-5 pb-5">
+          <div className="space-y-3 mb-4">
+            <div className="flex justify-between text-[#ababab] text-sm">
+              <span className="font-medium">Subtotal</span>
+              <span className="font-bold text-[#f5f5f5]">₹{total.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between text-[#ababab] text-sm">
+              <span className="font-medium">Tax (5%)</span>
+              <span className="font-bold text-[#f5f5f5]">₹{tax.toFixed(2)}</span>
+            </div>
+            <div className="h-px bg-[#333]"></div>
+            <div className="flex justify-between text-[#f6b100]">
+              <span className="text-base font-black uppercase">Total</span>
+              <span className="text-lg font-black">₹{totalWithTax.toFixed(2)}</span>
+            </div>
+          </div>
+
+          <div className="mb-4">
+            <p className="text-[#ababab] text-[10px] font-bold uppercase tracking-widest mb-2">Payment Method</p>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                onClick={(e) => { e.stopPropagation(); setPaymentMethod("Cash"); }}
+                className={`py-2.5 rounded-xl font-bold text-xs transition-all border-2 ${
+                  paymentMethod === "Cash"
+                    ? "bg-[#f6b100]/10 border-[#f6b100] text-[#f6b100]"
+                    : "bg-[#1a1a1a] border-[#333] text-[#ababab] hover:border-[#444]"
+                }`}
+              >
+                Cash
+              </button>
+              <button
+                onClick={(e) => { e.stopPropagation(); setPaymentMethod("Razorpay"); }}
+                className={`py-2.5 rounded-xl font-bold text-xs transition-all border-2 ${
+                  paymentMethod === "Razorpay"
+                    ? "bg-[#f6b100]/10 border-[#f6b100] text-[#f6b100]"
+                    : "bg-[#1a1a1a] border-[#333] text-[#ababab] hover:border-[#444]"
+                }`}
+              >
+                Online
+              </button>
+            </div>
+          </div>
+
+          <button
+            onClick={(e) => { e.stopPropagation(); handlePlaceOrder(); }}
+            disabled={cartItems.length === 0 || orderMutation.isPending || razorpayMutation.isPending}
+            className="w-full bg-[#f6b100] hover:bg-[#e5a600] disabled:opacity-50 disabled:cursor-not-allowed text-[#1a1a1a] font-black uppercase tracking-widest py-4 rounded-2xl transition-all transform active:scale-[0.98] shadow-2xl shadow-yellow-500/10 text-xs"
+          >
+            {orderMutation.isPending || razorpayMutation.isPending ? "Processing..." : "Place Order"}
+          </button>
+        </div>
+      )}
+
+      {/* Minimized: show Place Order only */}
+      {isMinimized && (
+        <div className="px-5 pb-4">
+          <button
+            onClick={(e) => { e.stopPropagation(); handlePlaceOrder(); }}
+            disabled={cartItems.length === 0 || orderMutation.isPending || razorpayMutation.isPending}
+            className="w-full bg-[#f6b100] hover:bg-[#e5a600] disabled:opacity-50 disabled:cursor-not-allowed text-[#1a1a1a] font-black uppercase tracking-widest py-3 rounded-2xl transition-all transform active:scale-[0.98] shadow-xl shadow-yellow-500/10 text-xs"
+          >
+            {orderMutation.isPending || razorpayMutation.isPending ? "Processing..." : "Place Order"}
+          </button>
+        </div>
+      )}
     </div>
   );
 };

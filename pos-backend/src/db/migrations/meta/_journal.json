@@ -22,6 +22,13 @@
       "when": 1778442968323,
       "tag": "0002_steep_skullbuster",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1778477043352,
+      "tag": "0003_colossal_colleen_wing",
+      "breakpoints": true
     }
   ]
 }

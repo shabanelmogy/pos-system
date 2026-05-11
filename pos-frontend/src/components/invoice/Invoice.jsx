@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { FaCheck, FaPrint, FaTimes, FaStore, FaUser, FaClock } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import { removeAllItems } from "../../redux/slices/cartSlice";
-import { removeCustomer } from "../../redux/slices/customerSlice";
+import { removeCustomer, setCustomer } from "../../redux/slices/customerSlice";
 import { useNavigate } from "react-router-dom";
 
 const Invoice = ({ orderInfo, setShowInvoice, isReprint = false }) => {
@@ -14,17 +14,21 @@ const Invoice = ({ orderInfo, setShowInvoice, isReprint = false }) => {
 
   const handleClose = () => {
     setShowInvoice(false);
-    
-    // Only navigate away if we are in the primary checkout flow
+
     if (!isReprint) {
       const enableTables = selectedPOSPoint?.settings?.enableTables !== false;
-      navigate(enableTables ? "/tables" : "/menu"); 
-    }
-    
-    // Only clear session data if we are in the primary checkout flow
-    if (!isReprint) {
+      const openOnMenu = selectedPOSPoint?.settings?.openOnMenu === true;
+
       dispatch(removeAllItems());
-      dispatch(removeCustomer());
+
+      if (openOnMenu) {
+        // Stay on menu flow — reset customer to Guest for next order
+        dispatch(setCustomer({ name: "Guest", phone: "N/A", guests: 1 }));
+        navigate("/menu");
+      } else {
+        dispatch(removeCustomer());
+        navigate(enableTables ? "/tables" : "/menu");
+      }
     }
   };
 

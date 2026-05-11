@@ -56,10 +56,10 @@ const BottomNav = () => {
     }
 
     // send the data to store
-    dispatch(setCustomer({ 
-      name: name || "Guest", 
-      phone: phone || "N/A", 
-      guests: guestCount || 1 
+    dispatch(setCustomer({
+      name: name || "Guest",
+      phone: phone || "N/A",
+      guests: guestCount || 1
     }));
     dispatch(removeAllItems());
 
@@ -82,13 +82,13 @@ const BottomNav = () => {
   const handleDishClick = () => {
     if (!requireCustomer) {
       // Bypass modal and start order immediately
-      dispatch(setCustomer({ 
-        name: "Guest", 
-        phone: "N/A", 
-        guests: 1 
+      dispatch(setCustomer({
+        name: "Guest",
+        phone: "N/A",
+        guests: 1
       }));
       dispatch(removeAllItems());
-      
+
       if (!enableTables) {
         navigate("/menu");
       } else {
