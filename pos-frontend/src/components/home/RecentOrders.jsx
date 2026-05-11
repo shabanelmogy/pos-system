@@ -37,8 +37,8 @@ const RecentOrders = () => {
 
 
   return (
-    <div className="px-6 mt-4 relative">
-      <div className="bg-[var(--bg-card)] w-full min-h-[300px] lg:h-[355px] lg:min-h-[355px] rounded-3xl border border-[var(--border-main)] shadow-2xl overflow-hidden flex flex-col">
+    <div className="px-6 mt-4 mb-6 relative">
+      <div className="bg-[var(--bg-card)] w-full min-h-[300px] lg:h-[331px] 2xl:h-[503px] rounded-2xl border border-[var(--border-main)] shadow-xl overflow-hidden flex flex-col">
         <div className="flex justify-between items-center px-6 py-4 border-b border-[var(--bg-card-alt)]">
           <h1 className="text-[var(--text-main)] text-base font-black uppercase tracking-tighter">
             Recent Orders
@@ -48,7 +48,7 @@ const RecentOrders = () => {
           </button>
         </div>
 
-        <div className="p-4 flex flex-col flex-1 overflow-hidden">
+        <div className="overflow-y-auto min-h-[300px] lg:h-[420px] scrollbar-hide">
           <div className="flex items-center gap-3 bg-[var(--bg-card-alt)] rounded-xl px-4 py-2.5 mb-4 border border-[var(--border-main)] focus-within:border-[var(--primary)] transition-colors">
             <FaSearch className="text-[var(--text-dim)]" />
             <input
