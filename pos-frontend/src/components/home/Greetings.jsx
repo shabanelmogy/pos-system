@@ -31,26 +31,26 @@ const Greetings = () => {
   };
 
   return (
-    <div className="flex justify-between items-center px-8 mt-5">
+    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center px-6 mt-4 gap-4 sm:gap-0">
       <div>
-        <h1 className="text-[#f5f5f5] text-2xl font-semibold tracking-wide">
+        <h1 className="text-[#f5f5f5] text-xl font-semibold tracking-wide">
           Good Morning, {userData.name || "TEST USER"}
         </h1>
-        <p className="text-[#ababab] text-sm">
+        <p className="text-[#ababab] text-xs">
           Give your best services for customers 😀
         </p>
         {canCompleteOrders && (
           <button 
             onClick={handleStartOrder}
-            className="mt-4 bg-[#f6b100] text-[#1a1a1a] font-bold py-2 px-6 rounded-lg hover:bg-yellow-600 transition-colors shadow-lg flex items-center gap-2"
+            className="mt-3 bg-[#f6b100] text-[#1a1a1a] font-bold py-1.5 px-5 rounded-lg hover:bg-yellow-600 transition-colors shadow-lg flex items-center gap-2 text-sm"
           >
-            <span className="text-xl">+</span> Start New Order
+            <span className="text-lg">+</span> Start New Order
           </button>
         )}
       </div>
-      <div className="text-right">
-        <h1 className="text-[#f5f5f5] text-3xl font-bold tracking-wide">{formatTime(dateTime)}</h1>
-        <p className="text-[#ababab] text-sm">{formatDate(dateTime)}</p>
+      <div className="text-left sm:text-right w-full sm:w-auto border-t sm:border-t-0 border-[#333] pt-3 sm:pt-0">
+        <h1 className="text-[#f5f5f5] text-2xl font-bold tracking-wide">{formatTime(dateTime)}</h1>
+        <p className="text-[#ababab] text-xs">{formatDate(dateTime)}</p>
       </div>
     </div>
   );

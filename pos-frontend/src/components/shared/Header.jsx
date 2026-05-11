@@ -45,20 +45,20 @@ const Header = () => {
   };
 
   return (
-    <header className="flex justify-between items-center py-4 px-8 bg-[#1a1a1a] border-b border-[#333]">
+    <header className="flex justify-between items-center py-3 px-4 md:px-8 bg-[#1a1a1a] border-b border-[#333] relative z-50">
       {/* LOGO */}
       <div onClick={() => navigate("/")} className="flex items-center gap-4 cursor-pointer group">
         <div className="bg-[#f6b100] p-1.5 rounded-lg transform group-hover:rotate-12 transition-transform">
           <img src={logo} className="h-6 w-6 brightness-0" alt="restro logo" />
         </div>
-        <h1 className="text-xl font-black text-[#f5f5f5] tracking-tighter uppercase">
+        <h1 className="text-xl font-black text-[#f5f5f5] tracking-tighter uppercase hidden sm:block">
           Restro<span className="text-[#f6b100]">POS</span>
         </h1>
       </div>
 
       {/* CENTERED POS TERMINAL INFO */}
       {selectedBranch && selectedPOSPoint && (
-        <div className="absolute left-1/2 -translate-x-1/2 hidden xl:flex flex-col items-center bg-[#1f1f1f] border border-[#333] rounded-2xl shadow-xl shadow-black/20 px-6 py-1.5">
+        <div className="absolute left-1/2 -translate-x-1/2 hidden lg:flex flex-col items-center bg-[#1f1f1f] border border-[#333] rounded-2xl shadow-xl shadow-black/20 px-6 py-1.5">
           <div className="flex items-center gap-6">
             <div className="flex items-center gap-3">
               <div className="text-[#f6b100] bg-[#f6b100]/10 p-1.5 rounded-lg">
@@ -69,7 +69,7 @@ const Header = () => {
                 <span className="text-xs text-white font-bold leading-none">{selectedBranch.name}</span>
               </div>
             </div>
-            
+
             <div className="w-px h-6 bg-[#333]"></div>
 
             <div className="flex items-center gap-3">
@@ -82,7 +82,7 @@ const Header = () => {
               </div>
             </div>
 
-            <button 
+            <button
               onClick={handleChangeTerminal}
               className="ml-2 p-1.5 hover:bg-[#333] rounded-lg text-[#ababab] hover:text-[#f6b100] transition-all tooltip"
               title="Change Terminal"
@@ -102,12 +102,12 @@ const Header = () => {
 
       {/* SHIFT ACTIONS (For Cashiers) */}
       {activeShift && (
-        <button 
+        <button
           onClick={() => dispatch(setShowShiftModal(true))}
-          className="ml-auto mr-4 flex items-center gap-2 px-4 py-2 bg-red-500/10 text-red-500 border border-red-500/20 rounded-xl hover:bg-red-500 hover:text-white transition-all group"
+          className="ml-auto mr-2 sm:mr-4 flex items-center gap-2 px-3 sm:px-4 py-2 bg-red-500/10 text-red-500 border border-red-500/20 rounded-xl hover:bg-red-500 hover:text-white transition-all group shrink-0"
         >
           <MdStop className="group-hover:animate-pulse" size={18} />
-          <span className="text-[10px] font-black uppercase tracking-widest">End Shift</span>
+          <span className="text-[10px] font-black uppercase tracking-widest">End Session</span>
         </button>
       )}
 
@@ -123,15 +123,15 @@ const Header = () => {
             <MdSettings className="text-[#f5f5f5] text-2xl" />
           </div>
         )}
-        <div className="bg-[#1f1f1f] border border-[#333] rounded-xl p-3 cursor-pointer relative group">
+        <div className="bg-[#1f1f1f] border border-[#333] rounded-xl p-3 cursor-pointer relative group hidden md:block">
           <FaBell className="text-[#f5f5f5] text-2xl" />
           <span className="absolute top-3 right-3 w-2.5 h-2.5 bg-red-500 border-2 border-[#1f1f1f] rounded-full"></span>
         </div>
-        
-        <div className="h-10 w-px bg-[#333] mx-2"></div>
+
+        <div className="h-10 w-px bg-[#333] mx-1 md:mx-2 hidden sm:block"></div>
 
         <div className="flex items-center gap-3">
-          <div className="flex flex-col items-end">
+          <div className="flex flex-col items-end hidden sm:flex">
             <h1 className="text-sm text-[#f5f5f5] font-black tracking-tight uppercase">
               {name || "User"}
             </h1>

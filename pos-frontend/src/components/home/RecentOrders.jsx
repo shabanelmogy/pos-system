@@ -37,19 +37,19 @@ const RecentOrders = () => {
 
 
   return (
-    <div className="px-8 mt-6 relative">
-      <div className="bg-[#1a1a1a] w-full h-[450px] rounded-[2rem] border border-[#333] shadow-2xl overflow-hidden flex flex-col">
-        <div className="flex justify-between items-center px-8 py-6 border-b border-[#262626]">
-          <h1 className="text-white text-lg font-black uppercase tracking-tighter">
+    <div className="px-6 mt-4 relative">
+      <div className="bg-[#1a1a1a] w-full min-h-[300px] lg:h-[380px] rounded-3xl border border-[#333] shadow-2xl overflow-hidden flex flex-col">
+        <div className="flex justify-between items-center px-6 py-4 border-b border-[#262626]">
+          <h1 className="text-white text-base font-black uppercase tracking-tighter">
             Recent Orders
           </h1>
-          <button className="text-[#f6b100] text-[10px] font-black uppercase tracking-widest hover:underline">
+          <button className="text-[#f6b100] text-[9px] font-black uppercase tracking-widest hover:underline">
             View full history
           </button>
         </div>
 
-        <div className="p-6 flex flex-col flex-1 overflow-hidden">
-          <div className="flex items-center gap-4 bg-[#262626] rounded-2xl px-6 py-3 mb-6 border border-[#333] focus-within:border-[#f6b100] transition-colors">
+        <div className="p-4 flex flex-col flex-1 overflow-hidden">
+          <div className="flex items-center gap-3 bg-[#262626] rounded-xl px-4 py-2.5 mb-4 border border-[#333] focus-within:border-[#f6b100] transition-colors">
             <FaSearch className="text-[#555]" />
             <input
               type="text"

@@ -25,28 +25,28 @@ const popularDishes = [
 
 const PopularDishes = () => {
   return (
-    <div className="mt-6 pr-6">
+    <div className="mt-4 px-6 lg:px-0 lg:pr-6">
       <div className="bg-[#1a1a1a] w-full rounded-lg">
-        <div className="flex justify-between items-center px-6 py-4">
-          <h1 className="text-[#f5f5f5] text-lg font-semibold tracking-wide">
+        <div className="flex justify-between items-center px-4 py-3">
+          <h1 className="text-[#f5f5f5] text-base font-semibold tracking-wide">
             Popular Dishes
           </h1>
-          <a href="" className="text-[#025cca] text-sm font-semibold">
+          <a href="" className="text-[#025cca] text-xs font-semibold">
             View all
           </a>
         </div>
 
-        <div className="overflow-y-scroll h-[680px] scrollbar-hide">
+        <div className="overflow-y-auto min-h-[300px] lg:h-[480px] scrollbar-hide">
           {popularDishes.map((dish) => (
             <div
               key={dish.id}
-              className="flex items-center gap-4 bg-[#1f1f1f] rounded-[15px] px-6 py-4 mt-4 mx-6 border border-transparent hover:border-[#333] transition-all"
+              className="flex items-center gap-3 bg-[#1f1f1f] rounded-xl px-4 py-2.5 mt-3 mx-4 border border-transparent hover:border-[#333] transition-all"
             >
-              <h1 className="text-[#f6b100] font-black text-xl mr-4">{dish.id < 10 ? `0${dish.id}` : dish.id}</h1>
+              <h1 className="text-[#f6b100] font-black text-lg mr-2">{dish.id < 10 ? `0${dish.id}` : dish.id}</h1>
               <img
                 src={dish.image}
                 alt={dish.name}
-                className="w-[50px] h-[50px] rounded-full object-cover border-2 border-[#333]"
+                className="w-[40px] h-[40px] rounded-full object-cover border-2 border-[#333]"
               />
               <div>
                 <h1 className="text-[#f5f5f5] font-semibold tracking-wide">{dish.name}</h1>
