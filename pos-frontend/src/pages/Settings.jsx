@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getAllPosSettings, updatePosSettings } from "../https";
 import { enqueueSnackbar } from "notistack";
+import { setSelectedPOSPoint } from "../redux/slices/posSlice";
 import BackButton from "../components/shared/BackButton";
 import BottomNav from "../components/shared/BottomNav";
 import { FaPrint, FaUserCheck, FaSave, FaTerminal, FaChevronRight, FaCheckCircle } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 
 const Settings = () => {
+    const dispatch = useDispatch();
+    const { selectedPOSPoint: currentActiveTerminal } = useSelector(state => state.pos);
     const queryClient = useQueryClient();
     const [selectedTerminal, setSelectedTerminal] = useState(null);
     const [localSettings, setLocalSettings] = useState(null);
@@ -29,9 +32,18 @@ const Settings = () => {
 
     const mutation = useMutation({
         mutationFn: (data) => updatePosSettings(selectedTerminal.id, data),
-        onSuccess: () => {
+        onSuccess: (res) => {
             queryClient.invalidateQueries(["all-pos-settings"]);
             enqueueSnackbar("Settings saved successfully!", { variant: "success" });
+            
+            // If the terminal we just updated is the one we are currently using, update Redux state
+            if (currentActiveTerminal && currentActiveTerminal.id === selectedTerminal.id) {
+                const updatedTerminal = {
+                    ...selectedTerminal,
+                    settings: res.data.data
+                };
+                dispatch(setSelectedPOSPoint(updatedTerminal));
+            }
         },
         onError: () => {
             enqueueSnackbar("Failed to save settings", { variant: "error" });
