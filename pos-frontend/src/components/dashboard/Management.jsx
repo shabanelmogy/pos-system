@@ -134,17 +134,17 @@ const Management = () => {
 
   const renderEmptyState = (label) => (
     <div className="col-span-full py-20 flex flex-col items-center justify-center text-center">
-      <div className="w-24 h-24 bg-[#1a1a1a] rounded-full flex items-center justify-center mb-6 border border-[#333] text-[#444]">
+      <div className="w-24 h-24 bg-[var(--bg-card)] rounded-full flex items-center justify-center mb-6 border border-[var(--border-main)] text-[var(--text-dim)]">
         <MdOutlineInventory2 size={40} />
       </div>
-      <h3 className="text-white text-xl font-bold uppercase tracking-tighter">No {label} Found</h3>
-      <p className="text-[#ababab] text-sm mt-2 max-w-xs">Start building your enterprise by adding your first {label.toLowerCase()}.</p>
+      <h3 className="text-[var(--text-main)] text-xl font-bold uppercase tracking-tighter">No {label} Found</h3>
+      <p className="text-[var(--text-muted)] text-sm mt-2 max-w-xs">Start building your enterprise by adding your first {label.toLowerCase()}.</p>
     </div>
   );
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 border-b border-[#333] pb-6">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 border-b border-[var(--border-main)] pb-6">
         <div className="flex items-center gap-4 overflow-x-auto no-scrollbar pb-2 lg:pb-0">
           {subTabs.map((tab) => (
             <button
@@ -152,8 +152,8 @@ const Management = () => {
               onClick={() => setActiveSubTab(tab.id)}
               className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest transition-all whitespace-nowrap ${
                 activeSubTab === tab.id 
-                  ? "bg-[#f6b100] text-[#1a1a1a] shadow-lg shadow-[#f6b100]/20" 
-                  : "text-[#ababab] hover:text-white hover:bg-[#1a1a1a]"
+                  ? "bg-[var(--primary)] text-[var(--bg-card)] shadow-lg shadow-[var(--primary)]/20" 
+                  : "text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-card)]"
               }`}
             >
               {tab.icon} {tab.label}
@@ -163,14 +163,14 @@ const Management = () => {
 
         <div className="flex items-center gap-4">
            {activeSubTab === "Users" && (
-             <div className="relative group flex-1 lg:flex-none">
-                <MdSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-[#555] group-focus-within:text-[#f6b100] transition-colors" size={20} />
+              <div className="relative group flex-1 lg:flex-none">
+                <MdSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-dim)] group-focus-within:text-[var(--primary)] transition-colors" size={20} />
                 <input 
                   type="text" 
                   placeholder="Search staff..." 
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="bg-[#1a1a1a] border border-[#333] rounded-2xl py-3 pl-12 pr-6 text-white text-sm focus:outline-none focus:border-[#f6b100] w-full lg:w-64 transition-all"
+                  className="bg-[var(--bg-card)] border border-[var(--border-main)] rounded-2xl py-3 pl-12 pr-6 text-[var(--text-main)] text-sm focus:outline-none focus:border-[var(--primary)] w-full lg:w-64 transition-all"
                 />
              </div>
            )}
@@ -180,7 +180,7 @@ const Management = () => {
                 whileTap={{ scale: 0.95 }}
                 onClick={handleManualRefresh}
                 title="Refresh Data"
-                className="p-3.5 bg-[#1a1a1a] border border-[#333] rounded-2xl text-[#ababab] hover:text-[#f6b100] transition-all"
+                className="p-3.5 bg-[var(--bg-card)] border border-[var(--border-main)] rounded-2xl text-[var(--text-muted)] hover:text-[var(--primary)] transition-all"
              >
                 <MdRefresh size={22} />
              </motion.button>
@@ -188,7 +188,7 @@ const Management = () => {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => openEditModal(activeSubTab === "Users" ? "user" : activeSubTab.toLowerCase(), null)}
-                className="bg-[#f6b100] text-[#1a1a1a] px-6 py-3.5 rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg flex items-center gap-2 whitespace-nowrap"
+                className="bg-[var(--primary)] text-[var(--bg-card)] px-6 py-3.5 rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg flex items-center gap-2 whitespace-nowrap"
              >
                 <MdAddCircle size={18} /> New {activeSubTab === "Users" ? "Staff" : activeSubTab.slice(0, -1)}
              </motion.button>
@@ -209,21 +209,21 @@ const Management = () => {
           {activeSubTab === "Tables" && (
             <>
               {(tables || []).map((table) => (
-                <motion.div variants={itemVariants} key={table.id} className="relative bg-[#1a1a1a] p-6 rounded-[2rem] border border-[#333] flex flex-col gap-6 group transition-all hover:border-[#f6b100]/50 hover:shadow-2xl hover:shadow-[#f6b100]/5">
+                <motion.div variants={itemVariants} key={table.id} className="relative bg-[var(--bg-card)] p-6 rounded-[2rem] border border-[var(--border-main)] flex flex-col gap-6 group transition-all hover:border-[var(--primary)]/50 hover:shadow-2xl hover:shadow-[var(--primary)]/5">
                   <div className="flex justify-between items-start">
                     <div className={`p-4 rounded-2xl ${table.status === 'Available' ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'}`}>
                       <MdTableBar size={32} />
                     </div>
                     <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button onClick={() => openEditModal("table", table)} className="p-3 bg-[#262626] hover:bg-[#333] rounded-xl text-[#ababab] hover:text-white transition-colors"><MdEdit size={18} /></button>
+                      <button onClick={() => openEditModal("table", table)} className="p-3 bg-[var(--bg-card-alt)] hover:bg-[var(--border-main)] rounded-xl text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors"><MdEdit size={18} /></button>
                       <button onClick={() => openConfirm("table", table.id, `Table ${table.tableNo}`)} className="p-3 bg-red-500/10 hover:bg-red-500/20 rounded-xl text-red-500 transition-colors"><MdDelete size={18} /></button>
                     </div>
                   </div>
                   <div>
-                    <h3 className="text-white text-2xl font-black tracking-tighter">TABLE {table.tableNo}</h3>
+                    <h3 className="text-[var(--text-main)] text-2xl font-black tracking-tighter">TABLE {table.tableNo}</h3>
                     <div className="flex items-center gap-2 mt-1">
-                      <span className="text-[#ababab] text-xs font-bold uppercase tracking-widest">{table.seats} Seats</span>
-                      <span className="w-1 h-1 bg-[#333] rounded-full"></span>
+                      <span className="text-[var(--text-muted)] text-xs font-bold uppercase tracking-widest">{table.seats} Seats</span>
+                      <span className="w-1 h-1 bg-[var(--border-main)] rounded-full"></span>
                       <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-md ${table.status === 'Available' ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'}`}>
                         {table.status}
                       </span>
@@ -239,18 +239,18 @@ const Management = () => {
           {activeSubTab === "Categories" && (
             <>
               {(categories || []).map((cat) => (
-                <motion.div variants={itemVariants} key={cat.id} className="bg-[#1a1a1a] p-6 rounded-[2rem] border border-[#333] flex items-center justify-between group transition-all hover:border-[#f6b100]/50 hover:shadow-2xl">
+                <motion.div variants={itemVariants} key={cat.id} className="bg-[var(--bg-card)] p-6 rounded-[2rem] border border-[var(--border-main)] flex items-center justify-between group transition-all hover:border-[var(--primary)]/50 hover:shadow-2xl">
                   <div className="flex items-center gap-5">
-                    <div className="p-4 bg-gradient-to-br from-[#262626] to-[#1a1a1a] rounded-2xl text-[#f6b100] shadow-xl">
+                    <div className="p-4 bg-gradient-to-br from-[var(--bg-card-alt)] to-[var(--bg-card)] rounded-2xl text-[var(--primary)] shadow-xl">
                       <MdCategory size={30} />
                     </div>
                     <div>
-                      <h3 className="text-white text-lg font-black tracking-tighter uppercase">{cat.name}</h3>
-                      <p className="text-[#ababab] text-[10px] font-bold uppercase tracking-widest">Category</p>
+                      <h3 className="text-[var(--text-main)] text-lg font-black tracking-tighter uppercase">{cat.name}</h3>
+                      <p className="text-[var(--text-muted)] text-[10px] font-bold uppercase tracking-widest">Category</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button onClick={() => openEditModal("category", cat)} className="p-2.5 bg-[#262626] hover:bg-[#333] rounded-xl text-[#ababab] hover:text-white transition-colors"><MdEdit size={16} /></button>
+                    <button onClick={() => openEditModal("category", cat)} className="p-2.5 bg-[var(--bg-card-alt)] hover:bg-[var(--border-main)] rounded-xl text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors"><MdEdit size={16} /></button>
                     <button onClick={() => openConfirm("category", cat.id, cat.name)} className="p-2.5 bg-red-500/10 hover:bg-red-500/20 rounded-xl text-red-500 transition-colors"><MdDelete size={16} /></button>
                   </div>
                 </motion.div>
@@ -263,21 +263,21 @@ const Management = () => {
           {activeSubTab === "Items" && (
             <>
               {(items || []).map((item) => (
-                <motion.div variants={itemVariants} key={item.id} className="bg-[#1a1a1a] p-5 rounded-[2rem] border border-[#333] flex flex-col gap-4 group transition-all hover:border-[#f6b100]/50 hover:shadow-2xl">
+                <motion.div variants={itemVariants} key={item.id} className="bg-[var(--bg-card)] p-5 rounded-[2rem] border border-[var(--border-main)] flex flex-col gap-4 group transition-all hover:border-[var(--primary)]/50 hover:shadow-2xl">
                   <div className="flex justify-between items-start">
-                    <div className="p-4 bg-gradient-to-br from-[#262626] to-[#1a1a1a] rounded-2xl text-[#f6b100] shadow-xl">
+                    <div className="p-4 bg-gradient-to-br from-[var(--bg-card-alt)] to-[var(--bg-card)] rounded-2xl text-[var(--primary)] shadow-xl">
                       <MdRestaurantMenu size={32} />
                     </div>
                     <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button onClick={() => openEditModal("dishes", item)} className="p-2.5 bg-[#262626] hover:bg-[#333] rounded-xl text-[#ababab] hover:text-white"><MdEdit size={16} /></button>
+                      <button onClick={() => openEditModal("dishes", item)} className="p-2.5 bg-[var(--bg-card-alt)] hover:bg-[var(--border-main)] rounded-xl text-[var(--text-muted)] hover:text-[var(--text-main)]"><MdEdit size={16} /></button>
                       <button onClick={() => openConfirm("item", item.id, item.name)} className="p-2.5 bg-red-500/10 hover:bg-red-500/20 rounded-xl text-red-500"><MdDelete size={16} /></button>
                     </div>
                   </div>
                   <div>
-                    <h3 className="text-white text-xl font-black tracking-tighter uppercase line-clamp-1">{item.name}</h3>
+                    <h3 className="text-[var(--text-main)] text-xl font-black tracking-tighter uppercase line-clamp-1">{item.name}</h3>
                     <div className="flex items-center justify-between mt-2">
-                      <p className="text-[#f6b100] text-lg font-black italic">₹{item.price}</p>
-                      <span className="text-[10px] bg-[#262626] text-[#ababab] px-3 py-1 rounded-full font-black uppercase tracking-widest">Dish</span>
+                      <p className="text-[var(--primary)] text-lg font-black italic">₹{item.price}</p>
+                      <span className="text-[10px] bg-[var(--bg-card-alt)] text-[var(--text-muted)] px-3 py-1 rounded-full font-black uppercase tracking-widest">Dish</span>
                     </div>
                   </div>
                 </motion.div>
@@ -290,18 +290,18 @@ const Management = () => {
           {activeSubTab === "Branches" && (
             <>
               {(branches || []).map((branch) => (
-                <motion.div variants={itemVariants} key={branch.id} className="bg-[#1a1a1a] p-6 rounded-[2rem] border border-[#333] flex flex-col gap-6 group transition-all hover:border-[#f6b100]/50 hover:shadow-2xl">
+                <motion.div variants={itemVariants} key={branch.id} className="bg-[var(--bg-card)] p-6 rounded-[2rem] border border-[var(--border-main)] flex flex-col gap-6 group transition-all hover:border-[var(--primary)]/50 hover:shadow-2xl">
                   <div className="flex justify-between items-start">
-                    <div className="p-4 bg-gradient-to-br from-[#f6b100]/20 to-[#f6b100]/5 text-[#f6b100] rounded-2xl border border-[#f6b100]/20 shadow-lg">
+                    <div className="p-4 bg-gradient-to-br from-[var(--primary)]/20 to-[var(--primary)]/5 text-[var(--primary)] rounded-2xl border border-[var(--primary)]/20 shadow-lg">
                       <MdStore size={32} />
                     </div>
-                    <button onClick={() => openEditModal("branch", branch)} className="p-3 bg-[#262626] hover:bg-[#333] rounded-xl text-[#ababab] hover:text-white opacity-0 group-hover:opacity-100 transition-all"><MdEdit size={18} /></button>
+                    <button onClick={() => openEditModal("branch", branch)} className="p-3 bg-[var(--bg-card-alt)] hover:bg-[var(--border-main)] rounded-xl text-[var(--text-muted)] hover:text-[var(--text-main)] opacity-0 group-hover:opacity-100 transition-all"><MdEdit size={18} /></button>
                   </div>
                   <div>
-                    <h3 className="text-white text-2xl font-black tracking-tighter uppercase">{branch.name}</h3>
-                    <p className="text-[#f6b100] text-[10px] font-black uppercase tracking-[0.2em] mt-1">{branch.code}</p>
+                    <h3 className="text-[var(--text-main)] text-2xl font-black tracking-tighter uppercase">{branch.name}</h3>
+                    <p className="text-[var(--primary)] text-[10px] font-black uppercase tracking-[0.2em] mt-1">{branch.code}</p>
                     <div className="mt-4 flex flex-col gap-1">
-                       <div className="flex items-center gap-2 text-[#ababab] text-xs">
+                       <div className="flex items-center gap-2 text-[var(--text-muted)] text-xs">
                           <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
                           {branch.city || "Primary Location"}
                        </div>
@@ -317,18 +317,18 @@ const Management = () => {
           {activeSubTab === "POSPoints" && (
             <>
               {(posPoints || []).map((pos) => (
-                <motion.div variants={itemVariants} key={pos.id} className="bg-[#1a1a1a] p-6 rounded-[2rem] border border-[#333] flex flex-col gap-6 group transition-all hover:border-[#f6b100]/50 hover:shadow-2xl">
+                <motion.div variants={itemVariants} key={pos.id} className="bg-[var(--bg-card)] p-6 rounded-[2rem] border border-[var(--border-main)] flex flex-col gap-6 group transition-all hover:border-[var(--primary)]/50 hover:shadow-2xl">
                   <div className="flex justify-between items-start">
                     <div className="p-4 bg-gradient-to-br from-indigo-500/20 to-indigo-500/5 text-indigo-400 rounded-2xl border border-indigo-500/20 shadow-lg">
                       <MdComputer size={32} />
                     </div>
-                    <button onClick={() => openEditModal("posPoint", pos)} className="p-3 bg-[#262626] hover:bg-[#333] rounded-xl text-[#ababab] hover:text-white opacity-0 group-hover:opacity-100 transition-all"><MdEdit size={18} /></button>
+                    <button onClick={() => openEditModal("posPoint", pos)} className="p-3 bg-[var(--bg-card-alt)] hover:bg-[var(--border-main)] rounded-xl text-[var(--text-muted)] hover:text-[var(--text-main)] opacity-0 group-hover:opacity-100 transition-all"><MdEdit size={18} /></button>
                   </div>
                   <div>
-                    <h3 className="text-white text-2xl font-black tracking-tighter uppercase">{pos.name}</h3>
+                    <h3 className="text-[var(--text-main)] text-2xl font-black tracking-tighter uppercase">{pos.name}</h3>
                     <p className="text-indigo-400 text-[10px] font-black uppercase tracking-[0.2em] mt-1">{pos.code}</p>
                     <div className="mt-4 flex items-center gap-2">
-                       <span className="px-3 py-1 bg-[#262626] rounded-full text-[9px] text-[#ababab] font-bold uppercase tracking-widest">Active Terminal</span>
+                       <span className="px-3 py-1 bg-[var(--bg-card-alt)] rounded-full text-[9px] text-[var(--text-muted)] font-bold uppercase tracking-widest">Active Terminal</span>
                     </div>
                   </div>
                 </motion.div>
@@ -339,16 +339,16 @@ const Management = () => {
 
           {/* USERS SECTION (DATA GRID) */}
           {activeSubTab === "Users" && (
-            <div className="bg-[#1a1a1a] rounded-[2.5rem] border border-[#333] overflow-hidden shadow-2xl">
+            <div className="bg-[var(--bg-card)] rounded-[2.5rem] border border-[var(--border-main)] overflow-hidden shadow-2xl">
               <div className="overflow-x-auto custom-scrollbar">
                 <table className="w-full text-left border-collapse">
                   <thead>
-                    <tr className="bg-[#262626]/50 border-b border-[#333]">
-                      <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.3em] text-[#555]">Staff Member</th>
-                      <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.3em] text-[#555]">Role & Access</th>
-                      <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.3em] text-[#555]">Location</th>
-                      <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.3em] text-[#555]">Contact Info</th>
-                      <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.3em] text-[#555] text-right">Actions</th>
+                    <tr className="bg-[var(--bg-card-alt)]/50 border-b border-[var(--border-main)]">
+                      <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.3em] text-[var(--text-dim)]">Staff Member</th>
+                      <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.3em] text-[var(--text-dim)]">Role & Access</th>
+                      <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.3em] text-[var(--text-dim)]">Location</th>
+                      <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.3em] text-[var(--text-dim)]">Contact Info</th>
+                      <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.3em] text-[var(--text-dim)] text-right">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -361,7 +361,7 @@ const Management = () => {
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: index * 0.03 }}
                         key={user.id} 
-                        className="border-b border-[#262626] hover:bg-[#262626]/30 transition-all group"
+                        className="border-b border-[var(--bg-card-alt)] hover:bg-[var(--bg-card-alt)]/30 transition-all group"
                       >
                         <td className="px-8 py-6">
                           <div className="flex items-center gap-4">
@@ -369,20 +369,20 @@ const Management = () => {
                               <MdPeople size={24} />
                             </div>
                             <div>
-                              <p className="text-white font-black uppercase tracking-tight text-base group-hover:text-emerald-400 transition-colors">{user.name}</p>
-                              <p className="text-[10px] text-[#555] font-black uppercase tracking-widest mt-0.5">Staff ID: {user.id.slice(0, 8)}</p>
+                              <p className="text-[var(--text-main)] font-black uppercase tracking-tight text-base group-hover:text-emerald-400 transition-colors">{user.name}</p>
+                              <p className="text-[10px] text-[var(--text-dim)] font-black uppercase tracking-widest mt-0.5">Staff ID: {user.id.slice(0, 8)}</p>
                             </div>
                           </div>
                         </td>
                         <td className="px-8 py-6">
                           <div className="flex flex-col gap-2">
                              <div className="flex items-center gap-2">
-                                <MdShield className="text-[#f6b100]" size={14} />
-                                <span className="text-[10px] bg-[#f6b100]/10 text-[#f6b100] px-3 py-1 rounded-full font-black uppercase tracking-widest border border-[#f6b100]/10">
+                                <MdShield className="text-[var(--primary)]" size={14} />
+                                <span className="text-[10px] bg-[var(--primary)]/10 text-[var(--primary)] px-3 py-1 rounded-full font-black uppercase tracking-widest border border-[var(--primary)]/10">
                                   {user.role}
                                 </span>
                              </div>
-                             <div className="flex items-center gap-2 text-[10px] text-[#ababab] font-bold uppercase tracking-tight">
+                             <div className="flex items-center gap-2 text-[10px] text-[var(--text-muted)] font-bold uppercase tracking-tight">
                                 <MdComputer size={14} className="text-indigo-400" />
                                 {user.posPermissions?.length || "All"} Terminals Authorized
                              </div>
@@ -393,17 +393,17 @@ const Management = () => {
                               <div className="w-8 h-8 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-400">
                                  <MdStore size={18} />
                               </div>
-                              <p className="text-[#ababab] text-xs font-black uppercase tracking-widest">{user.branch?.name || "Global"}</p>
+                              <p className="text-[var(--text-muted)] text-xs font-black uppercase tracking-widest">{user.branch?.name || "Global"}</p>
                            </div>
                         </td>
                         <td className="px-8 py-6">
                           <div className="space-y-1">
-                            <div className="flex items-center gap-2 text-[#ababab] text-xs">
-                              <MdEmail size={14} className="text-[#444]" />
+                            <div className="flex items-center gap-2 text-[var(--text-muted)] text-xs">
+                              <MdEmail size={14} className="text-[var(--text-dim)]" />
                               {user.email}
                             </div>
-                            <div className="flex items-center gap-2 text-[#ababab] text-xs">
-                              <MdPhone size={14} className="text-[#444]" />
+                            <div className="flex items-center gap-2 text-[var(--text-muted)] text-xs">
+                              <MdPhone size={14} className="text-[var(--text-dim)]" />
                               {user.phone}
                             </div>
                           </div>
@@ -414,7 +414,7 @@ const Management = () => {
                                 whileHover={{ scale: 1.1 }}
                                 whileTap={{ scale: 0.9 }}
                                 onClick={() => openEditModal("user", user)}
-                                className="p-3 bg-[#f6b100]/10 hover:bg-[#f6b100] text-[#f6b100] hover:text-[#1a1a1a] rounded-xl transition-all border border-[#f6b100]/20"
+                                className="p-3 bg-[var(--primary)]/10 hover:bg-[var(--primary)] text-[var(--primary)] hover:text-[var(--bg-card)] rounded-xl transition-all border border-[var(--primary)]/20"
                               >
                                 <MdEdit size={18} />
                               </motion.button>
@@ -429,7 +429,7 @@ const Management = () => {
                               <motion.button 
                                 whileHover={{ scale: 1.1 }}
                                 whileTap={{ scale: 0.9 }}
-                                className="p-3 bg-[#262626] hover:bg-[#333] text-[#ababab] hover:text-white rounded-xl border border-[#333] transition-all"
+                                className="p-3 bg-[var(--bg-card-alt)] hover:bg-[var(--border-main)] text-[var(--text-muted)] hover:text-[var(--text-main)] rounded-xl border border-[var(--border-main)] transition-all"
                               >
                                 <MdChevronRight size={18} />
                               </motion.button>

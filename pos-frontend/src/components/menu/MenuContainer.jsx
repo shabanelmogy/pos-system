@@ -115,8 +115,8 @@ const MenuContainer = () => {
   if (categoriesLoading)
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <div className="w-10 h-10 rounded-full border-4 border-[#f6b100]/20 border-t-[#f6b100] animate-spin" />
-        <p className="text-[#555] text-sm font-semibold tracking-wider uppercase animate-pulse">Loading Menu…</p>
+        <div className="w-10 h-10 rounded-full border-4 border-[var(--primary)]/20 border-t-[var(--primary)] animate-spin" />
+        <p className="text-[var(--text-muted)] text-sm font-semibold tracking-wider uppercase animate-pulse">Loading Menu…</p>
       </div>
     );
 
@@ -126,7 +126,7 @@ const MenuContainer = () => {
         {/* Left Scroll Button */}
         <button
           onClick={() => scroll("left")}
-          className="absolute left-1 top-[calc(50%+8px)] -translate-y-1/2 z-10 bg-[#1a1a1a]/80 hover:bg-[#f6b100] text-[#f6b100] hover:text-black p-1.5 rounded-full lg:opacity-0 lg:group-hover/nav:opacity-100 transition-all duration-300 border border-[#333] shadow-xl backdrop-blur-sm"
+          className="absolute left-1 top-[calc(50%+8px)] -translate-y-1/2 z-10 bg-[var(--bg-card)]/80 hover:bg-[var(--primary)] text-[var(--primary)] hover:text-black p-1.5 rounded-full lg:opacity-0 lg:group-hover/nav:opacity-100 transition-all duration-300 border border-[var(--border-main)] shadow-xl backdrop-blur-sm"
         >
           <MdChevronLeft size={20} />
         </button>
@@ -139,7 +139,7 @@ const MenuContainer = () => {
           onMouseMove={handleMouseMove}
           className={`overflow-x-auto scrollbar-hide cursor-grab active:cursor-grabbing select-none ${isDragging ? "scroll-auto" : "scroll-smooth"}`}
         >
-          <div className="flex items-center gap-2 min-w-max border-b border-[#2a2a2a] pb-0">
+          <div className="flex items-center gap-2 min-w-max border-b border-[var(--border-main)] pb-0">
             {categories?.map((category) => {
               const isActive = selectedCategory?.id === category.id;
               return (
@@ -152,11 +152,11 @@ const MenuContainer = () => {
                     setSearchTerm("");
                   }}
                   className={`relative flex items-center gap-2 px-5 py-3 text-sm font-bold uppercase tracking-wider whitespace-nowrap transition-all duration-200 rounded-t-xl ${isActive
-                    ? "bg-[#f6b100] text-black shadow-lg shadow-[#f6b100]/20"
-                    : "text-[#666] hover:text-[#ababab] hover:bg-[#222]"
+                    ? "bg-[var(--primary)] text-black shadow-lg shadow-[var(--primary)]/20"
+                    : "text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-hover)]"
                     }`}
                 >
-                  <MdRestaurantMenu className={isActive ? "text-black" : "text-[#f6b100]"} />
+                  <MdRestaurantMenu className={isActive ? "text-black" : "text-[var(--primary)]"} />
                   {category.name}
                 </button>
               );
@@ -167,7 +167,7 @@ const MenuContainer = () => {
         {/* Right Scroll Button */}
         <button
           onClick={() => scroll("right")}
-          className="absolute right-1 top-[calc(50%+8px)] -translate-y-1/2 z-10 bg-[#1a1a1a]/80 hover:bg-[#f6b100] text-[#f6b100] hover:text-black p-1.5 rounded-full lg:opacity-0 lg:group-hover/nav:opacity-100 transition-all duration-300 border border-[#333] shadow-xl backdrop-blur-sm"
+          className="absolute right-1 top-[calc(50%+8px)] -translate-y-1/2 z-10 bg-[var(--bg-card)]/80 hover:bg-[var(--primary)] text-[var(--primary)] hover:text-black p-1.5 rounded-full lg:opacity-0 lg:group-hover/nav:opacity-100 transition-all duration-300 border border-[var(--border-main)] shadow-xl backdrop-blur-sm"
         >
           <MdChevronRight size={20} />
         </button>
@@ -176,18 +176,18 @@ const MenuContainer = () => {
       {/* ── Search Bar ── */}
       <div className="px-6 py-4">
         <div className="relative group">
-          <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-[#444] group-focus-within:text-[#f6b100] transition-colors text-sm" />
+          <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-dim)] group-focus-within:text-[var(--primary)] transition-colors text-sm" />
           <input
             type="text"
             placeholder={`Search in ${selectedCategory?.name || "menu"}…`}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-[#151515] border border-[#2a2a2a] focus:border-[#f6b100]/60 text-[#f5f5f5] text-sm rounded-xl pl-11 pr-10 py-2.5 outline-none transition-all placeholder-[#333]"
+            className="w-full bg-[var(--bg-input)] border border-[var(--border-main)] focus:border-[var(--primary)]/60 text-[var(--text-main)] text-sm rounded-xl pl-11 pr-10 py-2.5 outline-none transition-all placeholder-[var(--text-dim)]"
           />
           {searchTerm && (
             <button
               onClick={() => setSearchTerm("")}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-[#555] hover:text-white transition-colors text-xs"
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--text-dim)] hover:text-[var(--text-main)] transition-colors text-xs"
             >
               ✕
             </button>
@@ -200,7 +200,7 @@ const MenuContainer = () => {
         {itemsLoading ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
             {Array.from({ length: 10 }).map((_, i) => (
-              <div key={i} className="h-44 bg-[#1a1a1a] rounded-2xl animate-pulse border border-[#222]" />
+              <div key={i} className="h-44 bg-[var(--bg-card)] rounded-2xl animate-pulse border border-[var(--border-main)]" />
             ))}
           </div>
         ) : filteredItems?.length > 0 ? (
@@ -211,58 +211,58 @@ const MenuContainer = () => {
                 <div
                   key={item.id}
                   onClick={() => increment(item.id)}
-                  className={`relative group flex flex-col justify-between bg-[#151515] border-2 rounded-2xl p-4 cursor-pointer transition-all duration-200 select-none overflow-hidden ${isActive
-                    ? "border-[#f6b100] shadow-lg shadow-[#f6b100]/15 bg-[#1c1800]"
-                    : "border-[#222] hover:border-[#f6b100]/40 hover:bg-[#1a1a1a]"
+                  className={`relative group flex flex-col justify-between bg-[var(--bg-card)] border-2 rounded-2xl p-4 cursor-pointer transition-all duration-200 select-none overflow-hidden shadow-sm hover:shadow-md ${isActive
+                    ? "border-[var(--primary)] shadow-[var(--primary)]/10 bg-[var(--primary-light)]"
+                    : "border-[var(--border-main)] hover:border-[var(--primary)]/40 hover:bg-[var(--bg-hover)]"
                     }`}
                 >
                   {/* Qty Badge */}
                   {isActive && (
-                    <div className="absolute top-2.5 right-2.5 bg-[#f6b100] text-black text-xs font-black w-6 h-6 rounded-full flex items-center justify-center shadow-lg z-10">
+                    <div className="absolute top-2.5 right-2.5 bg-[var(--primary)] text-black text-xs font-black w-6 h-6 rounded-full flex items-center justify-center shadow-lg z-10">
                       {itemCount}
                     </div>
                   )}
 
                   {/* Icon */}
-                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-3 transition-colors ${isActive ? "bg-[#f6b100]/20" : "bg-[#262626] group-hover:bg-[#2a2a2a]"}`}>
-                    <MdRestaurantMenu className={`text-2xl ${isActive ? "text-[#f6b100]" : "text-[#444]"}`} />
+                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-3 transition-colors ${isActive ? "bg-[var(--primary)]/20" : "bg-[var(--bg-hover)] group-hover:bg-[var(--bg-card-alt)]"}`}>
+                    <MdRestaurantMenu className={`text-2xl ${isActive ? "text-[var(--primary)]" : "text-[var(--text-dim)]"}`} />
                   </div>
 
                   <div className="flex-1">
-                    <h3 className={`font-bold text-sm leading-snug line-clamp-2 transition-colors ${isActive ? "text-white" : "text-[#ccc] group-hover:text-white"}`}>
+                    <h3 className={`font-bold text-sm leading-snug line-clamp-2 transition-colors ${isActive ? "text-[var(--text-main)]" : "text-[var(--text-muted)] group-hover:text-[var(--text-main)]"}`}>
                       {item.name}
                     </h3>
                     {item.description && (
-                      <p className="text-[#555] text-[10px] mt-1 line-clamp-1">{item.description}</p>
+                      <p className="text-[var(--text-dim)] text-[10px] mt-1 line-clamp-1">{item.description}</p>
                     )}
                   </div>
 
                   <div className="mt-3 flex items-center justify-between">
-                    <span className="text-[#f6b100] font-black text-base">₹{item.price}</span>
+                    <span className="text-[var(--primary)] font-black text-base">₹{item.price}</span>
                     {isActive ? (
                       <div
-                        className="flex items-center gap-1 bg-[#262626] border border-[#333] rounded-lg px-1 py-0.5"
+                        className="flex items-center gap-1 bg-[var(--bg-card-alt)] border border-[var(--border-main)] rounded-lg px-1 py-0.5"
                         onClick={(e) => e.stopPropagation()}
                       >
                         <button
                           onClick={() => decrement(item.id)}
-                          className="w-6 h-6 flex items-center justify-center text-[#ababab] hover:text-red-400 transition-colors rounded active:scale-90"
+                          className="w-6 h-6 flex items-center justify-center text-[var(--text-muted)] hover:text-red-400 transition-colors rounded active:scale-90"
                         >
                           <RiSubtractFill size={12} />
                         </button>
-                        <span className="text-white text-xs font-black min-w-[16px] text-center">
+                        <span className="text-[var(--text-main)] text-xs font-black min-w-[16px] text-center">
                           {itemCount}
                         </span>
                         <button
                           onClick={() => increment(item.id)}
-                          className="w-6 h-6 flex items-center justify-center text-[#ababab] hover:text-[#f6b100] transition-colors rounded active:scale-90"
+                          className="w-6 h-6 flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--primary)] transition-colors rounded active:scale-90"
                         >
                           <RiAddFill size={12} />
                         </button>
                       </div>
                     ) : (
-                      <div className="w-7 h-7 rounded-lg bg-[#262626] group-hover:bg-[#f6b100]/10 flex items-center justify-center transition-colors">
-                        <RiAddFill className="text-[#555] group-hover:text-[#f6b100] transition-colors" size={14} />
+                      <div className="w-7 h-7 rounded-lg bg-[var(--bg-card-alt)] group-hover:bg-[var(--primary)]/10 flex items-center justify-center transition-colors">
+                        <RiAddFill className="text-[var(--text-dim)] group-hover:text-[var(--primary)] transition-colors" size={14} />
                       </div>
                     )}
                   </div>
@@ -271,7 +271,7 @@ const MenuContainer = () => {
                   {isActive && (
                     <button
                       onClick={(e) => { e.stopPropagation(); handleAddToCart(item); }}
-                      className="mt-3 w-full py-2 bg-[#f6b100] hover:bg-[#e5a600] text-black text-xs font-black uppercase rounded-xl flex items-center justify-center gap-2 transition-all active:scale-95 shadow-lg shadow-[#f6b100]/20"
+                      className="mt-3 w-full py-2 bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-black text-xs font-black uppercase rounded-xl flex items-center justify-center gap-2 transition-all active:scale-95 shadow-lg shadow-[var(--primary)]/20"
                     >
                       <FaShoppingCart size={11} />
                       Add {itemCount > 1 ? `${itemCount} items` : "to order"}
@@ -283,10 +283,10 @@ const MenuContainer = () => {
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center py-24 gap-4 opacity-40">
-            <div className="bg-[#1a1a1a] p-8 rounded-full">
-              <FaSearch size={36} className="text-[#555]" />
+            <div className="bg-[var(--bg-card)] p-8 rounded-full">
+              <FaSearch size={36} className="text-[var(--text-dim)]" />
             </div>
-            <p className="text-[#666] font-semibold text-sm">No items found</p>
+            <p className="text-[var(--text-muted)] font-semibold text-sm">No items found</p>
           </div>
         )}
       </div>

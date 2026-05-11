@@ -10,11 +10,18 @@ const Invoice = ({ orderInfo, setShowInvoice, isReprint = false, directPrint = f
   const invoiceRef = useRef(null);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  
   const { selectedBranch, selectedPOSPoint } = useSelector((state) => state.pos);
   const user = useSelector((state) => state.user);
   const isAdmin = user?.role?.toLowerCase() === "admin";
-  const directPrintEnabled = selectedPOSPoint?.settings?.directPrint === true;
-  const isDirectPrint = directPrint || directPrintEnabled;
+  
+  // Settings from DB/Redux
+  const directPrintSetting = selectedPOSPoint?.settings?.directPrint === true;
+  const autoPrintSetting = selectedPOSPoint?.settings?.autoPrintReceipt !== false;
+
+  // Final Logic Flags
+  const isAutoPrint = autoPrintSetting && !isReprint;
+  const isDirectPrint = directPrint || directPrintSetting;
 
   const handleClose = useCallback(() => {
     setShowInvoice(false);
@@ -25,20 +32,21 @@ const Invoice = ({ orderInfo, setShowInvoice, isReprint = false, directPrint = f
 
       dispatch(removeAllItems());
 
-      if (openOnMenu && !isAdmin) {
-        // Stay on menu flow — reset customer to Guest for next order
+      if (isAdmin) return; // Admins stay put
+
+      if (openOnMenu) {
         dispatch(setCustomer({ name: "Guest", phone: "N/A", guests: 1 }));
         navigate("/menu");
-      } else if (!isAdmin) {
+      } else {
         dispatch(removeCustomer());
         navigate(enableTables ? "/tables" : "/menu");
       }
-      // Admins just stay where they are or we can add specific logic
     }
   }, [isReprint, selectedPOSPoint, dispatch, navigate, setShowInvoice, isAdmin]);
 
   const handlePrint = useCallback(() => {
-    console.log("[INVOICE] Executing handlePrint...");
+    console.log("[INVOICE] Printing logic started...");
+    
     let iframe = document.getElementById("print-iframe");
     if (!iframe) {
       iframe = document.createElement("iframe");
@@ -48,7 +56,6 @@ const Invoice = ({ orderInfo, setShowInvoice, isReprint = false, directPrint = f
     }
 
     const doc = iframe.contentWindow.document;
-
     doc.open();
     doc.write(`
       <html>
@@ -57,30 +64,22 @@ const Invoice = ({ orderInfo, setShowInvoice, isReprint = false, directPrint = f
           <style>
             @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@400;700;900&display=swap');
             * { margin: 0; padding: 0; box-sizing: border-box; }
-            body { 
-              font-family: 'Inter', sans-serif; 
-              padding: 40px; 
-              color: #000; 
-              max-width: 400px; 
-              margin: 0 auto; 
-              background: #fff;
-              line-height: 1.4;
-            }
+            body { font-family: 'Inter', sans-serif; padding: 20px; color: #000; max-width: 300px; margin: 0 auto; background: #fff; line-height: 1.2; }
             .mono { font-family: 'Space+Mono', monospace; }
-            .header { text-align: center; margin-bottom: 30px; border-bottom: 3px solid #000; padding-bottom: 20px; }
-            .header h1 { font-size: 24px; font-weight: 900; letter-spacing: -1px; text-transform: uppercase; }
-            .header p { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; margin-top: 5px; }
-            .meta { display: flex; justify-content: space-between; font-size: 10px; font-weight: 800; text-transform: uppercase; margin-bottom: 25px; }
-            table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-            th { text-align: left; font-size: 10px; font-weight: 900; text-transform: uppercase; border-bottom: 2px solid #000; padding-bottom: 8px; }
-            td { padding: 10px 0; font-size: 12px; font-weight: 700; border-bottom: 1px solid #eee; }
-            .col-qty { text-align: center; width: 40px; }
+            .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #000; padding-bottom: 10px; }
+            .header h1 { font-size: 18px; font-weight: 900; }
+            .header p { font-size: 8px; font-weight: 700; text-transform: uppercase; margin-top: 2px; }
+            .meta { display: flex; justify-content: space-between; font-size: 9px; font-weight: 800; margin-bottom: 15px; }
+            table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
+            th { text-align: left; font-size: 9px; font-weight: 900; border-bottom: 1px solid #000; padding-bottom: 4px; }
+            td { padding: 6px 0; font-size: 10px; font-weight: 700; border-bottom: 1px solid #eee; }
+            .col-qty { text-align: center; width: 30px; }
             .col-total { text-align: right; }
-            .summary-row { display: flex; justify-content: space-between; font-size: 11px; font-weight: 700; margin-bottom: 6px; }
-            .grand-total { margin-top: 15px; padding-top: 15px; border-top: 3px solid #000; display: flex; justify-content: space-between; align-items: center; }
-            .grand-total .label { font-size: 16px; font-weight: 900; text-transform: uppercase; }
-            .grand-total .value { font-size: 22px; font-weight: 900; }
-            .footer { text-align: center; font-size: 9px; font-weight: 700; text-transform: uppercase; color: #000; margin-top: 40px; }
+            .summary-row { display: flex; justify-content: space-between; font-size: 10px; font-weight: 700; margin-bottom: 4px; }
+            .grand-total { margin-top: 10px; padding-top: 10px; border-top: 2px solid #000; display: flex; justify-content: space-between; align-items: center; }
+            .grand-total .label { font-size: 14px; font-weight: 900; }
+            .grand-total .value { font-size: 18px; font-weight: 900; }
+            .footer { text-align: center; font-size: 8px; font-weight: 700; margin-top: 30px; }
           </style>
         </head>
         <body>
@@ -118,43 +117,53 @@ const Invoice = ({ orderInfo, setShowInvoice, isReprint = false, directPrint = f
     `);
     doc.close();
 
+    // Give time for styles to load in iframe
     setTimeout(() => {
       iframe.contentWindow.focus();
       iframe.contentWindow.print();
-      // If direct print is enabled, close automatically after print command
+      
+      // If we are in Direct Print mode, we don't need to stay on this screen
       if (isDirectPrint) {
         handleClose();
       }
-    }, 600);
+    }, 500);
   }, [orderInfo, isReprint, handleClose, isDirectPrint]);
 
+  // Handle Automatic Trigger
   useEffect(() => {
-    if (isDirectPrint && orderInfo && !isReprint) {
+    if (isAutoPrint && orderInfo) {
       handlePrint();
     }
-  }, [isDirectPrint, orderInfo, isReprint, handlePrint]);
+  }, [isAutoPrint, orderInfo, handlePrint]);
 
   const formatNum = (val) => {
     const num = parseFloat(val);
     return isNaN(num) ? "0.00" : num.toFixed(2);
   };
 
-  // If direct print is enabled, we show a simplified "Printing" indicator instead of the full modal
-  if (isDirectPrint && !isReprint) {
+  /**
+   * RENDER LOGIC
+   * 1. Direct Print + Auto Print = Minimal "Printing" screen.
+   * 2. Otherwise = Full Invoice Modal.
+   */
+  if (isDirectPrint && isAutoPrint) {
     return (
       <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-center z-[2000]">
         <motion.div 
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-[#1a1a1a] p-8 rounded-3xl border border-[#333] flex flex-col items-center gap-4 shadow-2xl"
+          className="bg-[var(--bg-card)] p-10 rounded-[2.5rem] border border-[var(--border-main)] flex flex-col items-center gap-6 shadow-2xl"
         >
-          <div className="w-12 h-12 bg-[#f6b100] rounded-full flex items-center justify-center animate-pulse shadow-lg shadow-[#f6b100]/20">
-            <FaPrint className="text-[#1a1a1a]" size={20} />
+          <div className="w-16 h-16 bg-[var(--primary)] rounded-full flex items-center justify-center animate-pulse shadow-lg shadow-[var(--primary)]/20">
+            <FaPrint className="text-[var(--bg-card)]" size={24} />
           </div>
           <div className="text-center">
-            <h3 className="text-white font-black uppercase tracking-widest text-xs">Printing Receipt...</h3>
-            <p className="text-[#666] text-[10px] uppercase font-bold mt-1">Please wait a moment</p>
+            <h3 className="text-white text-sm font-black uppercase tracking-[0.2em]">Processing Receipt</h3>
+            <p className="text-[var(--text-dim)] text-[10px] font-bold uppercase mt-2 opacity-50">Direct print in progress...</p>
           </div>
+          <button onClick={handleClose} className="mt-4 text-[var(--primary)] text-[10px] font-black uppercase tracking-widest hover:underline">
+            Cancel & Close
+          </button>
         </motion.div>
       </div>
     );
@@ -165,96 +174,74 @@ const Invoice = ({ orderInfo, setShowInvoice, isReprint = false, directPrint = f
       <motion.div 
         initial={{ scale: 0.95, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        className="bg-white rounded-[2rem] shadow-2xl w-full max-w-sm overflow-hidden relative border border-white/20"
+        className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-sm overflow-hidden relative border border-white/20"
       >
-        {/* Compact Success Header */}
-        <div className={`p-6 flex items-center justify-between text-white ${isReprint ? 'bg-amber-500' : 'bg-emerald-500'}`}>
-           <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-md">
+        {/* Header */}
+        <div className={`px-8 py-6 flex items-center justify-between text-white ${isReprint ? 'bg-amber-500' : 'bg-emerald-500'}`}>
+           <div className="flex items-center gap-4">
+              <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-md">
                  <FaCheck size={18} />
               </div>
               <div>
-                 <h2 className="text-sm font-black uppercase tracking-tighter">{isReprint ? 'Reprint Mode' : 'Confirmed'}</h2>
-                 <p className="text-[8px] text-white/70 font-black uppercase tracking-widest">{isReprint ? 'Duplicate Invoice' : 'Order Success'}</p>
+                 <h2 className="text-xs font-black uppercase tracking-widest">{isReprint ? 'Reprint Copy' : 'Order Placed'}</h2>
+                 <p className="text-[9px] text-white/60 font-black uppercase tracking-widest mt-0.5">Success Confirmation</p>
               </div>
            </div>
            <button onClick={handleClose} className="w-8 h-8 flex items-center justify-center hover:bg-black/10 rounded-lg transition-colors">
-              <FaTimes size={14} />
+              <FaTimes size={16} />
            </button>
         </div>
 
-        {/* Invoice Body */}
-        <div className="p-8">
+        {/* Invoice Content */}
+        <div className="p-10">
           <div ref={invoiceRef}>
-            <div className="flex justify-between items-end mb-6 pb-4 border-b border-gray-50">
+            <div className="flex justify-between items-end mb-8 pb-6 border-b border-gray-100">
                <div>
-                  <h3 className="text-[8px] text-gray-300 font-black uppercase tracking-widest mb-1">Receipt ID</h3>
-                  <p className="text-gray-900 font-black text-sm uppercase">#RD-{orderInfo.id?.slice(0, 8).toUpperCase()}</p>
+                  <h3 className="text-[8px] text-gray-300 font-black uppercase tracking-widest mb-1">Receipt Number</h3>
+                  <p className="text-gray-900 font-black text-sm uppercase leading-none">#RD-{orderInfo.id?.slice(0, 8).toUpperCase()}</p>
                </div>
                <div className="text-right">
-                  <p className="text-[8px] text-gray-400 font-black uppercase tracking-widest mb-1">Terminal</p>
-                  <p className="text-gray-900 font-black text-[10px] uppercase">{selectedPOSPoint?.name || "Register"}</p>
+                  <p className="text-[8px] text-gray-300 font-black uppercase tracking-widest mb-1">Terminal</p>
+                  <p className="text-gray-900 font-black text-[10px] uppercase leading-none">{selectedPOSPoint?.name}</p>
                </div>
             </div>
 
-            {/* Table Headers */}
-            <div className="flex items-center text-[8px] font-black uppercase tracking-[0.2em] text-amber-500 border-b border-amber-500/10 pb-2 mb-4">
-               <span className="flex-1">Item Description</span>
-               <span className="w-12 text-center">Qty</span>
-               <span className="w-16 text-right">Total</span>
-            </div>
-
-            {/* Item Rows */}
-            <div className="space-y-4 mb-8 max-h-48 overflow-y-auto custom-scrollbar pr-2">
+            <div className="space-y-4 mb-8 max-h-48 overflow-y-auto custom-scrollbar pr-4">
                {orderInfo.items?.map((item, index) => (
                  <div key={index} className="flex items-center">
-                   <span className="flex-1 text-gray-800 font-black text-xs uppercase truncate pr-2">
-                     {item.name}
-                   </span>
-                   <span className="w-12 text-center text-gray-400 font-black text-[10px]">
-                     {item.quantity}
-                   </span>
-                   <span className="w-16 text-right text-gray-900 font-black text-xs">
+                   <div className="flex-1">
+                      <p className="text-gray-900 font-black text-xs uppercase truncate leading-none">{item.name}</p>
+                      <p className="text-[8px] text-gray-400 font-bold uppercase mt-1">Qty: {item.quantity}</p>
+                   </div>
+                   <span className="text-gray-900 font-black text-xs">
                      ₹{formatNum(item.price * item.quantity)}
                    </span>
                  </div>
                ))}
             </div>
 
-            <div className="mt-auto pt-6 border-t-2 border-dashed border-gray-100 space-y-2">
-              <div className="flex justify-between text-gray-400 text-[8px] font-black uppercase tracking-widest">
-                <span>Core Subtotal</span>
-                <span className="text-gray-900 font-bold">₹{formatNum(orderInfo.bills?.total)}</span>
-              </div>
-              <div className="flex justify-between text-gray-400 text-[8px] font-black uppercase tracking-widest">
-                <span>Sales Tax (5%)</span>
-                <span className="text-gray-900 font-bold">₹{formatNum(orderInfo.bills?.tax)}</span>
-              </div>
-              <div className="flex justify-between items-center pt-5">
-                <span className="text-[10px] font-black text-amber-500 uppercase tracking-[0.2em]">Payable</span>
+            <div className="pt-6 border-t-2 border-dashed border-gray-100 space-y-2">
+              <div className="flex justify-between items-center pt-4">
+                <span className="text-[10px] font-black text-amber-500 uppercase tracking-widest">Total Payable</span>
                 <span className="text-3xl font-black text-gray-900 tracking-tighter">₹{formatNum(orderInfo.bills?.totalWithTax)}</span>
               </div>
             </div>
           </div>
 
-          {/* Action Bar */}
-          <div className="mt-8 flex gap-3 no-print">
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+          {/* Footer Actions */}
+          <div className="mt-10 flex gap-3">
+            <button
               onClick={handlePrint}
-              className="flex-[2] bg-gray-900 text-white font-black py-5 rounded-2xl flex items-center justify-center gap-3 shadow-xl shadow-gray-900/10 uppercase tracking-[0.2em] text-[10px]"
+              className="flex-[2] bg-gray-900 text-white font-black py-5 rounded-2xl flex items-center justify-center gap-3 shadow-xl shadow-gray-900/20 uppercase tracking-widest text-[10px] hover:bg-black transition-colors"
             >
-              <FaPrint /> {isReprint ? 'Reprint Copy' : 'Print Receipt'}
-            </motion.button>
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+              <FaPrint /> {isDirectPrint ? 'Direct Print' : 'Print Receipt'}
+            </button>
+            <button
               onClick={handleClose}
-              className="flex-1 bg-white border border-gray-200 text-gray-400 font-black py-5 rounded-2xl hover:text-red-500 transition-colors uppercase tracking-[0.2em] text-[10px]"
+              className="flex-1 bg-gray-50 text-gray-400 font-black py-5 rounded-2xl hover:text-gray-900 transition-colors uppercase tracking-widest text-[10px]"
             >
-              Cancel
-            </motion.button>
+              Close
+            </button>
           </div>
         </div>
       </motion.div>

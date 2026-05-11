@@ -65,12 +65,12 @@ const Orders = () => {
   });
 
   return (
-    <section className="bg-[#1f1f1f] h-[calc(100vh-5rem)] overflow-hidden flex flex-col">
+    <section className="bg-[var(--bg-main)] h-[calc(100vh-5rem)] overflow-hidden flex flex-col">
       <div className="flex flex-col px-10 py-6 gap-6">
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-4">
             <BackButton />
-            <h1 className="text-[#f5f5f5] text-2xl font-black uppercase tracking-tighter">
+            <h1 className="text-[var(--text-main)] text-2xl font-black uppercase tracking-tighter">
                 Orders
             </h1>
             </div>
@@ -80,8 +80,8 @@ const Orders = () => {
                     onClick={() => setDateFilter(dateFilter === "all" ? "today" : "all")}
                     className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all border ${
                         dateFilter === "today" 
-                        ? "bg-[#f6b100] border-[#f6b100] text-[#1a1a1a]" 
-                        : "bg-transparent border-[#333] text-[#ababab] hover:border-[#f6b100] hover:text-[#f6b100]"
+                        ? "bg-[var(--primary)] border-[var(--primary)] text-black" 
+                        : "bg-transparent border-[var(--border-main)] text-[var(--text-muted)] hover:border-[var(--primary)] hover:text-[var(--primary)]"
                     }`}
                 >
                     {dateFilter === "today" ? "Showing Today" : "Show Today Only"}
@@ -91,8 +91,8 @@ const Orders = () => {
                     onClick={() => setShowOnlyMine(!showOnlyMine)}
                     className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all border ${
                         showOnlyMine 
-                        ? "bg-[#f6b100] border-[#f6b100] text-[#1a1a1a]" 
-                        : "bg-transparent border-[#333] text-[#ababab] hover:border-[#f6b100] hover:text-[#f6b100]"
+                        ? "bg-[var(--primary)] border-[var(--primary)] text-black" 
+                        : "bg-transparent border-[var(--border-main)] text-[var(--text-muted)] hover:border-[var(--primary)] hover:text-[var(--primary)]"
                     }`}
                 >
                     {showOnlyMine ? "Showing My Orders" : "Show My Orders"}
@@ -101,7 +101,7 @@ const Orders = () => {
         </div>
 
         {enableTables && (
-          <div className="flex items-center bg-[#1a1a1a] p-1 rounded-xl border border-[#333] overflow-x-auto whitespace-nowrap scrollbar-hide max-w-fit">
+          <div className="flex items-center bg-[var(--bg-card)] p-1 rounded-xl border border-[var(--border-main)] overflow-x-auto whitespace-nowrap scrollbar-hide max-w-fit">
             {[
               { id: "all", label: "All Status" },
               { id: "progress", label: "In Progress" },
@@ -113,8 +113,8 @@ const Orders = () => {
                 onClick={() => setStatus(tab.id)} 
                 className={`px-6 py-2 rounded-lg font-bold text-sm transition-all ${
                   status === tab.id 
-                    ? "bg-[#f6b100] text-[#1a1a1a] shadow-lg shadow-[#f6b100]/20" 
-                    : "text-[#ababab] hover:text-[#f5f5f5]"
+                    ? "bg-[var(--primary)] text-black shadow-lg shadow-[var(--primary)]/20" 
+                    : "text-[var(--text-muted)] hover:text-[var(--text-main)]"
                 }`}
               >
                 {tab.label}
@@ -132,7 +132,7 @@ const Orders = () => {
             ))
           ) : (
             <div className="col-span-full flex flex-col items-center justify-center py-20 opacity-20">
-              <h2 className="text-white text-2xl font-black uppercase">No {status !== 'all' ? status : ''} orders found</h2>
+              <h2 className="text-[var(--text-main)] text-2xl font-black uppercase">No {status !== 'all' ? status : ''} orders found</h2>
             </div>
           )}
         </div>

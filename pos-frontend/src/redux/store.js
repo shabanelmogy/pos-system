@@ -3,6 +3,7 @@ import customerSlice from "./slices/customerSlice"
 import cartSlice from "./slices/cartSlice";
 import userSlice from "./slices/userSlice";
 import posSlice from "./slices/posSlice";
+import themeSlice from "./slices/themeSlice";
 import { loadState, saveState } from "./persist";
 
 const persistedCustomer = loadState("customer");
@@ -13,7 +14,8 @@ const store = configureStore({
         customer: customerSlice,
         cart : cartSlice,
         user : userSlice,
-        pos  : posSlice
+        pos  : posSlice,
+        theme: themeSlice
     },
     preloadedState: {
         customer: persistedCustomer,

@@ -66,8 +66,8 @@ const Login = () => {
     >
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-2">
-          <label className="flex items-center gap-2 text-[#ababab] text-[10px] font-black uppercase tracking-[0.2em] ml-1">
-            <MdEmail className="text-[#f6b100]" /> Terminal Email
+          <label className="flex items-center gap-2 text-[var(--text-muted)] text-[10px] font-black uppercase tracking-[0.2em] ml-1">
+            <MdEmail className="text-[var(--primary)]" /> Terminal Email
           </label>
           <div className="group relative">
             <input
@@ -76,15 +76,15 @@ const Login = () => {
               value={formData.email}
               onChange={handleChange}
               placeholder="e.g. cashier01@enterprise.com"
-              className="w-full bg-[#1a1a1a] border border-[#333] focus:border-[#f6b100] rounded-2xl p-5 text-white focus:outline-none transition-all placeholder:text-[#333] font-bold"
+              className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] focus:border-[var(--primary)] rounded-2xl p-5 text-[var(--text-main)] focus:outline-none transition-all placeholder:text-[var(--text-dim)] font-bold"
               required
             />
           </div>
         </div>
 
         <div className="space-y-2">
-          <label className="flex items-center gap-2 text-[#ababab] text-[10px] font-black uppercase tracking-[0.2em] ml-1">
-            <MdLock className="text-[#f6b100]" /> Security Code
+          <label className="flex items-center gap-2 text-[var(--text-muted)] text-[10px] font-black uppercase tracking-[0.2em] ml-1">
+            <MdLock className="text-[var(--primary)]" /> Security Code
           </label>
           <div className="group relative">
             <input
@@ -93,7 +93,7 @@ const Login = () => {
               value={formData.password}
               onChange={handleChange}
               placeholder="••••••••"
-              className="w-full bg-[#1a1a1a] border border-[#333] focus:border-[#f6b100] rounded-2xl p-5 text-white focus:outline-none transition-all placeholder:text-[#333] font-bold tracking-[0.5em]"
+              className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] focus:border-[var(--primary)] rounded-2xl p-5 text-[var(--text-main)] focus:outline-none transition-all placeholder:text-[var(--text-dim)] font-bold tracking-[0.5em]"
               required
             />
           </div>
@@ -104,7 +104,7 @@ const Login = () => {
           whileTap={{ scale: 0.98 }}
           type="submit"
           disabled={loginMutation.isPending}
-          className="w-full bg-[#f6b100] text-[#1a1a1a] font-black py-5 rounded-2xl mt-4 flex items-center justify-center gap-3 shadow-2xl shadow-yellow-500/10 hover:bg-yellow-600 transition-all uppercase tracking-[0.3em] text-xs disabled:opacity-50"
+          className="w-full bg-[var(--primary)] text-[var(--bg-card)] font-black py-5 rounded-2xl mt-4 flex items-center justify-center gap-3 shadow-2xl shadow-yellow-500/10 hover:bg-yellow-600 transition-all uppercase tracking-[0.3em] text-xs disabled:opacity-50"
         >
           {loginMutation.isPending ? (
             <span className="flex items-center gap-2">

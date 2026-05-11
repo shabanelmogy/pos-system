@@ -23,17 +23,17 @@ const CustomDropdown = ({ options, value, onChange, placeholder = "Select option
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-3 bg-[#262626] border border-[#333] hover:border-[#f6b100] transition-all px-5 py-3 rounded-xl text-white min-w-[200px] justify-between group"
+        className="flex items-center gap-3 bg-[var(--bg-card-alt)] border border-[var(--border-main)] hover:border-[var(--primary)] transition-all px-5 py-3 rounded-xl text-[var(--text-main)] min-w-[200px] justify-between group"
       >
         <div className="flex items-center gap-3">
-          {icon && <div className="text-[#f6b100] group-hover:scale-110 transition-transform">{icon}</div>}
+          {icon && <div className="text-[var(--primary)] group-hover:scale-110 transition-transform">{icon}</div>}
           <span className="text-sm font-bold tracking-tight uppercase">
             {selectedOption ? selectedOption.name : placeholder}
           </span>
         </div>
         <motion.div
           animate={{ rotate: isOpen ? 180 : 0 }}
-          className="text-[#ababab] group-hover:text-white"
+          className="text-[var(--text-muted)] group-hover:text-[var(--text-main)]"
         >
           <MdKeyboardArrowDown size={20} />
         </motion.div>
@@ -45,7 +45,7 @@ const CustomDropdown = ({ options, value, onChange, placeholder = "Select option
             initial={{ opacity: 0, y: 10, scale: 0.95 }}
             animate={{ opacity: 1, y: 5, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.95 }}
-            className="absolute top-full left-0 right-0 bg-[#1a1a1a] border border-[#333] rounded-2xl shadow-2xl z-[300] py-2 overflow-hidden backdrop-blur-xl bg-opacity-90"
+            className="absolute top-full left-0 right-0 bg-[var(--bg-card)] border border-[var(--border-main)] rounded-2xl shadow-2xl z-[300] py-2 overflow-hidden backdrop-blur-xl bg-opacity-90"
           >
             {options.map((option) => (
               <button
@@ -57,13 +57,13 @@ const CustomDropdown = ({ options, value, onChange, placeholder = "Select option
                 }}
                 className={`w-full text-left px-5 py-3 text-sm font-bold uppercase tracking-widest transition-colors flex items-center justify-between group ${
                   value === option.id 
-                    ? "bg-[#f6b100] text-[#1a1a1a]" 
-                    : "text-[#ababab] hover:text-white hover:bg-[#262626]"
+                    ? "bg-[var(--primary)] text-[var(--bg-card)]" 
+                    : "text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-card-alt)]"
                 }`}
               >
                 {option.name}
                 {value === option.id && (
-                  <motion.div layoutId="active-dot" className="w-1.5 h-1.5 bg-[#1a1a1a] rounded-full" />
+                  <motion.div layoutId="active-dot" className="w-1.5 h-1.5 bg-[var(--bg-card)] rounded-full" />
                 )}
               </button>
             ))}

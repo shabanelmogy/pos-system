@@ -56,18 +56,18 @@ const TableCard = ({id, name, status, initials, seats, order, onViewOrder}) => {
     <div 
       onClick={() => handleClick(name)} 
       key={id} 
-      className={`w-full hover:bg-[#2c2c2c] bg-[#262626] p-4 rounded-xl cursor-pointer transition-all border-2 ${
-        status === "Booked" ? "border-[#2e4a40]" : "border-transparent"
+      className={`w-full hover:bg-[var(--bg-hover)] bg-[var(--bg-card-alt)] p-4 rounded-xl cursor-pointer transition-all border-2 ${
+        status === "Booked" ? "border-[var(--status-success)]" : "border-transparent"
       }`}
     >
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-[#f5f5f5] text-lg font-bold">T-{name}</h1>
+        <h1 className="text-[var(--text-main)] text-lg font-bold">T-{name}</h1>
         <div className="flex items-center gap-2">
-           <span className="text-[#ababab] text-xs flex items-center gap-1">
+           <span className="text-[var(--text-muted)] text-xs flex items-center gap-1">
              <FaShoppingCart size={10}/> {order?.items?.length || 0}
            </span>
            <p className={`text-[10px] uppercase font-bold px-2 py-1 rounded ${
-             status === "Booked" ? "bg-[#2e4a40] text-green-400" : "bg-[#333] text-[#ababab]"
+             status === "Booked" ? "bg-[var(--status-success-bg)] text-[var(--status-success)]" : "bg-[var(--border-main)] text-[var(--text-muted)]"
            }`}>
              {status}
            </p>
@@ -77,21 +77,21 @@ const TableCard = ({id, name, status, initials, seats, order, onViewOrder}) => {
       <div className="flex flex-col items-center justify-center py-2">
         <div 
           className="w-16 h-16 rounded-full flex items-center justify-center text-xl font-black text-white shadow-lg mb-2"
-          style={{backgroundColor : initials ? getBgColor() : "#1f1f1f"}}
+          style={{backgroundColor : initials ? getBgColor() : "var(--bg-main)"}}
         >
           {getAvatarName(initials) || "?"}
         </div>
-        <p className="text-[#f5f5f5] text-xs font-semibold truncate w-full text-center">
+        <p className="text-[var(--text-main)] text-xs font-semibold truncate w-full text-center">
           {initials || "Available"}
         </p>
       </div>
 
-      <div className="mt-4 pt-3 border-t border-[#333] flex items-center justify-between">
-        <p className="text-[#ababab] text-[10px] font-medium">Seats: {seats}</p>
+      <div className="mt-4 pt-3 border-t border-[var(--border-main)] flex items-center justify-between">
+        <p className="text-[var(--text-muted)] text-[10px] font-medium">Seats: {seats}</p>
         {status === "Booked" && (
           <div className="flex items-center gap-1">
             <FaCircle className={`text-[8px] ${order?.orderStatus === "Ready" ? "text-green-500 animate-pulse" : "text-yellow-500"}`} />
-            <span className="text-[#f5f5f5] text-[10px] font-bold">
+            <span className="text-[var(--text-main)] text-[10px] font-bold">
                {order?.orderStatus || "In Progress"}
             </span>
           </div>
@@ -99,7 +99,7 @@ const TableCard = ({id, name, status, initials, seats, order, onViewOrder}) => {
       </div>
       
       {status === "Booked" && (
-        <div className="mt-2 text-right text-[#f6b100] text-xs font-black">
+        <div className="mt-2 text-right text-[var(--primary)] text-xs font-black">
           ₹{order?.bills?.totalWithTax?.toFixed(2) || "0.00"}
         </div>
       )}

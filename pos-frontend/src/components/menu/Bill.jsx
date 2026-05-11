@@ -150,7 +150,7 @@ const Bill = () => {
           name: customerData.customerName,
           contact: customerData.customerPhone,
         },
-        theme: { color: "#f6b100" },
+        theme: { color: "var(--primary)" },
       };
       const rzp = new window.Razorpay(options);
       rzp.open();
@@ -168,19 +168,19 @@ const Bill = () => {
   }
 
   return (
-    <div className="bg-[#262626] rounded-2xl border border-[#333] shadow-xl overflow-hidden">
+    <div className="bg-[var(--bg-card-alt)] rounded-2xl border border-[var(--border-main)] shadow-xl overflow-hidden">
       {/* Header — always visible, click to toggle */}
       <div
-        className="flex items-center justify-between px-5 py-3 cursor-pointer hover:bg-[#2e2e2e] transition-colors select-none"
+        className="flex items-center justify-between px-5 py-3 cursor-pointer hover:bg-[var(--bg-hover)] transition-colors select-none"
         onClick={() => setIsMinimized((prev) => !prev)}
       >
         <div className="flex items-center gap-3">
-          <h2 className="text-[#f5f5f5] text-sm font-black uppercase tracking-tighter">Bill Summary</h2>
+          <h2 className="text-[var(--text-main)] text-sm font-black uppercase tracking-tighter">Bill Summary</h2>
           {isMinimized && (
-            <span className="text-[#f6b100] text-sm font-black">₹{totalWithTax.toFixed(2)}</span>
+            <span className="text-[var(--primary)] text-sm font-black">₹{totalWithTax.toFixed(2)}</span>
           )}
         </div>
-        <div className="text-[#ababab] hover:text-[#f6b100] transition-colors">
+        <div className="text-[var(--text-muted)] hover:text-[var(--primary)] transition-colors">
           {isMinimized ? <FaChevronUp size={12} /> : <FaChevronDown size={12} />}
         </div>
       </div>
@@ -189,30 +189,30 @@ const Bill = () => {
       {!isMinimized && (
         <div className="px-5 pb-5">
           <div className="space-y-3 mb-4">
-            <div className="flex justify-between text-[#ababab] text-sm">
+            <div className="flex justify-between text-[var(--text-muted)] text-sm">
               <span className="font-medium">Subtotal</span>
-              <span className="font-bold text-[#f5f5f5]">₹{total.toFixed(2)}</span>
+              <span className="font-bold text-[var(--text-main)]">₹{total.toFixed(2)}</span>
             </div>
-            <div className="flex justify-between text-[#ababab] text-sm">
+            <div className="flex justify-between text-[var(--text-muted)] text-sm">
               <span className="font-medium">Tax (5%)</span>
-              <span className="font-bold text-[#f5f5f5]">₹{tax.toFixed(2)}</span>
+              <span className="font-bold text-[var(--text-main)]">₹{tax.toFixed(2)}</span>
             </div>
-            <div className="h-px bg-[#333]"></div>
-            <div className="flex justify-between text-[#f6b100]">
+            <div className="h-px bg-[var(--border-main)]"></div>
+            <div className="flex justify-between text-[var(--primary)]">
               <span className="text-base font-black uppercase">Total</span>
               <span className="text-lg font-black">₹{totalWithTax.toFixed(2)}</span>
             </div>
           </div>
 
           <div className="mb-4">
-            <p className="text-[#ababab] text-[10px] font-bold uppercase tracking-widest mb-2">Payment Method</p>
+            <p className="text-[var(--text-muted)] text-[10px] font-bold uppercase tracking-widest mb-2">Payment Method</p>
             <div className="grid grid-cols-2 gap-2">
               <button
                 onClick={(e) => { e.stopPropagation(); setPaymentMethod("Cash"); }}
                 className={`py-2.5 rounded-xl font-bold text-xs transition-all border-2 ${
                   paymentMethod === "Cash"
-                    ? "bg-[#f6b100]/10 border-[#f6b100] text-[#f6b100]"
-                    : "bg-[#1a1a1a] border-[#333] text-[#ababab] hover:border-[#444]"
+                    ? "bg-[var(--primary)]/10 border-[var(--primary)] text-[var(--primary)]"
+                    : "bg-[var(--bg-card)] border-[var(--border-main)] text-[var(--text-muted)] hover:border-[var(--text-dim)]"
                 }`}
               >
                 Cash
@@ -221,8 +221,8 @@ const Bill = () => {
                 onClick={(e) => { e.stopPropagation(); setPaymentMethod("Razorpay"); }}
                 className={`py-2.5 rounded-xl font-bold text-xs transition-all border-2 ${
                   paymentMethod === "Razorpay"
-                    ? "bg-[#f6b100]/10 border-[#f6b100] text-[#f6b100]"
-                    : "bg-[#1a1a1a] border-[#333] text-[#ababab] hover:border-[#444]"
+                    ? "bg-[var(--primary)]/10 border-[var(--primary)] text-[var(--primary)]"
+                    : "bg-[var(--bg-card)] border-[var(--border-main)] text-[var(--text-muted)] hover:border-[var(--text-dim)]"
                 }`}
               >
                 Online
@@ -233,7 +233,7 @@ const Bill = () => {
           <button
             onClick={(e) => { e.stopPropagation(); handlePlaceOrder(); }}
             disabled={cartItems.length === 0 || orderMutation.isPending || razorpayMutation.isPending}
-            className="w-full bg-[#f6b100] hover:bg-[#e5a600] disabled:opacity-50 disabled:cursor-not-allowed text-[#1a1a1a] font-black uppercase tracking-widest py-4 rounded-2xl transition-all transform active:scale-[0.98] shadow-2xl shadow-yellow-500/10 text-xs"
+            className="w-full bg-[var(--primary)] hover:bg-[#e5a600] disabled:opacity-50 disabled:cursor-not-allowed text-[var(--bg-card)] font-black uppercase tracking-widest py-4 rounded-2xl transition-all transform active:scale-[0.98] shadow-2xl shadow-yellow-500/10 text-xs"
           >
             {orderMutation.isPending || razorpayMutation.isPending ? "Processing..." : "Place Order"}
           </button>
@@ -246,7 +246,7 @@ const Bill = () => {
           <button
             onClick={(e) => { e.stopPropagation(); handlePlaceOrder(); }}
             disabled={cartItems.length === 0 || orderMutation.isPending || razorpayMutation.isPending}
-            className="w-full bg-[#f6b100] hover:bg-[#e5a600] disabled:opacity-50 disabled:cursor-not-allowed text-[#1a1a1a] font-black uppercase tracking-widest py-3 rounded-2xl transition-all transform active:scale-[0.98] shadow-xl shadow-yellow-500/10 text-xs"
+            className="w-full bg-[var(--primary)] hover:bg-[#e5a600] disabled:opacity-50 disabled:cursor-not-allowed text-[var(--bg-card)] font-black uppercase tracking-widest py-3 rounded-2xl transition-all transform active:scale-[0.98] shadow-xl shadow-yellow-500/10 text-xs"
           >
             {orderMutation.isPending || razorpayMutation.isPending ? "Processing..." : "Place Order"}
           </button>

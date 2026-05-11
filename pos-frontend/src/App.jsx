@@ -11,12 +11,14 @@ import { useSelector, useDispatch } from "react-redux";
 import useLoadData from "./hooks/useLoadData";
 import FullScreenLoader from "./components/shared/FullScreenLoader"
 import useAuth from "./hooks/useAuth";
+import useSettingsSync from "./hooks/useSettingsSync";
 import ShiftManager from "./components/shared/ShiftManager";
 import { setCustomer } from "./redux/slices/customerSlice";
 import { useEffect } from "react";
 
 function Layout() {
   const isLoading = useLoadData();
+  useSettingsSync();
   const { isAuth, isAdmin } = useAuth();
   const { activeShift, showShiftModal, selectedPOSPoint } = useSelector((state) => state.pos);
   const customer = useSelector((state) => state.customer);
@@ -32,6 +34,12 @@ function Layout() {
       dispatch(setCustomer({ name: "Guest", phone: "N/A", guests: 1 }));
     }
   }, [openOnMenu, isAdmin, isAuth, customer.customerName, dispatch]);
+
+  // 0. Theme Sync
+  const { mode } = useSelector((state) => state.theme);
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', mode);
+  }, [mode]);
 
   // 1. Loading Check
   if (isLoading) return <FullScreenLoader />;

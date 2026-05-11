@@ -26,7 +26,7 @@ const Menu = () => {
 
   return (
     <>
-      <section className="bg-[#1f1f1f] h-[calc(100vh-5rem)] pb-32 lg:pb-12 lg:h-[calc(100vh-5rem)] overflow-hidden flex flex-col lg:flex-row gap-3">
+      <section className="bg-[var(--bg-main)] h-[calc(100vh-5rem)] pb-32 lg:pb-12 lg:h-[calc(100vh-5rem)] overflow-hidden flex flex-col lg:flex-row gap-3">
 
         {/* ── Left: Menu ── */}
         <div className="flex-[3] flex flex-col min-h-0 overflow-hidden">
@@ -35,19 +35,19 @@ const Menu = () => {
           <div className="flex-none flex items-center justify-between px-10 py-4">
             <div className="flex items-center gap-4">
               <BackButton />
-              <h1 className="text-[#f5f5f5] text-2xl font-bold tracking-wider">
+              <h1 className="text-[var(--text-main)] text-2xl font-bold tracking-wider">
                 Menu
               </h1>
             </div>
 
             {requireCustomer && !isGuest && (
               <div className="flex items-center gap-3 cursor-pointer">
-                <MdRestaurantMenu className="text-[#f5f5f5] text-4xl" />
+                <MdRestaurantMenu className="text-[var(--text-main)] text-4xl" />
                 <div className="flex flex-col items-start">
-                  <h1 className="text-md text-[#f5f5f5] font-semibold tracking-wide">
+                  <h1 className="text-md text-[var(--text-main)] font-semibold tracking-wide">
                     {customerData.customerName}
                   </h1>
-                  <p className="text-xs text-[#ababab] font-medium">
+                  <p className="text-xs text-[var(--text-muted)] font-medium">
                     Table: {customerData.table?.tableNo || "N/A"}
                   </p>
                 </div>
@@ -62,12 +62,12 @@ const Menu = () => {
         </div>
 
         {/* ── Right: Cart ── */}
-        <div className="flex-[2.5] lg:flex-[1.2] flex flex-col min-h-0 bg-[#1a1a1a] lg:my-4 lg:mr-3 rounded-lg overflow-hidden pb-2 lg:pb-0">
+        <div className="flex-[2.5] lg:flex-[1.2] flex flex-col min-h-0 bg-[var(--bg-card)] lg:my-4 lg:mr-3 rounded-lg overflow-hidden pb-2 lg:pb-0 border border-[var(--border-main)]">
 
           {requireCustomer && !isGuest && (
             <div className="flex-none">
               <CustomerInfo />
-              <hr className="border-[#2a2a2a] border-t-2" />
+              <hr className="border-[var(--border-main)]" />
             </div>
           )}
 
@@ -77,7 +77,7 @@ const Menu = () => {
           </div>
 
           {/* Fixed bill at bottom */}
-          <div className="flex-none border-t-2 border-[#2a2a2a] bg-[#1a1a1a]">
+          <div className="flex-none border-t border-[var(--border-main)] bg-[var(--bg-card)]">
             <Bill />
           </div>
         </div>

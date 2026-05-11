@@ -138,13 +138,13 @@ const ManagementModal = ({ type, isOpen, onClose, initialData = null }) => {
       <motion.div
         initial={{ opacity: 0, scale: 0.9, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        className="bg-[#262626] p-8 rounded-[3rem] shadow-2xl w-full max-w-xl border border-[#444] max-h-[90vh] overflow-y-auto custom-scrollbar relative"
+        className="bg-[var(--bg-card-alt)] p-8 rounded-[3rem] shadow-2xl w-full max-w-xl border border-[#444] max-h-[90vh] overflow-y-auto custom-scrollbar relative"
       >
         <div className="flex justify-between items-center mb-8">
-          <h2 className="text-white text-3xl font-black uppercase tracking-tighter">
+          <h2 className="text-[var(--text-main)] text-3xl font-black uppercase tracking-tighter">
             {isEdit ? "Edit" : "Add"} {type === "dishes" ? "Dish" : type === "posPoint" ? "Terminal" : type === "user" ? "Staff" : type}
           </h2>
-          <button onClick={onClose} className="p-2 hover:bg-[#333] rounded-full text-[#ababab] hover:text-white transition-colors">
+          <button onClick={onClose} className="p-2 hover:bg-[var(--border-main)] rounded-full text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors">
             <IoMdClose size={28} />
           </button>
         </div>
@@ -154,26 +154,26 @@ const ManagementModal = ({ type, isOpen, onClose, initialData = null }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-4">
                 <div>
-                  <label className="flex items-center gap-2 text-[#ababab] text-[10px] font-black uppercase tracking-widest mb-2"><MdPerson /> Full Name</label>
-                  <input name="name" type="text" value={formData.name} onChange={handleInputChange} required className="w-full bg-[#1a1a1a] border border-[#333] rounded-2xl p-4 text-white focus:outline-none focus:border-[#f6b100] transition-colors font-bold" />
+                  <label className="flex items-center gap-2 text-[var(--text-muted)] text-[10px] font-black uppercase tracking-widest mb-2"><MdPerson /> Full Name</label>
+                  <input name="name" type="text" value={formData.name} onChange={handleInputChange} required className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-2xl p-4 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-colors font-bold" />
                 </div>
                 <div>
-                  <label className="flex items-center gap-2 text-[#ababab] text-[10px] font-black uppercase tracking-widest mb-2"><MdEmail /> Email Address</label>
-                  <input name="email" type="email" value={formData.email} onChange={handleInputChange} required className="w-full bg-[#1a1a1a] border border-[#333] rounded-2xl p-4 text-white focus:outline-none focus:border-[#f6b100] transition-colors" />
+                  <label className="flex items-center gap-2 text-[var(--text-muted)] text-[10px] font-black uppercase tracking-widest mb-2"><MdEmail /> Email Address</label>
+                  <input name="email" type="email" value={formData.email} onChange={handleInputChange} required className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-2xl p-4 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-colors" />
                 </div>
                 <div>
-                  <label className="flex items-center gap-2 text-[#ababab] text-[10px] font-black uppercase tracking-widest mb-2"><MdPhone /> Phone Number</label>
-                  <input name="phone" type="text" value={formData.phone} onChange={handleInputChange} required className="w-full bg-[#1a1a1a] border border-[#333] rounded-2xl p-4 text-white focus:outline-none focus:border-[#f6b100] transition-colors" />
+                  <label className="flex items-center gap-2 text-[var(--text-muted)] text-[10px] font-black uppercase tracking-widest mb-2"><MdPhone /> Phone Number</label>
+                  <input name="phone" type="text" value={formData.phone} onChange={handleInputChange} required className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-2xl p-4 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-colors" />
                 </div>
                 <div>
-                  <label className="flex items-center gap-2 text-[#ababab] text-[10px] font-black uppercase tracking-widest mb-2"><MdLock /> {isEdit ? "New Password (Optional)" : "Security Password"}</label>
-                  <input name="password" type="password" value={formData.password} onChange={handleInputChange} required={!isEdit} placeholder={isEdit ? "Leave blank to keep current" : ""} className="w-full bg-[#1a1a1a] border border-[#333] rounded-2xl p-4 text-white focus:outline-none focus:border-[#f6b100] transition-colors" />
+                  <label className="flex items-center gap-2 text-[var(--text-muted)] text-[10px] font-black uppercase tracking-widest mb-2"><MdLock /> {isEdit ? "New Password (Optional)" : "Security Password"}</label>
+                  <input name="password" type="password" value={formData.password} onChange={handleInputChange} required={!isEdit} placeholder={isEdit ? "Leave blank to keep current" : ""} className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-2xl p-4 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-colors" />
                 </div>
               </div>
 
               <div className="space-y-4">
                 <div>
-                  <label className="flex items-center gap-2 text-[#ababab] text-[10px] font-black uppercase tracking-widest mb-2"><MdShield /> Role</label>
+                  <label className="flex items-center gap-2 text-[var(--text-muted)] text-[10px] font-black uppercase tracking-widest mb-2"><MdShield /> Role</label>
                   <CustomDropdown 
                     options={[{id: "cashier", name: "Cashier"}, {id: "manager", name: "Manager"}, {id: "admin", name: "Global Admin"}]}
                     value={formData.role}
@@ -182,7 +182,7 @@ const ManagementModal = ({ type, isOpen, onClose, initialData = null }) => {
                   />
                 </div>
                 <div>
-                  <label className="flex items-center gap-2 text-[#ababab] text-[10px] font-black uppercase tracking-widest mb-2"><MdStore /> Assigned Branch</label>
+                  <label className="flex items-center gap-2 text-[var(--text-muted)] text-[10px] font-black uppercase tracking-widest mb-2"><MdStore /> Assigned Branch</label>
                   <CustomDropdown 
                     options={branches || []}
                     value={formData.branchId}
@@ -192,8 +192,8 @@ const ManagementModal = ({ type, isOpen, onClose, initialData = null }) => {
                 </div>
                 
                 {formData.branchId && (
-                  <div className="bg-[#1a1a1a] p-5 rounded-3xl border border-[#333]">
-                    <label className="flex items-center gap-2 text-[#ababab] text-[10px] font-black uppercase tracking-widest mb-4"><MdComputer /> Restricted Terminals</label>
+                  <div className="bg-[var(--bg-card)] p-5 rounded-3xl border border-[var(--border-main)]">
+                    <label className="flex items-center gap-2 text-[var(--text-muted)] text-[10px] font-black uppercase tracking-widest mb-4"><MdComputer /> Restricted Terminals</label>
                     <div className="space-y-2 max-h-40 overflow-y-auto custom-scrollbar pr-2">
                        {(branchPOSPoints || []).map(pos => (
                          <label key={pos.id} className="flex items-center gap-3 cursor-pointer group">
@@ -201,14 +201,14 @@ const ManagementModal = ({ type, isOpen, onClose, initialData = null }) => {
                              type="checkbox" 
                              checked={selectedPOSPoints.includes(pos.id)} 
                              onChange={() => togglePOSSelection(pos.id)}
-                             className="w-4 h-4 rounded border-[#333] bg-[#262626] text-[#f6b100] focus:ring-[#f6b100]"
+                             className="w-4 h-4 rounded border-[var(--border-main)] bg-[var(--bg-card-alt)] text-[var(--primary)] focus:ring-[var(--primary)]"
                            />
-                           <span className="text-xs text-[#ababab] group-hover:text-white transition-colors font-bold uppercase tracking-tight">{pos.name}</span>
+                           <span className="text-xs text-[var(--text-muted)] group-hover:text-[var(--text-main)] transition-colors font-bold uppercase tracking-tight">{pos.name}</span>
                          </label>
                        ))}
-                       {branchPOSPoints?.length === 0 && <p className="text-[10px] text-[#444] font-bold uppercase italic">No terminals in branch</p>}
+                       {branchPOSPoints?.length === 0 && <p className="text-[10px] text-[var(--text-dim)] font-bold uppercase italic">No terminals in branch</p>}
                     </div>
-                    <p className="text-[9px] text-[#444] mt-4 font-bold uppercase">If none selected, staff can use all terminals.</p>
+                    <p className="text-[9px] text-[var(--text-dim)] mt-4 font-bold uppercase">If none selected, staff can use all terminals.</p>
                   </div>
                 )}
               </div>
@@ -218,29 +218,29 @@ const ManagementModal = ({ type, isOpen, onClose, initialData = null }) => {
           {type === "table" && (
             <div className="grid grid-cols-2 gap-6">
               <div>
-                <label className="block text-[#ababab] text-[10px] font-black uppercase tracking-widest mb-2">Table Number</label>
-                <input name="tableNo" type="number" value={formData.tableNo} onChange={handleInputChange} required className="w-full bg-[#1a1a1a] border border-[#333] rounded-2xl p-4 text-white focus:outline-none focus:border-[#f6b100] transition-colors text-xl font-black" />
+                <label className="block text-[var(--text-muted)] text-[10px] font-black uppercase tracking-widest mb-2">Table Number</label>
+                <input name="tableNo" type="number" value={formData.tableNo} onChange={handleInputChange} required className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-2xl p-4 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-colors text-xl font-black" />
               </div>
               <div>
-                <label className="block text-[#ababab] text-[10px] font-black uppercase tracking-widest mb-2">Seats</label>
-                <input name="seats" type="number" value={formData.seats} onChange={handleInputChange} required className="w-full bg-[#1a1a1a] border border-[#333] rounded-2xl p-4 text-white focus:outline-none focus:border-[#f6b100] transition-colors text-xl font-black" />
+                <label className="block text-[var(--text-muted)] text-[10px] font-black uppercase tracking-widest mb-2">Seats</label>
+                <input name="seats" type="number" value={formData.seats} onChange={handleInputChange} required className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-2xl p-4 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-colors text-xl font-black" />
               </div>
             </div>
           )}
 
           {(type === "category" || type === "dishes" || type === "branch" || type === "posPoint") && (
             <div>
-              <label className="block text-[#ababab] text-[10px] font-black uppercase tracking-widest mb-2">
+              <label className="block text-[var(--text-muted)] text-[10px] font-black uppercase tracking-widest mb-2">
                 {type === "posPoint" ? "Terminal Name" : "Name"}
               </label>
-              <input name="name" type="text" value={formData.name} onChange={handleInputChange} required className="w-full bg-[#1a1a1a] border border-[#333] rounded-2xl p-4 text-white focus:outline-none focus:border-[#f6b100] transition-colors font-bold uppercase tracking-tighter" />
+              <input name="name" type="text" value={formData.name} onChange={handleInputChange} required className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-2xl p-4 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-colors font-bold uppercase tracking-tighter" />
             </div>
           )}
 
           {(type === "branch" || type === "posPoint") && (
             <div>
-              <label className="block text-[#ababab] text-[10px] font-black uppercase tracking-widest mb-2">Unique Code</label>
-              <input name="code" type="text" value={formData.code} onChange={handleInputChange} required placeholder={type === 'branch' ? 'e.g. BR-01' : 'e.g. POS-01'} className="w-full bg-[#1a1a1a] border border-[#333] rounded-2xl p-4 text-white focus:outline-none focus:border-[#f6b100] transition-colors font-mono" />
+              <label className="block text-[var(--text-muted)] text-[10px] font-black uppercase tracking-widest mb-2">Unique Code</label>
+              <input name="code" type="text" value={formData.code} onChange={handleInputChange} required placeholder={type === 'branch' ? 'e.g. BR-01' : 'e.g. POS-01'} className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-2xl p-4 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-colors font-mono" />
             </div>
           )}
 
@@ -248,24 +248,24 @@ const ManagementModal = ({ type, isOpen, onClose, initialData = null }) => {
             <>
               <div className="grid grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-[#ababab] text-[10px] font-black uppercase tracking-widest mb-2">City</label>
-                  <input name="city" type="text" value={formData.city} onChange={handleInputChange} className="w-full bg-[#1a1a1a] border border-[#333] rounded-2xl p-4 text-white focus:outline-none focus:border-[#f6b100] transition-colors" />
+                  <label className="block text-[var(--text-muted)] text-[10px] font-black uppercase tracking-widest mb-2">City</label>
+                  <input name="city" type="text" value={formData.city} onChange={handleInputChange} className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-2xl p-4 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-colors" />
                 </div>
                 <div>
-                  <label className="block text-[#ababab] text-[10px] font-black uppercase tracking-widest mb-2">Phone</label>
-                  <input name="phone" type="text" value={formData.phone} onChange={handleInputChange} className="w-full bg-[#1a1a1a] border border-[#333] rounded-2xl p-4 text-white focus:outline-none focus:border-[#f6b100] transition-colors" />
+                  <label className="block text-[var(--text-muted)] text-[10px] font-black uppercase tracking-widest mb-2">Phone</label>
+                  <input name="phone" type="text" value={formData.phone} onChange={handleInputChange} className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-2xl p-4 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-colors" />
                 </div>
               </div>
               <div>
-                <label className="block text-[#ababab] text-[10px] font-black uppercase tracking-widest mb-2">Address</label>
-                <textarea name="address" value={formData.address} onChange={handleInputChange} className="w-full bg-[#1a1a1a] border border-[#333] rounded-2xl p-4 text-white focus:outline-none focus:border-[#f6b100] transition-colors h-24 custom-scrollbar" />
+                <label className="block text-[var(--text-muted)] text-[10px] font-black uppercase tracking-widest mb-2">Address</label>
+                <textarea name="address" value={formData.address} onChange={handleInputChange} className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-2xl p-4 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-colors h-24 custom-scrollbar" />
               </div>
             </>
           )}
 
           {type === "posPoint" && (
             <div>
-              <label className="block text-[#ababab] text-[10px] font-black uppercase tracking-widest mb-2">Assign to Branch</label>
+              <label className="block text-[var(--text-muted)] text-[10px] font-black uppercase tracking-widest mb-2">Assign to Branch</label>
               <CustomDropdown 
                 options={branches || []}
                 value={formData.branchId}
@@ -279,11 +279,11 @@ const ManagementModal = ({ type, isOpen, onClose, initialData = null }) => {
           {type === "dishes" && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-[#ababab] text-[10px] font-black uppercase tracking-widest mb-2">Price (₹)</label>
-                <input name="price" type="number" value={formData.price} onChange={handleInputChange} required className="w-full bg-[#1a1a1a] border border-[#333] rounded-2xl p-4 text-white focus:outline-none focus:border-[#f6b100] transition-colors text-2xl font-black italic" />
+                <label className="block text-[var(--text-muted)] text-[10px] font-black uppercase tracking-widest mb-2">Price (₹)</label>
+                <input name="price" type="number" value={formData.price} onChange={handleInputChange} required className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-2xl p-4 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-colors text-2xl font-black italic" />
               </div>
               <div>
-                <label className="block text-[#ababab] text-[10px] font-black uppercase tracking-widest mb-2">Category</label>
+                <label className="block text-[var(--text-muted)] text-[10px] font-black uppercase tracking-widest mb-2">Category</label>
                 <CustomDropdown 
                   options={categories || []}
                   value={formData.categoryId}
@@ -298,7 +298,7 @@ const ManagementModal = ({ type, isOpen, onClose, initialData = null }) => {
           <button
             type="submit"
             disabled={mutation.isPending}
-            className="w-full bg-[#f6b100] text-[#1a1a1a] font-black py-5 rounded-2xl mt-4 hover:bg-yellow-600 transition-all uppercase tracking-[0.3em] shadow-2xl shadow-yellow-500/20 disabled:opacity-50 text-xs"
+            className="w-full bg-[var(--primary)] text-[var(--bg-card)] font-black py-5 rounded-2xl mt-4 hover:bg-yellow-600 transition-all uppercase tracking-[0.3em] shadow-2xl shadow-yellow-500/20 disabled:opacity-50 text-xs"
           >
             {mutation.isPending ? "Syncing..." : `${isEdit ? 'Update' : 'Register'} ${type === "dishes" ? "Dish" : type === "posPoint" ? "Terminal" : type === "user" ? "Staff Member" : type}`}
           </button>

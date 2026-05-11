@@ -14,7 +14,7 @@ const Home = () => {
     }, [])
 
   return (
-    <section className="bg-[#1f1f1f] h-[calc(100vh-5rem)] overflow-y-auto lg:overflow-hidden flex flex-col lg:flex-row gap-2 custom-scrollbar">
+    <section className="bg-[var(--bg-main)] h-[calc(100vh-5rem)] overflow-y-auto lg:overflow-hidden flex flex-col lg:flex-row gap-2 custom-scrollbar">
       {/* Left Div */}
       <div className="flex-[3] flex flex-col min-h-fit">
         <Greetings />

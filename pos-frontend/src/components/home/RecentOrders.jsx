@@ -38,31 +38,31 @@ const RecentOrders = () => {
 
   return (
     <div className="px-6 mt-4 relative">
-      <div className="bg-[#1a1a1a] w-full min-h-[300px] lg:h-[380px] rounded-3xl border border-[#333] shadow-2xl overflow-hidden flex flex-col">
-        <div className="flex justify-between items-center px-6 py-4 border-b border-[#262626]">
-          <h1 className="text-white text-base font-black uppercase tracking-tighter">
+      <div className="bg-[var(--bg-card)] w-full min-h-[300px] lg:h-[380px] rounded-3xl border border-[var(--border-main)] shadow-2xl overflow-hidden flex flex-col">
+        <div className="flex justify-between items-center px-6 py-4 border-b border-[var(--bg-card-alt)]">
+          <h1 className="text-[var(--text-main)] text-base font-black uppercase tracking-tighter">
             Recent Orders
           </h1>
-          <button className="text-[#f6b100] text-[9px] font-black uppercase tracking-widest hover:underline">
+          <button className="text-[var(--primary)] text-[9px] font-black uppercase tracking-widest hover:underline">
             View full history
           </button>
         </div>
 
         <div className="p-4 flex flex-col flex-1 overflow-hidden">
-          <div className="flex items-center gap-3 bg-[#262626] rounded-xl px-4 py-2.5 mb-4 border border-[#333] focus-within:border-[#f6b100] transition-colors">
-            <FaSearch className="text-[#555]" />
+          <div className="flex items-center gap-3 bg-[var(--bg-card-alt)] rounded-xl px-4 py-2.5 mb-4 border border-[var(--border-main)] focus-within:border-[var(--primary)] transition-colors">
+            <FaSearch className="text-[var(--text-dim)]" />
             <input
               type="text"
               placeholder="Search history..."
-              className="bg-transparent outline-none text-white text-sm w-full font-medium"
+              className="bg-transparent outline-none text-[var(--text-main)] text-sm w-full font-medium"
             />
           </div>
 
           <div className="flex-1 overflow-y-auto custom-scrollbar pr-2">
             {isLoading ? (
                <div className="flex flex-col items-center justify-center h-full gap-4 opacity-50">
-                  <div className="w-8 h-8 border-4 border-[#333] border-t-[#f6b100] rounded-full animate-spin" />
-                  <p className="text-[10px] text-[#ababab] font-black uppercase tracking-widest">Fetching Orders...</p>
+                  <div className="w-8 h-8 border-4 border-[var(--border-main)] border-t-[var(--primary)] rounded-full animate-spin" />
+                  <p className="text-[10px] text-[var(--text-muted)] font-black uppercase tracking-widest">Fetching Orders...</p>
                </div>
             ) : ordersList.length > 0 ? (
               <div className="space-y-3">
@@ -72,8 +72,8 @@ const RecentOrders = () => {
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center h-full text-center py-10">
-                <p className="text-[#444] font-black uppercase tracking-widest text-xs">No Recent Activity</p>
-                <p className="text-[#333] text-[10px] mt-1 font-bold uppercase">Ready for your first order</p>
+                <p className="text-[var(--text-dim)] font-black uppercase tracking-widest text-xs">No Recent Activity</p>
+                <p className="text-[var(--border-main)] text-[10px] mt-1 font-bold uppercase">Ready for your first order</p>
               </div>
             )}
           </div>

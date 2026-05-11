@@ -57,22 +57,22 @@ const Dashboard = () => {
   ];
 
   return (
-    <div className="bg-[#121212] min-h-[calc(100vh-5rem)] pb-20 overflow-y-auto">
+    <div className="bg-[var(--bg-main)] min-h-[calc(100vh-5rem)] pb-20 overflow-y-auto">
       {/* Top Banner / Hero */}
-      <div className="bg-[#1a1a1a] border-b border-[#333]">
+      <div className="bg-[var(--bg-card)] border-b border-[var(--border-main)]">
         <div className="container mx-auto px-6 py-10 flex flex-col md:flex-row items-center justify-between gap-8">
           <div>
             <div className="flex items-center gap-3 mb-2">
-              <span className="bg-[#f6b100]/10 text-[#f6b100] text-[10px] font-black tracking-widest px-2 py-1 rounded-md uppercase">Enterprise Dashboard</span>
+              <span className="bg-[var(--primary)]/10 text-[var(--primary)] text-[10px] font-black tracking-widest px-2 py-1 rounded-md uppercase">Enterprise Dashboard</span>
             </div>
             <motion.h1 
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
-              className="text-3xl md:text-4xl font-black text-white tracking-tighter uppercase"
+              className="text-3xl md:text-4xl font-black text-[var(--text-main)] tracking-tighter uppercase"
             >
               Management Center
             </motion.h1>
-            <p className="text-[#ababab] mt-2 font-medium">Full control over your restaurant infrastructure and inventory.</p>
+            <p className="text-[var(--text-muted)] mt-2 font-medium">Full control over your restaurant infrastructure and inventory.</p>
           </div>
 
           <div className="flex items-center gap-4 flex-wrap justify-center">
@@ -102,15 +102,15 @@ const Dashboard = () => {
 
       {/* Tab Navigation */}
       <div className="container mx-auto px-6 mt-10">
-        <div className="flex items-center bg-[#1a1a1a] p-1.5 rounded-2xl border border-[#333] w-fit overflow-x-auto no-scrollbar max-w-full">
+        <div className="flex items-center bg-[var(--bg-card)] p-1.5 rounded-2xl border border-[var(--border-main)] w-fit overflow-x-auto no-scrollbar max-w-full">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               className={`
                 px-8 py-3 rounded-xl font-bold text-sm flex items-center gap-2 transition-all duration-300 whitespace-nowrap ${
                 activeTab === tab.id
-                  ? "bg-[#f6b100] text-[#1a1a1a] shadow-lg shadow-[#f6b100]/20"
-                  : "text-[#ababab] hover:text-[#f5f5f5] hover:bg-[#262626]"
+                  ? "bg-[var(--primary)] text-[var(--bg-card)] shadow-lg shadow-[var(--primary)]/20"
+                  : "text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-card-alt)]"
               }`}
               onClick={() => setActiveTab(tab.id)}
             >
@@ -136,12 +136,12 @@ const Dashboard = () => {
             {activeTab === "Customers" && <CustomerList />}
             {activeTab === "Orders" && <RecentOrders branchId={selectedBranchId} />}
             {activeTab === "Payments" && (
-              <div className="bg-[#1a1a1a] border border-[#333] rounded-3xl p-20 flex flex-col items-center justify-center text-center">
-                <div className="w-20 h-20 bg-[#262626] rounded-full flex items-center justify-center mb-6 border border-[#444]">
-                  <FaWallet className="text-[#ababab]" size={30} />
+              <div className="bg-[var(--bg-card)] border border-[var(--border-main)] rounded-3xl p-20 flex flex-col items-center justify-center text-center">
+                <div className="w-20 h-20 bg-[var(--bg-card-alt)] rounded-full flex items-center justify-center mb-6 border border-[var(--border-main)]">
+                  <FaWallet className="text-[var(--text-muted)]" size={30} />
                 </div>
-                <h3 className="text-[#f5f5f5] text-xl font-bold">Transaction History Coming Soon</h3>
-                <p className="text-[#ababab] mt-2 max-w-sm">We are integrating deeper payment analytics into your dashboard.</p>
+                <h3 className="text-[var(--text-main)] text-xl font-bold">Transaction History Coming Soon</h3>
+                <p className="text-[var(--text-muted)] mt-2 max-w-sm">We are integrating deeper payment analytics into your dashboard.</p>
               </div>
             )}
           </motion.div>

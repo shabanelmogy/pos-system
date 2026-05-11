@@ -37,10 +37,10 @@ const CartInfo = () => {
   return (
     <div className="flex flex-col h-full px-3 py-2">
       <div className="flex items-center justify-between mb-3">
-        <h1 className="text-lg text-white font-bold tracking-tight">
+        <h1 className="text-lg text-[var(--text-main)] font-bold tracking-tight">
           Order Details
         </h1>
-        <span className="bg-[#f6b100]/20 text-[#f6b100] px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider">
+        <span className="bg-[var(--primary)]/20 text-[var(--primary)] px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider">
           {cartData.length} {cartData.length === 1 ? 'Item' : 'Items'}
         </span>
       </div>
@@ -52,59 +52,59 @@ const CartInfo = () => {
       >
         {cartData.length === 0 ? (
           <div className="flex flex-col justify-center items-center h-[380px] opacity-60">
-            <div className="bg-[#2a2a2a] p-4 rounded-full mb-3">
-              <RiShoppingCartLine size={32} className="text-[#ababab]" />
+            <div className="bg-[var(--bg-card-alt)] p-4 rounded-full mb-3">
+              <RiShoppingCartLine size={32} className="text-[var(--text-muted)]" />
             </div>
-            <p className="text-[#ababab] text-center text-sm font-medium">Your cart is empty</p>
-            <p className="text-[#777] text-xs text-center mt-0.5">Add items to start!</p>
+            <p className="text-[var(--text-muted)] text-center text-sm font-medium">Your cart is empty</p>
+            <p className="text-[var(--text-dim)] text-xs text-center mt-0.5">Add items to start!</p>
           </div>
         ) : cartData.map((item) => {
           return (
             <div
               key={item.id}
-              className="group bg-[#1a1a1a] border border-[#2a2a2a] hover:border-[#f6b100]/40 rounded-lg p-2.5 transition-all duration-200"
+              className="group bg-[var(--bg-card)] border border-[var(--border-main)] hover:border-[var(--primary)]/40 rounded-lg p-2.5 transition-all duration-200 shadow-sm"
             >
               <div className="flex items-start justify-between gap-2 mb-2">
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-[#f5f5f5] font-semibold text-sm leading-snug truncate">
+                  <h3 className="text-[var(--text-main)] font-semibold text-sm leading-snug truncate">
                     {item.name}
                   </h3>
                 </div>
-                <p className="text-[#f6b100] text-base font-bold whitespace-nowrap">₹{item.price}</p>
+                <p className="text-[var(--primary)] text-base font-bold whitespace-nowrap">₹{item.price}</p>
               </div>
 
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="flex items-center bg-[#2a2a2a] rounded-md border border-[#333]">
+                  <div className="flex items-center bg-[var(--bg-hover)] rounded-md border border-[var(--border-main)]">
                     <button
                       onClick={() => handleDecrease(item)}
-                      className="p-1 text-[#ababab] hover:text-[#f6b100] transition-colors"
+                      className="p-1 text-[var(--text-muted)] hover:text-[var(--primary)] transition-colors"
                     >
                       <RiSubtractFill size={12} />
                     </button>
-                    <span className="text-[#f6b100] text-xs font-black min-w-[20px] text-center">
+                    <span className="text-[var(--primary)] text-xs font-black min-w-[20px] text-center">
                       {item.quantity}
                     </span>
                     <button
                       onClick={() => handleIncrease(item)}
-                      className="p-1 text-[#ababab] hover:text-[#f6b100] transition-colors"
+                      className="p-1 text-[var(--text-muted)] hover:text-[var(--primary)] transition-colors"
                     >
                       <RiAddFill size={12} />
                     </button>
                   </div>
-                  <span className="text-[#666] text-[10px]">₹{item.pricePerQuantity || (item.price / item.quantity)}</span>
+                  <span className="text-[var(--text-dim)] text-[10px]">₹{item.pricePerQuantity || (item.price / item.quantity)}</span>
                 </div>
 
                 <div className="flex items-center gap-1.5">
                   <button
-                    className="p-1.5 bg-[#2a2a2a] hover:bg-[#f6b100]/10 text-[#888] hover:text-[#f6b100] rounded transition-colors duration-200"
+                    className="p-1.5 bg-[var(--bg-hover)] hover:bg-[var(--primary)]/10 text-[var(--text-muted)] hover:text-[var(--primary)] rounded transition-colors duration-200"
                     title="Note"
                   >
                     <FaNotesMedical size={12} />
                   </button>
                   <button
                     onClick={() => handleRemove(item.id)}
-                    className="p-1.5 bg-[#2a2a2a] hover:bg-red-500/10 text-[#888] hover:text-red-500 rounded transition-colors duration-200"
+                    className="p-1.5 bg-[var(--bg-hover)] hover:bg-red-500/10 text-[var(--text-muted)] hover:text-red-500 rounded transition-colors duration-200"
                     title="Remove"
                   >
                     <RiDeleteBin2Fill size={12} />

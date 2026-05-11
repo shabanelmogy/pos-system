@@ -100,10 +100,10 @@ const BottomNav = () => {
   };
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-[#262626] p-2 h-16 flex justify-around border-t border-[#333] z-40">
+    <div className="fixed bottom-0 left-0 right-0 bg-[var(--bg-card-alt)] p-2 h-16 flex justify-around border-t border-[var(--border-main)] z-40">
       <button
         onClick={() => navigate("/")}
-        className={`flex flex-col items-center justify-center font-bold transition-all ${isActive("/") ? "text-[#f6b100]" : "text-[#ababab] hover:text-white"
+        className={`flex flex-col items-center justify-center font-bold transition-all ${isActive("/") ? "text-[var(--primary)]" : "text-[var(--text-muted)] hover:text-[var(--text-main)]"
           } w-full`}
       >
         <FaHome size={20} />
@@ -112,7 +112,7 @@ const BottomNav = () => {
 
       <button
         onClick={() => navigate("/orders")}
-        className={`flex flex-col items-center justify-center font-bold transition-all ${isActive("/orders") ? "text-[#f6b100]" : "text-[#ababab] hover:text-white"
+        className={`flex flex-col items-center justify-center font-bold transition-all ${isActive("/orders") ? "text-[var(--primary)]" : "text-[var(--text-muted)] hover:text-[var(--text-main)]"
           } w-full`}
       >
         <MdOutlineReorder size={20} />
@@ -122,7 +122,7 @@ const BottomNav = () => {
       {enableTables && (
         <button
           onClick={() => navigate("/tables")}
-          className={`flex flex-col items-center justify-center font-bold transition-all ${isActive("/tables") ? "text-[#f6b100]" : "text-[#ababab] hover:text-white"
+          className={`flex flex-col items-center justify-center font-bold transition-all ${isActive("/tables") ? "text-[var(--primary)]" : "text-[var(--text-muted)] hover:text-[var(--text-main)]"
             } w-full`}
         >
           <MdTableBar size={20} />
@@ -134,7 +134,7 @@ const BottomNav = () => {
         <>
           <button
             onClick={() => navigate("/customers")}
-            className={`flex flex-col items-center justify-center font-bold transition-all ${isActive("/customers") ? "text-[#f6b100]" : "text-[#ababab] hover:text-white"
+            className={`flex flex-col items-center justify-center font-bold transition-all ${isActive("/customers") ? "text-[var(--primary)]" : "text-[var(--text-muted)] hover:text-[var(--text-main)]"
               } w-full`}
           >
             <FaUsers size={20} />
@@ -142,7 +142,7 @@ const BottomNav = () => {
           </button>
           <button
             onClick={() => navigate("/dashboard")}
-            className={`flex flex-col items-center justify-center font-bold transition-all ${isActive("/dashboard") ? "text-[#f6b100]" : "text-[#ababab] hover:text-white"
+            className={`flex flex-col items-center justify-center font-bold transition-all ${isActive("/dashboard") ? "text-[var(--primary)]" : "text-[var(--text-muted)] hover:text-[var(--text-main)]"
               } w-full`}
           >
             <FaChartBar size={20} />
@@ -155,7 +155,7 @@ const BottomNav = () => {
         <button
           disabled={isActive("/tables") || isActive("/menu")}
           onClick={handleDishClick}
-          className="absolute -top-14 bg-[#f6b100] text-[#1a1a1a] rounded-full p-4 items-center shadow-2xl hover:scale-105 transition-transform border-4 border-[#1f1f1f] disabled:opacity-50 disabled:grayscale"
+          className="absolute -top-14 bg-[var(--primary)] text-[var(--bg-card)] rounded-full p-4 items-center shadow-2xl hover:scale-105 transition-transform border-4 border-[var(--bg-main)] disabled:opacity-50 disabled:grayscale"
         >
           <BiSolidDish size={30} />
         </button>
@@ -163,30 +163,30 @@ const BottomNav = () => {
 
       <Modal isOpen={isModalOpen} onClose={closeModal}>
         <div>
-          <label className="block text-[#ababab] mb-2 text-sm font-medium">
-            Customer Name {!requireCustomer && <span className="text-[#666] text-xs ml-1">(Optional)</span>}
+          <label className="block text-[var(--text-muted)] mb-2 text-sm font-medium">
+            Customer Name {!requireCustomer && <span className="text-[var(--text-dim)] text-xs ml-1">(Optional)</span>}
           </label>
-          <div className="flex items-center rounded-lg p-3 px-4 bg-[#1f1f1f]">
-            <input value={name} onChange={(e) => setName(e.target.value)} type="text" name="" placeholder="Enter customer name" id="" className="bg-transparent flex-1 text-white focus:outline-none" />
+          <div className="flex items-center rounded-lg p-3 px-4 bg-[var(--bg-main)]">
+            <input value={name} onChange={(e) => setName(e.target.value)} type="text" name="" placeholder="Enter customer name" id="" className="bg-transparent flex-1 text-[var(--text-main)] focus:outline-none placeholder:text-[var(--text-dim)]" />
           </div>
         </div>
         <div>
-          <label className="block text-[#ababab] mb-2 mt-3 text-sm font-medium">
-            Customer Phone {!requireCustomer && <span className="text-[#666] text-xs ml-1">(Optional)</span>}
+          <label className="block text-[var(--text-muted)] mb-2 mt-3 text-sm font-medium">
+            Customer Phone {!requireCustomer && <span className="text-[var(--text-dim)] text-xs ml-1">(Optional)</span>}
           </label>
-          <div className="flex items-center rounded-lg p-3 px-4 bg-[#1f1f1f]">
-            <input value={phone} onChange={(e) => setPhone(e.target.value)} type="number" name="" placeholder="+91-9999999999" id="" className="bg-transparent flex-1 text-white focus:outline-none" />
+          <div className="flex items-center rounded-lg p-3 px-4 bg-[var(--bg-main)]">
+            <input value={phone} onChange={(e) => setPhone(e.target.value)} type="number" name="" placeholder="+91-9999999999" id="" className="bg-transparent flex-1 text-[var(--text-main)] focus:outline-none placeholder:text-[var(--text-dim)]" />
           </div>
         </div>
         <div>
-          <label className="block mb-2 mt-3 text-sm font-medium text-[#ababab]">Guest Count</label>
-          <div className="flex items-center justify-between bg-[#1f1f1f] px-4 py-3 rounded-lg">
+          <label className="block mb-2 mt-3 text-sm font-medium text-[var(--text-muted)]">Guest Count</label>
+          <div className="flex items-center justify-between bg-[var(--bg-main)] px-4 py-3 rounded-lg">
             <button onClick={decrement} className="text-yellow-500 text-2xl font-bold px-2">&minus;</button>
-            <span className="text-white font-bold">{guestCount} {guestCount === 1 ? 'Person' : 'People'}</span>
+            <span className="text-[var(--text-main)] font-bold">{guestCount} {guestCount === 1 ? 'Person' : 'People'}</span>
             <button onClick={increment} className="text-yellow-500 text-2xl font-bold px-2">&#43;</button>
           </div>
         </div>
-        <button onClick={handleCreateOrder} className="w-full bg-[#f6b100] text-[#1a1a1a] font-black rounded-xl py-4 mt-8 hover:bg-yellow-600 transition-all uppercase tracking-widest shadow-lg shadow-yellow-500/20">
+        <button onClick={handleCreateOrder} className="w-full bg-[var(--primary)] text-[var(--bg-card)] font-black rounded-xl py-4 mt-8 hover:bg-yellow-600 transition-all uppercase tracking-widest shadow-lg shadow-yellow-500/20">
           Start Placing Order
         </button>
       </Modal>

@@ -26,12 +26,12 @@ const popularDishes = [
 const PopularDishes = () => {
   return (
     <div className="mt-4 px-6 lg:px-0 lg:pr-6">
-      <div className="bg-[#1a1a1a] w-full rounded-lg">
+      <div className="bg-[var(--bg-card)] w-full rounded-lg">
         <div className="flex justify-between items-center px-4 py-3">
-          <h1 className="text-[#f5f5f5] text-base font-semibold tracking-wide">
+          <h1 className="text-[var(--text-main)] text-base font-semibold tracking-wide">
             Popular Dishes
           </h1>
-          <a href="" className="text-[#025cca] text-xs font-semibold">
+          <a href="" className="text-[var(--primary)] text-xs font-semibold">
             View all
           </a>
         </div>
@@ -40,18 +40,18 @@ const PopularDishes = () => {
           {popularDishes.map((dish) => (
             <div
               key={dish.id}
-              className="flex items-center gap-3 bg-[#1f1f1f] rounded-xl px-4 py-2.5 mt-3 mx-4 border border-transparent hover:border-[#333] transition-all"
+              className="flex items-center gap-3 bg-[var(--bg-main)] rounded-xl px-4 py-2.5 mt-3 mx-4 border border-transparent hover:border-[var(--border-main)] transition-all"
             >
-              <h1 className="text-[#f6b100] font-black text-lg mr-2">{dish.id < 10 ? `0${dish.id}` : dish.id}</h1>
+              <h1 className="text-[var(--primary)] font-black text-lg mr-2">{dish.id < 10 ? `0${dish.id}` : dish.id}</h1>
               <img
                 src={dish.image}
                 alt={dish.name}
-                className="w-[40px] h-[40px] rounded-full object-cover border-2 border-[#333]"
+                className="w-[40px] h-[40px] rounded-full object-cover border-2 border-[var(--border-main)]"
               />
               <div>
-                <h1 className="text-[#f5f5f5] font-semibold tracking-wide">{dish.name}</h1>
-                <p className="text-[#ababab] text-xs font-medium mt-1">
-                  Orders: <span className="text-[#f6b100] font-bold">{dish.numberOfOrders}</span>
+                <h1 className="text-[var(--text-main)] font-semibold tracking-wide">{dish.name}</h1>
+                <p className="text-[var(--text-muted)] text-xs font-medium mt-1">
+                  Orders: <span className="text-[var(--primary)] font-bold">{dish.numberOfOrders}</span>
                 </p>
               </div>
             </div>

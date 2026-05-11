@@ -51,20 +51,20 @@ const TerminalSelector = () => {
   });
 
   return (
-    <div className="fixed inset-0 bg-[#0f0f0f] z-[200] flex items-center justify-center p-6 overflow-y-auto">
+    <div className="fixed inset-0 bg-[var(--bg-main)] z-[200] flex items-center justify-center p-6 overflow-y-auto">
       <div className="max-w-4xl w-full py-20">
         <header className="text-center mb-12">
-          <div className="inline-flex items-center gap-2 bg-[#f6b100]/10 text-[#f6b100] px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest mb-6 border border-[#f6b100]/20">
+          <div className="inline-flex items-center gap-2 bg-[var(--primary)]/10 text-[var(--primary)] px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest mb-6 border border-[var(--primary)]/20">
              <MdLock /> Security Enforcement Active
           </div>
           <motion.h1 
             initial={{ y: -20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            className="text-5xl font-black text-white uppercase tracking-tighter mb-2"
+            className="text-5xl font-black text-[var(--text-main)] uppercase tracking-tighter mb-2"
           >
             Terminal Setup
           </motion.h1>
-          <p className="text-[#ababab] font-bold uppercase tracking-[0.2em] text-xs">
+          <p className="text-[var(--text-muted)] font-bold uppercase tracking-[0.2em] text-xs">
             {step === 1 ? "Select physical branch location" : "Assign to register / device"}
           </p>
         </header>
@@ -80,17 +80,17 @@ const TerminalSelector = () => {
                   key={branch.id}
                   disabled={isDisabled}
                   onClick={() => handleBranchSelect(branch)}
-                  className={`bg-[#1a1a1a] border p-8 rounded-[2.5rem] text-left transition-all group relative ${
-                    isDisabled ? 'opacity-30 grayscale cursor-not-allowed border-[#222]' : 'border-[#333] hover:border-[#f6b100]'
+                  className={`bg-[var(--bg-card)] border p-8 rounded-[2.5rem] text-left transition-all group relative ${
+                    isDisabled ? 'opacity-30 grayscale cursor-not-allowed border-[var(--bg-card-alt)]' : 'border-[var(--border-main)] hover:border-[var(--primary)]'
                   }`}
                 >
-                  <div className={`w-16 h-16 bg-[#262626] rounded-2xl flex items-center justify-center mb-8 transition-all ${
-                    isDisabled ? 'text-[#333]' : 'text-[#f6b100] group-hover:bg-[#f6b100] group-hover:text-[#1a1a1a]'
+                  <div className={`w-16 h-16 bg-[var(--bg-card-alt)] rounded-2xl flex items-center justify-center mb-8 transition-all ${
+                    isDisabled ? 'text-[var(--border-main)]' : 'text-[var(--primary)] group-hover:bg-[var(--primary)] group-hover:text-[var(--bg-card)]'
                   }`}>
                     <MdStore size={36} />
                   </div>
-                  <h3 className="text-white text-2xl font-black tracking-tighter mb-1 uppercase">{branch.name}</h3>
-                  <p className="text-[#ababab] text-xs uppercase tracking-widest font-black">{branch.code}</p>
+                  <h3 className="text-[var(--text-main)] text-2xl font-black tracking-tighter mb-1 uppercase">{branch.name}</h3>
+                  <p className="text-[var(--text-muted)] text-xs uppercase tracking-widest font-black">{branch.code}</p>
                   
                   {isDisabled && (
                     <div className="absolute top-6 right-6 text-[#444]">
@@ -108,27 +108,27 @@ const TerminalSelector = () => {
                   whileTap={{ scale: 0.98 }}
                   key={pos.id}
                   onClick={() => handlePOSSelect(pos)}
-                  className="bg-[#1a1a1a] border border-[#333] p-8 rounded-[2.5rem] text-left hover:border-[#f6b100] transition-all group"
+                  className="bg-[var(--bg-card)] border border-[var(--border-main)] p-8 rounded-[2.5rem] text-left hover:border-[var(--primary)] transition-all group"
                 >
-                  <div className="w-16 h-16 bg-[#262626] rounded-2xl flex items-center justify-center text-[#f6b100] mb-8 group-hover:bg-[#f6b100] group-hover:text-[#1a1a1a] transition-all">
+                  <div className="w-16 h-16 bg-[var(--bg-card-alt)] rounded-2xl flex items-center justify-center text-[var(--primary)] mb-8 group-hover:bg-[var(--primary)] group-hover:text-[var(--bg-card)] transition-all">
                     <MdComputer size={36} />
                   </div>
-                  <h3 className="text-white text-2xl font-black tracking-tighter mb-1 uppercase">{pos.name}</h3>
-                  <p className="text-[#ababab] text-xs uppercase tracking-widest font-black">{pos.code}</p>
+                  <h3 className="text-[var(--text-main)] text-2xl font-black tracking-tighter mb-1 uppercase">{pos.name}</h3>
+                  <p className="text-[var(--text-muted)] text-xs uppercase tracking-widest font-black">{pos.code}</p>
                 </motion.button>
               ))}
               
               {filteredPOSPoints.length === 0 && (
-                <div className="col-span-full py-10 bg-[#1a1a1a] border border-red-500/20 rounded-3xl text-center">
+                <div className="col-span-full py-10 bg-[var(--bg-card)] border border-red-500/20 rounded-3xl text-center">
                    <p className="text-red-500 font-black uppercase tracking-widest text-xs">Access Denied</p>
-                   <p className="text-[#ababab] text-sm mt-2">You are not authorized to use any terminals in this branch.</p>
+                   <p className="text-[var(--text-muted)] text-sm mt-2">You are not authorized to use any terminals in this branch.</p>
                 </div>
               )}
 
               {!branchId && (
                 <button 
                   onClick={() => setStep(1)}
-                  className="col-span-full mt-10 text-[#ababab] hover:text-[#f6b100] font-black text-xs uppercase tracking-widest transition-colors flex items-center justify-center gap-2"
+                  className="col-span-full mt-10 text-[var(--text-muted)] hover:text-[var(--primary)] font-black text-xs uppercase tracking-widest transition-colors flex items-center justify-center gap-2"
                 >
                   Back to branch selection
                 </button>
