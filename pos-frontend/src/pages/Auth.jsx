@@ -4,8 +4,14 @@ import logo from "../assets/images/logo.png"
 import Register from "../components/auth/Register";
 import Login from "../components/auth/Login";
 import { motion, AnimatePresence } from "framer-motion";
+import { useDispatch, useSelector } from "react-redux";
+import { toggleTheme } from "../redux/slices/themeSlice";
+import { FaSun, FaMoon } from "react-icons/fa";
 
 const Auth = () => {
+  const dispatch = useDispatch();
+  const { mode } = useSelector((state) => state.theme);
+
   useEffect(() => {
     document.title = "RestroPOS | Enterprise Secure Login"
   }, [])
@@ -72,6 +78,15 @@ const Auth = () => {
 
       {/* Authentication Section */}
       <div className="w-full lg:w-2/5 min-h-screen flex flex-col justify-center px-8 md:px-20 relative bg-[var(--bg-main)]">
+        {/* Theme Toggle */}
+        <button
+          onClick={() => dispatch(toggleTheme())}
+          className="absolute top-10 right-8 md:right-20 bg-[var(--bg-card)] border border-[var(--border-main)] hover:border-[var(--primary)] rounded-xl p-3 cursor-pointer transition-all shadow-sm flex items-center justify-center w-11 h-11 z-10"
+          title={`Switch to ${mode === 'dark' ? 'Light' : 'Dark'} Mode`}
+        >
+          {mode === 'dark' ? <FaSun size={18} className="text-[var(--primary)]" /> : <FaMoon size={18} className="text-blue-500" />}
+        </button>
+
         <div className="absolute top-12 left-8 md:left-20 flex items-center gap-3">
           <motion.div 
             whileHover={{ rotate: 180 }}
