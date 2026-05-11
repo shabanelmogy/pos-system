@@ -37,7 +37,7 @@ const RecentOrders = () => {
 
 
   return (
-    <div className="px-6 mt-4 mb-6 relative">
+    <div className="mt-4 mb-6 relative">
       <div className="bg-[var(--bg-card)] w-full min-h-[300px] lg:h-[331px] 2xl:h-[503px] rounded-2xl border border-[var(--border-main)] shadow-xl overflow-hidden flex flex-col">
         <div className="flex justify-between items-center px-6 py-4 border-b border-[var(--bg-card-alt)]">
           <h1 className="text-[var(--text-main)] text-base font-black uppercase tracking-tighter">
