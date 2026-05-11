@@ -58,46 +58,45 @@ const Header = () => {
 
       {/* CENTERED POS TERMINAL INFO */}
       {selectedBranch && selectedPOSPoint && (
-        <div className="absolute left-1/2 -translate-x-1/2 hidden xl:flex items-center gap-6 px-6 py-2 bg-[#1f1f1f] border border-[#333] rounded-2xl shadow-xl shadow-black/20">
-          <div className="flex items-center gap-3">
-            <div className="text-[#f6b100] bg-[#f6b100]/10 p-2 rounded-lg">
-              <MdStore size={18} />
+        <div className="absolute left-1/2 -translate-x-1/2 hidden xl:flex flex-col items-center bg-[#1f1f1f] border border-[#333] rounded-2xl shadow-xl shadow-black/20 px-6 py-1.5">
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-3">
+              <div className="text-[#f6b100] bg-[#f6b100]/10 p-1.5 rounded-lg">
+                <MdStore size={16} />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-[9px] text-[#ababab] font-bold uppercase tracking-widest leading-none mb-0.5">Branch</span>
+                <span className="text-xs text-white font-bold leading-none">{selectedBranch.name}</span>
+              </div>
             </div>
-            <div className="flex flex-col">
-              <span className="text-[10px] text-[#ababab] font-bold uppercase tracking-widest">Branch</span>
-              <span className="text-xs text-white font-bold">{selectedBranch.name}</span>
-            </div>
-          </div>
-          
-          <div className="w-px h-8 bg-[#333]"></div>
+            
+            <div className="w-px h-6 bg-[#333]"></div>
 
-          <div className="flex items-center gap-3">
-            <div className="text-[#f6b100] bg-[#f6b100]/10 p-2 rounded-lg">
-              <MdComputer size={18} />
+            <div className="flex items-center gap-3">
+              <div className="text-[#f6b100] bg-[#f6b100]/10 p-1.5 rounded-lg">
+                <MdComputer size={16} />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-[9px] text-[#ababab] font-bold uppercase tracking-widest leading-none mb-0.5">Terminal</span>
+                <span className="text-xs text-white font-bold leading-none">{selectedPOSPoint.name}</span>
+              </div>
             </div>
-            <div className="flex flex-col">
-              <span className="text-[10px] text-[#ababab] font-bold uppercase tracking-widest">Terminal</span>
-              <span className="text-xs text-white font-bold">{selectedPOSPoint.name}</span>
-            </div>
+
+            <button 
+              onClick={handleChangeTerminal}
+              className="ml-2 p-1.5 hover:bg-[#333] rounded-lg text-[#ababab] hover:text-[#f6b100] transition-all tooltip"
+              title="Change Terminal"
+            >
+              <MdSwapHoriz size={18} />
+            </button>
           </div>
 
           {activeShift && (
-            <>
-              <div className="w-px h-8 bg-[#333]"></div>
-              <div className="flex flex-col">
-                <span className="text-[10px] text-[#ababab] font-bold uppercase tracking-widest">Session ID</span>
-                <span className="text-[10px] text-[#f6b100] font-black tracking-tight">{activeShift.slug || "N/A"}</span>
-              </div>
-            </>
+            <div className="flex items-center gap-2 mt-1.5 pt-1.5 border-t border-[#333]/50 w-full justify-center">
+              <span className="text-[8px] text-[#ababab] font-bold uppercase tracking-widest">Active Session</span>
+              <span className="text-[10px] text-[#f6b100] font-black tracking-tight">{activeShift.slug || "N/A"}</span>
+            </div>
           )}
-
-          <button 
-            onClick={handleChangeTerminal}
-            className="ml-2 p-2 hover:bg-[#333] rounded-lg text-[#ababab] hover:text-[#f6b100] transition-all tooltip"
-            title="Change Terminal"
-          >
-            <MdSwapHoriz size={20} />
-          </button>
         </div>
       )}
 

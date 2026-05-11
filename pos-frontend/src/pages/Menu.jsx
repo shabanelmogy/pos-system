@@ -29,7 +29,7 @@ const Menu = () => {
       <section className="bg-[#1f1f1f] h-[calc(100vh-5rem)] pb-32 lg:pb-12 lg:h-[calc(100vh-5rem)] overflow-hidden flex flex-col lg:flex-row gap-3">
 
         {/* ── Left: Menu ── */}
-        <div className="flex-[2.5] flex flex-col min-h-0 overflow-hidden">
+        <div className="flex-[3] flex flex-col min-h-0 overflow-hidden">
 
           {/* Fixed header */}
           <div className="flex-none flex items-center justify-between px-10 py-4">
