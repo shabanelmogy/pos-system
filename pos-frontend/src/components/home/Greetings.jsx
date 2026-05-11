@@ -31,7 +31,7 @@ const Greetings = () => {
   };
 
   return (
-    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center px-6 mt-4 gap-4 sm:gap-0">
+    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mt-4 gap-4 sm:gap-0 lg:px-0">
       <div>
         <h1 className="text-[var(--text-main)] text-xl font-semibold tracking-wide">
           Good Morning, {userData.name || "TEST USER"}
