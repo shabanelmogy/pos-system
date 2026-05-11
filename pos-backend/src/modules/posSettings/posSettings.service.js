@@ -14,6 +14,7 @@ const posSettingsService = {
           enableTables: true,
           requireCustomerOnOrder: false,
           openOnMenu: false,
+          directPrint: false,
           receiptPrinterName: "Default",
           kitchenPrinterName: "Kitchen"
         });
@@ -36,6 +37,7 @@ const posSettingsService = {
         enableTables: true,
         requireCustomerOnOrder: false,
         openOnMenu: false,
+        directPrint: false,
         receiptPrinterName: "Default",
         kitchenPrinterName: "Kitchen"
       });

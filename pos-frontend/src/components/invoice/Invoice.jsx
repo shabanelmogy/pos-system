@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FaCheck, FaPrint, FaTimes, FaStore, FaUser, FaClock } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
@@ -6,13 +6,17 @@ import { removeAllItems } from "../../redux/slices/cartSlice";
 import { removeCustomer, setCustomer } from "../../redux/slices/customerSlice";
 import { useNavigate } from "react-router-dom";
 
-const Invoice = ({ orderInfo, setShowInvoice, isReprint = false }) => {
+const Invoice = ({ orderInfo, setShowInvoice, isReprint = false, directPrint = false }) => {
   const invoiceRef = useRef(null);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { selectedBranch, selectedPOSPoint } = useSelector((state) => state.pos);
+  const user = useSelector((state) => state.user);
+  const isAdmin = user?.role?.toLowerCase() === "admin";
+  const directPrintEnabled = selectedPOSPoint?.settings?.directPrint === true;
+  const isDirectPrint = directPrint || directPrintEnabled;
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     setShowInvoice(false);
 
     if (!isReprint) {
@@ -21,18 +25,20 @@ const Invoice = ({ orderInfo, setShowInvoice, isReprint = false }) => {
 
       dispatch(removeAllItems());
 
-      if (openOnMenu) {
+      if (openOnMenu && !isAdmin) {
         // Stay on menu flow — reset customer to Guest for next order
         dispatch(setCustomer({ name: "Guest", phone: "N/A", guests: 1 }));
         navigate("/menu");
-      } else {
+      } else if (!isAdmin) {
         dispatch(removeCustomer());
         navigate(enableTables ? "/tables" : "/menu");
       }
+      // Admins just stay where they are or we can add specific logic
     }
-  };
+  }, [isReprint, selectedPOSPoint, dispatch, navigate, setShowInvoice, isAdmin]);
 
-  const handlePrint = () => {
+  const handlePrint = useCallback(() => {
+    console.log("[INVOICE] Executing handlePrint...");
     let iframe = document.getElementById("print-iframe");
     if (!iframe) {
       iframe = document.createElement("iframe");
@@ -115,14 +121,44 @@ const Invoice = ({ orderInfo, setShowInvoice, isReprint = false }) => {
     setTimeout(() => {
       iframe.contentWindow.focus();
       iframe.contentWindow.print();
-      handleClose();
+      // If direct print is enabled, close automatically after print command
+      if (isDirectPrint) {
+        handleClose();
+      }
     }, 600);
-  };
+  }, [orderInfo, isReprint, handleClose, isDirectPrint]);
+
+  useEffect(() => {
+    if (isDirectPrint && orderInfo && !isReprint) {
+      handlePrint();
+    }
+  }, [isDirectPrint, orderInfo, isReprint, handlePrint]);
 
   const formatNum = (val) => {
     const num = parseFloat(val);
     return isNaN(num) ? "0.00" : num.toFixed(2);
   };
+
+  // If direct print is enabled, we show a simplified "Printing" indicator instead of the full modal
+  if (isDirectPrint && !isReprint) {
+    return (
+      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-center z-[2000]">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-[#1a1a1a] p-8 rounded-3xl border border-[#333] flex flex-col items-center gap-4 shadow-2xl"
+        >
+          <div className="w-12 h-12 bg-[#f6b100] rounded-full flex items-center justify-center animate-pulse shadow-lg shadow-[#f6b100]/20">
+            <FaPrint className="text-[#1a1a1a]" size={20} />
+          </div>
+          <div className="text-center">
+            <h3 className="text-white font-black uppercase tracking-widest text-xs">Printing Receipt...</h3>
+            <p className="text-[#666] text-[10px] uppercase font-bold mt-1">Please wait a moment</p>
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 bg-black/90 backdrop-blur-md flex justify-center items-center z-[2000] p-4">

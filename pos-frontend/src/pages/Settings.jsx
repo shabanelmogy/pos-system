@@ -186,6 +186,19 @@ const Settings = () => {
                                                     </button>
                                                 </div>
 
+                                                <div className="bg-[#1f1f1f] p-5 rounded-2xl border border-[#333] flex items-center justify-between group hover:border-[#f6b100]/30 transition-all">
+                                                    <div>
+                                                        <span className="text-[10px] text-[#f5f5f5] font-black uppercase tracking-widest block">Direct Print</span>
+                                                        <p className="text-[9px] text-[#666] mt-1 font-medium">Bypass print preview and print immediately</p>
+                                                    </div>
+                                                    <button
+                                                        onClick={() => handleToggle('directPrint')}
+                                                        className={`w-10 h-5 rounded-full relative transition-all ${localSettings.directPrint ? 'bg-[#f6b100]' : 'bg-[#333]'}`}
+                                                    >
+                                                        <div className={`absolute top-1 w-3 h-3 rounded-full bg-white transition-all ${localSettings.directPrint ? 'left-6' : 'left-1'}`} />
+                                                    </button>
+                                                </div>
+
                                                 <div className="bg-[#1f1f1f] p-5 rounded-2xl border border-[#333] space-y-3 group hover:border-[#f6b100]/30 transition-all">
                                                     <label className="text-[10px] text-[#ababab] font-black uppercase tracking-widest block">Receipt Printer</label>
                                                     <input

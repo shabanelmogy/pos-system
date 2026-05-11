@@ -158,7 +158,13 @@ const Bill = () => {
   });
 
   if (showInvoice && orderInfo) {
-    return <Invoice orderInfo={orderInfo} setShowInvoice={setShowInvoice} />;
+    return (
+      <Invoice 
+        orderInfo={orderInfo} 
+        setShowInvoice={setShowInvoice} 
+        directPrint={selectedPOSPoint?.settings?.directPrint === true}
+      />
+    );
   }
 
   return (
