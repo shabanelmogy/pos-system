@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { FaShoppingCart, FaSearch } from "react-icons/fa";
-import { MdRestaurantMenu } from "react-icons/md";
+import { MdRestaurantMenu, MdChevronLeft, MdChevronRight } from "react-icons/md";
+import { RiAddFill, RiSubtractFill } from "react-icons/ri";
 import { useDispatch } from "react-redux";
 import { addItems } from "../../redux/slices/cartSlice";
 import { getCategories, getItems } from "../../https";
@@ -12,8 +13,41 @@ const MenuContainer = () => {
   const [activeItemId, setActiveItemId] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const dispatch = useDispatch();
+  const scrollRef = React.useRef(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollLeftState, setScrollLeftState] = useState(0);
 
-  // Fetch Categories
+  const handleMouseDown = (e) => {
+    setIsDragging(true);
+    setStartX(e.pageX - scrollRef.current.offsetLeft);
+    setScrollLeftState(scrollRef.current.scrollLeft);
+  };
+
+  const handleMouseLeave = () => {
+    setIsDragging(false);
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const handleMouseMove = (e) => {
+    if (!isDragging) return;
+    e.preventDefault();
+    const x = e.pageX - scrollRef.current.offsetLeft;
+    const walk = (x - startX) * 2; // Scroll speed
+    scrollRef.current.scrollLeft = scrollLeftState - walk;
+  };
+
+  const scroll = (direction) => {
+    if (scrollRef.current) {
+      const { scrollLeft } = scrollRef.current;
+      const scrollTo = direction === "left" ? scrollLeft - 200 : scrollLeft + 200;
+      scrollRef.current.scrollTo({ left: scrollTo, behavior: "smooth" });
+    }
+  };
+
   const { data: categories, isLoading: categoriesLoading } = useQuery({
     queryKey: ["categories"],
     queryFn: async () => {
@@ -22,14 +56,12 @@ const MenuContainer = () => {
     },
   });
 
-  // Set initial category when data loads
   useEffect(() => {
     if (categories?.length > 0 && !selectedCategory) {
       setSelectedCategory(categories[0]);
     }
   }, [categories, selectedCategory]);
 
-  // Fetch Items for Selected Category
   const { data: items, isLoading: itemsLoading } = useQuery({
     queryKey: ["items", selectedCategory?.id],
     queryFn: async () => {
@@ -45,137 +77,217 @@ const MenuContainer = () => {
       setActiveItemId(id);
       setItemCount(1);
     } else {
-      if (itemCount >= 10) return;
+      if (itemCount >= 99) return;
       setItemCount((prev) => prev + 1);
     }
   };
 
   const decrement = (id) => {
     if (activeItemId !== id) return;
-    if (itemCount <= 0) return;
+    if (itemCount <= 1) {
+      setItemCount(0);
+      setActiveItemId(null);
+      return;
+    }
     setItemCount((prev) => prev - 1);
   };
 
   const handleAddToCart = (item) => {
     if (activeItemId !== item.id || itemCount === 0) return;
-
     const { name, price } = item;
     const priceNum = parseFloat(price);
-    const newObj = { 
+    const newObj = {
       id: item.id, // Keep the real database UUID
-      name, 
-      pricePerQuantity: priceNum, 
-      quantity: itemCount, 
-      price: priceNum * itemCount 
+      name,
+      pricePerQuantity: priceNum,
+      quantity: itemCount,
+      price: priceNum * itemCount,
     };
-
     dispatch(addItems(newObj));
     setItemCount(0);
     setActiveItemId(null);
   };
 
-  const filteredItems = items?.filter(item => 
+  const filteredItems = items?.filter((item) =>
     item.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  if (categoriesLoading) return <div className="h-40 flex items-center justify-center"><p className="text-[#ababab]">Loading categories...</p></div>;
+  if (categoriesLoading)
+    return (
+      <div className="flex flex-col items-center justify-center h-64 gap-4">
+        <div className="w-10 h-10 rounded-full border-4 border-[#f6b100]/20 border-t-[#f6b100] animate-spin" />
+        <p className="text-[#555] text-sm font-semibold tracking-wider uppercase animate-pulse">Loading Menu…</p>
+      </div>
+    );
 
   return (
     <>
-      {/* Category List */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 px-10 py-4 w-[100%]">
-        {categories?.map((category) => (
-          <div
-            key={category.id}
-            className={`flex flex-col items-start justify-between p-4 rounded-lg min-h-[100px] cursor-pointer transition-all bg-[#262626] border-2 ${
-              selectedCategory?.id === category.id ? "border-[#f6b100] scale-95 shadow-lg shadow-[#f6b100]/20" : "border-transparent opacity-80 hover:opacity-100"
-            }`}
-            onClick={() => {
-              setSelectedCategory(category);
-              setActiveItemId(null);
-              setItemCount(0);
-              setSearchTerm("");
-            }}
-          >
-            <div className="flex items-center justify-between w-full">
-              <div className="flex flex-col items-start text-white">
-                <h1 className="text-xl font-bold text-white uppercase">{category.name}</h1>
-                <p className="text-xs font-medium opacity-40 uppercase tracking-widest mt-1">Explore Menu</p>
-              </div>
-              <MdRestaurantMenu className={`text-3xl transition-colors ${selectedCategory?.id === category.id ? "text-[#f6b100]" : "text-white opacity-10"}`} />
-            </div>
+      <div className="relative group/nav px-6 pt-4">
+        {/* Left Scroll Button */}
+        <button
+          onClick={() => scroll("left")}
+          className="absolute left-1 top-[calc(50%+8px)] -translate-y-1/2 z-10 bg-[#1a1a1a]/80 hover:bg-[#f6b100] text-[#f6b100] hover:text-black p-1.5 rounded-full lg:opacity-0 lg:group-hover/nav:opacity-100 transition-all duration-300 border border-[#333] shadow-xl backdrop-blur-sm"
+        >
+          <MdChevronLeft size={20} />
+        </button>
+
+        <div 
+          ref={scrollRef}
+          onMouseDown={handleMouseDown}
+          onMouseLeave={handleMouseLeave}
+          onMouseUp={handleMouseUp}
+          onMouseMove={handleMouseMove}
+          className={`overflow-x-auto scrollbar-hide cursor-grab active:cursor-grabbing select-none ${isDragging ? "scroll-auto" : "scroll-smooth"}`}
+        >
+          <div className="flex items-center gap-2 min-w-max border-b border-[#2a2a2a] pb-0">
+            {categories?.map((category) => {
+              const isActive = selectedCategory?.id === category.id;
+              return (
+                <button
+                  key={category.id}
+                  onClick={() => {
+                    setSelectedCategory(category);
+                    setActiveItemId(null);
+                    setItemCount(0);
+                    setSearchTerm("");
+                  }}
+                  className={`relative flex items-center gap-2 px-5 py-3 text-sm font-bold uppercase tracking-wider whitespace-nowrap transition-all duration-200 rounded-t-xl ${isActive
+                    ? "bg-[#f6b100] text-black shadow-lg shadow-[#f6b100]/20"
+                    : "text-[#666] hover:text-[#ababab] hover:bg-[#222]"
+                    }`}
+                >
+                  <MdRestaurantMenu className={isActive ? "text-black" : "text-[#f6b100]"} />
+                  {category.name}
+                </button>
+              );
+            })}
           </div>
-        ))}
+        </div>
+
+        {/* Right Scroll Button */}
+        <button
+          onClick={() => scroll("right")}
+          className="absolute right-1 top-[calc(50%+8px)] -translate-y-1/2 z-10 bg-[#1a1a1a]/80 hover:bg-[#f6b100] text-[#f6b100] hover:text-black p-1.5 rounded-full lg:opacity-0 lg:group-hover/nav:opacity-100 transition-all duration-300 border border-[#333] shadow-xl backdrop-blur-sm"
+        >
+          <MdChevronRight size={20} />
+        </button>
       </div>
 
-      <div className="px-10 py-2 flex items-center justify-between gap-4">
-        <h2 className="text-[#f5f5f5] text-xl font-bold tracking-wider">
-          {selectedCategory?.name || "Items"}
-        </h2>
-        <div className="bg-[#1a1a1a] flex items-center gap-3 px-4 py-2 rounded-lg border border-[#333] w-full max-w-[300px]">
-          <FaSearch className="text-[#ababab] text-sm" />
-          <input 
-            type="text" 
-            placeholder="Search dish..." 
+      {/* ── Search Bar ── */}
+      <div className="px-6 py-4">
+        <div className="relative group">
+          <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-[#444] group-focus-within:text-[#f6b100] transition-colors text-sm" />
+          <input
+            type="text"
+            placeholder={`Search in ${selectedCategory?.name || "menu"}…`}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="bg-transparent outline-none text-[#f5f5f5] text-sm w-full"
+            className="w-full bg-[#151515] border border-[#2a2a2a] focus:border-[#f6b100]/60 text-[#f5f5f5] text-sm rounded-xl pl-11 pr-10 py-2.5 outline-none transition-all placeholder-[#333]"
           />
+          {searchTerm && (
+            <button
+              onClick={() => setSearchTerm("")}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-[#555] hover:text-white transition-colors text-xs"
+            >
+              ✕
+            </button>
+          )}
         </div>
       </div>
 
-      <hr className="border-[#2a2a2a] border-t-2 mx-10" />
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 px-10 py-4 w-[100%] overflow-y-auto custom-scrollbar">
+      {/* ── Items Grid ── */}
+      <div className="px-6 pb-6">
         {itemsLoading ? (
-          <p className="text-[#ababab] col-span-full text-center py-10">Loading items...</p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+            {Array.from({ length: 10 }).map((_, i) => (
+              <div key={i} className="h-44 bg-[#1a1a1a] rounded-2xl animate-pulse border border-[#222]" />
+            ))}
+          </div>
         ) : filteredItems?.length > 0 ? (
-          filteredItems.map((item) => (
-            <div
-              key={item.id}
-              className="flex flex-col items-start justify-between p-4 rounded-lg min-h-[180px] hover:bg-[#2a2a2a] bg-[#1a1a1a] transition-all border border-[#333] hover:border-[#444]"
-            >
-              <div className="flex items-start justify-between w-full gap-2">
-                <div>
-                  <h1 className="text-[#f5f5f5] text-md sm:text-lg font-semibold line-clamp-2">
-                    {item.name}
-                  </h1>
-                  <p className="text-[#ababab] text-[10px] mt-1 line-clamp-2">{item.description}</p>
-                </div>
-                <button 
-                  onClick={() => handleAddToCart(item)} 
-                  disabled={activeItemId !== item.id || itemCount === 0}
-                  className="bg-[#2e4a40] text-[#02ca3a] p-2 rounded-lg flex-none hover:bg-[#3d5a4d] transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+            {filteredItems.map((item) => {
+              const isActive = activeItemId === item.id && itemCount > 0;
+              return (
+                <div
+                  key={item.id}
+                  onClick={() => increment(item.id)}
+                  className={`relative group flex flex-col justify-between bg-[#151515] border-2 rounded-2xl p-4 cursor-pointer transition-all duration-200 select-none overflow-hidden ${isActive
+                    ? "border-[#f6b100] shadow-lg shadow-[#f6b100]/15 bg-[#1c1800]"
+                    : "border-[#222] hover:border-[#f6b100]/40 hover:bg-[#1a1a1a]"
+                    }`}
                 >
-                  <FaShoppingCart size={18} />
-                </button>
-              </div>
-              <div className="flex flex-wrap items-center justify-between w-full mt-4 gap-2">
-                <p className="text-[#f6b100] text-lg sm:text-xl font-black">
-                  ₹{item.price}
-                </p>
-                <div className="flex items-center justify-between bg-[#262626] px-2 sm:px-4 py-2 rounded-lg gap-3 sm:gap-6 ml-auto border border-[#333]">
-                  <button
-                    onClick={() => decrement(item.id)}
-                    className="text-[#f5f5f5] text-xl sm:text-2xl hover:text-[#f6b100] transition-colors"
-                  >
-                    &minus;
-                  </button>
-                  <span className="text-[#f6b100] text-sm sm:text-base font-black min-w-[20px] text-center">
-                    {activeItemId === item.id ? itemCount : "0"}
-                  </span>
-                  <button
-                    onClick={() => increment(item.id)}
-                    className="text-[#f5f5f5] text-xl sm:text-2xl hover:text-[#f6b100] transition-colors"
-                  >
-                    &#43;
-                  </button>
+                  {/* Qty Badge */}
+                  {isActive && (
+                    <div className="absolute top-2.5 right-2.5 bg-[#f6b100] text-black text-xs font-black w-6 h-6 rounded-full flex items-center justify-center shadow-lg z-10">
+                      {itemCount}
+                    </div>
+                  )}
+
+                  {/* Icon */}
+                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-3 transition-colors ${isActive ? "bg-[#f6b100]/20" : "bg-[#262626] group-hover:bg-[#2a2a2a]"}`}>
+                    <MdRestaurantMenu className={`text-2xl ${isActive ? "text-[#f6b100]" : "text-[#444]"}`} />
+                  </div>
+
+                  <div className="flex-1">
+                    <h3 className={`font-bold text-sm leading-snug line-clamp-2 transition-colors ${isActive ? "text-white" : "text-[#ccc] group-hover:text-white"}`}>
+                      {item.name}
+                    </h3>
+                    {item.description && (
+                      <p className="text-[#555] text-[10px] mt-1 line-clamp-1">{item.description}</p>
+                    )}
+                  </div>
+
+                  <div className="mt-3 flex items-center justify-between">
+                    <span className="text-[#f6b100] font-black text-base">₹{item.price}</span>
+                    {isActive ? (
+                      <div
+                        className="flex items-center gap-1 bg-[#262626] border border-[#333] rounded-lg px-1 py-0.5"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <button
+                          onClick={() => decrement(item.id)}
+                          className="w-6 h-6 flex items-center justify-center text-[#ababab] hover:text-red-400 transition-colors rounded active:scale-90"
+                        >
+                          <RiSubtractFill size={12} />
+                        </button>
+                        <span className="text-white text-xs font-black min-w-[16px] text-center">
+                          {itemCount}
+                        </span>
+                        <button
+                          onClick={() => increment(item.id)}
+                          className="w-6 h-6 flex items-center justify-center text-[#ababab] hover:text-[#f6b100] transition-colors rounded active:scale-90"
+                        >
+                          <RiAddFill size={12} />
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="w-7 h-7 rounded-lg bg-[#262626] group-hover:bg-[#f6b100]/10 flex items-center justify-center transition-colors">
+                        <RiAddFill className="text-[#555] group-hover:text-[#f6b100] transition-colors" size={14} />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Add to Cart — shown when active */}
+                  {isActive && (
+                    <button
+                      onClick={(e) => { e.stopPropagation(); handleAddToCart(item); }}
+                      className="mt-3 w-full py-2 bg-[#f6b100] hover:bg-[#e5a600] text-black text-xs font-black uppercase rounded-xl flex items-center justify-center gap-2 transition-all active:scale-95 shadow-lg shadow-[#f6b100]/20"
+                    >
+                      <FaShoppingCart size={11} />
+                      Add {itemCount > 1 ? `${itemCount} items` : "to order"}
+                    </button>
+                  )}
                 </div>
-              </div>
-            </div>
-          ))
+              );
+            })}
+          </div>
         ) : (
-          <p className="text-[#ababab] col-span-full text-center py-10">No items found in this category.</p>
+          <div className="flex flex-col items-center justify-center py-24 gap-4 opacity-40">
+            <div className="bg-[#1a1a1a] p-8 rounded-full">
+              <FaSearch size={36} className="text-[#555]" />
+            </div>
+            <p className="text-[#666] font-semibold text-sm">No items found</p>
+          </div>
         )}
       </div>
     </>

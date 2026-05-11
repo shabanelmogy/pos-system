@@ -45,8 +45,8 @@ const CartInfo = () => {
         </span>
       </div>
 
-      <div 
-        className="flex-1 overflow-y-auto pr-1 scrollbar-hide space-y-1.5" 
+      <div
+        className="flex-1 overflow-y-auto pr-1 scrollbar-hide space-y-1.5"
         ref={scrolLRef}
         style={{ maxHeight: '480px' }}
       >
@@ -60,8 +60,8 @@ const CartInfo = () => {
           </div>
         ) : cartData.map((item) => {
           return (
-            <div 
-              key={item.id} 
+            <div
+              key={item.id}
               className="group bg-[#1a1a1a] border border-[#2a2a2a] hover:border-[#f6b100]/40 rounded-lg p-2.5 transition-all duration-200"
             >
               <div className="flex items-start justify-between gap-2 mb-2">
@@ -76,7 +76,7 @@ const CartInfo = () => {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="flex items-center bg-[#2a2a2a] rounded-md border border-[#333]">
-                    <button 
+                    <button
                       onClick={() => handleDecrease(item)}
                       className="p-1 text-[#ababab] hover:text-[#f6b100] transition-colors"
                     >
@@ -85,7 +85,7 @@ const CartInfo = () => {
                     <span className="text-[#f6b100] text-xs font-black min-w-[20px] text-center">
                       {item.quantity}
                     </span>
-                    <button 
+                    <button
                       onClick={() => handleIncrease(item)}
                       className="p-1 text-[#ababab] hover:text-[#f6b100] transition-colors"
                     >
@@ -96,13 +96,13 @@ const CartInfo = () => {
                 </div>
 
                 <div className="flex items-center gap-1.5">
-                  <button 
+                  <button
                     className="p-1.5 bg-[#2a2a2a] hover:bg-[#f6b100]/10 text-[#888] hover:text-[#f6b100] rounded transition-colors duration-200"
                     title="Note"
                   >
                     <FaNotesMedical size={12} />
                   </button>
-                  <button 
+                  <button
                     onClick={() => handleRemove(item.id)}
                     className="p-1.5 bg-[#2a2a2a] hover:bg-red-500/10 text-[#888] hover:text-red-500 rounded transition-colors duration-200"
                     title="Remove"
@@ -121,3 +121,4 @@ const CartInfo = () => {
 };
 
 export default CartInfo;
+
