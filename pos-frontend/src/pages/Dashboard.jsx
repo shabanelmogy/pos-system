@@ -59,8 +59,8 @@ const Dashboard = () => {
   return (
     <div className="bg-[var(--bg-main)] min-h-[calc(100vh-5rem)] pb-20 overflow-y-auto">
       {/* Top Banner / Hero */}
-      <div className="bg-[var(--bg-card)] border-b border-[var(--border-main)]">
-        <div className="container mx-auto px-6 py-10 flex flex-col md:flex-row items-center justify-between gap-8">
+      <div className="bg-[var(--bg-card)] border-b border-[var(--border-main)] shadow-sm">
+        <div className="container mx-auto px-6 py-6 flex flex-col md:flex-row items-center justify-between gap-6">
           <div>
             <div className="flex items-center gap-3 mb-2">
               <span className="bg-[var(--primary)]/10 text-[var(--primary)] text-[10px] font-black tracking-widest px-2 py-1 rounded-md uppercase">Enterprise Dashboard</span>
@@ -68,11 +68,11 @@ const Dashboard = () => {
             <motion.h1 
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
-              className="text-3xl md:text-4xl font-black text-[var(--text-main)] tracking-tighter uppercase"
+              className="text-2xl md:text-3xl font-black text-[var(--text-main)] tracking-tighter uppercase"
             >
               Management Center
             </motion.h1>
-            <p className="text-[var(--text-muted)] mt-2 font-medium">Full control over your restaurant infrastructure and inventory.</p>
+            <p className="text-[var(--text-muted)] mt-1 text-sm font-medium">Infrastructure and inventory control.</p>
           </div>
 
           <div className="flex items-center gap-4 flex-wrap justify-center">
@@ -90,7 +90,7 @@ const Dashboard = () => {
                 whileTap={{ scale: 0.95 }}
                 key={action}
                 onClick={() => handleOpenModal(action)}
-                className={`bg-gradient-to-br ${color} px-6 py-3 rounded-xl text-white font-bold text-sm flex items-center gap-2 shadow-lg hover:shadow-xl transition-all border border-white/10 h-[52px]`}
+                className={`bg-gradient-to-br ${color} px-5 py-2.5 rounded-xl text-white font-bold text-xs flex items-center gap-2 shadow-lg hover:shadow-xl transition-all border border-white/10 h-[44px]`}
               >
                 <MdAddCircleOutline size={18} />
                 Add {label}
@@ -101,13 +101,13 @@ const Dashboard = () => {
       </div>
 
       {/* Tab Navigation */}
-      <div className="container mx-auto px-6 mt-10">
-        <div className="flex items-center bg-[var(--bg-card)] p-1.5 rounded-2xl border border-[var(--border-main)] w-fit overflow-x-auto no-scrollbar max-w-full">
+      <div className="container mx-auto px-6 mt-6">
+        <div className="flex items-center bg-[var(--bg-card)] p-1 rounded-xl border border-[var(--border-main)] w-fit overflow-x-auto no-scrollbar max-w-full">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               className={`
-                px-8 py-3 rounded-xl font-bold text-sm flex items-center gap-2 transition-all duration-300 whitespace-nowrap ${
+                px-6 py-2 rounded-lg font-bold text-xs flex items-center gap-2 transition-all duration-300 whitespace-nowrap ${
                 activeTab === tab.id
                   ? "bg-[var(--primary)] text-[var(--bg-card)] shadow-lg shadow-[var(--primary)]/20"
                   : "text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-card-alt)]"
@@ -122,7 +122,7 @@ const Dashboard = () => {
       </div>
 
       {/* Main Content Area */}
-      <div className="container mx-auto px-6 mt-8">
+      <div className="container mx-auto px-6 mt-6">
         <AnimatePresence mode="wait">
           <motion.div
             key={activeTab + selectedBranchId}

@@ -47,9 +47,9 @@ const RecentOrders = ({ branchId = "all" }) => {
   });
 
   return (
-    <div className="container mx-auto bg-[var(--bg-card-alt)] p-4 rounded-lg">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-[var(--text-main)] text-xl font-semibold">
+    <div className="container mx-auto bg-[var(--bg-card-alt)] p-3 rounded-xl border border-[var(--border-main)]">
+      <div className="flex items-center justify-between mb-3 px-1">
+        <h2 className="text-[var(--text-main)] text-lg font-black uppercase tracking-tighter">
           {branchId === "all" ? "All Orders" : "Branch Orders"}
         </h2>
         <button 
@@ -61,17 +61,17 @@ const RecentOrders = ({ branchId = "all" }) => {
       </div>
       <div className="overflow-x-auto custom-scrollbar">
         <table className="w-full text-left text-[var(--text-main)]">
-          <thead className="bg-[var(--border-main)] text-[var(--text-muted)]">
+          <thead className="bg-[var(--bg-card)] text-[var(--text-muted)] border-b border-[var(--border-main)]">
             <tr>
-              <th className="p-3">Order ID</th>
-              <th className="p-3">Source</th>
-              <th className="p-3">Customer</th>
-              <th className="p-3">Status</th>
-              <th className="p-3">Date & Time</th>
-              <th className="p-3">Items</th>
-              <th className="p-3">Table No</th>
-              <th className="p-3">Total</th>
-              <th className="p-3 text-center">Payment</th>
+              <th className="p-3 text-[9px] font-black uppercase tracking-widest">Order ID</th>
+              <th className="p-3 text-[9px] font-black uppercase tracking-widest">Source</th>
+              <th className="p-3 text-[9px] font-black uppercase tracking-widest">Customer</th>
+              <th className="p-3 text-[9px] font-black uppercase tracking-widest">Status</th>
+              <th className="p-3 text-[9px] font-black uppercase tracking-widest">Date & Time</th>
+              <th className="p-3 text-[9px] font-black uppercase tracking-widest">Items</th>
+              <th className="p-3 text-[9px] font-black uppercase tracking-widest">Table</th>
+              <th className="p-3 text-[9px] font-black uppercase tracking-widest">Total</th>
+              <th className="p-3 text-[9px] font-black uppercase tracking-widest text-center">Payment</th>
             </tr>
           </thead>
           <tbody>
@@ -82,8 +82,8 @@ const RecentOrders = ({ branchId = "all" }) => {
                   key={order.id}
                   className="border-b border-gray-600 hover:bg-[var(--border-main)] transition-colors"
                 >
-                  <td className="p-4 font-mono text-xs">#{Math.floor(new Date(order.createdAt).getTime() / 1000)}</td>
-                  <td className="p-4">
+                  <td className="p-3 font-mono text-xs">#{Math.floor(new Date(order.createdAt).getTime() / 1000)}</td>
+                  <td className="p-3">
                     <div className="flex flex-col gap-1">
                       <div className="flex items-center gap-1 text-[var(--primary)] text-[10px] font-bold uppercase">
                         <MdStore /> {order.branch?.name || "Unknown Branch"}
@@ -93,13 +93,13 @@ const RecentOrders = ({ branchId = "all" }) => {
                       </div>
                     </div>
                   </td>
-                  <td className="p-4">
+                  <td className="p-3">
                     <div className="flex flex-col">
                       <span className="font-semibold text-sm">{order.customerDetails?.name || "Guest"}</span>
                       {isPremium && <span className="text-[10px] text-[var(--status-warning)] font-bold uppercase">Loyal Customer</span>}
                     </div>
                   </td>
-                  <td className="p-4">
+                  <td className="p-3">
                     <select
                       className={`bg-[var(--bg-card)] text-[var(--text-main)] border border-[var(--border-main)] p-2 rounded-lg focus:outline-none text-xs ${
                         order.orderStatus === "Ready" ? "text-[var(--status-success)]" : 
@@ -113,14 +113,14 @@ const RecentOrders = ({ branchId = "all" }) => {
                       <option value="Completed">Completed</option>
                     </select>
                   </td>
-                  <td className="p-4 text-xs">{formatDateAndTime(order.createdAt)}</td>
-                  <td className="p-4 text-sm">{order.orderItems?.length || 0} Items</td>
-                  <td className="p-4">
-                    <span className="bg-[var(--border-main)] px-2 py-1 rounded text-xs">Table - {order.table?.tableNo || "N/A"}</span>
+                  <td className="p-3 text-xs">{formatDateAndTime(order.createdAt)}</td>
+                  <td className="p-3 text-sm">{order.orderItems?.length || 0} Items</td>
+                  <td className="p-3">
+                    <span className="bg-[var(--bg-card)] px-2 py-1 rounded text-[10px] font-bold border border-[var(--border-main)]">Table {order.table?.tableNo || "N/A"}</span>
                   </td>
-                  <td className="p-4 font-bold text-[var(--primary)] text-sm">₹{parseFloat(order.total || 0).toFixed(2)}</td>
-                  <td className="p-4 text-center">
-                    <span className={`text-[10px] font-bold uppercase px-2 py-1 rounded-full ${order.paymentMethod === 'Cash' ? 'bg-[var(--status-success-bg)] text-[var(--status-success)]' : 'bg-[var(--primary-light)] text-[var(--primary)]'}`}>
+                  <td className="p-3 font-bold text-[var(--primary)] text-sm">₹{parseFloat(order.total || 0).toFixed(2)}</td>
+                  <td className="p-3 text-center">
+                    <span className={`text-[9px] font-bold uppercase px-2 py-0.5 rounded-full ${order.paymentMethod === 'Cash' ? 'bg-[var(--status-success-bg)] text-[var(--status-success)]' : 'bg-[var(--primary-light)] text-[var(--primary)]'}`}>
                       {order.paymentMethod || "Cash"}
                     </span>
                   </td>

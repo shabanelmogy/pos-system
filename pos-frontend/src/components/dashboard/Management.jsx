@@ -143,14 +143,14 @@ const Management = () => {
   );
 
   return (
-    <div className="space-y-8">
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 border-b border-[var(--border-main)] pb-6">
+    <div className="space-y-6">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-[var(--border-main)] pb-4">
         <div className="flex items-center gap-4 overflow-x-auto no-scrollbar pb-2 lg:pb-0">
           {subTabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveSubTab(tab.id)}
-              className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest transition-all whitespace-nowrap ${
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all whitespace-nowrap ${
                 activeSubTab === tab.id 
                   ? "bg-[var(--primary)] text-[var(--bg-card)] shadow-lg shadow-[var(--primary)]/20" 
                   : "text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-card)]"
@@ -170,28 +170,28 @@ const Management = () => {
                   placeholder="Search staff..." 
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="bg-[var(--bg-card)] border border-[var(--border-main)] rounded-2xl py-3 pl-12 pr-6 text-[var(--text-main)] text-sm focus:outline-none focus:border-[var(--primary)] w-full lg:w-64 transition-all"
+                  className="bg-[var(--bg-card)] border border-[var(--border-main)] rounded-xl py-2.5 pl-10 pr-4 text-[var(--text-main)] text-xs focus:outline-none focus:border-[var(--primary)] w-full lg:w-48 transition-all"
                 />
              </div>
            )}
            <div className="flex items-center gap-2">
-             <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={handleManualRefresh}
-                title="Refresh Data"
-                className="p-3.5 bg-[var(--bg-card)] border border-[var(--border-main)] rounded-2xl text-[var(--text-muted)] hover:text-[var(--primary)] transition-all"
-             >
-                <MdRefresh size={22} />
-             </motion.button>
-             <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => openEditModal(activeSubTab === "Users" ? "user" : activeSubTab.toLowerCase(), null)}
-                className="bg-[var(--primary)] text-[var(--bg-card)] px-6 py-3.5 rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg flex items-center gap-2 whitespace-nowrap"
-             >
-                <MdAddCircle size={18} /> New {activeSubTab === "Users" ? "Staff" : activeSubTab.slice(0, -1)}
-             </motion.button>
+              <motion.button
+                 whileHover={{ scale: 1.05 }}
+                 whileTap={{ scale: 0.95 }}
+                 onClick={handleManualRefresh}
+                 title="Refresh Data"
+                 className="p-2.5 bg-[var(--bg-card)] border border-[var(--border-main)] rounded-xl text-[var(--text-muted)] hover:text-[var(--primary)] transition-all"
+              >
+                 <MdRefresh size={20} />
+              </motion.button>
+              <motion.button
+                 whileHover={{ scale: 1.05 }}
+                 whileTap={{ scale: 0.95 }}
+                 onClick={() => openEditModal(activeSubTab === "Users" ? "user" : activeSubTab.toLowerCase(), null)}
+                 className="bg-[var(--primary)] text-[var(--bg-card)] px-5 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg flex items-center gap-2 whitespace-nowrap"
+              >
+                 <MdAddCircle size={16} /> New {activeSubTab === "Users" ? "Staff" : activeSubTab.slice(0, -1)}
+              </motion.button>
            </div>
         </div>
       </div>
@@ -203,13 +203,13 @@ const Management = () => {
           initial="hidden"
           animate="show"
           exit="hidden"
-          className={activeSubTab === "Users" ? "w-full" : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"}
+           className={activeSubTab === "Users" ? "w-full" : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"}
         >
           {/* TABLES SECTION */}
           {activeSubTab === "Tables" && (
             <>
-              {(tables || []).map((table) => (
-                <motion.div variants={itemVariants} key={table.id} className="relative bg-[var(--bg-card)] p-6 rounded-[2rem] border border-[var(--border-main)] flex flex-col gap-6 group transition-all hover:border-[var(--primary)]/50 hover:shadow-2xl hover:shadow-[var(--primary)]/5">
+               {(tables || []).map((table) => (
+                <motion.div variants={itemVariants} key={table.id} className="relative bg-[var(--bg-card)] p-4 rounded-2xl border border-[var(--border-main)] flex flex-col gap-4 group transition-all hover:border-[var(--primary)]/50 hover:shadow-2xl hover:shadow-[var(--primary)]/5">
                   <div className="flex justify-between items-start">
                     <div className={`p-4 rounded-2xl ${table.status === 'Available' ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'}`}>
                       <MdTableBar size={32} />
@@ -218,9 +218,9 @@ const Management = () => {
                       <button onClick={() => openEditModal("table", table)} className="p-3 bg-[var(--bg-card-alt)] hover:bg-[var(--border-main)] rounded-xl text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors"><MdEdit size={18} /></button>
                       <button onClick={() => openConfirm("table", table.id, `Table ${table.tableNo}`)} className="p-3 bg-red-500/10 hover:bg-red-500/20 rounded-xl text-red-500 transition-colors"><MdDelete size={18} /></button>
                     </div>
-                  </div>
+                   </div>
                   <div>
-                    <h3 className="text-[var(--text-main)] text-2xl font-black tracking-tighter">TABLE {table.tableNo}</h3>
+                    <h3 className="text-[var(--text-main)] text-xl font-black tracking-tighter">TABLE {table.tableNo}</h3>
                     <div className="flex items-center gap-2 mt-1">
                       <span className="text-[var(--text-muted)] text-xs font-bold uppercase tracking-widest">{table.seats} Seats</span>
                       <span className="w-1 h-1 bg-[var(--border-main)] rounded-full"></span>
@@ -238,8 +238,8 @@ const Management = () => {
           {/* CATEGORIES SECTION */}
           {activeSubTab === "Categories" && (
             <>
-              {(categories || []).map((cat) => (
-                <motion.div variants={itemVariants} key={cat.id} className="bg-[var(--bg-card)] p-6 rounded-[2rem] border border-[var(--border-main)] flex items-center justify-between group transition-all hover:border-[var(--primary)]/50 hover:shadow-2xl">
+               {(categories || []).map((cat) => (
+                <motion.div variants={itemVariants} key={cat.id} className="bg-[var(--bg-card)] p-4 rounded-2xl border border-[var(--border-main)] flex items-center justify-between group transition-all hover:border-[var(--primary)]/50 hover:shadow-2xl">
                   <div className="flex items-center gap-5">
                     <div className="p-4 bg-gradient-to-br from-[var(--bg-card-alt)] to-[var(--bg-card)] rounded-2xl text-[var(--primary)] shadow-xl">
                       <MdCategory size={30} />
@@ -262,8 +262,8 @@ const Management = () => {
           {/* ITEMS SECTION */}
           {activeSubTab === "Items" && (
             <>
-              {(items || []).map((item) => (
-                <motion.div variants={itemVariants} key={item.id} className="bg-[var(--bg-card)] p-5 rounded-[2rem] border border-[var(--border-main)] flex flex-col gap-4 group transition-all hover:border-[var(--primary)]/50 hover:shadow-2xl">
+               {(items || []).map((item) => (
+                <motion.div variants={itemVariants} key={item.id} className="bg-[var(--bg-card)] p-4 rounded-2xl border border-[var(--border-main)] flex flex-col gap-3 group transition-all hover:border-[var(--primary)]/50 hover:shadow-2xl">
                   <div className="flex justify-between items-start">
                     <div className="p-4 bg-gradient-to-br from-[var(--bg-card-alt)] to-[var(--bg-card)] rounded-2xl text-[var(--primary)] shadow-xl">
                       <MdRestaurantMenu size={32} />
@@ -289,16 +289,16 @@ const Management = () => {
           {/* BRANCHES SECTION */}
           {activeSubTab === "Branches" && (
             <>
-              {(branches || []).map((branch) => (
-                <motion.div variants={itemVariants} key={branch.id} className="bg-[var(--bg-card)] p-6 rounded-[2rem] border border-[var(--border-main)] flex flex-col gap-6 group transition-all hover:border-[var(--primary)]/50 hover:shadow-2xl">
+               {(branches || []).map((branch) => (
+                <motion.div variants={itemVariants} key={branch.id} className="bg-[var(--bg-card)] p-5 rounded-2xl border border-[var(--border-main)] flex flex-col gap-4 group transition-all hover:border-[var(--primary)]/50 hover:shadow-2xl">
                   <div className="flex justify-between items-start">
                     <div className="p-4 bg-gradient-to-br from-[var(--primary)]/20 to-[var(--primary)]/5 text-[var(--primary)] rounded-2xl border border-[var(--primary)]/20 shadow-lg">
                       <MdStore size={32} />
                     </div>
                     <button onClick={() => openEditModal("branch", branch)} className="p-3 bg-[var(--bg-card-alt)] hover:bg-[var(--border-main)] rounded-xl text-[var(--text-muted)] hover:text-[var(--text-main)] opacity-0 group-hover:opacity-100 transition-all"><MdEdit size={18} /></button>
-                  </div>
+                   </div>
                   <div>
-                    <h3 className="text-[var(--text-main)] text-2xl font-black tracking-tighter uppercase">{branch.name}</h3>
+                    <h3 className="text-[var(--text-main)] text-xl font-black tracking-tighter uppercase">{branch.name}</h3>
                     <p className="text-[var(--primary)] text-[10px] font-black uppercase tracking-[0.2em] mt-1">{branch.code}</p>
                     <div className="mt-4 flex flex-col gap-1">
                        <div className="flex items-center gap-2 text-[var(--text-muted)] text-xs">
@@ -316,16 +316,16 @@ const Management = () => {
           {/* POS POINTS SECTION */}
           {activeSubTab === "POSPoints" && (
             <>
-              {(posPoints || []).map((pos) => (
-                <motion.div variants={itemVariants} key={pos.id} className="bg-[var(--bg-card)] p-6 rounded-[2rem] border border-[var(--border-main)] flex flex-col gap-6 group transition-all hover:border-[var(--primary)]/50 hover:shadow-2xl">
+               {(posPoints || []).map((pos) => (
+                <motion.div variants={itemVariants} key={pos.id} className="bg-[var(--bg-card)] p-5 rounded-2xl border border-[var(--border-main)] flex flex-col gap-4 group transition-all hover:border-[var(--primary)]/50 hover:shadow-2xl">
                   <div className="flex justify-between items-start">
                     <div className="p-4 bg-gradient-to-br from-indigo-500/20 to-indigo-500/5 text-indigo-400 rounded-2xl border border-indigo-500/20 shadow-lg">
                       <MdComputer size={32} />
                     </div>
                     <button onClick={() => openEditModal("posPoint", pos)} className="p-3 bg-[var(--bg-card-alt)] hover:bg-[var(--border-main)] rounded-xl text-[var(--text-muted)] hover:text-[var(--text-main)] opacity-0 group-hover:opacity-100 transition-all"><MdEdit size={18} /></button>
-                  </div>
+                   </div>
                   <div>
-                    <h3 className="text-[var(--text-main)] text-2xl font-black tracking-tighter uppercase">{pos.name}</h3>
+                    <h3 className="text-[var(--text-main)] text-xl font-black tracking-tighter uppercase">{pos.name}</h3>
                     <p className="text-indigo-400 text-[10px] font-black uppercase tracking-[0.2em] mt-1">{pos.code}</p>
                     <div className="mt-4 flex items-center gap-2">
                        <span className="px-3 py-1 bg-[var(--bg-card-alt)] rounded-full text-[9px] text-[var(--text-muted)] font-bold uppercase tracking-widest">Active Terminal</span>
@@ -338,19 +338,20 @@ const Management = () => {
           )}
 
           {/* USERS SECTION (DATA GRID) */}
-          {activeSubTab === "Users" && (
-            <div className="bg-[var(--bg-card)] rounded-[2.5rem] border border-[var(--border-main)] overflow-hidden shadow-2xl">
+           {activeSubTab === "Users" && (
+            <div className="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-main)] overflow-hidden shadow-2xl">
               <div className="overflow-x-auto custom-scrollbar">
                 <table className="w-full text-left border-collapse">
                   <thead>
                     <tr className="bg-[var(--bg-card-alt)]/50 border-b border-[var(--border-main)]">
-                      <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.3em] text-[var(--text-dim)]">Staff Member</th>
-                      <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.3em] text-[var(--text-dim)]">Role & Access</th>
-                      <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.3em] text-[var(--text-dim)]">Location</th>
-                      <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.3em] text-[var(--text-dim)]">Contact Info</th>
-                      <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.3em] text-[var(--text-dim)] text-right">Actions</th>
+                      <th className="px-6 py-4 text-[9px] font-black uppercase tracking-[0.2em] text-[var(--text-dim)]">Staff Member</th>
+                      <th className="px-6 py-4 text-[9px] font-black uppercase tracking-[0.2em] text-[var(--text-dim)]">Role & Access</th>
+                      <th className="px-6 py-4 text-[9px] font-black uppercase tracking-[0.2em] text-[var(--text-dim)]">Location</th>
+                      <th className="px-6 py-4 text-[9px] font-black uppercase tracking-[0.2em] text-[var(--text-dim)]">Contact Info</th>
+                      <th className="px-6 py-4 text-[9px] font-black uppercase tracking-[0.2em] text-[var(--text-dim)] text-right">Actions</th>
                     </tr>
                   </thead>
+
                   <tbody>
                     {(usersData || []).filter(u => 
                       u.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
@@ -361,20 +362,20 @@ const Management = () => {
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: index * 0.03 }}
                         key={user.id} 
-                        className="border-b border-[var(--bg-card-alt)] hover:bg-[var(--bg-card-alt)]/30 transition-all group"
+                         className="border-b border-[var(--bg-card-alt)] hover:bg-[var(--bg-card-alt)]/30 transition-all group"
                       >
-                        <td className="px-8 py-6">
+                        <td className="px-6 py-4">
                           <div className="flex items-center gap-4">
                             <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-emerald-500/5 flex items-center justify-center text-emerald-400 border border-emerald-500/10 shadow-lg">
-                              <MdPeople size={24} />
+                               <MdPeople size={20} />
                             </div>
                             <div>
-                              <p className="text-[var(--text-main)] font-black uppercase tracking-tight text-base group-hover:text-emerald-400 transition-colors">{user.name}</p>
-                              <p className="text-[10px] text-[var(--text-dim)] font-black uppercase tracking-widest mt-0.5">Staff ID: {user.id.slice(0, 8)}</p>
+                              <p className="text-[var(--text-main)] font-black uppercase tracking-tight text-sm group-hover:text-emerald-400 transition-colors">{user.name}</p>
+                              <p className="text-[10px] text-[var(--text-dim)] font-black uppercase tracking-widest mt-0.5">ID: {user.id.slice(0, 8)}</p>
                             </div>
                           </div>
                         </td>
-                        <td className="px-8 py-6">
+                        <td className="px-6 py-4">
                           <div className="flex flex-col gap-2">
                              <div className="flex items-center gap-2">
                                 <MdShield className="text-[var(--primary)]" size={14} />
@@ -388,15 +389,15 @@ const Management = () => {
                              </div>
                           </div>
                         </td>
-                        <td className="px-8 py-6">
+                        <td className="px-6 py-4">
                            <div className="flex items-center gap-3">
                               <div className="w-8 h-8 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-400">
                                  <MdStore size={18} />
                               </div>
                               <p className="text-[var(--text-muted)] text-xs font-black uppercase tracking-widest">{user.branch?.name || "Global"}</p>
-                           </div>
+                            </div>
                         </td>
-                        <td className="px-8 py-6">
+                        <td className="px-6 py-4">
                           <div className="space-y-1">
                             <div className="flex items-center gap-2 text-[var(--text-muted)] text-xs">
                               <MdEmail size={14} className="text-[var(--text-dim)]" />
@@ -408,7 +409,7 @@ const Management = () => {
                             </div>
                           </div>
                         </td>
-                        <td className="px-8 py-6 text-right">
+                        <td className="px-6 py-4 text-right">
                            <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all translate-x-4 group-hover:translate-x-0">
                               <motion.button 
                                 whileHover={{ scale: 1.1 }}

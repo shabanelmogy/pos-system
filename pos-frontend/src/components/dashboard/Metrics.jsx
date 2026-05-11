@@ -9,13 +9,13 @@ const MetricCard = ({ title, value, percentage, icon, color, isIncrease, delay }
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ delay }}
-    whileHover={{ y: -8, scale: 1.02 }}
-    className="bg-[var(--bg-card)] border border-[var(--border-main)] p-8 rounded-[2.5rem] relative overflow-hidden group hover:border-[var(--primary)]/30 transition-all shadow-xl"
+    whileHover={{ y: -4, scale: 1.01 }}
+    className="bg-[var(--bg-card)] border border-[var(--border-main)] p-5 rounded-3xl relative overflow-hidden group hover:border-[var(--primary)]/30 transition-all shadow-xl"
   >
     <div className={`absolute top-0 right-0 w-48 h-48 bg-gradient-to-br ${color} opacity-[0.03] blur-3xl group-hover:opacity-10 transition-opacity`} />
     
     <div className="flex justify-between items-start relative z-10">
-      <div className={`p-5 rounded-2xl bg-gradient-to-br ${color} text-white shadow-2xl transform group-hover:rotate-6 transition-transform`}>
+      <div className={`p-3.5 rounded-xl bg-gradient-to-br ${color} text-white shadow-2xl transform group-hover:rotate-6 transition-transform`}>
         {icon}
       </div>
       <div className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-[10px] font-black tracking-widest uppercase ${isIncrease ? 'bg-[var(--status-success-bg)] text-[var(--status-success)]' : 'bg-[var(--status-error-bg)] text-[var(--status-error)]'}`}>
@@ -24,9 +24,9 @@ const MetricCard = ({ title, value, percentage, icon, color, isIncrease, delay }
       </div>
     </div>
     
-    <div className="mt-10 relative z-10">
-      <p className="text-[var(--text-muted)] text-[10px] font-black uppercase tracking-[0.2em]">{title}</p>
-      <h3 className="text-[var(--text-main)] text-4xl font-black mt-2 tracking-tighter group-hover:text-[var(--primary)] transition-colors">{value}</h3>
+    <div className="mt-6 relative z-10">
+      <p className="text-[var(--text-muted)] text-[9px] font-black uppercase tracking-[0.2em]">{title}</p>
+      <h3 className="text-[var(--text-main)] text-3xl font-black mt-1 tracking-tighter group-hover:text-[var(--primary)] transition-colors">{value}</h3>
     </div>
     
     <div className="mt-6 w-full h-1.5 bg-[var(--bg-card-alt)] rounded-full overflow-hidden relative z-10">
@@ -105,18 +105,18 @@ const Metrics = ({ branchId = "all" }) => {
   ];
 
   return (
-    <div className="space-y-12">
+    <div className="space-y-8">
       {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
-          <div className="flex items-center gap-2 mb-3">
-             <div className="h-1 w-8 bg-[var(--primary)] rounded-full"></div>
-             <span className="text-[var(--primary)] text-[10px] font-black uppercase tracking-[0.3em]">Operational Insights</span>
+          <div className="flex items-center gap-2 mb-2">
+             <div className="h-1 w-6 bg-[var(--primary)] rounded-full"></div>
+             <span className="text-[var(--primary)] text-[9px] font-black uppercase tracking-[0.3em]">Operational Insights</span>
           </div>
-          <h2 className="text-[var(--text-main)] text-3xl font-black tracking-tighter uppercase">
+          <h2 className="text-[var(--text-main)] text-2xl font-black tracking-tighter uppercase">
             {branchId === "all" ? "Enterprise Pulse" : "Branch Performance"}
           </h2>
-          <p className="text-[var(--text-muted)] text-sm mt-1 font-medium">Real-time financial telemetry and growth metrics.</p>
+          <p className="text-[var(--text-muted)] text-xs mt-0.5 font-medium">Real-time financial telemetry.</p>
         </div>
         <div className="flex items-center gap-4 bg-[var(--bg-card)] p-2 rounded-2xl border border-[var(--border-main)]">
            <div className="px-4 py-2 bg-[var(--bg-card-alt)] rounded-xl text-[var(--text-main)] text-[10px] font-black uppercase tracking-widest border border-[var(--border-main)]">
@@ -129,28 +129,28 @@ const Metrics = ({ branchId = "all" }) => {
       </div>
 
       {/* Grid Section */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {performanceMetrics.map((metric, index) => (
           <MetricCard key={index} {...metric} delay={index * 0.1} />
         ))}
       </div>
 
       {/* Secondary Stats Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Inventory Summary */}
-        <div className="bg-[var(--bg-card)] border border-[var(--border-main)] p-10 rounded-[3rem] lg:col-span-1 shadow-2xl">
-          <div className="flex items-center gap-4 mb-10">
-             <div className="p-3 bg-[var(--bg-card-alt)] rounded-2xl text-[var(--primary)]">
-                <FaUtensils size={24} />
+        <div className="bg-[var(--bg-card)] border border-[var(--border-main)] p-6 rounded-3xl lg:col-span-1 shadow-2xl">
+          <div className="flex items-center gap-4 mb-6">
+             <div className="p-2.5 bg-[var(--bg-card-alt)] rounded-xl text-[var(--primary)]">
+                <FaUtensils size={20} />
              </div>
-             <h3 className="text-white text-xl font-black uppercase tracking-tighter">Infrastructure</h3>
+             <h3 className="text-white text-lg font-black uppercase tracking-tighter">Infrastructure</h3>
           </div>
-          <div className="space-y-8">
+          <div className="space-y-5">
             {inventoryStats.map((stat, idx) => (
               <div key={idx} className="group">
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-[var(--text-muted)] text-xs font-bold uppercase tracking-widest group-hover:text-[var(--text-main)] transition-colors">{stat.label}</span>
-                  <span className="text-[var(--text-main)] font-black text-2xl group-hover:text-[var(--primary)] transition-colors">{stat.value}</span>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[var(--text-muted)] text-[10px] font-bold uppercase tracking-widest group-hover:text-[var(--text-main)] transition-colors">{stat.label}</span>
+                  <span className="text-[var(--text-main)] font-black text-xl group-hover:text-[var(--primary)] transition-colors">{stat.value}</span>
                 </div>
                 <div className="h-1.5 w-full bg-[var(--bg-card-alt)] rounded-full overflow-hidden">
                   <motion.div 
@@ -166,11 +166,11 @@ const Metrics = ({ branchId = "all" }) => {
         </div>
 
         {/* Growth Chart */}
-        <div className="bg-[var(--bg-card)] border border-[var(--border-main)] p-10 rounded-[3rem] lg:col-span-2 relative overflow-hidden group shadow-2xl hover:border-[var(--primary)]/20 transition-all">
-          <div className="flex items-center justify-between mb-12">
+        <div className="bg-[var(--bg-card)] border border-[var(--border-main)] p-6 rounded-3xl lg:col-span-2 relative overflow-hidden group shadow-2xl hover:border-[var(--primary)]/20 transition-all">
+          <div className="flex items-center justify-between mb-8">
             <div>
-              <h3 className="text-[var(--text-main)] text-xl font-black uppercase tracking-tighter">Revenue Trajectory</h3>
-              <p className="text-[var(--text-dim)] text-[10px] font-bold uppercase tracking-widest mt-1">Rolling 10-period cycle</p>
+              <h3 className="text-[var(--text-main)] text-lg font-black uppercase tracking-tighter">Revenue Trajectory</h3>
+              <p className="text-[var(--text-dim)] text-[10px] font-bold uppercase tracking-widest mt-0.5">Rolling cycle</p>
             </div>
             <div className="flex gap-4">
               <div className="flex items-center gap-2">
