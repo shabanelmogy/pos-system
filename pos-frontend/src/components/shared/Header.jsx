@@ -13,7 +13,7 @@ import useAuth from "../../hooks/useAuth";
 import { clearPOS, setShowShiftModal } from "../../redux/slices/posSlice";
 
 const Header = () => {
-  const { role, name, canAccessDashboard } = useAuth();
+  const { role, name, canAccessDashboard, isAdmin } = useAuth();
   const { selectedBranch, selectedPOSPoint, activeShift } = useSelector((state) => state.pos);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -119,9 +119,11 @@ const Header = () => {
             <MdDashboard className="text-[#f5f5f5] text-2xl" />
           </div>
         )}
-        <div onClick={() => navigate("/settings")} className="bg-[#1f1f1f] border border-[#333] hover:border-[#f6b100] rounded-xl p-3 cursor-pointer transition-all tooltip" title="POS Settings">
-          <MdSettings className="text-[#f5f5f5] text-2xl" />
-        </div>
+        {isAdmin && (
+          <div onClick={() => navigate("/settings")} className="bg-[#1f1f1f] border border-[#333] hover:border-[#f6b100] rounded-xl p-3 cursor-pointer transition-all tooltip" title="POS Settings">
+            <MdSettings className="text-[#f5f5f5] text-2xl" />
+          </div>
+        )}
         <div className="bg-[#1f1f1f] border border-[#333] rounded-xl p-3 cursor-pointer relative group">
           <FaBell className="text-[#f5f5f5] text-2xl" />
           <span className="absolute top-3 right-3 w-2.5 h-2.5 bg-red-500 border-2 border-[#1f1f1f] rounded-full"></span>

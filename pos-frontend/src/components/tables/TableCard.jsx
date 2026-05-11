@@ -11,6 +11,7 @@ const TableCard = ({id, name, status, initials, seats, order, onViewOrder}) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { canCompleteOrders } = useAuth();
+  const { selectedPOSPoint } = useSelector((state) => state.pos);
   const customerData = useSelector((state) => state.customer);
 
   const handleClick = (name) => {
@@ -26,11 +27,22 @@ const TableCard = ({id, name, status, initials, seats, order, onViewOrder}) => {
     }
 
     // 3. If Table is Free and user is Cashier, allow creating order
+    const requireCustomer = selectedPOSPoint?.settings?.requireCustomerOnOrder;
+
     if (!customerData.customerName || !customerData.customerPhone) {
-      // Clear cart just in case something was left over
-      dispatch(setCart([])); 
-      window.dispatchEvent(new CustomEvent("open-create-order-modal"));
-      return;
+      if (!requireCustomer) {
+        // Automatically start guest order if not required
+        dispatch(setCustomer({ 
+          name: "Guest", 
+          phone: "N/A", 
+          guests: 1 
+        }));
+      } else {
+        // Force modal if required
+        dispatch(setCart([])); 
+        window.dispatchEvent(new CustomEvent("open-create-order-modal"));
+        return;
+      }
     }
 
     const table = { tableId: id, tableNo: name }

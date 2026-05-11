@@ -35,11 +35,12 @@ const customerSlice = createSlice({
         },
 
         setOrder: (state, action) => {
-            const { customerName, customerPhone, table, orderId } = action.payload;
+            const { customerName, customerPhone, table, orderId, guests } = action.payload;
             state.customerName = customerName;
             state.customerPhone = customerPhone;
             state.table = table;
             state.orderId = orderId;
+            state.guests = guests;
         }
 
     }

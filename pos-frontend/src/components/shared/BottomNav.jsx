@@ -42,16 +42,25 @@ const BottomNav = () => {
   const isActive = (path) => location.pathname === path;
 
   const handleCreateOrder = () => {
-    if (!name || !phone) {
-      alert("Please enter customer name and phone number!");
-      return;
+    const requireCustomer = selectedPOSPoint?.settings?.requireCustomerOnOrder;
+
+    if (requireCustomer) {
+      if (!name || !phone) {
+        alert("Please enter customer name and phone number!");
+        return;
+      }
+      if (guestCount <= 0) {
+        alert("Please select at least 1 guest!");
+        return;
+      }
     }
-    if (guestCount <= 0) {
-      alert("Please select at least 1 guest!");
-      return;
-    }
+
     // send the data to store
-    dispatch(setCustomer({ name, phone, guests: guestCount }));
+    dispatch(setCustomer({ 
+      name: name || "Guest", 
+      phone: phone || "N/A", 
+      guests: guestCount || 1 
+    }));
     dispatch(removeAllItems());
 
     // Clear local state
@@ -68,6 +77,27 @@ const BottomNav = () => {
   };
 
   const { canCompleteOrders, isAdmin } = useAuth();
+  const requireCustomer = selectedPOSPoint?.settings?.requireCustomerOnOrder;
+
+  const handleDishClick = () => {
+    if (!requireCustomer) {
+      // Bypass modal and start order immediately
+      dispatch(setCustomer({ 
+        name: "Guest", 
+        phone: "N/A", 
+        guests: 1 
+      }));
+      dispatch(removeAllItems());
+      
+      if (!enableTables) {
+        navigate("/menu");
+      } else {
+        navigate("/tables");
+      }
+    } else {
+      openModal();
+    }
+  };
 
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-[#262626] p-2 h-16 flex justify-around border-t border-[#333] z-40">
@@ -124,7 +154,7 @@ const BottomNav = () => {
       {canCompleteOrders && (
         <button
           disabled={isActive("/tables") || isActive("/menu")}
-          onClick={openModal}
+          onClick={handleDishClick}
           className="absolute -top-14 bg-[#f6b100] text-[#1a1a1a] rounded-full p-4 items-center shadow-2xl hover:scale-105 transition-transform border-4 border-[#1f1f1f] disabled:opacity-50 disabled:grayscale"
         >
           <BiSolidDish size={30} />
@@ -133,13 +163,17 @@ const BottomNav = () => {
 
       <Modal isOpen={isModalOpen} onClose={closeModal}>
         <div>
-          <label className="block text-[#ababab] mb-2 text-sm font-medium">Customer Name</label>
+          <label className="block text-[#ababab] mb-2 text-sm font-medium">
+            Customer Name {!requireCustomer && <span className="text-[#666] text-xs ml-1">(Optional)</span>}
+          </label>
           <div className="flex items-center rounded-lg p-3 px-4 bg-[#1f1f1f]">
             <input value={name} onChange={(e) => setName(e.target.value)} type="text" name="" placeholder="Enter customer name" id="" className="bg-transparent flex-1 text-white focus:outline-none" />
           </div>
         </div>
         <div>
-          <label className="block text-[#ababab] mb-2 mt-3 text-sm font-medium">Customer Phone</label>
+          <label className="block text-[#ababab] mb-2 mt-3 text-sm font-medium">
+            Customer Phone {!requireCustomer && <span className="text-[#666] text-xs ml-1">(Optional)</span>}
+          </label>
           <div className="flex items-center rounded-lg p-3 px-4 bg-[#1f1f1f]">
             <input value={phone} onChange={(e) => setPhone(e.target.value)} type="number" name="" placeholder="+91-9999999999" id="" className="bg-transparent flex-1 text-white focus:outline-none" />
           </div>
