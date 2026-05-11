@@ -16,8 +16,8 @@ const RecentOrders = () => {
   const { data: ordersList = [], isError, isLoading } = useQuery({
     queryKey: ["recent-orders", selectedPOSPoint?.id],
     queryFn: async () => {
-      const res = await getOrders({ 
-        posPointId: selectedPOSPoint?.id 
+      const res = await getOrders({
+        posPointId: selectedPOSPoint?.id
       });
       return res.data.data;
     },
@@ -38,7 +38,7 @@ const RecentOrders = () => {
 
   return (
     <div className="px-6 mt-4 relative">
-      <div className="bg-[var(--bg-card)] w-full min-h-[300px] lg:h-[380px] rounded-3xl border border-[var(--border-main)] shadow-2xl overflow-hidden flex flex-col">
+      <div className="bg-[var(--bg-card)] w-full min-h-[300px] lg:h-[355px] lg:min-h-[355px] rounded-3xl border border-[var(--border-main)] shadow-2xl overflow-hidden flex flex-col">
         <div className="flex justify-between items-center px-6 py-4 border-b border-[var(--bg-card-alt)]">
           <h1 className="text-[var(--text-main)] text-base font-black uppercase tracking-tighter">
             Recent Orders
@@ -60,10 +60,10 @@ const RecentOrders = () => {
 
           <div className="flex-1 overflow-y-auto custom-scrollbar pr-2">
             {isLoading ? (
-               <div className="flex flex-col items-center justify-center h-full gap-4 opacity-50">
-                  <div className="w-8 h-8 border-4 border-[var(--border-main)] border-t-[var(--primary)] rounded-full animate-spin" />
-                  <p className="text-[10px] text-[var(--text-muted)] font-black uppercase tracking-widest">Fetching Orders...</p>
-               </div>
+              <div className="flex flex-col items-center justify-center h-full gap-4 opacity-50">
+                <div className="w-8 h-8 border-4 border-[var(--border-main)] border-t-[var(--primary)] rounded-full animate-spin" />
+                <p className="text-[10px] text-[var(--text-muted)] font-black uppercase tracking-widest">Fetching Orders...</p>
+              </div>
             ) : ordersList.length > 0 ? (
               <div className="space-y-3">
                 {ordersList.map((order) => (
@@ -83,9 +83,9 @@ const RecentOrders = () => {
       {/* Reprint Invoice Modal */}
       <AnimatePresence>
         {showReprintModal && selectedOrderForReprint && (
-          <Invoice 
-            orderInfo={selectedOrderForReprint} 
-            setShowInvoice={setShowReprintModal} 
+          <Invoice
+            orderInfo={selectedOrderForReprint}
+            setShowInvoice={setShowReprintModal}
             isReprint={true}
           />
         )}

@@ -33,9 +33,9 @@ const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("Metrics");
   const [selectedBranchId, setSelectedBranchId] = useState("all");
 
-  const { data: branches } = useQuery({ 
-    queryKey: ["branches"], 
-    queryFn: async () => (await getBranches()).data.data 
+  const { data: branches } = useQuery({
+    queryKey: ["branches"],
+    queryFn: async () => (await getBranches()).data.data
   });
 
   useEffect(() => {
@@ -65,7 +65,7 @@ const Dashboard = () => {
             <div className="flex items-center gap-3 mb-2">
               <span className="bg-[var(--primary)]/10 text-[var(--primary)] text-[10px] font-black tracking-widest px-2 py-1 rounded-md uppercase">Enterprise Dashboard</span>
             </div>
-            <motion.h1 
+            <motion.h1
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               className="text-2xl md:text-3xl font-black text-[var(--text-main)] tracking-tighter uppercase"
@@ -77,7 +77,7 @@ const Dashboard = () => {
 
           <div className="flex items-center gap-4 flex-wrap justify-center">
             {/* Branch Filter */}
-            <CustomDropdown 
+            <CustomDropdown
               options={branchOptions}
               value={selectedBranchId}
               onChange={setSelectedBranchId}
@@ -107,11 +107,10 @@ const Dashboard = () => {
             <button
               key={tab.id}
               className={`
-                px-6 py-2 rounded-lg font-bold text-xs flex items-center gap-2 transition-all duration-300 whitespace-nowrap ${
-                activeTab === tab.id
+                px-6 py-2 rounded-lg font-bold text-xs flex items-center gap-2 transition-all duration-300 whitespace-nowrap ${activeTab === tab.id
                   ? "bg-[var(--primary)] text-[var(--bg-card)] shadow-lg shadow-[var(--primary)]/20"
                   : "text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-card-alt)]"
-              }`}
+                }`}
               onClick={() => setActiveTab(tab.id)}
             >
               {tab.icon}
@@ -148,10 +147,10 @@ const Dashboard = () => {
         </AnimatePresence>
       </div>
 
-      <ManagementModal 
-        isOpen={modalState.isOpen} 
-        type={modalState.type} 
-        onClose={handleCloseModal} 
+      <ManagementModal
+        isOpen={modalState.isOpen}
+        type={modalState.type}
+        onClose={handleCloseModal}
       />
     </div>
   );

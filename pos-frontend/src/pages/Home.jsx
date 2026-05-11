@@ -9,12 +9,12 @@ import PopularDishes from "../components/home/PopularDishes";
 
 const Home = () => {
 
-    useEffect(() => {
-      document.title = "POS | Home"
-    }, [])
+  useEffect(() => {
+    document.title = "POS | Home"
+  }, [])
 
   return (
-    <section className="bg-[var(--bg-main)] h-[calc(100vh-5rem)] overflow-y-auto lg:overflow-hidden flex flex-col lg:flex-row gap-2 custom-scrollbar">
+    <section className="bg-[var(--bg-main)] h-[calc(100vh-5rem)] overflow-y-auto lg:overflow-hidden flex flex-col lg:flex-row gap-2 custom-scrollbar pb-32">
       {/* Left Div */}
       <div className="flex-[3] flex flex-col min-h-fit">
         <Greetings />
@@ -22,7 +22,9 @@ const Home = () => {
           <MiniCard title="Total Earnings" icon={<BsCashCoin />} number={512} footerNum={1.6} />
           <MiniCard title="In Progress" icon={<GrInProgress />} number={16} footerNum={3.6} />
         </div>
-        <RecentOrders />
+        <div className="mb-24">
+          <RecentOrders />
+        </div>
       </div>
       {/* Right Div */}
       <div className="flex-[2] pb-24 lg:pb-0">

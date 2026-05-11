@@ -40,7 +40,7 @@ const Greetings = () => {
           Give your best services for customers 😀
         </p>
         {canCompleteOrders && (
-          <button 
+          <button
             onClick={handleStartOrder}
             className="mt-3 bg-[var(--primary)] text-[var(--bg-card)] font-bold py-1.5 px-5 rounded-lg hover:bg-yellow-600 transition-colors shadow-lg flex items-center gap-2 text-sm"
           >

@@ -119,6 +119,19 @@ const BottomNav = () => {
         <span className="text-[10px] mt-1">Orders</span>
       </button>
 
+      {canCompleteOrders && (
+        <div className="flex items-center justify-center w-full">
+          <button
+            disabled={isActive("/tables") || isActive("/menu")}
+            onClick={handleDishClick}
+            className="flex flex-col items-center justify-center font-bold transition-all text-[var(--primary)] bg-[var(--primary)]/10 px-4 py-1.5 rounded-2xl border border-[var(--primary)]/20 shadow-lg shadow-[var(--primary)]/5 disabled:opacity-50 disabled:grayscale"
+          >
+            <BiSolidDish size={26} />
+            <span className="text-[10px] mt-0.5">Order</span>
+          </button>
+        </div>
+      )}
+
       {enableTables && (
         <button
           onClick={() => navigate("/tables")}
@@ -151,15 +164,6 @@ const BottomNav = () => {
         </>
       )}
 
-      {canCompleteOrders && (
-        <button
-          disabled={isActive("/tables") || isActive("/menu")}
-          onClick={handleDishClick}
-          className="absolute -top-14 bg-[var(--primary)] text-[var(--bg-card)] rounded-full p-4 items-center shadow-2xl hover:scale-105 transition-transform border-4 border-[var(--bg-main)] disabled:opacity-50 disabled:grayscale"
-        >
-          <BiSolidDish size={30} />
-        </button>
-      )}
 
       <Modal isOpen={isModalOpen} onClose={closeModal}>
         <div>
