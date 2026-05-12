@@ -1,46 +1,46 @@
 import { axiosWrapper } from "../../../shared/api/axiosWrapper";
 
 // Getters
-export const getBranches = () => axiosWrapper.get("/branch/all");
+export const getBranches = () => axiosWrapper.get("/api/branch");
 export const getPOSPoints = (branchId) => {
-    const url = branchId ? `/pos/all?branchId=${branchId}` : "/pos/all";
+    const url = branchId ? `/api/pos-point?branchId=${branchId}` : "/api/pos-point";
     return axiosWrapper.get(url);
 };
-export const getCategories = () => axiosWrapper.get("/category/all");
-export const getItems = () => axiosWrapper.get("/item/all");
-export const getTables = () => axiosWrapper.get("/table/all");
-export const getUsers = () => axiosWrapper.get("/user/all");
-export const getCustomers = () => axiosWrapper.get("/customer/all");
-export const getOrders = () => axiosWrapper.get("/order/all");
-export const updateOrderStatus = ({ orderId, orderStatus }) => axiosWrapper.put(`/order/update-status/${orderId}`, { orderStatus });
+export const getCategories = () => axiosWrapper.get("/api/category");
+export const getItems = () => axiosWrapper.get("/api/item");
+export const getTables = () => axiosWrapper.get("/api/table");
+export const getUsers = () => axiosWrapper.get("/api/user");
+export const getCustomers = () => axiosWrapper.get("/api/customer");
+export const getOrders = () => axiosWrapper.get("/api/order");
+export const updateOrderStatus = ({ orderId, orderStatus }) => axiosWrapper.put(`/api/order/status/${orderId}`, { orderStatus });
 
 // Management - Create
-export const addBranch = (data) => axiosWrapper.post("/branch/add", data);
-export const addPOSPoint = (data) => axiosWrapper.post("/pos/add", data);
-export const addCategory = (data) => axiosWrapper.post("/category/add", data);
-export const addItem = (data) => axiosWrapper.post("/item/add", data);
-export const addTable = (data) => axiosWrapper.post("/table/add", data);
-export const createUser = (data) => axiosWrapper.post("/user/register", data);
+export const addBranch = (data) => axiosWrapper.post("/api/branch", data);
+export const addPOSPoint = (data) => axiosWrapper.post("/api/pos-point", data);
+export const addCategory = (data) => axiosWrapper.post("/api/category", data);
+export const addItem = (data) => axiosWrapper.post("/api/item", data);
+export const addTable = (data) => axiosWrapper.post("/api/table", data);
+export const createUser = (data) => axiosWrapper.post("/api/user", data);
 
 // Management - Update
-export const updateBranch = (data) => axiosWrapper.put(`/branch/update`, data);
-export const updatePOSPoint = (data) => axiosWrapper.put(`/pos/update`, data);
-export const updateCategory = (data) => axiosWrapper.put(`/category/update`, data);
-export const updateItem = (data) => axiosWrapper.put(`/item/update`, data);
-export const updateTable = (data) => axiosWrapper.put(`/table/update`, data);
-export const updateUser = (data) => axiosWrapper.put(`/user/update`, data);
-export const assignPOS = (data) => axiosWrapper.post("/user/assign-pos", data);
+export const updateBranch = ({ id, ...data }) => axiosWrapper.put(`/api/branch/${id}`, data);
+export const updatePOSPoint = ({ id, ...data }) => axiosWrapper.put(`/api/pos-point/${id}`, data);
+export const updateCategory = ({ categoryId, ...data }) => axiosWrapper.put(`/api/category/${categoryId}`, data);
+export const updateItem = ({ itemId, ...data }) => axiosWrapper.put(`/api/item/${itemId}`, data);
+export const updateTable = ({ tableId, ...data }) => axiosWrapper.put(`/api/table/${tableId}`, data);
+export const updateUser = ({ userId, ...data }) => axiosWrapper.put(`/api/user/${userId}`, data);
+export const assignPOS = (data) => axiosWrapper.post("/api/user/assign-pos", data);
 
 // Management - Delete
-export const deleteCategory = (id) => axiosWrapper.delete(`/category/${id}`);
-export const deleteItem = (id) => axiosWrapper.delete(`/item/${id}`);
-export const deleteTable = (id) => axiosWrapper.delete(`/table/${id}`);
-export const deleteUser = (id) => axiosWrapper.delete(`/user/${id}`);
+export const deleteCategory = (id) => axiosWrapper.delete(`/api/category/${id}`);
+export const deleteItem = (id) => axiosWrapper.delete(`/api/item/${id}`);
+export const deleteTable = (id) => axiosWrapper.delete(`/api/table/${id}`);
+export const deleteUser = (id) => axiosWrapper.delete(`/api/user/${id}`);
 
 // Analytics
 export const getDashboardMetrics = (branchId) => {
     const url = branchId && branchId !== "all" 
-        ? `/dashboard/metrics?branchId=${branchId}` 
-        : "/dashboard/metrics";
+        ? `/api/dashboard/metrics?branchId=${branchId}` 
+        : "/api/dashboard/metrics";
     return axiosWrapper.get(url);
 };

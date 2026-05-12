@@ -50,8 +50,8 @@ function Layout() {
   // 2. Auth Guard
   if (!isAuth && !isOnAuthPage) return <Navigate to="/auth" />;
 
-  // 3. Terminal Selection Guard
-  const needsTerminal = isAuth && (!selectedBranch || !selectedPOSPoint) && !isOnAuthPage;
+  // 3. Terminal Selection Guard - Only force for non-admins (Staff/Waiters/Cashiers)
+  const needsTerminal = isAuth && !isAdmin && (!selectedBranch || !selectedPOSPoint) && !isOnAuthPage;
   if (needsTerminal) return <TerminalSelector />;
 
   // 4. Shift Guard - Block cashiers if no active shift

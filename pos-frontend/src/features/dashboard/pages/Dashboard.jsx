@@ -35,7 +35,7 @@ const Dashboard = () => {
 
   const { data: branches } = useQuery({
     queryKey: ["branches"],
-    queryFn: async () => (await getBranches()).data.data
+    queryFn: async () => { const res = await getBranches(); return res.data.data || res.data; }
   });
 
   useEffect(() => {

@@ -41,11 +41,11 @@ const MetricCard = ({ title, value, percentage, icon, color, isIncrease, delay }
 );
 
 const Metrics = ({ branchId = "all" }) => {
-  const { data: orders } = useQuery({ queryKey: ["orders"], queryFn: async () => (await getOrders()).data.data });
-  const { data: customers } = useQuery({ queryKey: ["customers"], queryFn: async () => (await getCustomers()).data.data });
-  const { data: items } = useQuery({ queryKey: ["items"], queryFn: async () => (await getItems()).data.data });
-  const { data: categories } = useQuery({ queryKey: ["categories"], queryFn: async () => (await getCategories()).data.data });
-  const { data: tables } = useQuery({ queryKey: ["tables"], queryFn: async () => (await getTables()).data.data });
+  const { data: orders } = useQuery({ queryKey: ["orders"], queryFn: async () => { const res = await getOrders(); return res.data.data || res.data; } });
+  const { data: customers } = useQuery({ queryKey: ["customers"], queryFn: async () => { const res = await getCustomers(); return res.data.data || res.data; } });
+  const { data: items } = useQuery({ queryKey: ["items"], queryFn: async () => { const res = await getItems(); return res.data.data || res.data; } });
+  const { data: categories } = useQuery({ queryKey: ["categories"], queryFn: async () => { const res = await getCategories(); return res.data.data || res.data; } });
+  const { data: tables } = useQuery({ queryKey: ["tables"], queryFn: async () => { const res = await getTables(); return res.data.data || res.data; } });
 
   const fullOrdersList = Array.isArray(orders) ? orders : [];
   const ordersList = fullOrdersList.filter(order => {

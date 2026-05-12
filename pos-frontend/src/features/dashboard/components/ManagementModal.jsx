@@ -17,13 +17,13 @@ const ManagementModal = ({ type, isOpen, onClose, initialData = null }) => {
 
   const { data: categories } = useQuery({ 
     queryKey: ["categories"], 
-    queryFn: async () => (await getCategories()).data.data,
+    queryFn: async () => { const res = await getCategories(); return res.data.data || res.data; },
     enabled: type === "dishes"
   });
 
   const { data: branches } = useQuery({
     queryKey: ["branches"],
-    queryFn: async () => (await getBranches()).data.data,
+    queryFn: async () => { const res = await getBranches(); return res.data.data || res.data; },
     enabled: type === "posPoint" || type === "user"
   });
 
@@ -39,7 +39,7 @@ const ManagementModal = ({ type, isOpen, onClose, initialData = null }) => {
 
   const { data: branchPOSPoints } = useQuery({
     queryKey: ["posPoints", formData.branchId],
-    queryFn: async () => (await getPOSPoints(formData.branchId)).data.data,
+    queryFn: async () => { const res = await getPOSPoints(formData.branchId); return res.data.data || res.data; },
     enabled: type === "user" && !!formData.branchId
   });
 
