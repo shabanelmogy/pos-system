@@ -23,7 +23,7 @@ const OrderList = ({ order, onReprint }) => {
       </div>
       
       <div className="flex-1 flex items-center justify-between min-w-0">
-        <div className="flex flex-col min-w-0 mr-4">
+        <div className="flex flex-col min-w-0 me-4">
           <h1 className="text-[var(--text-main)] text-sm font-black uppercase tracking-tight truncate group-hover:text-[var(--primary)] transition-colors">
             {customerName}
           </h1>
@@ -32,11 +32,11 @@ const OrderList = ({ order, onReprint }) => {
 
         <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-[var(--bg-card-alt)] rounded-xl border border-[var(--border-main)]">
            <span className="text-[9px] text-[var(--text-muted)] font-black uppercase tracking-widest">Table</span>
-           <FaLongArrowAltRight className="text-[var(--text-dim)]" size={10} />
+           <FaLongArrowAltRight className="text-[var(--text-dim)] rtl:rotate-180" size={10} />
            <span className="text-xs text-[var(--primary)] font-black">{tableNo}</span>
         </div>
 
-        <div className="flex flex-col items-end gap-1 shrink-0 ml-4">
+        <div className="flex flex-col items-end gap-1 shrink-0 ms-4">
            <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${
              status === 'Ready' || status === 'Completed'
                ? 'bg-[var(--status-success-bg)] text-[var(--status-success)] border border-[var(--status-success-bg)]' 

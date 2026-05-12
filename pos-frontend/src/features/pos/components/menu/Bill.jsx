@@ -1,19 +1,20 @@
 import React, { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { addOrder, createOrderRazorpay, verifyPaymentRazorpay } from "../../api/posApi";
 import { updateTable } from "../../../../features/tables/api/tableApi";
 import { useSnackbar } from "notistack";
-import { removeAllItems } from "../../store/cartSlice";
-import { removeCustomer } from "../../../../features/customers/store/customerSlice";
+import useCartStore from "../../store/useCartStore";
+import useCustomerStore from "../../../../features/customers/store/useCustomerStore";
+import useUserStore from "../../../../features/auth/store/useUserStore";
+import usePOSStore from "../../store/usePOSStore";
 import Invoice from "../../../../features/orders/components/invoice/Invoice";
 import { FaChevronDown, FaChevronUp } from "react-icons/fa";
 
 const Bill = () => {
-  const cartItems = useSelector((state) => state.cart);
-  const customerData = useSelector((state) => state.customer);
-  const user = useSelector((state) => state.user);
-  const { selectedBranch, selectedPOSPoint, activeShift } = useSelector((state) => state.pos);
+  const { items: cartItems, removeAllItems, getTotalPrice } = useCartStore();
+  const { customerName, customerPhone, guests, table, removeCustomer } = useCustomerStore();
+  const user = useUserStore();
+  const { selectedBranch, selectedPOSPoint, activeShift } = usePOSStore();
 
   const [paymentMethod, setPaymentMethod] = useState("Cash");
   const [showInvoice, setShowInvoice] = useState(false);
@@ -21,10 +22,9 @@ const Bill = () => {
   const [isMinimized, setIsMinimized] = useState(true);
 
   const { enqueueSnackbar } = useSnackbar();
-  const dispatch = useDispatch();
   const queryClient = useQueryClient();
 
-  const total = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
+  const total = getTotalPrice();
   const tax = total * 0.05;
   const totalWithTax = total + tax;
 
@@ -42,6 +42,8 @@ const Bill = () => {
         enqueueSnackbar("Order Placed Successfully", { variant: "success" });
         setOrderInfo(order);
         setShowInvoice(true);
+        removeAllItems();
+        removeCustomer();
       };
 
       if (order.tableId) {
@@ -82,13 +84,13 @@ const Bill = () => {
 
     const baseOrderData = {
       customerDetails: {
-        name: customerData.customerName,
-        phone: customerData.customerPhone,
-        guests: customerData.guests,
+        name: customerName,
+        phone: customerPhone,
+        guests: guests,
       },
       orderStatus: selectedPOSPoint?.settings?.enableTables !== false ? "In Progress" : "Completed",
       items: preparedItems,
-      tableId: customerData.table?.tableId,
+      tableId: table?.tableId,
       paymentMethod: paymentMethod,
       branchId: selectedBranch?.id,
       posPointId: selectedPOSPoint?.id,
@@ -119,9 +121,9 @@ const Bill = () => {
             await verifyPaymentRazorpay(response);
             const orderData = {
               customerDetails: {
-                name: customerData.customerName,
-                phone: customerData.customerPhone,
-                guests: customerData.guests,
+                name: customerName,
+                phone: customerPhone,
+                guests: guests,
               },
               orderStatus: selectedPOSPoint?.settings?.enableTables !== false ? "In Progress" : "Completed",
               items: cartItems.map((item) => ({
@@ -130,7 +132,7 @@ const Bill = () => {
                 unitPrice: item.price,
                 name: item.name,
               })),
-              tableId: customerData.table?.tableId,
+              tableId: table?.tableId,
               paymentMethod: paymentMethod,
               paymentData: {
                 razorpay_order_id: response.razorpay_order_id,
@@ -148,8 +150,8 @@ const Bill = () => {
           }
         },
         prefill: {
-          name: customerData.customerName,
-          contact: customerData.customerPhone,
+          name: customerName,
+          contact: customerPhone,
         },
         theme: { color: "var(--primary)" },
       };

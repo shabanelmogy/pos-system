@@ -6,12 +6,13 @@ import MenuContainer from "../components/menu/MenuContainer";
 import CustomerInfo from "../components/menu/CustomerInfo";
 import CartInfo from "../components/menu/CartInfo";
 import Bill from "../components/menu/Bill";
-import { useSelector } from "react-redux";
+import useCustomerStore from "../../customers/store/useCustomerStore";
+import usePOSStore from "../store/usePOSStore";
 import { useNavigate } from "react-router-dom";
 
 const Menu = () => {
-  const customerData = useSelector((state) => state.customer);
-  const { selectedPOSPoint } = useSelector((state) => state.pos);
+  const customerData = useCustomerStore();
+  const { selectedPOSPoint } = usePOSStore();
   const navigate = useNavigate();
 
   const requireCustomer = selectedPOSPoint?.settings?.requireCustomerOnOrder;
@@ -62,7 +63,7 @@ const Menu = () => {
         </div>
 
         {/* ── Right: Cart ── */}
-        <div className="flex-[2.5] lg:flex-[1.2] flex flex-col min-h-0 bg-[var(--bg-card)] lg:my-4 lg:mr-3 rounded-lg overflow-hidden pb-2 lg:pb-0 border border-[var(--border-main)]">
+        <div className="flex-[2.5] lg:flex-[1.2] flex flex-col min-h-0 bg-[var(--bg-card)] lg:my-4 lg:me-3 rounded-lg overflow-hidden pb-2 lg:pb-0 border border-[var(--border-main)]">
 
           {requireCustomer && !isGuest && (
             <div className="flex-none">
@@ -72,7 +73,7 @@ const Menu = () => {
           )}
 
           {/* Scrollable cart items */}
-          <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar">
+          <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar pe-2">
             <CartInfo />
           </div>
 

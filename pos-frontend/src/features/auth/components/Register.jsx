@@ -57,28 +57,28 @@ const Register = ({setIsRegister}) => {
       <form onSubmit={handleSubmit} className="space-y-5">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div className="space-y-2">
-            <label className="flex items-center gap-2 text-[var(--text-muted)] text-[10px] font-black uppercase tracking-widest ml-1"><MdPerson /> Full Name</label>
+            <label className="flex items-center gap-2 text-[var(--text-muted)] text-[10px] font-black uppercase tracking-widest ms-1"><MdPerson /> Full Name</label>
             <input name="name" type="text" value={formData.name} onChange={handleChange} required placeholder="Employee Name" className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] focus:border-[var(--primary)] rounded-2xl p-4 text-[var(--text-main)] focus:outline-none transition-all font-bold placeholder:text-[var(--text-dim)]" />
           </div>
           <div className="space-y-2">
-            <label className="flex items-center gap-2 text-[var(--text-muted)] text-[10px] font-black uppercase tracking-widest ml-1"><MdEmail /> Email</label>
+            <label className="flex items-center gap-2 text-[var(--text-muted)] text-[10px] font-black uppercase tracking-widest ms-1"><MdEmail /> Email</label>
             <input name="email" type="email" value={formData.email} onChange={handleChange} required placeholder="Professional Email" className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] focus:border-[var(--primary)] rounded-2xl p-4 text-[var(--text-main)] focus:outline-none transition-all font-bold placeholder:text-[var(--text-dim)]" />
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div className="space-y-2">
-            <label className="flex items-center gap-2 text-[var(--text-muted)] text-[10px] font-black uppercase tracking-widest ml-1"><MdPhone /> Phone</label>
+            <label className="flex items-center gap-2 text-[var(--text-muted)] text-[10px] font-black uppercase tracking-widest ms-1"><MdPhone /> Phone</label>
             <input name="phone" type="text" value={formData.phone} onChange={handleChange} required placeholder="Contact Number" className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] focus:border-[var(--primary)] rounded-2xl p-4 text-[var(--text-main)] focus:outline-none transition-all font-bold placeholder:text-[var(--text-dim)]" />
           </div>
           <div className="space-y-2">
-            <label className="flex items-center gap-2 text-[var(--text-muted)] text-[10px] font-black uppercase tracking-widest ml-1"><MdLock /> Password</label>
+            <label className="flex items-center gap-2 text-[var(--text-muted)] text-[10px] font-black uppercase tracking-widest ms-1"><MdLock /> Password</label>
             <input name="password" type="password" value={formData.password} onChange={handleChange} required placeholder="Security Pass" className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] focus:border-[var(--primary)] rounded-2xl p-4 text-[var(--text-main)] focus:outline-none transition-all font-bold placeholder:text-[var(--text-dim)]" />
           </div>
         </div>
 
         <div className="space-y-3">
-          <label className="flex items-center gap-2 text-[var(--text-muted)] text-[10px] font-black uppercase tracking-widest ml-1"><MdSecurity /> Select Access Level</label>
+          <label className="flex items-center gap-2 text-[var(--text-muted)] text-[10px] font-black uppercase tracking-widest ms-1"><MdSecurity /> Select Access Level</label>
           <div className="flex gap-3">
             {["Waiter", "Cashier", "Admin"].map((role) => (
               <button

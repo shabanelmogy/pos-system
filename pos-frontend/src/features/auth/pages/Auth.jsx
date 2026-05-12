@@ -4,13 +4,11 @@ import logo from "../../../assets/images/logo.png"
 import Register from "../components/Register";
 import Login from "../components/Login";
 import { motion, AnimatePresence } from "framer-motion";
-import { useDispatch, useSelector } from "react-redux";
-import { toggleTheme } from "../../../shared/store/themeSlice";
+import useThemeStore from "../../../shared/store/useThemeStore";
 import { FaSun, FaMoon } from "react-icons/fa";
 
 const Auth = () => {
-  const dispatch = useDispatch();
-  const { mode } = useSelector((state) => state.theme);
+  const { mode, toggleTheme } = useThemeStore();
 
   useEffect(() => {
     document.title = "RestroPOS | Enterprise Secure Login"
@@ -32,7 +30,7 @@ const Auth = () => {
           <div className="absolute inset-0 bg-gradient-to-r from-black via-black/80 to-transparent"></div>
         </motion.div>
 
-        <div className="relative z-10 px-20 max-w-3xl">
+        <div className="relative z-10 ps-20 max-w-3xl">
           <motion.div
             initial={{ x: -50, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
@@ -73,21 +71,21 @@ const Auth = () => {
         </div>
 
         {/* Decorative Element */}
-        <div className="absolute bottom-20 left-20 w-40 h-1 bg-[var(--primary)]"></div>
+        <div className="absolute bottom-20 start-20 w-40 h-1 bg-[var(--primary)]"></div>
       </div>
 
       {/* Authentication Section */}
       <div className="w-full lg:w-2/5 min-h-screen flex flex-col justify-center px-8 md:px-20 relative bg-[var(--bg-main)]">
         {/* Theme Toggle */}
         <button
-          onClick={() => dispatch(toggleTheme())}
-          className="absolute top-10 right-8 md:right-20 bg-[var(--bg-card)] border border-[var(--border-main)] hover:border-[var(--primary)] rounded-xl p-3 cursor-pointer transition-all shadow-sm flex items-center justify-center w-11 h-11 z-10"
+          onClick={() => toggleTheme()}
+          className="absolute top-10 end-8 md:end-20 bg-[var(--bg-card)] border border-[var(--border-main)] hover:border-[var(--primary)] rounded-xl p-3 cursor-pointer transition-all shadow-sm flex items-center justify-center w-11 h-11 z-10"
           title={`Switch to ${mode === 'dark' ? 'Light' : 'Dark'} Mode`}
         >
           {mode === 'dark' ? <FaSun size={18} className="text-[var(--primary)]" /> : <FaMoon size={18} className="text-blue-500" />}
         </button>
 
-        <div className="absolute top-12 left-8 md:left-20 flex items-center gap-3">
+        <div className="absolute top-12 start-8 md:start-20 flex items-center gap-3">
           <motion.div 
             whileHover={{ rotate: 180 }}
             transition={{ duration: 0.5 }}
@@ -124,7 +122,7 @@ const Auth = () => {
                   {isRegister ? "Part of the team already?" : "Authorized personnel only."}
                   <button 
                     onClick={() => setIsRegister(!isRegister)} 
-                    className="ml-2 text-[var(--primary)] hover:text-[var(--text-main)] transition-colors underline underline-offset-4"
+                    className="ms-2 text-[var(--primary)] hover:text-[var(--text-main)] transition-colors underline underline-offset-4"
                   >
                     {isRegister ? "Sign in instead" : "Request access"}
                   </button>
@@ -134,7 +132,7 @@ const Auth = () => {
           </AnimatePresence>
         </div>
 
-        <div className="absolute bottom-10 left-0 right-0 text-center">
+        <div className="absolute bottom-10 inset-x-0 text-center">
            <p className="text-[9px] text-[var(--border-main)] font-black uppercase tracking-[0.4em]">
              &copy; 2026 RestroPOS Enterprise Logic. All rights reserved.
            </p>

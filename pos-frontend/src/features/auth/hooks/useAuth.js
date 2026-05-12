@@ -1,7 +1,9 @@
-import { useSelector } from 'react-redux';
+import useUserStore from '../store/useUserStore';
 
 const useAuth = () => {
-    const { role, isAuth, name, id, branchId, posPermissions } = useSelector((state) => state.user);
+    const { role, isAuth, name, id, branchId, posPermissions } = useUserStore();
+
+    const normalizedRole = role ? role.toLowerCase() : '';
 
     return {
         isAuth,
@@ -11,15 +13,15 @@ const useAuth = () => {
         branchId,
         posPermissions,
 
-        isAdmin: role === 'admin' || role === 'Admin',
-        isManager: role === 'manager',
-        isCashier: role === 'cashier' || role === 'Cashier',
-        isWaiter: role === 'waiter' || role === 'Waiter',
+        isAdmin: normalizedRole === 'admin',
+        isManager: normalizedRole === 'manager',
+        isCashier: normalizedRole === 'cashier',
+        isWaiter: normalizedRole === 'waiter',
         
-        canManageOrders: ['admin', 'manager', 'cashier', 'waiter'].includes(role.toLowerCase()),
-        canCompleteOrders: ['admin', 'manager', 'cashier'].includes(role.toLowerCase()),
-        canAccessDashboard: ['admin', 'manager'].includes(role.toLowerCase()),
-        canManageSettings: role.toLowerCase() === 'admin'
+        canManageOrders: ['admin', 'manager', 'cashier', 'waiter'].includes(normalizedRole),
+        canCompleteOrders: ['admin', 'manager', 'cashier'].includes(normalizedRole),
+        canAccessDashboard: ['admin', 'manager'].includes(normalizedRole),
+        canManageSettings: normalizedRole === 'admin'
     };
 };
 

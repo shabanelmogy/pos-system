@@ -1,13 +1,11 @@
 import React, { useEffect, useRef } from "react";
 import { RiDeleteBin2Fill, RiShoppingCartLine, RiAddFill, RiSubtractFill } from "react-icons/ri";
 import { FaNotesMedical } from "react-icons/fa6";
-import { useDispatch, useSelector } from "react-redux";
-import { removeItem, updateQuantity } from "../../store/cartSlice";
+import useCartStore from "../../store/useCartStore";
 
 const CartInfo = () => {
-  const cartData = useSelector((state) => state.cart);
+  const { items, addItem, removeItem, deleteItem } = useCartStore();
   const scrolLRef = useRef();
-  const dispatch = useDispatch();
 
   useEffect(() => {
     if (scrolLRef.current) {
@@ -16,22 +14,18 @@ const CartInfo = () => {
         behavior: "smooth"
       })
     }
-  }, [cartData]);
+  }, [items]);
 
   const handleRemove = (itemId) => {
-    dispatch(removeItem(itemId));
+    deleteItem(itemId);
   }
 
   const handleIncrease = (item) => {
-    dispatch(updateQuantity({ id: item.id, quantity: item.quantity + 1 }));
+    addItem(item);
   }
 
   const handleDecrease = (item) => {
-    if (item.quantity > 1) {
-      dispatch(updateQuantity({ id: item.id, quantity: item.quantity - 1 }));
-    } else {
-      handleRemove(item.id);
-    }
+    removeItem(item.id);
   }
 
   return (
@@ -41,16 +35,16 @@ const CartInfo = () => {
           Order Details
         </h1>
         <span className="bg-[var(--primary)]/20 text-[var(--primary)] px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider">
-          {cartData.length} {cartData.length === 1 ? 'Item' : 'Items'}
+          {items.length} {items.length === 1 ? 'Item' : 'Items'}
         </span>
       </div>
 
       <div
-        className="flex-1 overflow-y-auto pr-1 scrollbar-hide space-y-1.5"
+        className="flex-1 overflow-y-auto pe-1 scrollbar-hide space-y-1.5"
         ref={scrolLRef}
         style={{ maxHeight: '480px' }}
       >
-        {cartData.length === 0 ? (
+        {items.length === 0 ? (
           <div className="flex flex-col justify-center items-center h-[380px] opacity-60">
             <div className="bg-[var(--bg-card-alt)] p-4 rounded-full mb-3">
               <RiShoppingCartLine size={32} className="text-[var(--text-muted)]" />
@@ -58,7 +52,7 @@ const CartInfo = () => {
             <p className="text-[var(--text-muted)] text-center text-sm font-medium">Your cart is empty</p>
             <p className="text-[var(--text-dim)] text-xs text-center mt-0.5">Add items to start!</p>
           </div>
-        ) : cartData.map((item) => {
+        ) : items.map((item) => {
           return (
             <div
               key={item.id}
@@ -92,7 +86,7 @@ const CartInfo = () => {
                       <RiAddFill size={12} />
                     </button>
                   </div>
-                  <span className="text-[var(--text-dim)] text-[10px]">₹{item.pricePerQuantity || (item.price / item.quantity)}</span>
+                  <span className="text-[var(--text-dim)] text-[10px]">₹{item.price} / unit</span>
                 </div>
 
                 <div className="flex items-center gap-1.5">
@@ -121,4 +115,3 @@ const CartInfo = () => {
 };
 
 export default CartInfo;
-

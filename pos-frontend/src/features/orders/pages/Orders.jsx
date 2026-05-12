@@ -5,7 +5,8 @@ import BackButton from "../../../shared/components/BackButton";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { getOrders } from "../api/orderApi";
 import { enqueueSnackbar } from "notistack"
-import { useSelector } from "react-redux";
+import usePOSStore from "../../pos/store/usePOSStore";
+import useUserStore from "../../auth/store/useUserStore";
 import Invoice from "../components/invoice/Invoice";
 import { AnimatePresence } from "framer-motion";
 
@@ -17,9 +18,9 @@ const Orders = () => {
   const [selectedOrderForReprint, setSelectedOrderForReprint] = useState(null);
   const [showReprintModal, setShowReprintModal] = useState(false);
   
-  const { selectedPOSPoint } = useSelector((state) => state.pos);
+  const { selectedPOSPoint } = usePOSStore();
   const enableTables = selectedPOSPoint?.settings?.enableTables !== false;
-  const user = useSelector((state) => state.user);
+  const user = useUserStore();
 
   useEffect(() => {
     document.title = "POS | Orders"

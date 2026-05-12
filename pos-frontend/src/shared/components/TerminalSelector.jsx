@@ -1,15 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { getBranches, getPOSPoints } from "../../https";
-import { useDispatch, useSelector } from "react-redux";
-import { setSelectedBranch, setSelectedPOSPoint } from "../../redux/slices/posSlice";
+import { getBranches, getPOSPoints } from "../../features/pos/api/posApi";
+import usePOSStore from "../../features/pos/store/usePOSStore";
 import { motion } from "framer-motion";
 import { MdStore, MdComputer, MdCheckCircle, MdLock } from "react-icons/md";
-import useAuth from "../../hooks/useAuth";
+import useAuth from "../../features/auth/hooks/useAuth";
 
 const TerminalSelector = () => {
-  const dispatch = useDispatch();
-  const { selectedBranch } = useSelector((state) => state.pos);
+  const { selectedBranch, setSelectedBranch, setSelectedPOSPoint } = usePOSStore();
   const { branchId, posPermissions, isAdmin } = useAuth();
   const [step, setStep] = useState(1);
 
@@ -29,19 +27,19 @@ const TerminalSelector = () => {
     if (branches && branchId && !isAdmin) {
       const userBranch = branches.find(b => b.id === branchId);
       if (userBranch) {
-        dispatch(setSelectedBranch(userBranch));
+        setSelectedBranch(userBranch);
         setStep(2);
       }
     }
   }, [branches, branchId, isAdmin]);
 
   const handleBranchSelect = (branch) => {
-    dispatch(setSelectedBranch(branch));
+    setSelectedBranch(branch);
     setStep(2);
   };
 
   const handlePOSSelect = (pos) => {
-    dispatch(setSelectedPOSPoint(pos));
+    setSelectedPOSPoint(pos);
   };
 
   // Filter terminals based on user permissions
@@ -80,7 +78,7 @@ const TerminalSelector = () => {
                   key={branch.id}
                   disabled={isDisabled}
                   onClick={() => handleBranchSelect(branch)}
-                  className={`bg-[var(--bg-card)] border p-8 rounded-[2.5rem] text-left transition-all group relative ${
+                  className={`bg-[var(--bg-card)] border p-8 rounded-[2.5rem] text-start transition-all group relative ${
                     isDisabled ? 'opacity-30 grayscale cursor-not-allowed border-[var(--bg-card-alt)]' : 'border-[var(--border-main)] hover:border-[var(--primary)]'
                   }`}
                 >
@@ -93,7 +91,7 @@ const TerminalSelector = () => {
                   <p className="text-[var(--text-muted)] text-xs uppercase tracking-widest font-black">{branch.code}</p>
                   
                   {isDisabled && (
-                    <div className="absolute top-6 right-6 text-[#444]">
+                    <div className="absolute top-6 end-6 text-[#444]">
                        <MdLock size={20} />
                     </div>
                   )}
@@ -108,7 +106,7 @@ const TerminalSelector = () => {
                   whileTap={{ scale: 0.98 }}
                   key={pos.id}
                   onClick={() => handlePOSSelect(pos)}
-                  className="bg-[var(--bg-card)] border border-[var(--border-main)] p-8 rounded-[2.5rem] text-left hover:border-[var(--primary)] transition-all group"
+                  className="bg-[var(--bg-card)] border border-[var(--border-main)] p-8 rounded-[2.5rem] text-start hover:border-[var(--primary)] transition-all group"
                 >
                   <div className="w-16 h-16 bg-[var(--bg-card-alt)] rounded-2xl flex items-center justify-center text-[var(--primary)] mb-8 group-hover:bg-[var(--primary)] group-hover:text-[var(--bg-card)] transition-all">
                     <MdComputer size={36} />

@@ -1,18 +1,18 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { getAvatarName, getBgColor } from "../../../shared/utils"
-import { useDispatch, useSelector } from "react-redux";
-import { setCustomer, setOrder, updateTable } from "../../customers/store/customerSlice";
-import { setCart } from "../../pos/store/cartSlice";
+import useCustomerStore from "../../customers/store/useCustomerStore";
+import useCartStore from "../../pos/store/useCartStore";
+import usePOSStore from "../../pos/store/usePOSStore";
 import { FaCircle, FaShoppingCart } from "react-icons/fa";
 import useAuth from "../../auth/hooks/useAuth";
 
 const TableCard = ({id, name, status, initials, seats, order, onViewOrder}) => {
-  const dispatch = useDispatch();
   const navigate = useNavigate();
   const { canCompleteOrders } = useAuth();
-  const { selectedPOSPoint } = useSelector((state) => state.pos);
-  const customerData = useSelector((state) => state.customer);
+  const { selectedPOSPoint } = usePOSStore();
+  const { customerName, customerPhone, setCustomer, updateTable } = useCustomerStore();
+  const { removeAllItems } = useCartStore();
 
   const handleClick = (name) => {
     // 1. If Table is Booked, Show Quick Summary Modal
@@ -29,26 +29,26 @@ const TableCard = ({id, name, status, initials, seats, order, onViewOrder}) => {
     // 3. If Table is Free and user is Cashier, allow creating order
     const requireCustomer = selectedPOSPoint?.settings?.requireCustomerOnOrder;
 
-    if (!customerData.customerName || !customerData.customerPhone) {
+    if (!customerName || !customerPhone) {
       if (!requireCustomer) {
         // Automatically start guest order if not required
-        dispatch(setCustomer({ 
+        setCustomer({ 
           name: "Guest", 
           phone: "N/A", 
           guests: 1 
-        }));
+        });
       } else {
         // Force modal if required
-        dispatch(setCart([])); 
+        removeAllItems(); 
         window.dispatchEvent(new CustomEvent("open-create-order-modal"));
         return;
       }
     }
 
     const table = { tableId: id, tableNo: name }
-    dispatch(updateTable({ table }))
+    updateTable(table)
     // FINAL SAFETY: Clear cart before going to a fresh table menu
-    dispatch(setCart([])); 
+    removeAllItems(); 
     navigate(`/menu`);
   };
 

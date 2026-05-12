@@ -1,14 +1,13 @@
-import { useDispatch, useSelector } from "react-redux";
 import { getUserData } from "../../features/auth/api/authApi";
 import { useEffect, useState } from "react";
-import { removeUser, setUser } from "../../features/auth/store/userSlice";
 import { useNavigate } from "react-router-dom";
-import { setActiveShift, setSelectedBranch, setSelectedPOSPoint } from "../../features/pos/store/posSlice";
+import useUserStore from "../../features/auth/store/useUserStore";
+import usePOSStore from "../../features/pos/store/usePOSStore";
 
 const useLoadData = () => {
-  const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { isAuth } = useSelector((state) => state.user);
+  const { isAuth, setUser, removeUser } = useUserStore();
+  const { setActiveShift, setSelectedBranch, setSelectedPOSPoint } = usePOSStore();
   const [isLoading, setIsLoading] = useState(!isAuth); // Only load if not authenticated
 
   useEffect(() => {
@@ -32,16 +31,16 @@ const useLoadData = () => {
         const serverShift = data.activeShift;
 
         // 1. Set User
-        dispatch(setUser({ id, name, email, phone, role, branchId, posPermissions }));
+        setUser({ id, name, email, phone, role, branchId, posPermissions });
 
         // 2. Restore Shift & Terminal if found
         if (serverShift) {
-          dispatch(setActiveShift(serverShift));
-          if (serverShift.branch) dispatch(setSelectedBranch(serverShift.branch));
-          if (serverShift.posPoint) dispatch(setSelectedPOSPoint(serverShift.posPoint));
+          setActiveShift(serverShift);
+          if (serverShift.branch) setSelectedBranch(serverShift.branch);
+          if (serverShift.posPoint) setSelectedPOSPoint(serverShift.posPoint);
         }
       } catch (error) {
-        dispatch(removeUser());
+        removeUser();
         if (window.location.pathname !== "/auth") {
           navigate("/auth");
         }
@@ -51,7 +50,7 @@ const useLoadData = () => {
     };
 
     fetchUser();
-  }, [dispatch, navigate, isAuth]);
+  }, [navigate, isAuth, setUser, removeUser, setActiveShift, setSelectedBranch, setSelectedPOSPoint]);
 
   return isLoading;
 };

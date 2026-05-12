@@ -2,8 +2,7 @@ import React, { useState, useEffect } from "react";
 import { FaShoppingCart, FaSearch } from "react-icons/fa";
 import { MdRestaurantMenu, MdChevronLeft, MdChevronRight } from "react-icons/md";
 import { RiAddFill, RiSubtractFill } from "react-icons/ri";
-import { useDispatch } from "react-redux";
-import { addItems } from "../../store/cartSlice";
+import useCartStore from "../../store/useCartStore";
 import { getCategories, getItems } from "../../api/posApi";
 import { useQuery } from "@tanstack/react-query";
 
@@ -12,7 +11,7 @@ const MenuContainer = () => {
   const [itemCount, setItemCount] = useState(0);
   const [activeItemId, setActiveItemId] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const dispatch = useDispatch();
+  const { addItem } = useCartStore();
   const scrollRef = React.useRef(null);
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
@@ -43,7 +42,16 @@ const MenuContainer = () => {
   const scroll = (direction) => {
     if (scrollRef.current) {
       const { scrollLeft } = scrollRef.current;
-      const scrollTo = direction === "left" ? scrollLeft - 200 : scrollLeft + 200;
+      const isRtl = document.documentElement.dir === 'rtl';
+      const scrollStep = 200;
+      let scrollTo;
+      
+      if (isRtl) {
+        scrollTo = direction === "left" ? scrollLeft + scrollStep : scrollLeft - scrollStep;
+      } else {
+        scrollTo = direction === "left" ? scrollLeft - scrollStep : scrollLeft + scrollStep;
+      }
+      
       scrollRef.current.scrollTo({ left: scrollTo, behavior: "smooth" });
     }
   };
@@ -96,14 +104,16 @@ const MenuContainer = () => {
     if (activeItemId !== item.id || itemCount === 0) return;
     const { name, price } = item;
     const priceNum = parseFloat(price);
-    const newObj = {
-      id: item.id, // Keep the real database UUID
-      name,
-      pricePerQuantity: priceNum,
-      quantity: itemCount,
-      price: priceNum * itemCount,
-    };
-    dispatch(addItems(newObj));
+    
+    // Add multiple times based on itemCount
+    for (let i = 0; i < itemCount; i++) {
+        addItem({
+          id: item.id,
+          name,
+          price: priceNum,
+        });
+    }
+
     setItemCount(0);
     setActiveItemId(null);
   };
@@ -126,7 +136,7 @@ const MenuContainer = () => {
         {/* Left Scroll Button */}
         <button
           onClick={() => scroll("left")}
-          className="absolute left-1 top-[calc(50%+8px)] -translate-y-1/2 z-10 bg-[var(--bg-card)]/80 hover:bg-[var(--primary)] text-[var(--primary)] hover:text-black p-1.5 rounded-full lg:opacity-0 lg:group-hover/nav:opacity-100 transition-all duration-300 border border-[var(--border-main)] shadow-xl backdrop-blur-sm"
+          className="absolute start-1 top-[calc(50%+8px)] -translate-y-1/2 z-10 bg-[var(--bg-card)]/80 hover:bg-[var(--primary)] text-[var(--primary)] hover:text-black p-1.5 rounded-full lg:opacity-0 lg:group-hover/nav:opacity-100 transition-all duration-300 border border-[var(--border-main)] shadow-xl backdrop-blur-sm rtl:rotate-180"
         >
           <MdChevronLeft size={20} />
         </button>
@@ -167,7 +177,7 @@ const MenuContainer = () => {
         {/* Right Scroll Button */}
         <button
           onClick={() => scroll("right")}
-          className="absolute right-1 top-[calc(50%+8px)] -translate-y-1/2 z-10 bg-[var(--bg-card)]/80 hover:bg-[var(--primary)] text-[var(--primary)] hover:text-black p-1.5 rounded-full lg:opacity-0 lg:group-hover/nav:opacity-100 transition-all duration-300 border border-[var(--border-main)] shadow-xl backdrop-blur-sm"
+          className="absolute end-1 top-[calc(50%+8px)] -translate-y-1/2 z-10 bg-[var(--bg-card)]/80 hover:bg-[var(--primary)] text-[var(--primary)] hover:text-black p-1.5 rounded-full lg:opacity-0 lg:group-hover/nav:opacity-100 transition-all duration-300 border border-[var(--border-main)] shadow-xl backdrop-blur-sm rtl:rotate-180"
         >
           <MdChevronRight size={20} />
         </button>
@@ -176,18 +186,18 @@ const MenuContainer = () => {
       {/* ── Search Bar ── */}
       <div className="px-6 py-4">
         <div className="relative group">
-          <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-dim)] group-focus-within:text-[var(--primary)] transition-colors text-sm" />
+          <FaSearch className="absolute start-4 top-1/2 -translate-y-1/2 text-[var(--text-dim)] group-focus-within:text-[var(--primary)] transition-colors text-sm" />
           <input
             type="text"
             placeholder={`Search in ${selectedCategory?.name || "menu"}…`}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-[var(--bg-input)] border border-[var(--border-main)] focus:border-[var(--primary)]/60 text-[var(--text-main)] text-sm rounded-xl pl-11 pr-10 py-2.5 outline-none transition-all placeholder-[var(--text-dim)]"
+            className="w-full bg-[var(--bg-input)] border border-[var(--border-main)] focus:border-[var(--primary)]/60 text-[var(--text-main)] text-sm rounded-xl ps-11 pe-10 py-2.5 outline-none transition-all placeholder-[var(--text-dim)]"
           />
           {searchTerm && (
             <button
               onClick={() => setSearchTerm("")}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--text-dim)] hover:text-[var(--text-main)] transition-colors text-xs"
+              className="absolute end-4 top-1/2 -translate-y-1/2 text-[var(--text-dim)] hover:text-[var(--text-main)] transition-colors text-xs"
             >
               ✕
             </button>
@@ -218,7 +228,7 @@ const MenuContainer = () => {
                 >
                   {/* Qty Badge */}
                   {isActive && (
-                    <div className="absolute top-2.5 right-2.5 bg-[var(--primary)] text-black text-xs font-black w-6 h-6 rounded-full flex items-center justify-center shadow-lg z-10">
+                    <div className="absolute top-2.5 end-2.5 bg-[var(--primary)] text-black text-xs font-black w-6 h-6 rounded-full flex items-center justify-center shadow-lg z-10">
                       {itemCount}
                     </div>
                   )}

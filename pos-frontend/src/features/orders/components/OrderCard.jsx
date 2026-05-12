@@ -52,12 +52,12 @@ const OrderCard = ({ order, onReprint }) => {
             {getAvatarName(order.customerDetails?.name || "Guest")}
           </button>
           {isPremiumCustomer && (
-            <div className="absolute -top-2 -right-2 bg-yellow-500 text-black p-1 rounded-full border-2 border-[var(--bg-card-alt)] title='Premium Customer'">
+            <div className="absolute -top-2 -end-2 bg-yellow-500 text-black p-1 rounded-full border-2 border-[var(--bg-card-alt)]" title='Premium Customer'>
               <FaCrown size={12} />
             </div>
           )}
         </div>
-        <div className="flex items-center justify-between w-[100%]">
+        <div className="flex-1 flex items-center justify-between">
           <div className="flex flex-col items-start gap-1">
             <div className="flex items-center gap-2">
               <h1 className="text-[var(--text-main)] text-lg font-semibold tracking-wide">
@@ -70,26 +70,26 @@ const OrderCard = ({ order, onReprint }) => {
               )}
             </div>
             <p className="text-[var(--text-muted)] text-xs font-medium">#{Math.floor(new Date(order.orderDate).getTime() / 1000)} / {order.paymentMethod || "Cash"}</p>
-            <p className="text-[var(--text-muted)] text-sm">Table <FaLongArrowAltRight className="text-[var(--text-muted)] ml-2 inline" /> {order.table?.tableNo || "N/A"}</p>
+            <p className="text-[var(--text-muted)] text-sm">Table <FaLongArrowAltRight className="text-[var(--text-muted)] ms-2 inline rtl:rotate-180" /> {order.table?.tableNo || "N/A"}</p>
           </div>
           <div className="flex flex-col items-end gap-2">
             {order.orderStatus === "Ready" ? (
               <>
                 <p className="text-[var(--status-success)] bg-[var(--status-success-bg)] px-2 py-1 rounded-lg">
-                  <FaCheckDouble className="inline mr-2" /> {order.orderStatus}
+                  <FaCheckDouble className="inline me-2" /> {order.orderStatus}
                 </p>
                 <p className="text-[var(--text-muted)] text-sm">
-                  <FaCircle className="inline mr-2 text-[var(--status-success)]" /> Ready to
+                  <FaCircle className="inline me-2 text-[var(--status-success)]" /> Ready to
                   serve
                 </p>
               </>
             ) : (
               <>
                 <p className={`px-2 py-1 rounded-lg ${order.orderStatus === "Completed" ? "text-[var(--status-success)] bg-[var(--status-success-bg)]" : "text-[var(--status-warning)] bg-[var(--status-warning-bg)]"}`}>
-                  <FaCircle className="inline mr-2" /> {order.orderStatus}
+                  <FaCircle className="inline me-2" /> {order.orderStatus}
                 </p>
                 <p className="text-[var(--text-muted)] text-sm">
-                  <FaCircle className={`inline mr-2 ${order.orderStatus === "Completed" ? "text-[var(--status-success)]" : "text-[var(--status-warning)]"}`} /> {order.orderStatus === "Completed" ? "Order Served" : "Preparing"}
+                  <FaCircle className={`inline me-2 ${order.orderStatus === "Completed" ? "text-[var(--status-success)]" : "text-[var(--status-warning)]"}`} /> {order.orderStatus === "Completed" ? "Order Served" : "Preparing"}
                 </p>
               </>
             )}

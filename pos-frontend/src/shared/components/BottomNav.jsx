@@ -4,16 +4,17 @@ import { MdOutlineReorder, MdTableBar } from "react-icons/md";
 import { BiSolidDish } from "react-icons/bi";
 import { useNavigate, useLocation } from "react-router-dom";
 import Modal from "./Modal";
-import { useDispatch, useSelector } from "react-redux";
-import { setCustomer } from "../../features/customers/store/customerSlice";
-import { removeAllItems } from "../../features/pos/store/cartSlice";
+import useCustomerStore from "../../features/customers/store/useCustomerStore";
+import useCartStore from "../../features/pos/store/useCartStore";
+import usePOSStore from "../../features/pos/store/usePOSStore";
 import useAuth from "../../features/auth/hooks/useAuth";
 
 const BottomNav = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const dispatch = useDispatch();
-  const { selectedPOSPoint } = useSelector((state) => state.pos);
+  const { selectedPOSPoint } = usePOSStore();
+  const { setCustomer } = useCustomerStore();
+  const { removeAllItems } = useCartStore();
   const enableTables = selectedPOSPoint?.settings?.enableTables !== false;
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -55,13 +56,12 @@ const BottomNav = () => {
       }
     }
 
-    // send the data to store
-    dispatch(setCustomer({
+    setCustomer({
       name: name || "Guest",
       phone: phone || "N/A",
       guests: guestCount || 1
-    }));
-    dispatch(removeAllItems());
+    });
+    removeAllItems();
 
     // Clear local state
     setName("");
@@ -82,12 +82,12 @@ const BottomNav = () => {
   const handleDishClick = () => {
     if (!requireCustomer) {
       // Bypass modal and start order immediately
-      dispatch(setCustomer({
+      setCustomer({
         name: "Guest",
         phone: "N/A",
         guests: 1
-      }));
-      dispatch(removeAllItems());
+      });
+      removeAllItems();
 
       if (!enableTables) {
         navigate("/menu");
@@ -100,7 +100,7 @@ const BottomNav = () => {
   };
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-[var(--bg-card)] border-t border-[var(--border-main)] px-4 py-2 flex justify-around items-center z-40 shadow-[0_-4px_20px_rgba(0,0,0,0.1)]">
+    <div className="fixed bottom-0 inset-x-0 bg-[var(--bg-card)] border-t border-[var(--border-main)] px-4 py-2 flex justify-around items-center z-40 shadow-[0_-4px_20px_rgba(0,0,0,0.1)]">
       <button
         onClick={() => navigate("/")}
         className={`flex flex-col items-center justify-center font-bold transition-all ${isActive("/") ? "text-[var(--primary)]" : "text-[var(--text-muted)] hover:text-[var(--text-main)]"
@@ -168,7 +168,7 @@ const BottomNav = () => {
       <Modal isOpen={isModalOpen} onClose={closeModal}>
         <div>
           <label className="block text-[var(--text-muted)] mb-2 text-sm font-medium">
-            Customer Name {!requireCustomer && <span className="text-[var(--text-dim)] text-xs ml-1">(Optional)</span>}
+            Customer Name {!requireCustomer && <span className="text-[var(--text-dim)] text-xs ms-1">(Optional)</span>}
           </label>
           <div className="flex items-center rounded-lg p-3 px-4 bg-[var(--bg-main)]">
             <input value={name} onChange={(e) => setName(e.target.value)} type="text" name="" placeholder="Enter customer name" id="" className="bg-transparent flex-1 text-[var(--text-main)] focus:outline-none placeholder:text-[var(--text-dim)]" />
@@ -176,7 +176,7 @@ const BottomNav = () => {
         </div>
         <div>
           <label className="block text-[var(--text-muted)] mb-2 mt-3 text-sm font-medium">
-            Customer Phone {!requireCustomer && <span className="text-[var(--text-dim)] text-xs ml-1">(Optional)</span>}
+            Customer Phone {!requireCustomer && <span className="text-[var(--text-dim)] text-xs ms-1">(Optional)</span>}
           </label>
           <div className="flex items-center rounded-lg p-3 px-4 bg-[var(--bg-main)]">
             <input value={phone} onChange={(e) => setPhone(e.target.value)} type="number" name="" placeholder="+91-9999999999" id="" className="bg-transparent flex-1 text-[var(--text-main)] focus:outline-none placeholder:text-[var(--text-dim)]" />

@@ -1,14 +1,12 @@
 import React, { useState } from "react";
 import { openShift, closeShift } from "../../features/pos/api/posApi";
-import { useDispatch, useSelector } from "react-redux";
-import { setActiveShift, setShowShiftModal } from "../../features/pos/store/posSlice";
+import usePOSStore from "../../features/pos/store/usePOSStore";
 import { motion } from "framer-motion";
 import { MdPlayArrow, MdStop, MdAttachMoney, MdNotes, MdClose, MdTrendingUp, MdHistory } from "react-icons/md";
 import { enqueueSnackbar } from "notistack";
 
 const ShiftManager = () => {
-  const dispatch = useDispatch();
-  const { activeShift, selectedBranch, selectedPOSPoint } = useSelector((state) => state.pos);
+  const { activeShift, selectedBranch, selectedPOSPoint, setActiveShift, setShowShiftModal } = usePOSStore();
   const [openingBalance, setOpeningBalance] = useState("0");
   const [closingBalance, setClosingBalance] = useState("0");
   const [loading, setLoading] = useState(false);
@@ -22,8 +20,8 @@ const ShiftManager = () => {
         posPointId: selectedPOSPoint.id,
         openingBalance: parseFloat(openingBalance || 0)
       });
-      dispatch(setActiveShift(res.data.data));
-      dispatch(setShowShiftModal(false));
+      setActiveShift(res.data.data);
+      setShowShiftModal(false);
       enqueueSnackbar("Shift started successfully", { variant: "success" });
     } catch (error) {
       enqueueSnackbar(error.response?.data?.message || "Failed to start shift", { variant: "error" });
@@ -39,8 +37,8 @@ const ShiftManager = () => {
       const res = await closeShift(activeShift.id, {
         closingBalance: parseFloat(closingBalance || 0)
       });
-      dispatch(setActiveShift(null));
-      dispatch(setShowShiftModal(false));
+      setActiveShift(null);
+      setShowShiftModal(false);
       enqueueSnackbar("Shift closed successfully", { variant: "success" });
     } catch (error) {
       enqueueSnackbar(error.response?.data?.message || "Failed to close shift", { variant: "error" });
@@ -50,7 +48,7 @@ const ShiftManager = () => {
   };
 
   const closeModal = () => {
-    dispatch(setShowShiftModal(false));
+    setShowShiftModal(false);
   };
 
   if (!activeShift) {
@@ -62,7 +60,7 @@ const ShiftManager = () => {
           className="bg-[var(--bg-card)] border border-[var(--border-main)] p-8 lg:p-12 rounded-[3rem] max-w-xl w-full shadow-2xl relative overflow-hidden"
         >
           {/* Background Glow */}
-          <div className="absolute -top-24 -right-24 w-64 h-64 bg-[var(--primary)]/5 blur-[100px] rounded-full"></div>
+          <div className="absolute -top-24 -end-24 w-64 h-64 bg-[var(--primary)]/5 blur-[100px] rounded-full"></div>
 
           <header className="text-center mb-10 relative z-10">
             <div className="w-20 h-20 bg-emerald-500/10 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-[0_0_40px_rgba(16,185,129,0.1)]">
@@ -77,9 +75,9 @@ const ShiftManager = () => {
 
           <form onSubmit={handleOpenShift} className="space-y-8 relative z-10">
             <div className="group">
-              <label className="block text-[#555] text-[10px] font-black uppercase tracking-widest mb-4 ml-1 group-focus-within:text-[var(--primary)] transition-colors">Opening Cash Balance (₹)</label>
+              <label className="block text-[#555] text-[10px] font-black uppercase tracking-widest mb-4 ms-1 group-focus-within:text-[var(--primary)] transition-colors">Opening Cash Balance (₹)</label>
               <div className="relative">
-                <div className="absolute left-6 top-1/2 -translate-y-1/2 text-[#444] group-focus-within:text-[var(--primary)] transition-colors">
+                <div className="absolute start-6 top-1/2 -translate-y-1/2 text-[#444] group-focus-within:text-[var(--primary)] transition-colors">
                   <MdAttachMoney size={24} />
                 </div>
                 <input 
@@ -87,7 +85,7 @@ const ShiftManager = () => {
                   value={openingBalance}
                   onChange={(e) => setOpeningBalance(e.target.value)}
                   placeholder="0.00"
-                  className="w-full bg-[#111] border border-[var(--border-main)] rounded-[1.5rem] p-6 pl-16 text-white text-3xl font-black focus:outline-none focus:border-[var(--primary)] transition-all shadow-inner tracking-tighter"
+                  className="w-full bg-[#111] border border-[var(--border-main)] rounded-[1.5rem] p-6 ps-16 text-white text-3xl font-black focus:outline-none focus:border-[var(--primary)] transition-all shadow-inner tracking-tighter"
                 />
               </div>
             </div>
@@ -99,8 +97,6 @@ const ShiftManager = () => {
               >
                 {loading ? "Validating Ledger..." : "Open Terminal Session"}
               </button>
-
-
             </div>
           </form>
 
@@ -121,7 +117,7 @@ const ShiftManager = () => {
         animate={{ y: 0, opacity: 1 }}
         className="bg-[var(--bg-card)] border border-[var(--border-main)] p-8 lg:p-12 rounded-[3.5rem] max-w-2xl w-full shadow-2xl relative"
       >
-        <button onClick={closeModal} className="absolute top-8 right-8 text-[#444] hover:text-white transition-colors">
+        <button onClick={closeModal} className="absolute top-8 end-8 text-[#444] hover:text-white transition-colors">
            <MdClose size={32} />
         </button>
 
@@ -134,13 +130,11 @@ const ShiftManager = () => {
           <p className="text-[#555] text-xs font-bold uppercase tracking-widest mt-2">Finalize your counts before drawer handoff</p>
         </header>
 
-
-
         <form onSubmit={handleCloseShift} className="space-y-8">
            <div className="group">
-              <label className="block text-[var(--text-muted)] text-[10px] font-black uppercase tracking-[0.2em] mb-4 ml-1">Actual Cash in Drawer (₹)</label>
+              <label className="block text-[var(--text-muted)] text-[10px] font-black uppercase tracking-[0.2em] mb-4 ms-1">Actual Cash in Drawer (₹)</label>
               <div className="relative">
-                <div className="absolute left-6 top-1/2 -translate-y-1/2 text-[#444] group-focus-within:text-[var(--primary)] transition-colors">
+                <div className="absolute start-6 top-1/2 -translate-y-1/2 text-[#444] group-focus-within:text-[var(--primary)] transition-colors">
                   <MdAttachMoney size={24} />
                 </div>
                 <input 
@@ -148,7 +142,7 @@ const ShiftManager = () => {
                   value={closingBalance}
                   onChange={(e) => setClosingBalance(e.target.value)}
                   placeholder="0.00"
-                  className="w-full bg-[var(--bg-input)] border border-[var(--border-main)] rounded-[1.5rem] p-6 pl-16 text-[var(--text-main)] text-3xl font-black focus:outline-none focus:border-[var(--primary)] transition-all tracking-tighter shadow-inner"
+                  className="w-full bg-[var(--bg-input)] border border-[var(--border-main)] rounded-[1.5rem] p-6 ps-16 text-[var(--text-main)] text-3xl font-black focus:outline-none focus:border-[var(--primary)] transition-all tracking-tighter shadow-inner"
                 />
               </div>
               <p className="mt-4 text-[9px] text-[#444] font-black uppercase tracking-widest">Include the opening balance in your total count</p>

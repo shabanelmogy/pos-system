@@ -1,10 +1,10 @@
 import React, { useState } from "react";
-import { useSelector } from "react-redux";
+import useCustomerStore from "../../../customers/store/useCustomerStore";
 import { formatDate, getAvatarName } from "../../../../shared/utils";
 
 const CustomerInfo = () => {
     const [dateTime, setDateTime] = useState(new Date());
-    const customerData = useSelector((state) => state.customer);
+    const customerData = useCustomerStore();
 
     return (
         <div className="flex items-center justify-between px-4 py-3">
@@ -27,4 +27,3 @@ const CustomerInfo = () => {
 };
 
 export default CustomerInfo;
-

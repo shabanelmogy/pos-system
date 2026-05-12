@@ -6,12 +6,12 @@ import { enqueueSnackbar } from "notistack";
 import { getOrders } from "../../../orders/api/orderApi";
 import { motion, AnimatePresence } from "framer-motion";
 import Invoice from "../../../orders/components/invoice/Invoice";
-import { useSelector } from "react-redux";
+import usePOSStore from "../../store/usePOSStore";
 
 const RecentOrders = () => {
   const [selectedOrderForReprint, setSelectedOrderForReprint] = useState(null);
   const [showReprintModal, setShowReprintModal] = useState(false);
-  const { selectedPOSPoint } = useSelector((state) => state.pos);
+  const { selectedPOSPoint } = usePOSStore();
 
   const { data: ordersList = [], isError, isLoading } = useQuery({
     queryKey: ["recent-orders", selectedPOSPoint?.id],
@@ -49,7 +49,7 @@ const RecentOrders = () => {
         </div>
 
         <div className="overflow-y-auto min-h-[300px] lg:h-[420px] scrollbar-hide">
-          <div className="flex items-center gap-3 bg-[var(--bg-card-alt)] rounded-xl px-4 py-2.5 mb-4 border border-[var(--border-main)] focus-within:border-[var(--primary)] transition-colors">
+          <div className="flex items-center gap-3 bg-[var(--bg-card-alt)] rounded-xl px-4 py-2.5 mb-4 border border-[var(--border-main)] focus-within:border-[var(--primary)] transition-colors mx-6 mt-4">
             <FaSearch className="text-[var(--text-dim)]" />
             <input
               type="text"
@@ -58,14 +58,14 @@ const RecentOrders = () => {
             />
           </div>
 
-          <div className="flex-1 overflow-y-auto custom-scrollbar pr-2">
+          <div className="flex-1 overflow-y-auto custom-scrollbar pe-2 px-6">
             {isLoading ? (
               <div className="flex flex-col items-center justify-center h-full gap-4 opacity-50">
                 <div className="w-8 h-8 border-4 border-[var(--border-main)] border-t-[var(--primary)] rounded-full animate-spin" />
                 <p className="text-[10px] text-[var(--text-muted)] font-black uppercase tracking-widest">Fetching Orders...</p>
               </div>
             ) : ordersList.length > 0 ? (
-              <div className="space-y-3">
+              <div className="space-y-3 pb-6">
                 {ordersList.map((order) => (
                   <OrderList key={order.id} order={order} onReprint={handleReprint} />
                 ))}

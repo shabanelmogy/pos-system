@@ -1,8 +1,8 @@
 import { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
 import { useQuery } from "@tanstack/react-query";
 import { getPosSettings } from "../../settings/api/settingsApi";
-import { setSelectedPOSPoint } from "../store/posSlice";
+import usePOSStore from "../store/usePOSStore";
+import useUserStore from "../../auth/store/useUserStore";
 
 /**
  * useSettingsSync
@@ -11,9 +11,8 @@ import { setSelectedPOSPoint } from "../store/posSlice";
  * take effect on all staff devices without requiring a page refresh.
  */
 const useSettingsSync = () => {
-    const dispatch = useDispatch();
-    const { selectedPOSPoint, activeShift } = useSelector((state) => state.pos);
-    const { isAuth } = useSelector((state) => state.user);
+    const { selectedPOSPoint, activeShift, setSelectedPOSPoint } = usePOSStore();
+    const { isAuth } = useUserStore();
 
     const posPointId = selectedPOSPoint?.id;
 
@@ -29,19 +28,19 @@ const useSettingsSync = () => {
         if (isSuccess && data?.data?.data) {
             const remoteSettings = data.data.data;
             
-            // Only update if settings have actually changed to avoid unnecessary Redux churn
+            // Only update if settings have actually changed to avoid unnecessary Zustand churn
             const currentSettingsStr = JSON.stringify(selectedPOSPoint.settings);
             const remoteSettingsStr = JSON.stringify(remoteSettings);
 
             if (currentSettingsStr !== remoteSettingsStr) {
                 console.log("[SYNC] POS Settings updated from server.");
-                dispatch(setSelectedPOSPoint({
+                setSelectedPOSPoint({
                     ...selectedPOSPoint,
                     settings: remoteSettings
-                }));
+                });
             }
         }
-    }, [isSuccess, data, dispatch, selectedPOSPoint]);
+    }, [isSuccess, data, selectedPOSPoint, setSelectedPOSPoint]);
 };
 
 export default useSettingsSync;

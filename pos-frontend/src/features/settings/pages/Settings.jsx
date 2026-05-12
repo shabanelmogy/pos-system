@@ -1,17 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { useSelector, useDispatch } from "react-redux";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getAllPosSettings, updatePosSettings } from "../api/settingsApi";
 import { enqueueSnackbar } from "notistack";
-import { setSelectedPOSPoint } from "../../pos/store/posSlice";
+import usePOSStore from "../../pos/store/usePOSStore";
 import BackButton from "../../../shared/components/BackButton";
 import BottomNav from "../../../shared/components/BottomNav";
 import { FaPrint, FaUserCheck, FaSave, FaTerminal, FaChevronRight, FaCheckCircle } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 
 const Settings = () => {
-    const dispatch = useDispatch();
-    const { selectedPOSPoint: currentActiveTerminal } = useSelector(state => state.pos);
+    const { selectedPOSPoint: currentActiveTerminal, setSelectedPOSPoint } = usePOSStore();
     const queryClient = useQueryClient();
     const [selectedTerminal, setSelectedTerminal] = useState(null);
     const [localSettings, setLocalSettings] = useState(null);
@@ -36,13 +34,13 @@ const Settings = () => {
             queryClient.invalidateQueries(["all-pos-settings"]);
             enqueueSnackbar("Settings saved successfully!", { variant: "success" });
             
-            // If the terminal we just updated is the one we are currently using, update Redux state
+            // If the terminal we just updated is the one we are currently using, update Zustand state
             if (currentActiveTerminal && currentActiveTerminal.id === selectedTerminal.id) {
                 const updatedTerminal = {
                     ...selectedTerminal,
                     settings: res.data.data
                 };
-                dispatch(setSelectedPOSPoint(updatedTerminal));
+                setSelectedPOSPoint(updatedTerminal);
             }
         },
         onError: () => {
@@ -110,7 +108,7 @@ const Settings = () => {
                                 key={term.id}
                                 onClick={() => handlePickTerminal(term)}
                                 className={`w-full flex items-center justify-between p-4 rounded-2xl transition-all border ${selectedTerminal?.id === term.id
-                                        ? "bg-[var(--primary)] border-[var(--primary)] text-black shadow-lg shadow-[var(--primary)]/10"
+                                        ? "bg-[var(--primary)] text-black shadow-lg shadow-[var(--primary)]/10"
                                         : "bg-[var(--bg-main)] border-transparent text-[var(--text-main)] hover:border-[var(--primary)]/30"
                                     }`}
                             >
@@ -118,12 +116,12 @@ const Settings = () => {
                                     <div className={`p-2 rounded-lg ${selectedTerminal?.id === term.id ? "bg-black/10" : "bg-[var(--bg-card-alt)]"}`}>
                                         <FaTerminal className={selectedTerminal?.id === term.id ? "text-black" : "text-[var(--primary)]"} />
                                     </div>
-                                    <div className="text-left">
+                                    <div className="text-start">
                                         <p className="text-sm font-black uppercase tracking-tight leading-none">{term.name}</p>
                                         <p className={`text-[8px] font-bold mt-1 ${selectedTerminal?.id === term.id ? "text-black/60" : "text-[var(--text-dim)]"}`}>ID: {term.code}</p>
                                     </div>
                                 </div>
-                                <FaChevronRight size={10} className={selectedTerminal?.id === term.id ? "opacity-40" : "text-[var(--border-main)]"} />
+                                <FaChevronRight size={10} className={selectedTerminal?.id === term.id ? "opacity-40" : "text-[var(--border-main)] rtl:rotate-180"} />
                             </button>
                         ))}
                     </div>
@@ -167,7 +165,7 @@ const Settings = () => {
                                         
                                         {/* Hardware & Printing Section */}
                                         <div className="space-y-6">
-                                            <div className="flex items-center gap-3 border-l-2 border-[var(--primary)] pl-4">
+                                            <div className="flex items-center gap-3 border-s-2 border-[var(--primary)] ps-4">
                                                 <FaPrint className="text-[var(--primary)]" size={14} />
                                                 <h3 className="text-[var(--text-main)] text-xs font-black uppercase tracking-[0.2em]">Hardware & Printing</h3>
                                             </div>
@@ -182,7 +180,7 @@ const Settings = () => {
                                                         onClick={() => handleToggle('autoPrintReceipt')}
                                                         className={`w-10 h-5 rounded-full relative transition-all ${localSettings.autoPrintReceipt ? 'bg-[var(--primary)]' : 'bg-[var(--border-main)]'}`}
                                                     >
-                                                        <div className={`absolute top-1 w-3 h-3 rounded-full bg-white transition-all ${localSettings.autoPrintReceipt ? 'left-6' : 'left-1'}`} />
+                                                        <div className={`absolute top-1 w-3 h-3 rounded-full bg-white transition-all ${localSettings.autoPrintReceipt ? 'end-1' : 'start-1'}`} />
                                                     </button>
                                                 </div>
 
@@ -195,7 +193,7 @@ const Settings = () => {
                                                         onClick={() => handleToggle('directPrint')}
                                                         className={`w-10 h-5 rounded-full relative transition-all ${localSettings.directPrint ? 'bg-[var(--primary)]' : 'bg-[var(--border-main)]'}`}
                                                     >
-                                                        <div className={`absolute top-1 w-3 h-3 rounded-full bg-white transition-all ${localSettings.directPrint ? 'left-6' : 'left-1'}`} />
+                                                        <div className={`absolute top-1 w-3 h-3 rounded-full bg-white transition-all ${localSettings.directPrint ? 'end-1' : 'start-1'}`} />
                                                     </button>
                                                 </div>
 
@@ -227,7 +225,7 @@ const Settings = () => {
 
                                         {/* Order Flow & Validation Section */}
                                         <div className="space-y-6">
-                                            <div className="flex items-center gap-3 border-l-2 border-[var(--primary)] pl-4">
+                                            <div className="flex items-center gap-3 border-s-2 border-[var(--primary)] ps-4">
                                                 <FaUserCheck className="text-[var(--primary)]" size={14} />
                                                 <h3 className="text-[var(--text-main)] text-xs font-black uppercase tracking-[0.2em]">Order Flow & Rules</h3>
                                             </div>
@@ -242,7 +240,7 @@ const Settings = () => {
                                                         onClick={() => handleToggle('requireCustomerOnOrder')}
                                                         className={`w-10 h-5 rounded-full relative transition-all ${localSettings.requireCustomerOnOrder ? 'bg-[var(--primary)]' : 'bg-[var(--border-main)]'}`}
                                                     >
-                                                        <div className={`absolute top-1 w-3 h-3 rounded-full bg-white transition-all ${localSettings.requireCustomerOnOrder ? 'left-6' : 'left-1'}`} />
+                                                        <div className={`absolute top-1 w-3 h-3 rounded-full bg-white transition-all ${localSettings.requireCustomerOnOrder ? 'end-1' : 'start-1'}`} />
                                                     </button>
                                                 </div>
 
@@ -255,7 +253,7 @@ const Settings = () => {
                                                         onClick={() => handleToggle('allowDiscounts')}
                                                         className={`w-10 h-5 rounded-full relative transition-all ${localSettings.allowDiscounts ? 'bg-[var(--primary)]' : 'bg-[var(--border-main)]'}`}
                                                     >
-                                                        <div className={`absolute top-1 w-3 h-3 rounded-full bg-white transition-all ${localSettings.allowDiscounts ? 'left-6' : 'left-1'}`} />
+                                                        <div className={`absolute top-1 w-3 h-3 rounded-full bg-white transition-all ${localSettings.allowDiscounts ? 'end-1' : 'start-1'}`} />
                                                     </button>
                                                 </div>
 
@@ -268,7 +266,7 @@ const Settings = () => {
                                                         onClick={() => handleToggle('enableTables')}
                                                         className={`w-10 h-5 rounded-full relative transition-all ${localSettings.enableTables !== false ? 'bg-[var(--primary)]' : 'bg-[var(--border-main)]'}`}
                                                     >
-                                                        <div className={`absolute top-1 w-3 h-3 rounded-full bg-white transition-all ${localSettings.enableTables !== false ? 'left-6' : 'left-1'}`} />
+                                                        <div className={`absolute top-1 w-3 h-3 rounded-full bg-white transition-all ${localSettings.enableTables !== false ? 'end-1' : 'start-1'}`} />
                                                     </button>
                                                 </div>
                                             </div>
@@ -276,7 +274,7 @@ const Settings = () => {
 
                                         {/* Advanced Features Section */}
                                         <div className="space-y-6">
-                                            <div className="flex items-center gap-3 border-l-2 border-[var(--primary)] pl-4">
+                                            <div className="flex items-center gap-3 border-s-2 border-[var(--primary)] ps-4">
                                                 <FaChevronRight className="text-[var(--primary)]" size={14} />
                                                 <h3 className="text-[var(--text-main)] text-xs font-black uppercase tracking-[0.2em]">Advanced Features</h3>
                                             </div>
@@ -290,7 +288,7 @@ const Settings = () => {
                                                     onClick={() => handleToggle('openOnMenu')}
                                                     className={`w-10 h-5 rounded-full relative transition-all ${localSettings.openOnMenu ? 'bg-[var(--primary)]' : 'bg-[var(--border-main)]'}`}
                                                 >
-                                                    <div className={`absolute top-1 w-3 h-3 rounded-full bg-white transition-all ${localSettings.openOnMenu ? 'left-6' : 'left-1'}`} />
+                                                    <div className={`absolute top-1 w-3 h-3 rounded-full bg-white transition-all ${localSettings.openOnMenu ? 'end-1' : 'start-1'}`} />
                                                 </button>
                                             </div>
                                         </div>

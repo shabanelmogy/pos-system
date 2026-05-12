@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { useSelector } from "react-redux";
+import useUserStore from "../../../auth/store/useUserStore";
 import useAuth from "../../../auth/hooks/useAuth";
 
 const Greetings = () => {
   const { canCompleteOrders } = useAuth();
-  const userData = useSelector(state => state.user);
+  const userData = useUserStore();
   const [dateTime, setDateTime] = useState(new Date());
 
   useEffect(() => {
@@ -48,7 +48,7 @@ const Greetings = () => {
           </button>
         )}
       </div>
-      <div className="text-left sm:text-right w-full sm:w-auto border-t sm:border-t-0 border-[var(--border-main)] pt-3 sm:pt-0">
+      <div className="text-start sm:text-end w-full sm:w-auto border-t sm:border-t-0 border-[var(--border-main)] pt-3 sm:pt-0">
         <h1 className="text-[var(--text-main)] text-2xl font-bold tracking-wide">{formatTime(dateTime)}</h1>
         <p className="text-[var(--text-muted)] text-xs">{formatDate(dateTime)}</p>
       </div>

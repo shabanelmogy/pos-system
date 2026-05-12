@@ -11,14 +11,13 @@ import { useNavigate } from "react-router-dom";
 import { useSnackbar } from "notistack";
 import FullScreenLoader from "../../../shared/components/FullScreenLoader";
 import OrderSummaryModal from "../components/OrderSummaryModal";
-import { setOrder } from "../../customers/store/customerSlice";
-import { setCart } from "../../pos/store/cartSlice";
-import { useDispatch, useSelector } from "react-redux";
+import useCustomerStore from "../../customers/store/useCustomerStore";
+import useCartStore from "../../pos/store/useCartStore";
 
 const Tables = () => {
-  const dispatch = useDispatch();
-  const customerData = useSelector((state) => state.customer);
-  const isNewOrderFlow = customerData.customerName && customerData.customerPhone;
+  const { customerName, customerPhone, setOrder } = useCustomerStore();
+  const { addItem, removeAllItems } = useCartStore();
+  const isNewOrderFlow = customerName && customerPhone;
   
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [isSummaryModalOpen, setIsSummaryModalOpen] = useState(false);
@@ -33,15 +32,29 @@ const Tables = () => {
   };
 
   const handleUpdateOrder = (order) => {
-    dispatch(setOrder({
+    setOrder({
       customerName: order.customerDetails.name,
       customerPhone: order.customerDetails.phone,
       table: { tableId: order.table.id, tableNo: order.table.tableNo },
       orderId: order.id,
       guests: order.customerDetails.guests
-    }));
+    });
     
-    dispatch(setCart(order.items));
+    // Convert backend items to cart items and set
+    removeAllItems();
+    order.items.forEach(item => {
+        // addItem handles quantity +1, so we loop for the quantity if necessary, 
+        // or we could add a setItems method to useCartStore. 
+        // For now, let's just use addItem in a loop for each item's quantity.
+        for(let i=0; i<item.quantity; i++) {
+            addItem({
+                id: item.menuItem.id,
+                name: item.name,
+                price: item.unitPrice
+            });
+        }
+    });
+
     navigate(`/menu`);
   };
 

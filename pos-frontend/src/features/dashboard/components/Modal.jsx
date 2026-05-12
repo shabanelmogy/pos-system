@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { IoMdClose } from "react-icons/io";
 import { useMutation } from "@tanstack/react-query";
-import { addTable } from "../../https";
+import { addTable } from "../api/dashboardApi";
 import { enqueueSnackbar } from "notistack"
 
 const Modal = ({ setIsTableModalOpen }) => {

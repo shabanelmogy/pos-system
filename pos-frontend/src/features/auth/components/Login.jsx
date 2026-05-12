@@ -2,17 +2,17 @@ import React, { useState } from "react";
 import { useMutation } from "@tanstack/react-query"
 import { login } from "../api/authApi"
 import { enqueueSnackbar } from "notistack";
-import { useDispatch } from "react-redux";
-import { setUser } from "../store/userSlice";
+import useUserStore from "../store/useUserStore";
+import usePOSStore from "../../pos/store/usePOSStore";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { MdEmail, MdLock, MdLogin } from "react-icons/md";
-import { setActiveShift, setSelectedBranch, setSelectedPOSPoint } from "../../pos/store/posSlice";
- 
+
 const Login = () => {
     const navigate = useNavigate();
-    const dispatch = useDispatch();
-    const[formData, setFormData] = useState({
+    const { setUser } = useUserStore();
+    const { setActiveShift, setSelectedBranch, setSelectedPOSPoint } = usePOSStore();
+    const [formData, setFormData] = useState({
       email: "",
       password: "",
     });
@@ -35,19 +35,19 @@ const Login = () => {
 
           // One shot update: Shift then User
           if (activeShift) {
-            dispatch(setActiveShift(activeShift));
+            setActiveShift(activeShift);
             
             // Auto-assign branch and POS if present in shift
-            if (activeShift.branch) dispatch(setSelectedBranch(activeShift.branch));
-            if (activeShift.posPoint) dispatch(setSelectedPOSPoint(activeShift.posPoint));
+            if (activeShift.branch) setSelectedBranch(activeShift.branch);
+            if (activeShift.posPoint) setSelectedPOSPoint(activeShift.posPoint);
           } else {
              // Fallback to user permissions if no active shift
-             if (userData.branch) dispatch(setSelectedBranch(userData.branch));
+             if (userData.branch) setSelectedBranch(userData.branch);
              const assignedPOS = userData.posPermissions?.[0]?.posPoint;
-             if (assignedPOS) dispatch(setSelectedPOSPoint(assignedPOS));
+             if (assignedPOS) setSelectedPOSPoint(assignedPOS);
           }
 
-          dispatch(setUser(userData));
+          setUser(userData);
 
           enqueueSnackbar(`Welcome back, ${userData.name}`, { variant: "success" });
           navigate("/");
@@ -66,7 +66,7 @@ const Login = () => {
     >
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-2">
-          <label className="flex items-center gap-2 text-[var(--text-muted)] text-[10px] font-black uppercase tracking-[0.2em] ml-1">
+          <label className="flex items-center gap-2 text-[var(--text-muted)] text-[10px] font-black uppercase tracking-[0.2em] ms-1">
             <MdEmail className="text-[var(--primary)]" /> Terminal Email
           </label>
           <div className="group relative">
@@ -83,7 +83,7 @@ const Login = () => {
         </div>
 
         <div className="space-y-2">
-          <label className="flex items-center gap-2 text-[var(--text-muted)] text-[10px] font-black uppercase tracking-[0.2em] ml-1">
+          <label className="flex items-center gap-2 text-[var(--text-muted)] text-[10px] font-black uppercase tracking-[0.2em] ms-1">
             <MdLock className="text-[var(--primary)]" /> Security Code
           </label>
           <div className="group relative">
@@ -113,7 +113,7 @@ const Login = () => {
             </span>
           ) : (
             <>
-               <MdLogin size={20} /> Authorize Access
+              <MdLogin size={20} /> Authorize Access
             </>
           )}
         </motion.button>

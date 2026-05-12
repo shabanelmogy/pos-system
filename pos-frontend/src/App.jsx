@@ -7,36 +7,39 @@ import {
 } from "react-router-dom";
 import { Home, Auth, Orders, Tables, Menu, Dashboard, Customers, Settings } from "./pages";
 import Header from "./shared/components/Header";
-import { useSelector, useDispatch } from "react-redux";
 import useLoadData from "./shared/hooks/useLoadData";
 import FullScreenLoader from "./shared/components/FullScreenLoader"
 import useAuth from "./features/auth/hooks/useAuth";
 import useSettingsSync from "./features/pos/hooks/useSettingsSync";
 import ShiftManager from "./shared/components/ShiftManager";
-import { setCustomer } from "./features/customers/store/customerSlice";
+import TerminalSelector from "./shared/components/TerminalSelector";
+import useUserStore from "./features/auth/store/useUserStore";
+import usePOSStore from "./features/pos/store/usePOSStore";
+import useCustomerStore from "./features/customers/store/useCustomerStore";
+import useThemeStore from "./shared/store/useThemeStore";
 import { useEffect } from "react";
 
 function Layout() {
   const isLoading = useLoadData();
   useSettingsSync();
   const { isAuth, isAdmin } = useAuth();
-  const { activeShift, showShiftModal, selectedPOSPoint } = useSelector((state) => state.pos);
-  const customer = useSelector((state) => state.customer);
-  const dispatch = useDispatch();
+  const { activeShift, showShiftModal, selectedPOSPoint, selectedBranch } = usePOSStore();
+  const { customerName, setCustomer } = useCustomerStore();
   const location = useLocation();
-  const hideHeaderRoutes = ["/auth"];
+  const isOnAuthPage = location.pathname.startsWith("/auth");
+  
   const enableTables = selectedPOSPoint?.settings?.enableTables !== false;
   const openOnMenu = selectedPOSPoint?.settings?.openOnMenu === true;
 
   // Auto-set guest customer when openOnMenu is on and no customer set yet
   useEffect(() => {
-    if (openOnMenu && !isAdmin && isAuth && !customer.customerName) {
-      dispatch(setCustomer({ name: "Guest", phone: "N/A", guests: 1 }));
+    if (openOnMenu && !isAdmin && isAuth && !customerName) {
+      setCustomer({ name: "Guest", phone: "N/A", guests: 1 });
     }
-  }, [openOnMenu, isAdmin, isAuth, customer.customerName, dispatch]);
+  }, [openOnMenu, isAdmin, isAuth, customerName, setCustomer]);
 
   // 0. Theme Sync
-  const { mode } = useSelector((state) => state.theme);
+  const { mode } = useThemeStore();
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', mode);
   }, [mode]);
@@ -45,17 +48,19 @@ function Layout() {
   if (isLoading) return <FullScreenLoader />;
 
   // 2. Auth Guard
-  const isOnAuthPage = hideHeaderRoutes.includes(location.pathname);
   if (!isAuth && !isOnAuthPage) return <Navigate to="/auth" />;
 
-  // 3. Shift Guard - Block cashiers if no active shift
+  // 3. Terminal Selection Guard
+  const needsTerminal = isAuth && (!selectedBranch || !selectedPOSPoint) && !isOnAuthPage;
+  if (needsTerminal) return <TerminalSelector />;
+
+  // 4. Shift Guard - Block cashiers if no active shift
   const needsShift = isAuth && !isAdmin && !activeShift && !isOnAuthPage;
   if (needsShift) return <ShiftManager />;
 
-  // If shift IS open and user manually opens the modal (e.g. to close shift), render as overlay on top
   return (
     <>
-      {!hideHeaderRoutes.includes(location.pathname) && <Header />}
+      {!isOnAuthPage && <Header />}
       {/* Shift close modal overlay — only when shift is open and user requests it */}
       {showShiftModal && activeShift && <ShiftManager />}
       <Routes>
@@ -123,7 +128,7 @@ function Layout() {
 }
 
 function ProtectedRoutes({ children }) {
-  const { isAuth } = useSelector((state) => state.user);
+  const { isAuth } = useUserStore();
   if (!isAuth) {
     return <Navigate to="/auth" />;
   }

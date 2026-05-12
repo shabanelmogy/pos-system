@@ -42,7 +42,7 @@ const PopularDishes = () => {
               key={dish.id}
               className="flex items-center gap-3 bg-[var(--bg-main)] rounded-xl px-4 py-2.5 mt-3 mx-4 border border-transparent hover:border-[var(--border-main)] transition-all"
             >
-              <h1 className="text-[var(--primary)] font-black text-lg mr-2">{dish.id < 10 ? `0${dish.id}` : dish.id}</h1>
+              <h1 className="text-[var(--primary)] font-black text-lg me-2">{dish.id < 10 ? `0${dish.id}` : dish.id}</h1>
               <img
                 src={dish.image}
                 alt={dish.name}
