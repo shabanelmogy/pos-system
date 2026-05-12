@@ -49,10 +49,19 @@ const tableRepository = {
   },
 
   async update(id, tableData) {
+    const updateObj = { updatedAt: new Date() };
+    if (tableData.tableNo !== undefined) updateObj.tableNo = tableData.tableNo;
+    if (tableData.seats !== undefined) updateObj.seats = tableData.seats;
+    if (tableData.status !== undefined) updateObj.status = tableData.status;
+    if (tableData.currentOrderId !== undefined) updateObj.currentOrderId = tableData.currentOrderId;
+
+    console.log(`[DEBUG] Repository Update - ID: ${id}, UpdateObj:`, updateObj);
     const result = await db.update(tables)
-      .set({ ...tableData, updatedAt: new Date() })
+      .set(updateObj)
       .where(eq(tables.id, id))
       .returning();
+    
+    console.log(`[DEBUG] Repository Result:`, result[0]);
     return result[0];
   },
 

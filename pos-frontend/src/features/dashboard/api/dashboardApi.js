@@ -23,12 +23,12 @@ export const addTable = (data) => axiosWrapper.post("/api/table", data);
 export const createUser = (data) => axiosWrapper.post("/api/user", data);
 
 // Management - Update
-export const updateBranch = ({ id, ...data }) => axiosWrapper.put(`/api/branch/${id}`, data);
-export const updatePOSPoint = ({ id, ...data }) => axiosWrapper.put(`/api/pos-point/${id}`, data);
-export const updateCategory = ({ categoryId, ...data }) => axiosWrapper.put(`/api/category/${categoryId}`, data);
-export const updateItem = ({ itemId, ...data }) => axiosWrapper.put(`/api/item/${itemId}`, data);
-export const updateTable = ({ tableId, ...data }) => axiosWrapper.put(`/api/table/${tableId}`, data);
-export const updateUser = ({ userId, ...data }) => axiosWrapper.put(`/api/user/${userId}`, data);
+export const updateBranch = (id, data) => axiosWrapper.put(`/api/branch/${id}`, data);
+export const updatePOSPoint = (id, data) => axiosWrapper.put(`/api/pos-point/${id}`, data);
+export const updateCategory = (id, data) => axiosWrapper.put(`/api/category/${id}`, data);
+export const updateItem = (id, data) => axiosWrapper.put(`/api/item/${id}`, data);
+export const updateTable = (id, data) => axiosWrapper.put(`/api/table/${id}`, data);
+export const updateUser = (id, data) => axiosWrapper.put(`/api/user/${id}`, data);
 export const assignPOS = (data) => axiosWrapper.post("/api/user/assign-pos", data);
 
 // Management - Delete

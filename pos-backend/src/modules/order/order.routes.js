@@ -9,6 +9,6 @@ router.use(isVerifiedUser);
 router.get("/", orderController.getAll);
 router.get("/:id", orderController.getById);
 router.post("/", orderController.create);
-router.put("/:id", orderController.updateStatus);
+router.put("/status/:id", orderController.updateStatus);
 
 export default router;

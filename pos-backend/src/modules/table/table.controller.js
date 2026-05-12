@@ -25,6 +25,7 @@ const tableController = {
   async update(req, res) {
     try {
       const { id } = req.params;
+      console.log(`[DEBUG] Table Update - ID: ${id}, Body:`, req.body);
       const validatedData = updateTableSchema.parse(req.body);
       const updatedTable = await tableService.updateTable(id, validatedData);
       res.status(200).json({ success: true, message: "Table updated successfully", data: updatedTable });

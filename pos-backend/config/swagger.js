@@ -64,6 +64,36 @@ const swaggerDefinition = {
           orderId: { type: "string", example: "65f1d6f1d6f1d6f1d6f1d6f1" },
         },
       },
+      BranchRequest: {
+        type: "object",
+        required: ["name", "code"],
+        properties: {
+          name: { type: "string", example: "Cairo Main Branch" },
+          code: { type: "string", example: "BR-CAIRO-01" },
+          phone: { type: "string", example: "+20123456789" },
+          email: { type: "string", format: "email" },
+          address: { type: "string" },
+          city: { type: "string" },
+        },
+      },
+      POSPointRequest: {
+        type: "object",
+        required: ["branchId", "name", "code"],
+        properties: {
+          branchId: { type: "string", format: "uuid" },
+          name: { type: "string", example: "Counter 1" },
+          code: { type: "string", example: "POS-BR1-01" },
+          isActive: { type: "boolean", default: true },
+        },
+      },
+      CategoryRequest: {
+        type: "object",
+        required: ["name"],
+        properties: {
+          name: { type: "string", example: "Main Course" },
+          images: { type: "array", items: { type: "string" } },
+        },
+      },
       OrderRequest: {
         type: "object",
         required: ["customerDetails", "orderStatus", "bills", "items"],
@@ -114,6 +144,37 @@ const swaggerDefinition = {
           razorpay_order_id: { type: "string" },
           razorpay_payment_id: { type: "string" },
           razorpay_signature: { type: "string" },
+        },
+      },
+      POSSettingsRequest: {
+        type: "object",
+        properties: {
+          autoPrintReceipt: { type: "boolean" },
+          allowDiscounts: { type: "boolean" },
+          enableTables: { type: "boolean" },
+          requireCustomerOnOrder: { type: "boolean" },
+          openOnMenu: { type: "boolean" },
+          directPrint: { type: "boolean" },
+          receiptPrinterName: { type: "string" },
+          kitchenPrinterName: { type: "string" },
+        },
+      },
+      OpenShiftRequest: {
+        type: "object",
+        required: ["branchId", "posPointId", "cashierId", "openingBalance"],
+        properties: {
+          branchId: { type: "string", format: "uuid" },
+          posPointId: { type: "string", format: "uuid" },
+          cashierId: { type: "string", format: "uuid" },
+          openingBalance: { type: "number", example: 100 },
+        },
+      },
+      CloseShiftRequest: {
+        type: "object",
+        required: ["closingBalance"],
+        properties: {
+          closingBalance: { type: "number", example: 1500 },
+          notes: { type: "string", example: "Shift ended normally" },
         },
       },
     },

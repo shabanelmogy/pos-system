@@ -25,6 +25,13 @@ const posPointRepository = {
   async findById(id) {
     const result = await db.select().from(posPoints).where(eq(posPoints.id, id)).limit(1);
     return result[0];
+  },
+  async update(id, data) {
+    const result = await db.update(posPoints).set(data).where(eq(posPoints.id, id)).returning();
+    return result[0];
+  },
+  async delete(id) {
+    return await db.delete(posPoints).where(eq(posPoints.id, id));
   }
 };
 

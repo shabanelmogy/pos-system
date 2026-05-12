@@ -1,24 +1,18 @@
 import shiftService from "./shift.service.js";
 import { handleError } from "../../utils/errorHandler.js";
-import { z } from "zod";
-
-const openShiftSchema = z.object({
-  branchId: z.string().uuid(),
-  posPointId: z.string().uuid(),
-  openingBalance: z.coerce.number().min(0),
-});
-
-const closeShiftSchema = z.object({
-  closingBalance: z.coerce.number().min(0),
-});
+import { openShiftSchema, closeShiftSchema } from "./shift.validation.js";
 
 const shiftController = {
   async open(req, res) {
     try {
       console.log("[DEBUG] Opening Shift with data:", req.body, "User ID:", req.user.id);
+      
+      // Ensure cashierId is present (default to logged-in user)
+      if (!req.body.cashierId && req.user) req.body.cashierId = req.user.id;
+      
       const validatedData = openShiftSchema.parse(req.body);
       const shift = await shiftService.openShift(
-        req.user.id,
+        validatedData.cashierId,
         validatedData.branchId,
         validatedData.posPointId,
         validatedData.openingBalance

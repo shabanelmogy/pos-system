@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { IoMdClose } from "react-icons/io";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -43,6 +43,17 @@ const ManagementModal = ({ type, isOpen, onClose, initialData = null }) => {
     enabled: type === "user" && !!formData.branchId
   });
 
+  const firstInputRef = useRef(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      const timer = setTimeout(() => {
+        firstInputRef.current?.focus();
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen, type]);
+
   useEffect(() => {
     if (initialData) {
       setFormData({
@@ -69,6 +80,20 @@ const ManagementModal = ({ type, isOpen, onClose, initialData = null }) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const recursiveFindId = (obj) => {
+    if (!obj || typeof obj !== "object") return null;
+    const directId = obj.id || obj.Id || obj.ID || obj.tableId || obj.categoryId || obj.itemId || obj.userId;
+    if (directId) return directId;
+    for (const key in obj) {
+      if (key.toLowerCase().endsWith("id")) return obj[key];
+    }
+    for (const key in obj) {
+      const found = recursiveFindId(obj[key]);
+      if (found) return found;
+    }
+    return null;
+  };
+
   const mutation = useMutation({
     mutationFn: async (data) => {
       const preparedData = { ...data };
@@ -77,14 +102,86 @@ const ManagementModal = ({ type, isOpen, onClose, initialData = null }) => {
       if (preparedData.seats) preparedData.seats = parseInt(preparedData.seats);
 
       if (isEdit) {
-        if (type === "dishes") return updateItem({ itemId: initialData.id, ...preparedData });
-        if (type === "category") return updateCategory({ categoryId: initialData.id, ...preparedData });
-        if (type === "table") return updateTable({ tableId: initialData.id, ...preparedData });
-        if (type === "branch") return updateBranch({ id: initialData.id, ...preparedData });
-        if (type === "posPoint") return updatePOSPoint({ id: initialData.id, ...preparedData });
+        const id = recursiveFindId(initialData);
+        
+        if (!id) {
+          const keys = Object.keys(initialData || {}).join(", ");
+          enqueueSnackbar(`Error: ID not found. Keys: ${keys}`, { variant: "error" });
+          console.error("ManagementModal: Missing ID. Keys found:", keys, initialData);
+          return;
+        }
+
+        // Diagnostic snackbar to confirm ID before request
+        enqueueSnackbar(`ID Found: ${id}. Sending PUT to /api/${type}/${id.slice(0, 8)}...`, { variant: "info", autoHideDuration: 2000 });
+        
+        if (type === "table") {
+          const payload = {};
+          if (preparedData.tableNo && !isNaN(parseInt(preparedData.tableNo))) {
+            payload.tableNo = parseInt(preparedData.tableNo);
+          }
+          if (preparedData.seats && !isNaN(parseInt(preparedData.seats))) {
+            payload.seats = parseInt(preparedData.seats);
+          }
+          
+          console.log("[DEBUG] Sending Table Update:", payload);
+          return updateTable(id, payload);
+        }
+        
+        if (type === "dishes") {
+          const payload = {
+            itemId: id,
+            name: preparedData.name,
+            price: parseFloat(preparedData.price),
+            categoryId: preparedData.categoryId
+          };
+          return updateItem(id, payload);
+        }
+
+        if (type === "category") {
+          const payload = {
+            categoryId: id,
+            name: preparedData.name
+          };
+          return updateCategory(id, payload);
+        }
+
+        if (type === "branch") {
+          const payload = {
+            id: id,
+            branchId: id,
+            Id: id,
+            name: preparedData.name,
+            code: preparedData.code,
+            city: preparedData.city || "",
+            phone: preparedData.phone || "",
+            address: preparedData.address || ""
+          };
+          return updateBranch(id, payload);
+        }
+
+        if (type === "posPoint") {
+          const payload = {
+            id: id,
+            name: preparedData.name,
+            code: preparedData.code,
+            branchId: preparedData.branchId
+          };
+          return updatePOSPoint(id, payload);
+        }
+
         if (type === "user") {
-          const res = await updateUser({ userId: initialData.id, ...preparedData });
-          await assignPOS({ userId: initialData.id, posPointIds: selectedPOSPoints });
+          const payload = {
+            userId: id,
+            name: preparedData.name,
+            email: preparedData.email,
+            phone: preparedData.phone,
+            role: preparedData.role,
+            branchId: preparedData.branchId
+          };
+          if (preparedData.password) payload.password = preparedData.password;
+          
+          const res = await updateUser(id, payload);
+          await assignPOS({ userId: id, posPointIds: selectedPOSPoints });
           return res;
         }
       } else {
@@ -111,7 +208,9 @@ const ManagementModal = ({ type, isOpen, onClose, initialData = null }) => {
         posPoint: "posPoints",
         user: "users"
       };
-      queryClient.invalidateQueries([queryMap[type] || type]);
+      const queryKey = queryMap[type] || type;
+      queryClient.invalidateQueries({ queryKey: [queryKey] });
+      queryClient.refetchQueries({ queryKey: [queryKey] });
       enqueueSnackbar(res.data.message || (isEdit ? "Updated successfully!" : "Added successfully!"), { variant: "success" });
       onClose();
     },
@@ -155,7 +254,7 @@ const ManagementModal = ({ type, isOpen, onClose, initialData = null }) => {
               <div className="space-y-3">
                 <div>
                   <label className="flex items-center gap-2 text-[var(--text-muted)] text-[9px] font-black uppercase tracking-widest mb-1.5"><MdPerson /> Full Name</label>
-                  <input name="name" type="text" value={formData.name} onChange={handleInputChange} required className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-xl p-3 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-colors font-bold text-sm" />
+                  <input ref={firstInputRef} name="name" type="text" value={formData.name} onChange={handleInputChange} required className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-xl p-3 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-colors font-bold text-sm" />
                 </div>
                 <div>
                   <label className="flex items-center gap-2 text-[var(--text-muted)] text-[9px] font-black uppercase tracking-widest mb-1.5"><MdEmail /> Email Address</label>
@@ -219,7 +318,7 @@ const ManagementModal = ({ type, isOpen, onClose, initialData = null }) => {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-[var(--text-muted)] text-[9px] font-black uppercase tracking-widest mb-1.5">Table Number</label>
-                <input name="tableNo" type="number" value={formData.tableNo} onChange={handleInputChange} required className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-xl p-3 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-colors text-lg font-black" />
+                <input ref={type === "table" ? firstInputRef : null} name="tableNo" type="number" value={formData.tableNo} onChange={handleInputChange} required className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-xl p-3 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-colors text-lg font-black" />
               </div>
               <div>
                 <label className="block text-[var(--text-muted)] text-[9px] font-black uppercase tracking-widest mb-1.5">Seats</label>
@@ -233,7 +332,7 @@ const ManagementModal = ({ type, isOpen, onClose, initialData = null }) => {
               <label className="block text-[var(--text-muted)] text-[9px] font-black uppercase tracking-widest mb-1.5">
                 {type === "posPoint" ? "Terminal Name" : "Name"}
               </label>
-              <input name="name" type="text" value={formData.name} onChange={handleInputChange} required className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-xl p-3 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-colors font-bold uppercase tracking-tighter text-sm" />
+              <input ref={(type === "category" || type === "dishes" || type === "branch" || type === "posPoint") ? firstInputRef : null} name="name" type="text" value={formData.name} onChange={handleInputChange} required className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-xl p-3 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-colors font-bold uppercase tracking-tighter text-sm" />
             </div>
           )}
 
