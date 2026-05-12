@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import i18n from '../../i18n/config';
 
 export const getDirection = (lng: string) => {
-  return lng === 'ar' ? 'rtl' : 'ltr';
+  return lng.startsWith('ar') ? 'rtl' : 'ltr';
 };
 
 export const I18nProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -15,22 +15,21 @@ export const I18nProvider: React.FC<{ children: React.ReactNode }> = ({ children
       document.documentElement.lang = lng;
     };
 
-    if (i18n.isInitialized) {
+    const onInitialized = () => {
       handleLanguageChange(i18n.language);
       setReady(true);
+    };
+
+    if (i18n.isInitialized) {
+      onInitialized();
     } else {
-      const onInitialized = () => {
-        handleLanguageChange(i18n.language);
-        setReady(true);
-      };
       i18n.on('initialized', onInitialized);
-      return () => {
-        i18n.off('initialized', onInitialized);
-      };
     }
 
     i18n.on('languageChanged', handleLanguageChange);
+
     return () => {
+      i18n.off('initialized', onInitialized);
       i18n.off('languageChanged', handleLanguageChange);
     };
   }, []);
