@@ -67,7 +67,7 @@ const Header = () => {
   return (
     <header className="sticky top-0 w-full flex justify-between items-center py-3 px-4 md:px-8 bg-[var(--bg-card)]/80 backdrop-blur-xl border-b border-[var(--border-main)] relative z-50 transition-all duration-300 shadow-2xl shadow-black/5">
       {/* LEFT SECTION: LOGO & STATUS */}
-      <div className="flex items-center gap-6">
+      <div className="flex items-center gap-8 min-w-[200px]">
         <motion.div 
           onClick={() => navigate("/")} 
           className="flex items-center gap-4 cursor-pointer group"
@@ -97,7 +97,7 @@ const Header = () => {
             initial={{ y: -20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: -20, opacity: 0 }}
-            className="absolute left-1/2 -translate-x-1/2 hidden lg:flex flex-col items-center bg-[var(--bg-main)]/50 border border-[var(--border-main)] rounded-2xl px-6 py-2 shadow-inner"
+            className="absolute left-1/2 -translate-x-1/2 hidden xl:flex flex-col items-center bg-[var(--bg-main)]/50 border border-[var(--border-main)] rounded-2xl px-6 py-2 shadow-inner"
           >
             <div className="flex items-center gap-6">
               <div className="flex items-center gap-3">
@@ -122,10 +122,10 @@ const Header = () => {
                 </div>
               </div>
 
-              <motion.button
+            <motion.button
                 whileHover={{ rotate: 180 }}
                 onClick={handleChangeTerminal}
-                className="ms-2 p-1.5 hover:bg-[var(--bg-card-alt)] rounded-lg text-[var(--text-muted)] hover:text-[var(--primary)] transition-all"
+                className="ms-2 p-1.5 hover:bg-[var(--bg-card-alt)] rounded-xl text-[var(--text-muted)] hover:text-[var(--primary)] transition-all bg-[var(--bg-card-alt)]/50 border border-[var(--border-main)]"
                 title="Change Terminal"
               >
                 <MdSwapHoriz size={18} />
@@ -192,8 +192,8 @@ const Header = () => {
             <IconButton title="Notifications">
               <FaBell size={16} />
             </IconButton>
-            <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 border-2 border-[var(--bg-card)] rounded-full animate-ping"></span>
-            <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 border-2 border-[var(--bg-card)] rounded-full"></span>
+            <span className="absolute top-2 end-2 w-2 h-2 bg-red-500 border-2 border-[var(--bg-card)] rounded-full animate-ping"></span>
+            <span className="absolute top-2 end-2 w-2 h-2 bg-red-500 border-2 border-[var(--bg-card)] rounded-full"></span>
           </div>
         </div>
 
@@ -202,7 +202,7 @@ const Header = () => {
         {/* USER PROFILE */}
         <motion.div 
           onClick={handleLogout}
-          whileHover={{ x: 5 }}
+          whileHover={{ scale: 1.02 }}
           className="flex items-center gap-3 cursor-pointer group bg-[var(--bg-main)]/50 hover:bg-[var(--primary)]/10 p-1.5 rounded-2xl border border-transparent hover:border-[var(--primary)]/20 transition-all"
         >
           <div className="flex flex-col items-end hidden md:flex">
@@ -217,7 +217,7 @@ const Header = () => {
             <div className="absolute inset-0 bg-[var(--primary)] rounded-full blur-md opacity-0 group-hover:opacity-40 transition-opacity"></div>
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[var(--bg-card-alt)] to-[var(--bg-main)] border border-[var(--border-main)] flex items-center justify-center relative z-10 overflow-hidden">
                <FaUserCircle className="text-[var(--text-muted)] text-2xl group-hover:text-[var(--primary)] transition-colors" />
-               <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-[var(--bg-card)] rounded-full"></div>
+               <div className="absolute bottom-0 end-0 w-2.5 h-2.5 bg-green-500 border-2 border-[var(--bg-card)] rounded-full"></div>
             </div>
           </div>
         </motion.div>

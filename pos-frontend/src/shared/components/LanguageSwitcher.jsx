@@ -22,8 +22,8 @@ export const LanguageSwitcher = () => {
     >
       <div className="absolute inset-0 bg-gradient-to-tr from-[var(--primary)]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
       
-      <MdLanguage className={`text-xl transition-all duration-500 ${currentLanguage === 'ar' ? 'rotate-180' : ''} text-[var(--primary)]`} />
-      
+      <div className="w-1.5 h-1.5 bg-[var(--primary)] rounded-full animate-pulse hidden sm:block me-1"></div>
+
       <div className="flex flex-col items-start leading-none hidden lg:flex">
         <span className="text-[8px] text-[var(--text-muted)] font-black uppercase tracking-tighter mb-0.5">Language</span>
         <span className="text-[10px] font-black uppercase tracking-widest text-[var(--text-main)]">
@@ -31,7 +31,7 @@ export const LanguageSwitcher = () => {
         </span>
       </div>
 
-      <div className="w-1.5 h-1.5 bg-[var(--primary)] rounded-full animate-pulse hidden sm:block ms-1"></div>
+      <MdLanguage className={`text-xl transition-all duration-500 ${currentLanguage === 'ar' ? 'rotate-180' : ''} text-[var(--primary)]`} />
     </motion.button>
   );
 };
