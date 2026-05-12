@@ -8,8 +8,13 @@ export const LanguageSwitcher = () => {
   const currentLanguage = i18nInstance.language;
 
   const toggleLanguage = () => {
-    const nextLang = currentLanguage === "en" ? "ar" : "en";
-    i18nInstance.changeLanguage(nextLang);
+    const nextLang = currentLanguage.startsWith('ar') ? 'en' : 'ar';
+    i18nInstance.changeLanguage(nextLang).then(() => {
+      // Fail-safe direction enforcement
+      const dir = nextLang.startsWith('ar') ? 'rtl' : 'ltr';
+      document.documentElement.dir = dir;
+      document.documentElement.lang = nextLang;
+    });
   };
 
   return (

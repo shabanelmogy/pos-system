@@ -1,35 +1,37 @@
 import React, { useEffect, useState } from 'react';
 import i18n from '../../i18n/config';
+import { useTranslation } from 'react-i18next';
 
 export const getDirection = (lng: string) => {
   return lng.startsWith('ar') ? 'rtl' : 'ltr';
 };
 
 export const I18nProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [ready, setReady] = useState(false);
+  const { i18n: i18nInstance } = useTranslation();
+  const [ready, setReady] = useState(i18n.isInitialized);
 
   useEffect(() => {
     const handleLanguageChange = (lng: string) => {
-      const dir = getDirection(lng);
-      document.documentElement.dir = dir;
-      document.documentElement.lang = lng;
+      if (lng) {
+        const dir = getDirection(lng);
+        document.documentElement.dir = dir;
+        document.documentElement.lang = lng;
+      }
     };
 
-    const onInitialized = () => {
+    // Listen for events directly on the global instance
+    i18n.on('languageChanged', handleLanguageChange);
+    i18n.on('initialized', () => {
       handleLanguageChange(i18n.language);
       setReady(true);
-    };
+    });
 
+    // Initial check
     if (i18n.isInitialized) {
-      onInitialized();
-    } else {
-      i18n.on('initialized', onInitialized);
+      handleLanguageChange(i18n.language);
     }
 
-    i18n.on('languageChanged', handleLanguageChange);
-
     return () => {
-      i18n.off('initialized', onInitialized);
       i18n.off('languageChanged', handleLanguageChange);
     };
   }, []);
