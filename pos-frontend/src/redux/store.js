@@ -1,9 +1,9 @@
 import { configureStore } from "@reduxjs/toolkit";
-import customerSlice from "./slices/customerSlice"
-import cartSlice from "./slices/cartSlice";
-import userSlice from "./slices/userSlice";
-import posSlice from "./slices/posSlice";
-import themeSlice from "./slices/themeSlice";
+import customerSlice from "../features/customers/store/customerSlice"
+import cartSlice from "../features/pos/store/cartSlice";
+import userSlice from "../features/auth/store/userSlice";
+import posSlice from "../features/pos/store/posSlice";
+import themeSlice from "../shared/store/themeSlice";
 import { loadState, saveState } from "./persist";
 
 const persistedCustomer = loadState("customer");

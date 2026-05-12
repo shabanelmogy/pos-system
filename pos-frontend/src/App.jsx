@@ -6,14 +6,14 @@ import {
   Navigate,
 } from "react-router-dom";
 import { Home, Auth, Orders, Tables, Menu, Dashboard, Customers, Settings } from "./pages";
-import Header from "./components/shared/Header";
+import Header from "./shared/components/Header";
 import { useSelector, useDispatch } from "react-redux";
-import useLoadData from "./hooks/useLoadData";
-import FullScreenLoader from "./components/shared/FullScreenLoader"
-import useAuth from "./hooks/useAuth";
-import useSettingsSync from "./hooks/useSettingsSync";
-import ShiftManager from "./components/shared/ShiftManager";
-import { setCustomer } from "./redux/slices/customerSlice";
+import useLoadData from "./shared/hooks/useLoadData";
+import FullScreenLoader from "./shared/components/FullScreenLoader"
+import useAuth from "./features/auth/hooks/useAuth";
+import useSettingsSync from "./features/pos/hooks/useSettingsSync";
+import ShiftManager from "./shared/components/ShiftManager";
+import { setCustomer } from "./features/customers/store/customerSlice";
 import { useEffect } from "react";
 
 function Layout() {
