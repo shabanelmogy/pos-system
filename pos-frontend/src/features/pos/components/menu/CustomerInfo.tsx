@@ -1,0 +1,29 @@
+import React, { useState } from "react";
+import useCustomerStore from "../../../customers/store/useCustomerStore";
+import { formatDate, getAvatarName } from "../../../../shared/utils";
+
+const CustomerInfo: React.FC = () => {
+    const [dateTime] = useState<Date>(new Date());
+    const customerData = useCustomerStore();
+
+    return (
+        <div className="flex items-center justify-between px-4 py-3">
+            <div className="flex flex-col items-start">
+                <h1 className="text-md text-[var(--text-main)] font-semibold tracking-wide">
+                    {customerData.customerName || "Customer Name"}
+                </h1>
+                <p className="text-xs text-[var(--text-muted)] font-medium mt-1">
+                    #{customerData.orderId || "N/A"} / Dine in
+                </p>
+                <p className="text-xs text-[var(--text-muted)] font-medium mt-2">
+                    {formatDate(dateTime)}
+                </p>
+            </div>
+            <button className="bg-[var(--primary)] p-3 text-xl font-bold rounded-lg">
+                {getAvatarName(customerData.customerName) || "CN"}
+            </button>
+        </div>
+    );
+};
+
+export default CustomerInfo;

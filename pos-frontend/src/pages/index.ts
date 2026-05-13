@@ -1,0 +1,8 @@
+export { default as Home } from '../features/pos/pages/Home'
+export { default as Menu } from '../features/pos/pages/Menu'
+export { default as Orders } from '../features/orders/pages/Orders'
+export { default as Auth } from '../features/auth/pages/Auth'
+export { default as Tables } from '../features/tables/pages/Tables'
+export { default as Dashboard } from "../features/dashboard/pages/Dashboard"
+export { default as Customers } from "../features/customers/pages/Customers"
+export { default as Settings } from "../features/settings/pages/Settings"
