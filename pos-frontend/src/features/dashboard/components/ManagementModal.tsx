@@ -11,6 +11,7 @@ import { enqueueSnackbar } from "notistack";
 import CustomDropdown from "../../../shared/components/CustomDropdown";
 import { MdCategory, MdStore, MdPerson, MdEmail, MdLock, MdPhone, MdShield, MdComputer } from "react-icons/md";
 import useManagementForm from "../hooks/useManagementForm";
+import { useTranslation } from "react-i18next";
 
 interface ManagementModalProps {
   type: string;
@@ -20,6 +21,7 @@ interface ManagementModalProps {
 }
 
 const ManagementModal: React.FC<ManagementModalProps> = ({ type, isOpen, onClose, initialData = null }) => {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const isEdit = !!initialData;
   const firstInputRef = useRef<HTMLInputElement>(null);
@@ -108,11 +110,11 @@ const ManagementModal: React.FC<ManagementModalProps> = ({ type, isOpen, onClose
     onSuccess: (res: any) => {
       const queryMap: { [key: string]: string } = { dishes: "items", table: "tables", category: "categories", branch: "branches", posPoint: "posPoints", user: "users" };
       queryClient.invalidateQueries({ queryKey: [queryMap[type] || type] });
-      enqueueSnackbar(res.data.message || "Success", { variant: "success" });
+      enqueueSnackbar(res.data.message || t('common.success'), { variant: "success" });
       onClose();
     },
     onError: (error: any) => {
-      enqueueSnackbar(error.response?.data?.message || "Something went wrong", { variant: "error" });
+      enqueueSnackbar(error.response?.data?.message || t('common.error'), { variant: "error" });
     }
   });
 
@@ -120,6 +122,19 @@ const ManagementModal: React.FC<ManagementModalProps> = ({ type, isOpen, onClose
 
   const togglePOSSelection = (id: string) => {
     setSelectedPOSPoints(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
+  };
+
+  const getModalTitle = () => {
+    const action = isEdit ? t('dashboard.management.modal.edit') : t('dashboard.management.modal.add');
+    const entityMap: { [key: string]: string } = {
+      dishes: t('dashboard.management.modal.dish'),
+      posPoint: t('dashboard.management.modal.terminal'),
+      user: t('dashboard.management.modal.staff'),
+      table: t('dashboard.management.modal.table'),
+      category: t('dashboard.management.modal.category'),
+      branch: t('dashboard.management.modal.branch')
+    };
+    return `${action} ${entityMap[type] || type}`;
   };
 
   if (!isOpen) return null;
@@ -133,7 +148,7 @@ const ManagementModal: React.FC<ManagementModalProps> = ({ type, isOpen, onClose
       >
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-[var(--text-main)] text-2xl font-black uppercase tracking-tighter">
-            {isEdit ? "Edit" : "Add"} {type === "dishes" ? "Dish" : type === "posPoint" ? "Terminal" : type === "user" ? "Staff" : type}
+            {getModalTitle()}
           </h2>
           <button onClick={onClose} className="p-2 hover:bg-[var(--border-main)] rounded-full text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors">
             <IoMdClose size={24} />
@@ -145,7 +160,7 @@ const ManagementModal: React.FC<ManagementModalProps> = ({ type, isOpen, onClose
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-3">
                 <div>
-                  <label className="flex items-center gap-2 text-[var(--text-muted)] text-[9px] font-black uppercase tracking-widest mb-1.5"><MdPerson /> Full Name</label>
+                  <label className="flex items-center gap-2 text-[var(--text-muted)] text-[9px] font-black uppercase tracking-widest mb-1.5"><MdPerson /> {t('dashboard.management.modal.full_name')}</label>
                   <input {...register("name")} ref={(e) => { 
                     register("name").ref(e); 
                     // @ts-ignore
@@ -154,34 +169,34 @@ const ManagementModal: React.FC<ManagementModalProps> = ({ type, isOpen, onClose
                   {errors.name && <span className="text-[9px] text-red-500 font-bold">{errors.name.message as string}</span>}
                 </div>
                 <div>
-                  <label className="flex items-center gap-2 text-[var(--text-muted)] text-[9px] font-black uppercase tracking-widest mb-1.5"><MdEmail /> Email Address</label>
+                  <label className="flex items-center gap-2 text-[var(--text-muted)] text-[9px] font-black uppercase tracking-widest mb-1.5"><MdEmail /> {t('dashboard.management.modal.email')}</label>
                   <input {...register("email")} type="email" className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-xl p-3 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-colors text-sm" />
                   {errors.email && <span className="text-[9px] text-red-500 font-bold">{errors.email.message as string}</span>}
                 </div>
                 <div>
-                  <label className="flex items-center gap-2 text-[var(--text-muted)] text-[9px] font-black uppercase tracking-widest mb-1.5"><MdPhone /> Phone Number</label>
+                  <label className="flex items-center gap-2 text-[var(--text-muted)] text-[9px] font-black uppercase tracking-widest mb-1.5"><MdPhone /> {t('dashboard.management.modal.phone')}</label>
                   <input {...register("phone")} type="text" className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-xl p-3 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-colors text-sm" />
                   {errors.phone && <span className="text-[9px] text-red-500 font-bold">{errors.phone.message as string}</span>}
                 </div>
                 <div>
-                  <label className="flex items-center gap-2 text-[var(--text-muted)] text-[9px] font-black uppercase tracking-widest mb-1.5"><MdLock /> {isEdit ? "New Password" : "Security Password"}</label>
-                  <input {...register("password")} type="password" placeholder={isEdit ? "Optional" : ""} className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-xl p-3 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-colors text-sm" />
+                  <label className="flex items-center gap-2 text-[var(--text-muted)] text-[9px] font-black uppercase tracking-widest mb-1.5"><MdLock /> {isEdit ? t('dashboard.management.modal.new_password') : t('dashboard.management.modal.security_password')}</label>
+                  <input {...register("password")} type="password" placeholder={isEdit ? t('dashboard.management.modal.optional') : ""} className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-xl p-3 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-colors text-sm" />
                   {errors.password && <span className="text-[9px] text-red-500 font-bold">{errors.password.message as string}</span>}
                 </div>
               </div>
 
               <div className="space-y-3">
                 <div>
-                  <label className="flex items-center gap-2 text-[var(--text-muted)] text-[9px] font-black uppercase tracking-widest mb-1.5"><MdShield /> Role</label>
-                  <CustomDropdown options={[{id: "cashier", name: "Cashier"}, {id: "manager", name: "Manager"}, {id: "admin", name: "Global Admin"}]} value={watchedRole} onChange={(val) => setValue("role", val)} placeholder="Select Role" />
+                  <label className="flex items-center gap-2 text-[var(--text-muted)] text-[9px] font-black uppercase tracking-widest mb-1.5"><MdShield /> {t('dashboard.management.modal.role')}</label>
+                  <CustomDropdown options={[{id: "cashier", name: t('dashboard.management.modal.roles.cashier')}, {id: "manager", name: t('dashboard.management.modal.roles.manager')}, {id: "admin", name: t('dashboard.management.modal.roles.admin')}]} value={watchedRole} onChange={(val) => setValue("role", val)} placeholder={t('dashboard.management.modal.select_role')} />
                 </div>
                 <div>
-                  <label className="flex items-center gap-2 text-[var(--text-muted)] text-[9px] font-black uppercase tracking-widest mb-1.5"><MdStore /> Assigned Branch</label>
-                  <CustomDropdown options={branches || []} value={watchedBranchId} onChange={(val) => setValue("branchId", val)} placeholder="Select Branch" />
+                  <label className="flex items-center gap-2 text-[var(--text-muted)] text-[9px] font-black uppercase tracking-widest mb-1.5"><MdStore /> {t('dashboard.management.modal.assigned_branch')}</label>
+                  <CustomDropdown options={branches || []} value={watchedBranchId} onChange={(val) => setValue("branchId", val)} placeholder={t('dashboard.management.modal.select_branch')} />
                 </div>
                 {watchedBranchId && (
                   <div className="bg-[var(--bg-card)] p-4 rounded-2xl border border-[var(--border-main)]">
-                    <label className="flex items-center gap-2 text-[var(--text-muted)] text-[9px] font-black uppercase tracking-widest mb-3"><MdComputer /> Restricted Terminals</label>
+                    <label className="flex items-center gap-2 text-[var(--text-muted)] text-[9px] font-black uppercase tracking-widest mb-3"><MdComputer /> {t('dashboard.management.modal.restricted_terminals')}</label>
                     <div className="space-y-2 max-h-40 overflow-y-auto custom-scrollbar pr-2">
                        {(branchPOSPoints || []).map((pos: any) => (
                          <label key={pos.id} className="flex items-center gap-3 cursor-pointer group">
@@ -199,7 +214,7 @@ const ManagementModal: React.FC<ManagementModalProps> = ({ type, isOpen, onClose
           {type === "table" && (
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-[var(--text-muted)] text-[9px] font-black uppercase tracking-widest mb-1.5">Table Number</label>
+                <label className="block text-[var(--text-muted)] text-[9px] font-black uppercase tracking-widest mb-1.5">{t('dashboard.management.modal.table_no')}</label>
                 <input {...register("tableNo")} ref={(e) => { 
                   register("tableNo").ref(e); 
                   // @ts-ignore
@@ -208,7 +223,7 @@ const ManagementModal: React.FC<ManagementModalProps> = ({ type, isOpen, onClose
                 {errors.tableNo && <span className="text-[9px] text-red-500 font-bold">{errors.tableNo.message as string}</span>}
               </div>
               <div>
-                <label className="block text-[var(--text-muted)] text-[9px] font-black uppercase tracking-widest mb-1.5">Seats</label>
+                <label className="block text-[var(--text-muted)] text-[9px] font-black uppercase tracking-widest mb-1.5">{t('dashboard.management.modal.seats')}</label>
                 <input {...register("seats")} type="number" className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-xl p-3 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-colors text-lg font-black" />
                 {errors.seats && <span className="text-[9px] text-red-500 font-bold">{errors.seats.message as string}</span>}
               </div>
@@ -217,7 +232,7 @@ const ManagementModal: React.FC<ManagementModalProps> = ({ type, isOpen, onClose
 
           {(type === "category" || type === "dishes" || type === "branch" || type === "posPoint") && (
             <div>
-              <label className="block text-[var(--text-muted)] text-[9px] font-black uppercase tracking-widest mb-1.5">{type === "posPoint" ? "Terminal Name" : "Name"}</label>
+              <label className="block text-[var(--text-muted)] text-[9px] font-black uppercase tracking-widest mb-1.5">{type === "posPoint" ? t('dashboard.management.modal.terminal_name') : t('dashboard.management.modal.name')}</label>
               <input {...register("name")} ref={(e) => { 
                 register("name").ref(e); 
                 // @ts-ignore
@@ -229,7 +244,7 @@ const ManagementModal: React.FC<ManagementModalProps> = ({ type, isOpen, onClose
 
           {(type === "branch" || type === "posPoint") && (
             <div>
-              <label className="block text-[var(--text-muted)] text-[9px] font-black uppercase tracking-widest mb-1.5">Unique Code</label>
+              <label className="block text-[var(--text-muted)] text-[9px] font-black uppercase tracking-widest mb-1.5">{t('dashboard.management.modal.unique_code')}</label>
               <input {...register("code")} type="text" placeholder={type === 'branch' ? 'e.g. BR-01' : 'e.g. POS-01'} className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-xl p-3 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-colors font-mono text-sm" />
               {errors.code && <span className="text-[9px] text-red-500 font-bold">{errors.code.message as string}</span>}
             </div>
@@ -239,16 +254,16 @@ const ManagementModal: React.FC<ManagementModalProps> = ({ type, isOpen, onClose
             <>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[var(--text-muted)] text-[9px] font-black uppercase tracking-widest mb-1.5">City</label>
+                  <label className="block text-[var(--text-muted)] text-[9px] font-black uppercase tracking-widest mb-1.5">{t('dashboard.management.modal.city')}</label>
                   <input {...register("city")} type="text" className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-xl p-3 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-colors text-sm" />
                 </div>
                 <div>
-                  <label className="block text-[var(--text-muted)] text-[9px] font-black uppercase tracking-widest mb-1.5">Phone</label>
+                  <label className="block text-[var(--text-muted)] text-[9px] font-black uppercase tracking-widest mb-1.5">{t('dashboard.management.modal.phone')}</label>
                   <input {...register("phone")} type="text" className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-xl p-3 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-colors text-sm" />
                 </div>
               </div>
               <div>
-                <label className="block text-[var(--text-muted)] text-[9px] font-black uppercase tracking-widest mb-1.5">Address</label>
+                <label className="block text-[var(--text-muted)] text-[9px] font-black uppercase tracking-widest mb-1.5">{t('dashboard.management.modal.address')}</label>
                 <textarea {...register("address")} className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-xl p-3 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-colors h-20 custom-scrollbar text-sm" />
               </div>
             </>
@@ -256,8 +271,8 @@ const ManagementModal: React.FC<ManagementModalProps> = ({ type, isOpen, onClose
 
           {type === "posPoint" && (
             <div>
-              <label className="block text-[var(--text-muted)] text-[9px] font-black uppercase tracking-widest mb-1.5">Assign to Branch</label>
-              <CustomDropdown options={branches || []} value={watchedBranchId} onChange={(val) => setValue("branchId", val)} icon={<MdStore />} placeholder="Select Branch" />
+              <label className="block text-[var(--text-muted)] text-[9px] font-black uppercase tracking-widest mb-1.5">{t('dashboard.management.modal.assign_branch')}</label>
+              <CustomDropdown options={branches || []} value={watchedBranchId} onChange={(val) => setValue("branchId", val)} icon={<MdStore />} placeholder={t('dashboard.management.modal.select_branch')} />
               {errors.branchId && <span className="text-[9px] text-red-500 font-bold">{errors.branchId.message as string}</span>}
             </div>
           )}
@@ -265,13 +280,13 @@ const ManagementModal: React.FC<ManagementModalProps> = ({ type, isOpen, onClose
           {type === "dishes" && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-[var(--text-muted)] text-[9px] font-black uppercase tracking-widest mb-1.5">Price (₹)</label>
+                <label className="block text-[var(--text-muted)] text-[9px] font-black uppercase tracking-widest mb-1.5">{t('dashboard.management.modal.price')} (₹)</label>
                 <input {...register("price")} type="number" className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-xl p-3 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-colors text-xl font-black italic" />
                 {errors.price && <span className="text-[9px] text-red-500 font-bold">{errors.price.message as string}</span>}
               </div>
               <div>
-                <label className="block text-[var(--text-muted)] text-[9px] font-black uppercase tracking-widest mb-1.5">Category</label>
-                <CustomDropdown options={categories || []} value={watch("categoryId")} onChange={(val) => setValue("categoryId", val)} icon={<MdCategory />} placeholder="Select Category" />
+                <label className="block text-[var(--text-muted)] text-[9px] font-black uppercase tracking-widest mb-1.5">{t('dashboard.management.modal.category')}</label>
+                <CustomDropdown options={categories || []} value={watch("categoryId")} onChange={(val) => setValue("categoryId", val)} icon={<MdCategory />} placeholder={t('dashboard.management.modal.select_category')} />
                 {errors.categoryId && <span className="text-[9px] text-red-500 font-bold">{errors.categoryId.message as string}</span>}
               </div>
             </div>
@@ -282,7 +297,7 @@ const ManagementModal: React.FC<ManagementModalProps> = ({ type, isOpen, onClose
             disabled={mutation.isPending}
             className="w-full bg-[var(--primary)] text-[var(--bg-card)] font-black py-4 rounded-xl mt-2 hover:bg-yellow-600 transition-all uppercase tracking-[0.3em] shadow-2xl shadow-yellow-500/20 disabled:opacity-50 text-[10px]"
           >
-            {mutation.isPending ? "Syncing..." : `${isEdit ? 'Update' : 'Register'} ${type === "dishes" ? "Dish" : type === "posPoint" ? "Terminal" : type === "user" ? "Staff Member" : type}`}
+            {mutation.isPending ? t('dashboard.management.modal.syncing') : `${isEdit ? t('dashboard.management.modal.update') : t('dashboard.management.modal.register')} ${type === "dishes" ? t('dashboard.management.modal.dish') : type === "posPoint" ? t('dashboard.management.modal.terminal') : type === "user" ? t('dashboard.management.modal.staff') : type}`}
           </button>
         </form>
       </motion.div>

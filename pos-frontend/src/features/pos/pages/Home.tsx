@@ -6,12 +6,14 @@ import { GrInProgress } from "react-icons/gr";
 import MiniCard from "../components/home/MiniCard";
 import RecentOrders from "../components/home/RecentOrders";
 import PopularDishes from "../components/home/PopularDishes";
+import { useTranslation } from "react-i18next";
 
 const Home: React.FC = () => {
+  const { t } = useTranslation();
 
   useEffect(() => {
-    document.title = "POS | Home"
-  }, [])
+    document.title = "POS | Home";
+  }, []);
 
   return (
     <section className="bg-[var(--bg-main)] h-[calc(100vh-5rem)] overflow-hidden">
@@ -20,8 +22,8 @@ const Home: React.FC = () => {
         <div className="flex-[3] flex flex-col min-h-fit">
           <Greetings />
           <div className="flex flex-col md:flex-row items-center w-full gap-3 mt-4">
-            <MiniCard title="Total Earnings" icon={<BsCashCoin />} number={512} footerNum={1.6} />
-            <MiniCard title="In Progress" icon={<GrInProgress />} number={16} footerNum={3.6} />
+            <MiniCard title={t('pos.home.total_earnings')} icon={<BsCashCoin />} number={512} footerNum={1.6} />
+            <MiniCard title={t('pos.home.in_progress')} icon={<GrInProgress />} number={16} footerNum={3.6} />
           </div>
           <div className="mt-4">
             <RecentOrders />
@@ -33,12 +35,9 @@ const Home: React.FC = () => {
         </div>
       </div>
 
-      {/* Spacer to ensure scrolling past the fixed nav */}
       <div className="h-24 md:h-32 w-full shrink-0" />
-      
       <BottomNav />
     </section>
-
   );
 };
 

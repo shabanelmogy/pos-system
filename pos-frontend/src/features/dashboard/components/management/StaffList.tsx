@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { MdPeople, MdShield, MdComputer, MdStore, MdEmail, MdPhone, MdEdit, MdDelete, MdChevronRight } from "react-icons/md";
 import { LoadingState, ErrorState, EmptyState } from "./StatusStates";
 import { User } from "../../api/dashboardApi";
+import { useTranslation } from "react-i18next";
 
 interface StaffListProps {
   data: User[];
@@ -15,15 +16,22 @@ interface StaffListProps {
 }
 
 const StaffList: React.FC<StaffListProps> = ({ data, loading, error, onEdit, onDelete, onRetry, searchQuery }) => {
+  const { t } = useTranslation();
   if (loading) return <LoadingState />;
-  if (error) return <ErrorState label="Staff" onRetry={onRetry} />;
+  if (error) return <ErrorState label={t('dashboard.management.tabs.staff')} onRetry={onRetry} />;
   
   const filteredUsers = (data || []).filter(u => 
     u.name?.toLowerCase().includes(searchQuery.toLowerCase()) || 
     u.email?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  if (filteredUsers.length === 0) return <EmptyState label="Staff Members" />;
+  if (filteredUsers.length === 0) return <EmptyState label={t('dashboard.management.tabs.staff')} />;
+
+  const roleLabelMap: { [key: string]: string } = {
+    cashier: t('dashboard.management.modal.roles.cashier'),
+    manager: t('dashboard.management.modal.roles.manager'),
+    admin: t('dashboard.management.modal.roles.admin')
+  };
 
   return (
     <div className="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-main)] overflow-hidden shadow-2xl">
@@ -31,11 +39,11 @@ const StaffList: React.FC<StaffListProps> = ({ data, loading, error, onEdit, onD
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-[var(--bg-card-alt)]/50 border-b border-[var(--border-main)]">
-              <th className="px-6 py-4 text-[9px] font-black uppercase tracking-[0.2em] text-[var(--text-dim)]">Staff Member</th>
-              <th className="px-6 py-4 text-[9px] font-black uppercase tracking-[0.2em] text-[var(--text-dim)]">Role & Access</th>
-              <th className="px-6 py-4 text-[9px] font-black uppercase tracking-[0.2em] text-[var(--text-dim)]">Location</th>
-              <th className="px-6 py-4 text-[9px] font-black uppercase tracking-[0.2em] text-[var(--text-dim)]">Contact Info</th>
-              <th className="px-6 py-4 text-[9px] font-black uppercase tracking-[0.2em] text-[var(--text-dim)] text-right">Actions</th>
+              <th className="px-6 py-4 text-[9px] font-black uppercase tracking-[0.2em] text-[var(--text-dim)]">{t('dashboard.management.lists.staff_member')}</th>
+              <th className="px-6 py-4 text-[9px] font-black uppercase tracking-[0.2em] text-[var(--text-dim)]">{t('dashboard.management.lists.role_access')}</th>
+              <th className="px-6 py-4 text-[9px] font-black uppercase tracking-[0.2em] text-[var(--text-dim)]">{t('dashboard.management.lists.location')}</th>
+              <th className="px-6 py-4 text-[9px] font-black uppercase tracking-[0.2em] text-[var(--text-dim)]">{t('dashboard.management.lists.contact_info')}</th>
+              <th className="px-6 py-4 text-[9px] font-black uppercase tracking-[0.2em] text-[var(--text-dim)] text-right">{t('dashboard.management.lists.actions')}</th>
             </tr>
           </thead>
           <tbody>
@@ -54,7 +62,7 @@ const StaffList: React.FC<StaffListProps> = ({ data, loading, error, onEdit, onD
                     </div>
                     <div>
                       <p className="text-[var(--text-main)] font-black uppercase tracking-tight text-sm group-hover:text-emerald-400 transition-colors">{user.name}</p>
-                      <p className="text-[10px] text-[var(--text-dim)] font-black uppercase tracking-widest mt-0.5">ID: {user.id?.slice(0, 8)}</p>
+                      <p className="text-[10px] text-[var(--text-dim)] font-black uppercase tracking-widest mt-0.5">{t('dashboard.management.lists.id')}: {user.id?.slice(0, 8)}</p>
                     </div>
                   </div>
                 </td>
@@ -63,12 +71,14 @@ const StaffList: React.FC<StaffListProps> = ({ data, loading, error, onEdit, onD
                      <div className="flex items-center gap-2">
                         <MdShield className="text-[var(--primary)]" size={14} />
                         <span className="text-[10px] bg-[var(--primary)]/10 text-[var(--primary)] px-3 py-1 rounded-full font-black uppercase tracking-widest border border-[var(--primary)]/10">
-                          {user.role}
+                          {roleLabelMap[user.role] || user.role}
                         </span>
                      </div>
                      <div className="flex items-center gap-2 text-[10px] text-[var(--text-muted)] font-bold uppercase tracking-tight">
                         <MdComputer size={14} className="text-indigo-400" />
-                        {user.posPermissions?.length || "All"} Terminals Authorized
+                        {!user.posPermissions || user.posPermissions.length === 0 
+                          ? t('dashboard.management.lists.all_terminals') 
+                          : t('dashboard.management.lists.terminals_authorized', { count: user.posPermissions.length })}
                      </div>
                   </div>
                 </td>
@@ -77,7 +87,7 @@ const StaffList: React.FC<StaffListProps> = ({ data, loading, error, onEdit, onD
                       <div className="w-8 h-8 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-400">
                          <MdStore size={18} />
                       </div>
-                      <p className="text-[var(--text-muted)] text-xs font-black uppercase tracking-widest">{user.branch?.name || "Global"}</p>
+                      <p className="text-[var(--text-muted)] text-xs font-black uppercase tracking-widest">{user.branch?.name || t('dashboard.management.lists.global')}</p>
                     </div>
                 </td>
                 <td className="px-6 py-4">

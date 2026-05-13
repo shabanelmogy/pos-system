@@ -2,8 +2,10 @@ import React from "react";
 import { motion } from "framer-motion";
 import { MdEmail, MdLock, MdLogin, MdAdminPanelSettings, MdPointOfSale } from "react-icons/md";
 import useLogin from "../hooks/useLogin";
+import { useTranslation } from "react-i18next";
 
 const Login: React.FC = () => {
+  const { t } = useTranslation();
   const { register, onSubmit, handleDemoLogin, errors, isLoading } = useLogin();
 
   return (
@@ -15,13 +17,13 @@ const Login: React.FC = () => {
       <form onSubmit={onSubmit} className="space-y-6">
         <div className="space-y-2">
           <label className="flex items-center gap-2 text-[var(--text-muted)] text-[10px] font-black uppercase tracking-[0.2em] ms-1">
-            <MdEmail className="text-[var(--primary)]" /> Terminal Email
+            <MdEmail className="text-[var(--primary)]" /> {t('auth.email_label')}
           </label>
           <div className="group relative">
             <input
               type="email"
               {...register("email")}
-              placeholder="e.g. cashier01@enterprise.com"
+              placeholder={t('auth.placeholder_email')}
               className={`w-full bg-[var(--bg-card)] border ${errors.email ? 'border-red-500' : 'border-[var(--border-main)]'} focus:border-[var(--primary)] rounded-2xl p-5 text-[var(--text-main)] focus:outline-none transition-all placeholder:text-[var(--text-dim)] font-bold`}
             />
             {errors.email && (
@@ -34,7 +36,7 @@ const Login: React.FC = () => {
 
         <div className="space-y-2">
           <label className="flex items-center gap-2 text-[var(--text-muted)] text-[10px] font-black uppercase tracking-[0.2em] ms-1">
-            <MdLock className="text-[var(--primary)]" /> Security Code
+            <MdLock className="text-[var(--primary)]" /> {t('auth.password_label')}
           </label>
           <div className="group relative">
             <input
@@ -61,11 +63,11 @@ const Login: React.FC = () => {
           {isLoading ? (
             <span className="flex items-center gap-2">
               <div className="w-4 h-4 border-2 border-black/20 border-t-black rounded-full animate-spin" />
-              Verifying...
+              {t('auth.login_loading')}
             </span>
           ) : (
             <>
-              <MdLogin size={20} /> Authorize Access
+              <MdLogin size={20} /> {t('auth.login_button')}
             </>
           )}
         </motion.button>
@@ -75,14 +77,14 @@ const Login: React.FC = () => {
       <div className="mt-8 space-y-4">
         <div className="flex items-center gap-4">
           <div className="flex-1 h-px bg-gradient-to-r from-transparent to-[var(--border-main)]"></div>
-          <span className="text-[10px] text-[var(--text-dim)] font-black uppercase tracking-widest whitespace-nowrap">Development Sandbox</span>
+          <span className="text-[10px] text-[var(--text-dim)] font-black uppercase tracking-widest whitespace-nowrap">{t('auth.dev_sandbox')}</span>
           <div className="flex-1 h-px bg-gradient-to-l from-transparent to-[var(--border-main)]"></div>
         </div>
 
         <div className="grid grid-cols-2 gap-3">
           {[
-            { role: 'Admin', email: 'admin@gmail.com', icon: <MdAdminPanelSettings size={22} /> },
-            { role: 'Cashier', email: 'cashier@gmail.com', icon: <MdPointOfSale size={22} /> }
+            { role: t('auth.role_admin'), email: 'admin@gmail.com', icon: <MdAdminPanelSettings size={22} /> },
+            { role: t('auth.role_cashier'), email: 'cashier@gmail.com', icon: <MdPointOfSale size={22} /> }
           ].map((demo) => (
             <button
               key={demo.role}
@@ -91,16 +93,12 @@ const Login: React.FC = () => {
               className="group relative flex flex-col items-center justify-center gap-2 p-4 rounded-2xl bg-[var(--bg-card-alt)] border border-[var(--border-main)] hover:border-[var(--primary)] hover:bg-[var(--bg-card)] transition-all cursor-pointer overflow-hidden group"
             >
               <div className="absolute inset-0 bg-gradient-to-br from-[var(--primary)]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-
               <div className="text-[var(--text-dim)] group-hover:text-[var(--primary)] group-hover:scale-110 transition-all z-10">
                 {demo.icon}
               </div>
-
               <span className="text-[10px] font-black uppercase tracking-tighter text-[var(--text-muted)] group-hover:text-[var(--text-main)] transition-colors z-10">
                 {demo.role}
               </span>
-
-              {/* Decorative indicator */}
               <div className="absolute top-2 right-2 w-1 h-1 rounded-full bg-[var(--border-main)] group-hover:bg-[var(--primary)] transition-colors" />
             </button>
           ))}

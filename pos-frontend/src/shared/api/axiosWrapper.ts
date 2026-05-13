@@ -157,6 +157,10 @@ axiosWrapper.interceptors.response.use(
         clearQueue(refreshError);
         localStorage.removeItem("accessToken");
         
+        // Clear local stores to prevent infinite redirect loops
+        localStorage.removeItem("user-storage");
+        localStorage.removeItem("pos-storage");
+        
         if (!isInsideAuthUI) {
           window.location.href = AUTH_UI_PREFIX;
         }

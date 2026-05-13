@@ -6,16 +6,51 @@
     "categories": "Categories",
     "items": "Items",
     "cart": {
-      "title": "Your Order",
+      "title": "Order Details",
       "empty": "Your cart is empty",
+      "empty_sub": "Add items to start!",
       "total": "Total",
       "subtotal": "Subtotal",
-      "tax": "Tax",
-      "discount": "Discount",
+      "tax": "Tax (5%)",
       "checkout": "Place Order",
-      "clear": "Clear Cart"
+      "clear": "Clear Cart",
+      "place_order": "Place Order",
+      "processing": "Processing...",
+      "bill_summary": "Bill Summary",
+      "payment_method": "Payment Method",
+      "cash": "Cash",
+      "online": "Online"
     },
     "search_placeholder": "Search items...",
-    "no_items_found": "No items match your search"
+    "no_items_found": "No items match your search",
+    "home": {
+      "greeting": "Good Morning",
+      "greeting_sub": "Give your best services for customers 😀",
+      "start_order": "Start New Order",
+      "total_earnings": "Total Earnings",
+      "in_progress": "In Progress",
+      "than_yesterday": "than yesterday",
+      "recent_orders": "Recent Orders",
+      "view_history": "View full history",
+      "search_history": "Search history...",
+      "fetching": "Fetching Orders...",
+      "no_recent": "No Recent Activity",
+      "ready_for_first": "Ready for your first order",
+      "popular_dishes": "Popular Dishes",
+      "view_all": "View all",
+      "orders_count": "Orders",
+      "dishes": {
+        "butter_chicken": "Butter Chicken",
+        "palak_paneer": "Palak Paneer",
+        "biryani": "Hyderabadi Biryani",
+        "masala_dosa": "Masala Dosa",
+        "chole_bhature": "Chole Bhature",
+        "rajma_chawal": "Rajma Chawal",
+        "paneer_tikka": "Paneer Tikka",
+        "gulab_jamun": "Gulab Jamun",
+        "poori_sabji": "Poori Sabji",
+        "rogan_josh": "Rogan Josh"
+      }
+    }
   }
 }

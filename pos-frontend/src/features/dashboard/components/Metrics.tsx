@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getOrders, getCustomers, getItems, getCategories, getTables } from "../api/dashboardApi";
 import { FaArrowUp, FaArrowDown, FaUsers, FaUtensils, FaChartLine, FaCheckCircle, FaMoneyBillWave } from "react-icons/fa";
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 
 interface MetricCardProps {
   title: string;
@@ -55,6 +56,7 @@ interface MetricsProps {
 }
 
 const Metrics: React.FC<MetricsProps> = ({ branchId = "all" }) => {
+  const { t } = useTranslation();
   const { data: orders } = useQuery({ queryKey: ["orders"], queryFn: async () => { const res = await getOrders(); return res.data.data || res.data; } });
   const { data: customers } = useQuery({ queryKey: ["customers"], queryFn: async () => { const res = await getCustomers(); return res.data.data || res.data; } });
   const { data: items } = useQuery({ queryKey: ["items"], queryFn: async () => { const res = await getItems(); return res.data.data || res.data; } });
@@ -78,7 +80,7 @@ const Metrics: React.FC<MetricsProps> = ({ branchId = "all" }) => {
 
   const performanceMetrics = [
     { 
-      title: "Gross Revenue", 
+      title: t('dashboard.metrics.gross_revenue'), 
       value: `₹${totalRevenue.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`, 
       percentage: "12.5%", 
       icon: <FaMoneyBillWave size={24} />, 
@@ -86,7 +88,7 @@ const Metrics: React.FC<MetricsProps> = ({ branchId = "all" }) => {
       isIncrease: true 
     },
     { 
-      title: "Total Volume", 
+      title: t('dashboard.metrics.total_volume'), 
       value: ordersList.length.toString(), 
       percentage: "4.2%", 
       icon: <FaChartLine size={24} />, 
@@ -94,7 +96,7 @@ const Metrics: React.FC<MetricsProps> = ({ branchId = "all" }) => {
       isIncrease: true 
     },
     { 
-      title: "Active Users", 
+      title: t('dashboard.metrics.active_users'), 
       value: customersList.length.toString(), 
       percentage: "18%", 
       icon: <FaUsers size={24} />, 
@@ -102,7 +104,7 @@ const Metrics: React.FC<MetricsProps> = ({ branchId = "all" }) => {
       isIncrease: true 
     },
     { 
-      title: "Success Rate", 
+      title: t('dashboard.metrics.success_rate'), 
       value: `${ordersList.length > 0 ? Math.round((completedOrders / ordersList.length) * 100) : 0}%`, 
       percentage: "2%", 
       icon: <FaCheckCircle size={24} />, 
@@ -112,10 +114,10 @@ const Metrics: React.FC<MetricsProps> = ({ branchId = "all" }) => {
   ];
 
   const inventoryStats = [
-    { label: "Total Categories", value: categoriesList.length, color: "bg-blue-500" },
-    { label: "Active Dishes", value: itemsList.length, color: "bg-orange-500" },
-    { label: "Table Capacity", value: tablesList.length, color: "bg-green-500" },
-    { label: "Pending Tickets", value: activeOrders, color: "bg-red-500" },
+    { label: t('dashboard.metrics.total_categories'), value: categoriesList.length, color: "bg-blue-500" },
+    { label: t('dashboard.metrics.active_dishes'), value: itemsList.length, color: "bg-orange-500" },
+    { label: t('dashboard.metrics.table_capacity'), value: tablesList.length, color: "bg-green-500" },
+    { label: t('dashboard.metrics.pending_tickets'), value: activeOrders, color: "bg-red-500" },
   ];
 
   return (
@@ -125,16 +127,16 @@ const Metrics: React.FC<MetricsProps> = ({ branchId = "all" }) => {
         <div>
           <div className="flex items-center gap-2 mb-2">
              <div className="h-1 w-6 bg-[var(--primary)] rounded-full"></div>
-             <span className="text-[var(--primary)] text-[9px] font-black uppercase tracking-[0.3em]">Operational Insights</span>
+             <span className="text-[var(--primary)] text-[9px] font-black uppercase tracking-[0.3em]">{t('dashboard.metrics.operational_insights')}</span>
           </div>
           <h2 className="text-[var(--text-main)] text-2xl font-black tracking-tighter uppercase">
-            {branchId === "all" ? "Enterprise Pulse" : "Branch Performance"}
+            {branchId === "all" ? t('dashboard.metrics.enterprise_pulse') : t('dashboard.metrics.branch_performance')}
           </h2>
-          <p className="text-[var(--text-muted)] text-xs mt-0.5 font-medium">Real-time financial telemetry.</p>
+          <p className="text-[var(--text-muted)] text-xs mt-0.5 font-medium">{t('dashboard.metrics.real_time_financials')}</p>
         </div>
         <div className="flex items-center gap-4 bg-[var(--bg-card)] p-2 rounded-2xl border border-[var(--border-main)]">
            <div className="px-4 py-2 bg-[var(--bg-card-alt)] rounded-xl text-[var(--text-main)] text-[10px] font-black uppercase tracking-widest border border-[var(--border-main)]">
-              Data Stream: Active
+              {t('dashboard.metrics.data_stream_active')}
            </div>
            <div className="w-10 h-10 rounded-xl bg-green-500/10 flex items-center justify-center">
               <div className="w-2.5 h-2.5 bg-green-500 rounded-full animate-ping"></div>
@@ -157,7 +159,7 @@ const Metrics: React.FC<MetricsProps> = ({ branchId = "all" }) => {
              <div className="p-2.5 bg-[var(--bg-card-alt)] rounded-xl text-[var(--primary)]">
                 <FaUtensils size={20} />
              </div>
-             <h3 className="text-white text-lg font-black uppercase tracking-tighter">Infrastructure</h3>
+             <h3 className="text-white text-lg font-black uppercase tracking-tighter">{t('dashboard.metrics.infrastructure')}</h3>
           </div>
           <div className="space-y-5">
             {inventoryStats.map((stat, idx) => (
@@ -183,17 +185,17 @@ const Metrics: React.FC<MetricsProps> = ({ branchId = "all" }) => {
         <div className="bg-[var(--bg-card)] border border-[var(--border-main)] p-6 rounded-3xl lg:col-span-2 relative overflow-hidden group shadow-2xl hover:border-[var(--primary)]/20 transition-all">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h3 className="text-[var(--text-main)] text-lg font-black uppercase tracking-tighter">Revenue Trajectory</h3>
-              <p className="text-[var(--text-dim)] text-[10px] font-bold uppercase tracking-widest mt-0.5">Rolling cycle</p>
+              <h3 className="text-[var(--text-main)] text-lg font-black uppercase tracking-tighter">{t('dashboard.metrics.revenue_trajectory')}</h3>
+              <p className="text-[var(--text-dim)] text-[10px] font-bold uppercase tracking-widest mt-0.5">{t('dashboard.metrics.rolling_cycle')}</p>
             </div>
             <div className="flex gap-4">
               <div className="flex items-center gap-2">
                  <span className="w-3 h-3 rounded-full bg-[var(--primary)] shadow-[0_0_10px_var(--primary)]" />
-                 <span className="text-[10px] text-[var(--text-main)] font-black uppercase">Current</span>
+                 <span className="text-[10px] text-[var(--text-main)] font-black uppercase">{t('dashboard.metrics.current')}</span>
               </div>
               <div className="flex items-center gap-2">
                  <span className="w-3 h-3 rounded-full bg-[var(--border-main)]" />
-                 <span className="text-[10px] text-[var(--text-dim)] font-black uppercase">Goal</span>
+                 <span className="text-[10px] text-[var(--text-dim)] font-black uppercase">{t('dashboard.metrics.goal')}</span>
               </div>
             </div>
           </div>
@@ -220,7 +222,16 @@ const Metrics: React.FC<MetricsProps> = ({ branchId = "all" }) => {
           </div>
           
           <div className="mt-8 flex justify-between text-[var(--text-dim)] text-[9px] font-black uppercase tracking-widest border-t border-[var(--bg-card-alt)] pt-6">
-            <span>Cycle 01</span><span>Cycle 02</span><span>Cycle 03</span><span>Cycle 04</span><span>Cycle 05</span><span>Cycle 06</span><span>Cycle 07</span><span>Cycle 08</span><span>Cycle 09</span><span>Cycle 10</span>
+            <span>{t('dashboard.metrics.cycle')} 01</span>
+            <span>{t('dashboard.metrics.cycle')} 02</span>
+            <span>{t('dashboard.metrics.cycle')} 03</span>
+            <span>{t('dashboard.metrics.cycle')} 04</span>
+            <span>{t('dashboard.metrics.cycle')} 05</span>
+            <span>{t('dashboard.metrics.cycle')} 06</span>
+            <span>{t('dashboard.metrics.cycle')} 07</span>
+            <span>{t('dashboard.metrics.cycle')} 08</span>
+            <span>{t('dashboard.metrics.cycle')} 09</span>
+            <span>{t('dashboard.metrics.cycle')} 10</span>
           </div>
         </div>
       </div>

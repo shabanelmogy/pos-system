@@ -2,6 +2,7 @@ import React from "react";
 import { motion } from "framer-motion";
 import { MdTableBar, MdEdit, MdDelete } from "react-icons/md";
 import { LoadingState, ErrorState, EmptyState } from "./StatusStates";
+import { useTranslation } from "react-i18next";
 
 interface TableListProps {
   data: any[];
@@ -14,9 +15,16 @@ interface TableListProps {
 }
 
 const TableList: React.FC<TableListProps> = ({ data, loading, error, onEdit, onDelete, onRetry, itemVariants }) => {
+  const { t } = useTranslation();
   if (loading) return <LoadingState />;
-  if (error) return <ErrorState label="Tables" onRetry={onRetry} />;
-  if (!data || data.length === 0) return <EmptyState label="Tables" />;
+  if (error) return <ErrorState label={t('dashboard.management.tabs.tables')} onRetry={onRetry} />;
+  if (!data || data.length === 0) return <EmptyState label={t('dashboard.management.tabs.tables')} />;
+
+  const statusLabelMap: { [key: string]: string } = {
+    Available: t('dashboard.management.lists.available'),
+    Occupied: t('dashboard.management.lists.occupied'),
+    Booked: t('dashboard.management.lists.booked')
+  };
 
   return (
     <>
@@ -28,16 +36,16 @@ const TableList: React.FC<TableListProps> = ({ data, loading, error, onEdit, onD
             </div>
             <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
               <button onClick={() => onEdit("table", table)} className="p-3 bg-[var(--bg-card-alt)] hover:bg-[var(--border-main)] rounded-xl text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors"><MdEdit size={18} /></button>
-              <button onClick={() => onDelete("table", table.id || table.tableId, `Table ${table.tableNo}`)} className="p-3 bg-red-500/10 hover:bg-red-500/20 rounded-xl text-red-500 transition-colors"><MdDelete size={18} /></button>
+              <button onClick={() => onDelete("table", table.id || table.tableId, `${t('dashboard.management.lists.table')} ${table.tableNo}`)} className="p-3 bg-red-500/10 hover:bg-red-500/20 rounded-xl text-red-500 transition-colors"><MdDelete size={18} /></button>
             </div>
           </div>
           <div>
-            <h3 className="text-[var(--text-main)] text-xl font-black tracking-tighter">TABLE {table.tableNo}</h3>
+            <h3 className="text-[var(--text-main)] text-xl font-black tracking-tighter uppercase">{t('dashboard.management.lists.table')} {table.tableNo}</h3>
             <div className="flex items-center gap-2 mt-1">
-              <span className="text-[var(--text-muted)] text-xs font-bold uppercase tracking-widest">{table.seats} Seats</span>
+              <span className="text-[var(--text-muted)] text-xs font-bold uppercase tracking-widest">{table.seats} {t('dashboard.management.lists.seats')}</span>
               <span className="w-1 h-1 bg-[var(--border-main)] rounded-full"></span>
               <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-md ${table.status === 'Available' ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'}`}>
-                {table.status}
+                {statusLabelMap[table.status] || table.status}
               </span>
             </div>
           </div>

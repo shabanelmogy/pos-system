@@ -3,6 +3,7 @@ import { MdTableBar, MdCategory, MdRestaurantMenu, MdStore, MdComputer, MdPeople
 import { AnimatePresence, motion } from "framer-motion";
 import ConfirmModal from "../../../shared/components/ConfirmModal";
 import ManagementModal from "./ManagementModal";
+import { useTranslation } from "react-i18next";
 
 // Custom Hook
 import { useManagement } from "../hooks/useManagement";
@@ -17,6 +18,7 @@ import POSPointList from "./management/POSPointList";
 import StaffList from "./management/StaffList";
 
 const Management: React.FC = () => {
+  const { t } = useTranslation();
   const {
     activeSubTab, setActiveSubTab,
     confirmModal, closeConfirm, handleConfirmAction,
@@ -30,12 +32,12 @@ const Management: React.FC = () => {
   } = useManagement();
 
   const subTabs = [
-    { id: "Tables", icon: <MdTableBar />, label: "Tables" },
-    { id: "Categories", icon: <MdCategory />, label: "Categories" },
-    { id: "Items", icon: <MdRestaurantMenu />, label: "Dishes" },
-    { id: "Branches", icon: <MdStore />, label: "Branches" },
-    { id: "POSPoints", icon: <MdComputer />, label: "Terminals" },
-    { id: "Users", icon: <MdPeople />, label: "Staff" },
+    { id: "Tables", icon: <MdTableBar />, label: t('dashboard.management.tabs.tables') },
+    { id: "Categories", icon: <MdCategory />, label: t('dashboard.management.tabs.categories') },
+    { id: "Items", icon: <MdRestaurantMenu />, label: t('dashboard.management.tabs.dishes') },
+    { id: "Branches", icon: <MdStore />, label: t('dashboard.management.tabs.branches') },
+    { id: "POSPoints", icon: <MdComputer />, label: t('dashboard.management.tabs.terminals') },
+    { id: "Users", icon: <MdPeople />, label: t('dashboard.management.tabs.staff') },
   ];
 
   const containerVariants = {
@@ -148,9 +150,9 @@ const Management: React.FC = () => {
         isOpen={confirmModal.isOpen}
         onClose={closeConfirm}
         onConfirm={handleConfirmAction}
-        title="Confirm Deletion"
-        message={`Are you sure you want to delete "${confirmModal.name}"? This action cannot be undone.`}
-        confirmText={isDeleting ? "Deleting..." : "Delete Permanently"}
+        title={t('dashboard.management.confirm_delete.title')}
+        message={t('dashboard.management.confirm_delete.message', { name: confirmModal.name })}
+        confirmText={isDeleting ? t('dashboard.management.confirm_delete.deleting') : t('dashboard.management.confirm_delete.delete_permanently')}
         type="danger"
       />
 

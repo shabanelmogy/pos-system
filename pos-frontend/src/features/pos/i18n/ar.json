@@ -6,16 +6,51 @@
     "categories": "الفئات",
     "items": "الأصناف",
     "cart": {
-      "title": "طلبك",
+      "title": "تفاصيل الطلب",
       "empty": "عربة التسوق فارغة",
+      "empty_sub": "أضف أصنافاً للبدء!",
       "total": "الإجمالي",
       "subtotal": "المجموع الفرعي",
-      "tax": "الضريبة",
-      "discount": "الخصم",
+      "tax": "الضريبة (5%)",
       "checkout": "إتمام الطلب",
-      "clear": "مسح العربة"
+      "clear": "مسح العربة",
+      "place_order": "تقديم الطلب",
+      "processing": "جاري المعالجة...",
+      "bill_summary": "ملخص الفاتورة",
+      "payment_method": "طريقة الدفع",
+      "cash": "نقداً",
+      "online": "أونلاين"
     },
     "search_placeholder": "بحث عن أصناف...",
-    "no_items_found": "لا توجد أصناف تطابق بحثك"
+    "no_items_found": "لا توجد أصناف تطابق بحثك",
+    "home": {
+      "greeting": "صباح الخير",
+      "greeting_sub": "قدم أفضل خدماتك للعملاء 😀",
+      "start_order": "بدء طلب جديد",
+      "total_earnings": "إجمالي الأرباح",
+      "in_progress": "قيد التنفيذ",
+      "than_yesterday": "مقارنة بالأمس",
+      "recent_orders": "الطلبات الأخيرة",
+      "view_history": "عرض السجل الكامل",
+      "search_history": "بحث في السجل...",
+      "fetching": "جاري التحميل...",
+      "no_recent": "لا توجد نشاطات حديثة",
+      "ready_for_first": "جاهز لأول طلب",
+      "popular_dishes": "الأطباق الشائعة",
+      "view_all": "عرض الكل",
+      "orders_count": "طلبات",
+      "dishes": {
+        "butter_chicken": "دجاج بالزبدة",
+        "palak_paneer": "بالاك بانير",
+        "biryani": "برياني حيدر أباد",
+        "masala_dosa": "ماسالا دوسا",
+        "chole_bhature": "تشولي بهاتوري",
+        "rajma_chawal": "راجما شوال",
+        "paneer_tikka": "بانير تيكا",
+        "gulab_jamun": "جولاب جامون",
+        "poori_sabji": "بوري سابجي",
+        "rogan_josh": "روغان جوش"
+      }
+    }
   }
 }

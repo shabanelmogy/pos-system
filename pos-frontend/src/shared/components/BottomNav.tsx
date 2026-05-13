@@ -8,8 +8,10 @@ import useCustomerStore from "../../features/customers/store/useCustomerStore";
 import useCartStore from "../../features/pos/store/useCartStore";
 import usePOSStore from "../../features/pos/store/usePOSStore";
 import useAuth from "../../features/auth/hooks/useAuth";
+import { useTranslation } from "react-i18next";
 
 const BottomNav: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const { selectedPOSPoint } = usePOSStore();
@@ -47,17 +49,17 @@ const BottomNav: React.FC = () => {
 
     if (requireCustomer) {
       if (!name || !phone) {
-        alert("Please enter customer name and phone number!");
+        alert(t('common.modal.validation_error'));
         return;
       }
       if (guestCount <= 0) {
-        alert("Please select at least 1 guest!");
+        alert(t('common.modal.guest_error'));
         return;
       }
     }
 
     setCustomer({
-      name: name || "Guest",
+      name: name || t('common.guest'),
       phone: phone || "N/A",
       guests: guestCount || 1
     });
@@ -83,7 +85,7 @@ const BottomNav: React.FC = () => {
     if (!requireCustomer) {
       // Bypass modal and start order immediately
       setCustomer({
-        name: "Guest",
+        name: t('common.guest'),
         phone: "N/A",
         guests: 1
       });
@@ -107,7 +109,7 @@ const BottomNav: React.FC = () => {
           } w-full`}
       >
         <FaHome size={20} />
-        <span className="text-[10px] mt-1">Home</span>
+        <span className="text-[10px] mt-1">{t('common.nav.home')}</span>
       </button>
 
       <button
@@ -116,7 +118,7 @@ const BottomNav: React.FC = () => {
           } w-full`}
       >
         <MdOutlineReorder size={20} />
-        <span className="text-[10px] mt-1">Orders</span>
+        <span className="text-[10px] mt-1">{t('common.nav.orders')}</span>
       </button>
 
       {canCompleteOrders && (
@@ -127,7 +129,7 @@ const BottomNav: React.FC = () => {
             className="flex flex-col items-center justify-center font-bold transition-all text-[var(--primary)] bg-[var(--primary)]/10 px-4 py-1.5 rounded-2xl border border-[var(--primary)]/20 shadow-lg shadow-[var(--primary)]/5 disabled:opacity-50 disabled:grayscale"
           >
             <BiSolidDish size={26} />
-            <span className="text-[10px] mt-0.5">Order</span>
+            <span className="text-[10px] mt-0.5">{t('common.nav.order')}</span>
           </button>
         </div>
       )}
@@ -139,7 +141,7 @@ const BottomNav: React.FC = () => {
             } w-full`}
         >
           <MdTableBar size={20} />
-          <span className="text-[10px] mt-1">Tables</span>
+          <span className="text-[10px] mt-1">{t('common.nav.tables')}</span>
         </button>
       )}
 
@@ -151,7 +153,7 @@ const BottomNav: React.FC = () => {
               } w-full`}
           >
             <FaUsers size={20} />
-            <span className="text-[10px] mt-1">Customers</span>
+            <span className="text-[10px] mt-1">{t('common.nav.customers')}</span>
           </button>
           <button
             onClick={() => navigate("/dashboard")}
@@ -159,7 +161,7 @@ const BottomNav: React.FC = () => {
               } w-full`}
           >
             <FaChartBar size={20} />
-            <span className="text-[10px] mt-1">Admin</span>
+            <span className="text-[10px] mt-1">{t('common.nav.admin')}</span>
           </button>
         </>
       )}
@@ -168,30 +170,30 @@ const BottomNav: React.FC = () => {
       <Modal isOpen={isModalOpen} onClose={closeModal}>
         <div>
           <label className="block text-[var(--text-muted)] mb-2 text-sm font-medium">
-            Customer Name {!requireCustomer && <span className="text-[var(--text-dim)] text-xs ms-1">(Optional)</span>}
+            {t('common.modal.customer_name')} {!requireCustomer && <span className="text-[var(--text-dim)] text-xs ms-1">({t('common.modal.optional')})</span>}
           </label>
           <div className="flex items-center rounded-lg p-3 px-4 bg-[var(--bg-main)]">
-            <input value={name} onChange={(e) => setName(e.target.value)} type="text" placeholder="Enter customer name" className="bg-transparent flex-1 text-[var(--text-main)] focus:outline-none placeholder:text-[var(--text-dim)]" />
+            <input value={name} onChange={(e) => setName(e.target.value)} type="text" placeholder={t('common.modal.enter_name')} className="bg-transparent flex-1 text-[var(--text-main)] focus:outline-none placeholder:text-[var(--text-dim)]" />
           </div>
         </div>
         <div>
           <label className="block text-[var(--text-muted)] mb-2 mt-3 text-sm font-medium">
-            Customer Phone {!requireCustomer && <span className="text-[var(--text-dim)] text-xs ms-1">(Optional)</span>}
+            {t('common.modal.customer_phone')} {!requireCustomer && <span className="text-[var(--text-dim)] text-xs ms-1">({t('common.modal.optional')})</span>}
           </label>
           <div className="flex items-center rounded-lg p-3 px-4 bg-[var(--bg-main)]">
             <input value={phone} onChange={(e) => setPhone(e.target.value)} type="number" placeholder="+91-9999999999" className="bg-transparent flex-1 text-[var(--text-main)] focus:outline-none placeholder:text-[var(--text-dim)]" />
           </div>
         </div>
         <div>
-          <label className="block mb-2 mt-3 text-sm font-medium text-[var(--text-muted)]">Guest Count</label>
+          <label className="block mb-2 mt-3 text-sm font-medium text-[var(--text-muted)]">{t('common.modal.guest_count')}</label>
           <div className="flex items-center justify-between bg-[var(--bg-main)] px-4 py-3 rounded-lg">
             <button onClick={decrement} className="text-yellow-500 text-2xl font-bold px-2">&minus;</button>
-            <span className="text-[var(--text-main)] font-bold">{guestCount} {guestCount === 1 ? 'Person' : 'People'}</span>
+            <span className="text-[var(--text-main)] font-bold">{guestCount} {guestCount === 1 ? t('common.modal.person') : t('common.modal.people')}</span>
             <button onClick={increment} className="text-yellow-500 text-2xl font-bold px-2">&#43;</button>
           </div>
         </div>
         <button onClick={handleCreateOrder} className="w-full bg-[var(--primary)] text-[var(--bg-card)] font-black rounded-xl py-4 mt-8 hover:bg-yellow-600 transition-all uppercase tracking-widest shadow-lg shadow-yellow-500/20">
-          Start Placing Order
+          {t('common.modal.start_order')}
         </button>
       </Modal>
     </div>

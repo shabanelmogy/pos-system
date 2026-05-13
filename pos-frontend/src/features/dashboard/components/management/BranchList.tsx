@@ -2,6 +2,7 @@ import React from "react";
 import { motion } from "framer-motion";
 import { MdStore, MdEdit } from "react-icons/md";
 import { LoadingState, ErrorState, EmptyState } from "./StatusStates";
+import { useTranslation } from "react-i18next";
 
 interface BranchListProps {
   data: any[];
@@ -13,9 +14,10 @@ interface BranchListProps {
 }
 
 const BranchList: React.FC<BranchListProps> = ({ data, loading, error, onEdit, onRetry, itemVariants }) => {
+  const { t } = useTranslation();
   if (loading) return <LoadingState />;
-  if (error) return <ErrorState label="Branches" onRetry={onRetry} />;
-  if (!data || data.length === 0) return <EmptyState label="Branches" />;
+  if (error) return <ErrorState label={t('dashboard.management.tabs.branches')} onRetry={onRetry} />;
+  if (!data || data.length === 0) return <EmptyState label={t('dashboard.management.tabs.branches')} />;
 
   return (
     <>
@@ -33,7 +35,7 @@ const BranchList: React.FC<BranchListProps> = ({ data, loading, error, onEdit, o
             <div className="mt-4 flex flex-col gap-1">
                <div className="flex items-center gap-2 text-[var(--text-muted)] text-xs">
                   <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
-                  {branch.city || "Primary Location"}
+                  {branch.city || t('dashboard.management.lists.branch')}
                </div>
             </div>
           </div>

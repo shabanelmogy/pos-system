@@ -2,10 +2,15 @@
   "customers": {
     "title": "Customer Database",
     "search_placeholder": "Search by name, phone or email...",
-    "no_customers": "No customers found",
+    "no_customers": "No Customers Yet",
+    "no_customers_sub": "When guests place orders, their details and loyalty points will appear here.",
     "visits": "Visits",
     "total_spent": "Total Spent",
     "last_visit": "Last Visit",
-    "add_customer": "Add Customer"
+    "first_timer": "First Timer",
+    "add_customer": "Add Customer",
+    "premium": "Premium",
+    "details": "Details",
+    "loyal": "Loyal"
   }
 }

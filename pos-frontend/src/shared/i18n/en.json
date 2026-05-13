@@ -1,26 +1,43 @@
 {
   "common": {
-    "loading": "Loading...",
-    "error": "Something went wrong",
-    "retry": "Try Again",
-    "search": "Search",
-    "cancel": "Cancel",
-    "confirm": "Confirm",
-    "delete": "Delete",
-    "edit": "Edit",
-    "add": "Add",
-    "save": "Save",
-    "close": "Close",
-    "back": "Back",
-    "yes": "Yes",
-    "no": "No",
-    "name": "Name",
-    "email": "Email",
-    "phone": "Phone",
-    "role": "Role",
-    "status": "Status",
-    "actions": "Actions",
-    "no_data": "No data available",
-    "guest": "Guest"
+    "guest": "Guest",
+    "items": "Items",
+    "item": "Item",
+    "unit": "Unit",
+    "error": "Something went wrong!",
+    "success": "Action completed successfully",
+    "no_found": "No {{label}} Found",
+    "start_adding": "Start by adding your first {{label}} to your branch infrastructure.",
+    "establishing_connection": "Establishing Secure Connection...",
+    "sync_failed": "Cloud Sync Failed",
+    "sync_failed_desc": "Your terminal could not reach the primary data cluster. Please verify your connection.",
+    "retry_sync": "Retry Cloud Sync",
+    "nav": {
+      "home": "Home",
+      "orders": "Orders",
+      "order": "Order",
+      "tables": "Tables",
+      "customers": "Customers",
+      "admin": "Admin"
+    },
+    "modal": {
+      "customer_name": "Customer Name",
+      "customer_phone": "Customer Phone",
+      "optional": "Optional",
+      "enter_name": "Enter customer name",
+      "guest_count": "Guest Count",
+      "person": "Person",
+      "people": "People",
+      "start_order": "Start Placing Order",
+      "validation_error": "Please enter customer name and phone number!",
+      "guest_error": "Please select at least 1 guest!"
+    },
+    "order_status": {
+      "in_progress": "In Progress",
+      "ready": "Ready",
+      "completed": "Completed"
+    },
+    "table": "Table",
+    "items_ordered": "{{count}} Items Ordered"
   }
 }

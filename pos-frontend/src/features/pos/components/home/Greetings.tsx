@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
 import useUserStore from "../../../auth/store/useUserStore";
 import useAuth from "../../../auth/hooks/useAuth";
+import { useTranslation } from "react-i18next";
 
 const Greetings: React.FC = () => {
+  const { t } = useTranslation();
   const { canCompleteOrders } = useAuth();
   const userData = useUserStore();
   const [dateTime, setDateTime] = useState<Date>(new Date());
@@ -13,20 +15,14 @@ const Greetings: React.FC = () => {
   }, []);
 
   const formatDate = (date: Date): string => {
-    const months = [
-      'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December'
-    ];
+    const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
     return `${months[date.getMonth()]} ${String(date.getDate()).padStart(2, '0')}, ${date.getFullYear()}`;
   };
 
   const formatTime = (date: Date): string =>
-    `${String(date.getHours()).padStart(2, "0")}:${String(
-      date.getMinutes()
-    ).padStart(2, "0")}:${String(date.getSeconds()).padStart(2, "0")}`;
+    `${String(date.getHours()).padStart(2,"0")}:${String(date.getMinutes()).padStart(2,"0")}:${String(date.getSeconds()).padStart(2,"0")}`;
 
   const handleStartOrder = () => {
-    // Dispatch a custom event that BottomNav will listen to
     window.dispatchEvent(new CustomEvent("open-create-order-modal"));
   };
 
@@ -34,17 +30,15 @@ const Greetings: React.FC = () => {
     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mt-4 gap-4 sm:gap-0 lg:px-0">
       <div>
         <h1 className="text-[var(--text-main)] text-xl font-semibold tracking-wide">
-          Good Morning, {userData.name || "TEST USER"}
+          {t('pos.home.greeting')}, {userData.name || "USER"}
         </h1>
-        <p className="text-[var(--text-muted)] text-xs">
-          Give your best services for customers 😀
-        </p>
+        <p className="text-[var(--text-muted)] text-xs">{t('pos.home.greeting_sub')}</p>
         {canCompleteOrders && (
           <button
             onClick={handleStartOrder}
             className="mt-3 bg-[var(--primary)] text-[var(--bg-card)] font-bold py-1.5 px-5 rounded-lg hover:bg-yellow-600 transition-colors shadow-lg flex items-center gap-2 text-sm"
           >
-            <span className="text-lg">+</span> Start New Order
+            <span className="text-lg">+</span> {t('pos.home.start_order')}
           </button>
         )}
       </div>

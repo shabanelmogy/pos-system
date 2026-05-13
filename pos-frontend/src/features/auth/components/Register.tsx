@@ -2,20 +2,22 @@ import React from "react";
 import { motion } from "framer-motion";
 import { MdPerson, MdEmail, MdPhone, MdLock, MdAppRegistration, MdSecurity } from "react-icons/md";
 import useRegister from "../hooks/useRegister";
+import { useTranslation } from "react-i18next";
 
 interface RegisterProps {
   setIsRegister: (value: boolean) => void;
 }
 
 const Register: React.FC<RegisterProps> = ({ setIsRegister }) => {
-  const { 
-    register, 
-    onSubmit, 
-    handleRoleSelection, 
-    selectedRole, 
-    errors, 
-    isLoading 
-  } = useRegister({ setIsRegister });
+  const { t } = useTranslation();
+  const { register, onSubmit, handleRoleSelection, selectedRole, errors, isLoading } = useRegister({ setIsRegister });
+
+  const roles = [
+    { key: "waiter",   label: t('auth.role_waiter') },
+    { key: "cashier",  label: t('auth.role_cashier') },
+    { key: "manager",  label: t('auth.role_manager') },
+    { key: "admin",    label: t('auth.role_admin') },
+  ];
 
   return (
     <motion.div
@@ -27,25 +29,25 @@ const Register: React.FC<RegisterProps> = ({ setIsRegister }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div className="space-y-2">
             <label className="flex items-center gap-2 text-[var(--text-muted)] text-[10px] font-black uppercase tracking-widest ms-1">
-              <MdPerson /> Full Name
+              <MdPerson /> {t('auth.name_label')}
             </label>
-            <input 
+            <input
               {...register("name")}
-              type="text" 
-              placeholder="Employee Name" 
-              className={`w-full bg-[var(--bg-card)] border ${errors.name ? 'border-red-500' : 'border-[var(--border-main)]'} focus:border-[var(--primary)] rounded-2xl p-4 text-[var(--text-main)] focus:outline-none transition-all font-bold placeholder:text-[var(--text-dim)]`} 
+              type="text"
+              placeholder={t('auth.placeholder_name')}
+              className={`w-full bg-[var(--bg-card)] border ${errors.name ? 'border-red-500' : 'border-[var(--border-main)]'} focus:border-[var(--primary)] rounded-2xl p-4 text-[var(--text-main)] focus:outline-none transition-all font-bold placeholder:text-[var(--text-dim)]`}
             />
             {errors.name && <span className="text-[9px] text-red-500 font-bold ms-2 uppercase tracking-tighter">{errors.name.message as string}</span>}
           </div>
           <div className="space-y-2">
             <label className="flex items-center gap-2 text-[var(--text-muted)] text-[10px] font-black uppercase tracking-widest ms-1">
-              <MdEmail /> Email
+              <MdEmail /> {t('auth.email_label')}
             </label>
-            <input 
+            <input
               {...register("email")}
-              type="email" 
-              placeholder="Professional Email" 
-              className={`w-full bg-[var(--bg-card)] border ${errors.email ? 'border-red-500' : 'border-[var(--border-main)]'} focus:border-[var(--primary)] rounded-2xl p-4 text-[var(--text-main)] focus:outline-none transition-all font-bold placeholder:text-[var(--text-dim)]`} 
+              type="email"
+              placeholder={t('auth.placeholder_pro_email')}
+              className={`w-full bg-[var(--bg-card)] border ${errors.email ? 'border-red-500' : 'border-[var(--border-main)]'} focus:border-[var(--primary)] rounded-2xl p-4 text-[var(--text-main)] focus:outline-none transition-all font-bold placeholder:text-[var(--text-dim)]`}
             />
             {errors.email && <span className="text-[9px] text-red-500 font-bold ms-2 uppercase tracking-tighter">{errors.email.message as string}</span>}
           </div>
@@ -54,25 +56,25 @@ const Register: React.FC<RegisterProps> = ({ setIsRegister }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div className="space-y-2">
             <label className="flex items-center gap-2 text-[var(--text-muted)] text-[10px] font-black uppercase tracking-widest ms-1">
-              <MdPhone /> Phone
+              <MdPhone /> {t('auth.phone_label')}
             </label>
-            <input 
+            <input
               {...register("phone")}
-              type="text" 
-              placeholder="Contact Number" 
-              className={`w-full bg-[var(--bg-card)] border ${errors.phone ? 'border-red-500' : 'border-[var(--border-main)]'} focus:border-[var(--primary)] rounded-2xl p-4 text-[var(--text-main)] focus:outline-none transition-all font-bold placeholder:text-[var(--text-dim)]`} 
+              type="text"
+              placeholder={t('auth.placeholder_phone')}
+              className={`w-full bg-[var(--bg-card)] border ${errors.phone ? 'border-red-500' : 'border-[var(--border-main)]'} focus:border-[var(--primary)] rounded-2xl p-4 text-[var(--text-main)] focus:outline-none transition-all font-bold placeholder:text-[var(--text-dim)]`}
             />
             {errors.phone && <span className="text-[9px] text-red-500 font-bold ms-2 uppercase tracking-tighter">{errors.phone.message as string}</span>}
           </div>
           <div className="space-y-2">
             <label className="flex items-center gap-2 text-[var(--text-muted)] text-[10px] font-black uppercase tracking-widest ms-1">
-              <MdLock /> Password
+              <MdLock /> {t('auth.password_label')}
             </label>
-            <input 
+            <input
               {...register("password")}
-              type="password" 
-              placeholder="Security Pass" 
-              className={`w-full bg-[var(--bg-card)] border ${errors.password ? 'border-red-500' : 'border-[var(--border-main)]'} focus:border-[var(--primary)] rounded-2xl p-4 text-[var(--text-main)] focus:outline-none transition-all font-bold placeholder:text-[var(--text-dim)]`} 
+              type="password"
+              placeholder={t('auth.placeholder_password')}
+              className={`w-full bg-[var(--bg-card)] border ${errors.password ? 'border-red-500' : 'border-[var(--border-main)]'} focus:border-[var(--primary)] rounded-2xl p-4 text-[var(--text-main)] focus:outline-none transition-all font-bold placeholder:text-[var(--text-dim)]`}
             />
             {errors.password && <span className="text-[9px] text-red-500 font-bold ms-2 uppercase tracking-tighter">{errors.password.message as string}</span>}
           </div>
@@ -80,21 +82,21 @@ const Register: React.FC<RegisterProps> = ({ setIsRegister }) => {
 
         <div className="space-y-3">
           <label className="flex items-center gap-2 text-[var(--text-muted)] text-[10px] font-black uppercase tracking-widest ms-1">
-            <MdSecurity /> Select Access Level
+            <MdSecurity /> {t('auth.role_label')}
           </label>
           <div className="flex flex-wrap gap-3">
-            {["Waiter", "Cashier", "Manager", "Admin"].map((role) => (
+            {roles.map(({ key, label }) => (
               <button
-                key={role}
+                key={key}
                 type="button"
-                onClick={() => handleRoleSelection(role)}
+                onClick={() => handleRoleSelection(key)}
                 className={`flex-1 min-w-[100px] py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest border transition-all ${
-                  selectedRole.toLowerCase() === role.toLowerCase() 
-                    ? "bg-[var(--primary)] text-[var(--bg-card)] border-[var(--primary)] shadow-lg shadow-yellow-500/20" 
+                  selectedRole.toLowerCase() === key
+                    ? "bg-[var(--primary)] text-[var(--bg-card)] border-[var(--primary)] shadow-lg shadow-yellow-500/20"
                     : "bg-[var(--bg-card)] border-[var(--border-main)] text-[var(--text-muted)] hover:border-[var(--text-dim)] hover:text-[var(--text-main)]"
                 }`}
               >
-                {role}
+                {label}
               </button>
             ))}
           </div>
@@ -111,11 +113,11 @@ const Register: React.FC<RegisterProps> = ({ setIsRegister }) => {
           {isLoading ? (
             <span className="flex items-center gap-2">
               <div className="w-4 h-4 border-2 border-black/20 border-t-black rounded-full animate-spin" />
-              Creating Account...
+              {t('auth.register_loading')}
             </span>
           ) : (
             <>
-               <MdAppRegistration size={20} /> Register Employee
+              <MdAppRegistration size={20} /> {t('auth.register_button')}
             </>
           )}
         </motion.button>

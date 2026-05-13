@@ -2,6 +2,7 @@ import React from "react";
 import { motion } from "framer-motion";
 import { MdCategory, MdEdit, MdDelete } from "react-icons/md";
 import { LoadingState, ErrorState, EmptyState } from "./StatusStates";
+import { useTranslation } from "react-i18next";
 
 interface CategoryListProps {
   data: any[];
@@ -14,9 +15,10 @@ interface CategoryListProps {
 }
 
 const CategoryList: React.FC<CategoryListProps> = ({ data, loading, error, onEdit, onDelete, onRetry, itemVariants }) => {
+  const { t } = useTranslation();
   if (loading) return <LoadingState />;
-  if (error) return <ErrorState label="Categories" onRetry={onRetry} />;
-  if (!data || data.length === 0) return <EmptyState label="Categories" />;
+  if (error) return <ErrorState label={t('dashboard.management.tabs.categories')} onRetry={onRetry} />;
+  if (!data || data.length === 0) return <EmptyState label={t('dashboard.management.tabs.categories')} />;
 
   return (
     <>
@@ -28,7 +30,7 @@ const CategoryList: React.FC<CategoryListProps> = ({ data, loading, error, onEdi
             </div>
             <div>
               <h3 className="text-[var(--text-main)] text-lg font-black tracking-tighter uppercase">{cat.name}</h3>
-              <p className="text-[var(--text-muted)] text-[10px] font-bold uppercase tracking-widest">Category</p>
+              <p className="text-[var(--text-muted)] text-[10px] font-bold uppercase tracking-widest">{t('dashboard.management.lists.category')}</p>
             </div>
           </div>
           <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">

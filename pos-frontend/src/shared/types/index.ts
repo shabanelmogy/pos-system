@@ -18,6 +18,7 @@ export interface POSPoint {
     enableTables?: boolean;
     openOnMenu?: boolean;
     directPrint?: boolean;
+    requireCustomerOnOrder?: boolean;
   };
 }
 

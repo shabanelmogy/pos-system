@@ -2,6 +2,7 @@ import React from "react";
 import { motion } from "framer-motion";
 import { MdComputer, MdEdit } from "react-icons/md";
 import { LoadingState, ErrorState, EmptyState } from "./StatusStates";
+import { useTranslation } from "react-i18next";
 
 interface POSPointListProps {
   data: any[];
@@ -13,9 +14,10 @@ interface POSPointListProps {
 }
 
 const POSPointList: React.FC<POSPointListProps> = ({ data, loading, error, onEdit, onRetry, itemVariants }) => {
+  const { t } = useTranslation();
   if (loading) return <LoadingState />;
-  if (error) return <ErrorState label="Terminals" onRetry={onRetry} />;
-  if (!data || data.length === 0) return <EmptyState label="Terminals" />;
+  if (error) return <ErrorState label={t('dashboard.management.tabs.terminals')} onRetry={onRetry} />;
+  if (!data || data.length === 0) return <EmptyState label={t('dashboard.management.tabs.terminals')} />;
 
   return (
     <>
@@ -31,7 +33,7 @@ const POSPointList: React.FC<POSPointListProps> = ({ data, loading, error, onEdi
             <h3 className="text-[var(--text-main)] text-xl font-black tracking-tighter uppercase">{pos.name}</h3>
             <p className="text-indigo-400 text-[10px] font-black uppercase tracking-[0.2em] mt-1">{pos.code}</p>
             <div className="mt-4 flex items-center gap-2">
-               <span className="px-3 py-1 bg-[var(--bg-card-alt)] rounded-full text-[9px] text-[var(--text-muted)] font-bold uppercase tracking-widest">Active Terminal</span>
+               <span className="px-3 py-1 bg-[var(--bg-card-alt)] rounded-full text-[9px] text-[var(--text-muted)] font-bold uppercase tracking-widest">{t('dashboard.management.lists.terminal')}</span>
             </div>
           </div>
         </motion.div>
