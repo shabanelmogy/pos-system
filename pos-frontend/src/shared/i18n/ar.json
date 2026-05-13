@@ -72,6 +72,12 @@
       "premium": "مميز (500+)"
     },
     "reset_default": "إعادة ضبط النظام",
-    "restore_defaults": "استعادة الافتراضي"
+    "restore_defaults": "استعادة الافتراضي",
+    "status_distribution": "توزيع الحالات",
+    "search_cluster": "ابحث عن أي شيء في المجموعة الحالية...",
+    "scanning_grid": "جاري مسح الشبكة...",
+    "optimizing_data": "تحسين تدفق البيانات",
+    "no_criteria_match": "لا توجد طلبات تطابق معاييرك",
+    "broaden_results": "حاول إزالة بعض الفلاتر أو كلمات البحث لتوسيع نتائجك عبر مجموعة البيانات."
   }
 }

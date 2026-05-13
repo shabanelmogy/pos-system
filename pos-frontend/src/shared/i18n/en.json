@@ -72,6 +72,12 @@
       "premium": "Premium (500+)"
     },
     "reset_default": "Reset to System Default",
-    "restore_defaults": "Restore Defaults"
+    "restore_defaults": "Restore Defaults",
+    "status_distribution": "Status Distribution",
+    "search_cluster": "Find anything in the current cluster...",
+    "scanning_grid": "Scanning Grid...",
+    "optimizing_data": "Optimizing data streams",
+    "no_criteria_match": "No orders match your criteria",
+    "broaden_results": "Try removing some filters or search terms to broaden your results across the data cluster."
   }
 }

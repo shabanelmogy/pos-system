@@ -122,20 +122,18 @@ const RecentOrders: React.FC = () => {
 
   const activeFilters = useMemo(() => {
     const filters: { type: string, value: string, label: string }[] = [];
-    selectedStatuses.forEach(s => filters.push({ type: 'status', value: s, label: s }));
-    selectedPayments.forEach(p => filters.push({ type: 'payment', value: p, label: p }));
-    selectedSizes.forEach(s => filters.push({ type: 'size', value: s, label: s }));
-    if (datePreset !== "All") filters.push({ type: 'date', value: datePreset, label: datePreset });
+    selectedStatuses.forEach(s => filters.push({ type: t('common.order_status.title'), value: s, label: s === "In Progress" ? t('common.order_status.in_progress') : s === "Ready" ? t('common.order_status.ready') : t('common.order_status.completed') }));
+    selectedPayments.forEach(p => filters.push({ type: t('pos.cart.payment_method'), value: p, label: p === "Cash" ? t('pos.cart.cash') : t('pos.cart.online') }));
+    selectedSizes.forEach(s => filters.push({ type: t('common.volume.title'), value: s, label: s === "Small" ? t('common.volume.small') : t('common.volume.large') }));
+    if (datePreset !== "All") filters.push({ type: t('common.period.title'), value: datePreset, label: datePreset === "Today" ? t('common.period.today') : t('common.period.yesterday') });
     return filters;
-  }, [selectedStatuses, selectedPayments, selectedSizes, datePreset]);
+  }, [selectedStatuses, selectedPayments, selectedSizes, datePreset, t]);
 
   const removeFilter = (filter: any) => {
-    switch(filter.type) {
-      case 'status': setSelectedStatuses(prev => prev.filter(v => v !== filter.value)); break;
-      case 'payment': setSelectedPayments(prev => prev.filter(v => v !== filter.value)); break;
-      case 'size': setSelectedSizes(prev => prev.filter(v => v !== filter.value)); break;
-      case 'date': setDatePreset("All"); break;
-    }
+    if (filter.type === t('common.order_status.title')) setSelectedStatuses(prev => prev.filter(v => v !== filter.value));
+    else if (filter.type === t('pos.cart.payment_method')) setSelectedPayments(prev => prev.filter(v => v !== filter.value));
+    else if (filter.type === t('common.volume.title')) setSelectedSizes(prev => prev.filter(v => v !== filter.value));
+    else if (filter.type === t('common.period.title')) setDatePreset("All");
   };
 
   const statusDistribution = useMemo(() => {
@@ -187,7 +185,7 @@ const RecentOrders: React.FC = () => {
             {/* Distribution Bar */}
             <div className="flex-1 max-w-md hidden sm:block">
                <div className="flex justify-between items-end mb-2 px-1">
-                  <span className="text-[9px] font-black uppercase tracking-widest text-[var(--text-dim)]">Status Distribution</span>
+                  <span className="text-[9px] font-black uppercase tracking-widest text-[var(--text-dim)]">{t('common.status_distribution')}</span>
                   <div className="flex gap-3">
                      {statusDistribution.map(d => (
                        <span key={d.label} className="text-[8px] font-bold uppercase text-[var(--text-muted)] flex items-center gap-1">
@@ -240,7 +238,7 @@ const RecentOrders: React.FC = () => {
                 type="text" 
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Find anything in the current cluster..."
+                placeholder={t('common.search_cluster')}
                 className="w-full bg-[var(--bg-main)] rounded-[1.5rem] ps-14 pe-14 py-4.5 border-2 border-[var(--border-main)] focus:border-[var(--primary)] focus:ring-8 focus:ring-[var(--primary)]/5 outline-none text-[var(--text-main)] font-bold text-sm transition-all shadow-inner" 
               />
               {searchTerm && (
@@ -287,7 +285,7 @@ const RecentOrders: React.FC = () => {
                    onClick={() => { setSelectedStatuses([]); setSelectedPayments([]); setSelectedSizes([]); setDatePreset("All"); }}
                    className="text-[9px] font-black uppercase tracking-widest text-red-500 hover:underline px-2"
                 >
-                   Clear All
+                   {t('common.clear_filters')}
                 </button>
               </motion.div>
             )}
@@ -383,8 +381,8 @@ const RecentOrders: React.FC = () => {
                 <div className="absolute inset-0 border-[12px] border-t-[var(--primary)] rounded-[3rem] animate-spin transform rotate-12 shadow-[0_0_50px_var(--primary)]/20" />
               </div>
               <div className="flex flex-col items-center gap-2">
-                 <p className="text-[12px] text-[var(--text-muted)] font-black uppercase tracking-[1em] animate-pulse">Scanning Grid…</p>
-                 <span className="text-[9px] text-[var(--text-dim)] font-bold uppercase tracking-widest">Optimizing data streams</span>
+                 <p className="text-[12px] text-[var(--text-muted)] font-black uppercase tracking-[1em] animate-pulse">{t('common.scanning_grid')}</p>
+                 <span className="text-[9px] text-[var(--text-dim)] font-bold uppercase tracking-widest">{t('common.optimizing_data')}</span>
               </div>
             </div>
           ) : processedOrders.length > 0 ? (
@@ -406,16 +404,16 @@ const RecentOrders: React.FC = () => {
                 <FaSearch className="text-[var(--text-dim)]/10 group-hover:text-[var(--primary)]/20 transition-colors" size={72} />
               </div>
               <h3 className="text-[var(--text-main)] font-black uppercase tracking-[0.3em] text-2xl mb-6 leading-tight">
-                Data Cluster Empty
+                {t('common.no_criteria_match')}
               </h3>
               <p className="text-[var(--text-dim)] text-xs font-bold uppercase max-w-[360px] leading-relaxed mb-12 opacity-70">
-                Your current parameters returned zero matches. Refine your query or reset the system to view all live data streams.
+                {t('common.broaden_results')}
               </p>
               <button 
                 onClick={() => { setSearchTerm(""); setSelectedStatuses([]); setSelectedPayments([]); setSelectedSizes([]); setDatePreset("All"); setSortBy("createdAt"); setSortOrder("desc"); }}
                 className="px-16 py-6 bg-gradient-to-r from-[var(--primary)] to-yellow-600 text-black text-xs font-black rounded-3xl shadow-[0_20px_50px_var(--primary)]/20 uppercase tracking-[0.6em] hover:scale-110 active:scale-95 transition-all transform"
               >
-                Reset Live Stream
+                {t('common.restore_defaults')}
               </button>
             </motion.div>
           )}
