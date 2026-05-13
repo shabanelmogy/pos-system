@@ -1,181 +1,243 @@
-import React from 'react';
+import React, { useState } from 'react';
+import ReactDOM from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaPalette, FaSun, FaMoon, FaCheck } from 'react-icons/fa';
+import { FaPalette, FaSun, FaMoon, FaCheck, FaTimes } from 'react-icons/fa';
 import { useThemeStore, Palette, Mode } from '../store/useThemeStore';
-import { useState } from 'react';
 
-// ---- Palette definitions ----
-const PALETTES: { id: Palette; label: string; color: string; darkColor?: string }[] = [
-  { id: 'gold',  label: 'Gold',  color: '#f6b100' },
-  { id: 'blue',  label: 'Blue',  color: '#3b82f6' },
-  { id: 'green', label: 'Green', color: '#10b981' },
-  { id: 'black', label: 'Mono',  color: '#ffffff', darkColor: '#111111' },
+// ─── Palette config ────────────────────────────────────────────────────────
+const PALETTES: { id: Palette; label: string; hex: string; lightHex?: string }[] = [
+  { id: 'gold',  label: 'Gold',  hex: '#f6b100' },
+  { id: 'blue',  label: 'Blue',  hex: '#3b82f6' },
+  { id: 'green', label: 'Green', hex: '#10b981' },
+  { id: 'black', label: 'Mono',  hex: '#ffffff', lightHex: '#111111' },
 ];
 
-// ---- ThemeSwitcher ----
+// ─── ThemeSwitcher ────────────────────────────────────────────────────────
 const ThemeSwitcher: React.FC = () => {
   const { palette, mode, setPalette, setMode } = useThemeStore();
   const [open, setOpen] = useState(false);
-
   const isLight = mode === 'light';
 
-  const swatchColor = (p: typeof PALETTES[0]) =>
-    p.id === 'black' ? (isLight ? (p.darkColor ?? '#111') : p.color) : p.color;
+  const swatchHex = (p: typeof PALETTES[0]) =>
+    p.id === 'black' ? (isLight ? (p.lightHex ?? '#111') : p.hex) : p.hex;
 
-  const currentSwatch = swatchColor(PALETTES.find(p => p.id === palette)!);
+  const activeSwatch = swatchHex(PALETTES.find(p => p.id === palette)!);
 
-  return (
-    <>
-      {/* Trigger */}
-      <button
-        id="theme-switcher-trigger"
-        onClick={() => setOpen(true)}
-        className="relative flex items-center gap-2 px-3 py-2 rounded-xl bg-[var(--bg-card-alt)] border border-[var(--border-main)] text-[var(--text-muted)] hover:text-[var(--text-main)] hover:border-[var(--primary)] transition-all group"
-        title="Appearance"
-      >
-        {/* live palette dot */}
-        <span
-          className="w-3 h-3 rounded-full shadow-sm ring-2 ring-[var(--border-main)] group-hover:ring-[var(--primary)] transition-all"
-          style={{ backgroundColor: currentSwatch }}
-        />
-        <FaPalette size={14} />
-        <span className="text-[10px] font-bold uppercase tracking-widest hidden lg:block">Appearance</span>
-      </button>
+  // ── Modal rendered via portal to escape Header's backdrop-filter context ──
+  const modal = (
+    <AnimatePresence>
+      {open && (
+        <>
+          {/* Backdrop */}
+          <motion.div
+            key="backdrop"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setOpen(false)}
+            style={{
+              position: 'fixed',
+              inset: 0,
+              zIndex: 9998,
+              backgroundColor: 'rgba(0,0,0,0.45)',
+              backdropFilter: 'blur(4px)',
+            }}
+          />
 
-      {/* Modal */}
-      <AnimatePresence>
-        {open && (
-          <div className="fixed inset-0 z-[300] flex items-center justify-center p-4">
-            {/* Backdrop */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-              onClick={() => setOpen(false)}
-            />
-
-            {/* Panel */}
-            <motion.div
-              initial={{ scale: 0.92, opacity: 0, y: 16 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.92, opacity: 0, y: 16 }}
-              transition={{ type: 'spring', stiffness: 380, damping: 28 }}
-              className="relative z-10 w-full max-w-sm bg-[var(--bg-card)] border border-[var(--border-main)] rounded-[2rem] shadow-2xl overflow-hidden"
-            >
-              {/* Header */}
-              <div className="px-6 py-5 border-b border-[var(--border-main)] flex items-center gap-3 bg-gradient-to-r from-[var(--primary)]/10 to-transparent">
-                <div
-                  className="w-8 h-8 rounded-xl flex items-center justify-center shadow-lg"
-                  style={{ backgroundColor: `${currentSwatch}22` }}
-                >
-                  <FaPalette style={{ color: currentSwatch }} />
+          {/* Panel — anchored top-right, below header */}
+          <motion.div
+            key="panel"
+            initial={{ opacity: 0, scale: 0.94, y: -10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.94, y: -10 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 32 }}
+            style={{
+              position: 'fixed',
+              top: 70,          // just below the header
+              right: 16,
+              zIndex: 9999,
+              width: 340,
+              maxHeight: 'calc(100dvh - 86px)',
+              overflowY: 'auto',
+              backgroundColor: 'var(--bg-card)',
+              border: '1px solid var(--border-main)',
+              borderRadius: '1.5rem',
+              boxShadow: '0 32px 64px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.04)',
+            }}
+          >
+            {/* ── Panel header ── */}
+            <div style={{
+              padding: '18px 22px 14px',
+              borderBottom: '1px solid var(--border-main)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              background: `linear-gradient(135deg, ${activeSwatch}14 0%, transparent 60%)`,
+              borderRadius: '1.5rem 1.5rem 0 0',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div style={{
+                  width: 32, height: 32, borderRadius: 10, flexShrink: 0,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  backgroundColor: `${activeSwatch}20`,
+                }}>
+                  <FaPalette style={{ color: activeSwatch, fontSize: 14 }} />
                 </div>
                 <div>
-                  <h2 className="text-[var(--text-main)] text-sm font-black uppercase tracking-widest leading-none">
+                  <p style={{ fontSize: 12, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-main)', margin: 0, lineHeight: 1 }}>
                     Appearance
-                  </h2>
-                  <p className="text-[var(--text-dim)] text-[9px] font-bold uppercase tracking-widest mt-0.5">
+                  </p>
+                  <p style={{ fontSize: 9, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.18em', color: 'var(--text-dim)', margin: '3px 0 0' }}>
                     Palette & visual mode
                   </p>
                 </div>
               </div>
+              <button
+                onClick={() => setOpen(false)}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-dim)', padding: 6, borderRadius: 8, lineHeight: 0 }}
+              >
+                <FaTimes size={13} />
+              </button>
+            </div>
 
-              <div className="p-6 space-y-8">
-                {/* — Visual Mode — */}
-                <section>
-                  <label className="text-[9px] font-black uppercase tracking-[0.3em] text-[var(--text-dim)] mb-3 block">
-                    Visual Mode
-                  </label>
-                  <div className="grid grid-cols-2 gap-3">
-                    {(['dark', 'light'] as Mode[]).map((m) => {
-                      const active = mode === m;
-                      return (
-                        <button
-                          key={m}
-                          id={`mode-${m}`}
-                          onClick={() => setMode(m)}
-                          className={`flex flex-col items-center gap-2.5 py-5 rounded-2xl border-2 transition-all ${
-                            active
-                              ? 'border-[var(--primary)] text-[var(--primary)]'
-                              : 'border-[var(--border-main)] bg-[var(--bg-card-alt)] text-[var(--text-muted)] hover:border-[var(--text-dim)]'
-                          }`}
-                          style={active ? { backgroundColor: `${currentSwatch}12` } : {}}
-                        >
-                          {m === 'dark' ? <FaMoon size={20} /> : <FaSun size={20} />}
-                          <span className="text-[10px] font-bold uppercase tracking-wider">
-                            {m === 'dark' ? 'Dark Night' : 'Light Day'}
-                          </span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </section>
+            {/* ── Body ── */}
+            <div style={{ padding: '18px 22px', display: 'flex', flexDirection: 'column', gap: 22 }}>
 
-                {/* — Color Palette — */}
-                <section>
-                  <label className="text-[9px] font-black uppercase tracking-[0.3em] text-[var(--text-dim)] mb-3 block">
-                    Color Palette
-                  </label>
-                  <div className="grid grid-cols-2 gap-3">
-                    {PALETTES.map((p) => {
-                      const active = palette === p.id;
-                      const swatch = swatchColor(p);
-                      return (
-                        <button
-                          key={p.id}
-                          id={`palette-${p.id}`}
-                          onClick={() => setPalette(p.id)}
-                          className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl border-2 transition-all ${
-                            active
-                              ? 'border-[var(--primary)] bg-[var(--bg-card-alt)] shadow-md'
-                              : 'border-[var(--border-main)] bg-[var(--bg-card-alt)] hover:border-[var(--text-dim)]'
-                          }`}
-                        >
-                          {/* Swatch */}
-                          <div
-                            className="w-6 h-6 rounded-full flex items-center justify-center shadow-inner flex-shrink-0"
-                            style={{ backgroundColor: swatch }}
-                          >
-                            {active && (
-                              <FaCheck size={9} style={{ color: p.id === 'gold' ? '#000' : '#000' }} />
-                            )}
-                          </div>
-                          <span
-                            className={`text-[10px] font-bold uppercase tracking-wider ${
-                              active ? 'text-[var(--text-main)]' : 'text-[var(--text-muted)]'
-                            }`}
-                          >
-                            {p.label}
-                          </span>
-                          {active && (
-                            <span className="ms-auto text-[8px] font-black uppercase text-[var(--primary)] tracking-widest">
-                              Active
-                            </span>
-                          )}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </section>
-              </div>
-
-              {/* Footer */}
-              <div className="px-6 py-4 bg-[var(--bg-card-alt)] border-t border-[var(--border-main)] flex items-center justify-between">
-                <p className="text-[9px] text-[var(--text-dim)] font-bold uppercase tracking-widest">
-                  Saved to this terminal
+              {/* Visual Mode */}
+              <section>
+                <p style={{ fontSize: 9, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.28em', color: 'var(--text-dim)', marginBottom: 10 }}>
+                  Visual Mode
                 </p>
-                <button
-                  onClick={() => setOpen(false)}
-                  className="text-[10px] font-black uppercase tracking-widest text-[var(--primary)] hover:opacity-70 transition-opacity"
-                >
-                  Done
-                </button>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                  {(['dark', 'light'] as Mode[]).map((m) => {
+                    const active = mode === m;
+                    return (
+                      <button
+                        key={m}
+                        id={`mode-${m}`}
+                        onClick={() => setMode(m)}
+                        style={{
+                          display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 7,
+                          padding: '16px 10px',
+                          borderRadius: 14,
+                          border: `2px solid ${active ? 'var(--primary)' : 'var(--border-main)'}`,
+                          backgroundColor: active ? `${activeSwatch}10` : 'var(--bg-card-alt)',
+                          color: active ? 'var(--primary)' : 'var(--text-muted)',
+                          cursor: 'pointer', transition: 'all 0.2s',
+                        }}
+                      >
+                        {m === 'dark' ? <FaMoon size={17} /> : <FaSun size={17} />}
+                        <span style={{ fontSize: 9, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em' }}>
+                          {m === 'dark' ? 'Dark Night' : 'Light Day'}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </section>
+
+              {/* Color Palette */}
+              <section>
+                <p style={{ fontSize: 9, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.28em', color: 'var(--text-dim)', marginBottom: 10 }}>
+                  Color Palette
+                </p>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                  {PALETTES.map((p) => {
+                    const active = palette === p.id;
+                    const swatch = swatchHex(p);
+                    return (
+                      <button
+                        key={p.id}
+                        id={`palette-${p.id}`}
+                        onClick={() => setPalette(p.id)}
+                        style={{
+                          display: 'flex', alignItems: 'center', gap: 10,
+                          padding: '11px 14px',
+                          borderRadius: 12,
+                          border: `2px solid ${active ? 'var(--primary)' : 'var(--border-main)'}`,
+                          backgroundColor: 'var(--bg-card-alt)',
+                          cursor: 'pointer', transition: 'border-color 0.2s',
+                        }}
+                      >
+                        <div style={{
+                          width: 20, height: 20, borderRadius: '50%', flexShrink: 0,
+                          backgroundColor: swatch,
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          boxShadow: active ? `0 0 0 2px var(--bg-card), 0 0 0 3.5px ${swatch}` : '0 0 0 1.5px rgba(0,0,0,0.1)',
+                        }}>
+                          {active && <FaCheck size={7} style={{ color: '#000' }} />}
+                        </div>
+                        <span style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: active ? 'var(--text-main)' : 'var(--text-muted)' }}>
+                          {p.label}
+                        </span>
+                        {active && (
+                          <span style={{ marginLeft: 'auto', fontSize: 8, fontWeight: 900, color: 'var(--primary)', textTransform: 'uppercase' }}>
+                            Active
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </section>
+            </div>
+
+            {/* ── Footer ── */}
+            <div style={{
+              padding: '12px 22px',
+              borderTop: '1px solid var(--border-main)',
+              backgroundColor: 'var(--bg-card-alt)',
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              borderRadius: '0 0 1.5rem 1.5rem',
+            }}>
+              <span style={{ fontSize: 9, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.18em', color: 'var(--text-dim)' }}>
+                Saved to this terminal
+              </span>
+              <button
+                onClick={() => setOpen(false)}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 9, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.15em', color: 'var(--primary)' }}
+              >
+                Done
+              </button>
+            </div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
+  );
+
+  return (
+    <>
+      {/* ── Trigger ── */}
+      <button
+        id="theme-switcher-trigger"
+        onClick={() => setOpen(true)}
+        style={{
+          display: 'flex', alignItems: 'center', gap: 7,
+          padding: '7px 12px',
+          borderRadius: 10,
+          backgroundColor: 'var(--bg-card-alt)',
+          border: '1px solid var(--border-main)',
+          color: 'var(--text-muted)',
+          cursor: 'pointer',
+          transition: 'border-color 0.2s, color 0.2s',
+        }}
+        title="Appearance"
+      >
+        <span style={{
+          width: 11, height: 11, borderRadius: '50%', flexShrink: 0,
+          backgroundColor: activeSwatch,
+          boxShadow: `0 0 0 2px var(--bg-card), 0 0 0 3px ${activeSwatch}`,
+        }} />
+        <FaPalette size={13} />
+        <span style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', whiteSpace: 'nowrap' }}
+          className="hidden lg:block">
+          Appearance
+        </span>
+      </button>
+
+      {/* Modal rendered at document.body to escape backdrop-filter stacking context */}
+      {ReactDOM.createPortal(modal, document.body)}
     </>
   );
 };
