@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { FaSearch, FaFilter, FaSortAmountDown, FaSortAmountUp, FaWallet, FaChevronDown, FaChevronUp, FaUtensils, FaMoneyBillWave, FaCalendarDay, FaChartPie, FaTimesCircle, FaUser, FaSort, FaTimes, FaLayerGroup } from "react-icons/fa";
+import { FaSearch, FaFilter, FaSortAmountDown, FaSortAmountUp, FaWallet, FaChevronDown, FaChevronUp, FaUtensils, FaMoneyBillWave, FaCalendarDay, FaChartPie, FaTimesCircle, FaUser, FaSort, FaTimes, FaLayerGroup, FaExpand, FaCompress } from "react-icons/fa";
 import OrderList from "../menu/OrderList";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { enqueueSnackbar } from "notistack";
@@ -13,6 +13,7 @@ const RecentOrders: React.FC = () => {
   const { t } = useTranslation();
   const [selectedOrderForReprint, setSelectedOrderForReprint] = useState<any>(null);
   const [showReprintModal, setShowReprintModal] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   
   // Advanced & Flexible States
   const [searchTerm, setSearchTerm] = useState("");
@@ -151,8 +152,8 @@ const RecentOrders: React.FC = () => {
   ];
 
   return (
-    <div className="mt-4 mb-6 relative">
-      <div className="bg-[var(--bg-card)] w-full min-h-[600px] lg:h-[650px] 2xl:h-[850px] rounded-[3rem] border border-[var(--border-main)] shadow-2xl overflow-hidden flex flex-col transition-all duration-700">
+    <div className={`mt-4 mb-6 transition-all duration-700 ${isFullscreen ? "fixed inset-0 z-[100] m-0 p-4 bg-black/40 backdrop-blur-xl" : "relative"}`}>
+      <div className={`bg-[var(--bg-card)] w-full rounded-[3rem] border border-[var(--border-main)] shadow-2xl overflow-hidden flex flex-col transition-all duration-700 ${isFullscreen ? "h-full" : "min-h-[600px] lg:h-[650px] 2xl:h-[850px]"}`}>
         
         {/* Top Header - Analytics & Summary */}
         <div className="px-8 py-8 border-b border-[var(--border-main)]/50 bg-gradient-to-br from-[var(--bg-card)] via-[var(--bg-card)] to-[var(--primary)]/5 sticky top-0 z-30">
@@ -208,6 +209,14 @@ const RecentOrders: React.FC = () => {
             </div>
 
             <div className="flex items-center gap-3">
+              <button 
+                onClick={() => setIsFullscreen(!isFullscreen)}
+                className="bg-[var(--bg-card-alt)] p-4 rounded-2xl border border-[var(--border-main)] text-[var(--text-muted)] hover:text-[var(--text-main)] transition-all shadow-xl flex items-center justify-center"
+                title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
+              >
+                {isFullscreen ? <FaCompress size={18} /> : <FaExpand size={18} />}
+              </button>
+
               <div className="flex items-center gap-2 bg-[var(--bg-card-alt)] rounded-2xl p-1.5 border border-[var(--border-main)] shadow-xl">
                 <select 
                   value={sortBy}
@@ -231,15 +240,15 @@ const RecentOrders: React.FC = () => {
 
         {/* Search & Filter Toolbar */}
         <div className="px-8 py-6 bg-[var(--bg-card-alt)]/5 border-b border-[var(--border-main)]/50 space-y-4">
-          <div className="flex flex-col md:flex-row gap-4 items-stretch">
-            <div className="flex-1 relative group">
+          <div className="flex flex-col md:flex-row gap-4 items-stretch h-auto md:h-16">
+            <div className="flex-1 relative group h-full">
               <FaSearch className="absolute start-5 top-1/2 -translate-y-1/2 text-[var(--text-dim)] group-focus-within:text-[var(--primary)] transition-all duration-300" size={18} />
               <input 
                 type="text" 
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder={t('common.search_cluster')}
-                className="w-full bg-[var(--bg-main)] rounded-[1.5rem] ps-14 pe-14 py-4.5 border-2 border-[var(--border-main)] focus:border-[var(--primary)] focus:ring-8 focus:ring-[var(--primary)]/5 outline-none text-[var(--text-main)] font-bold text-sm transition-all shadow-inner" 
+                className="w-full h-full bg-[var(--bg-main)] rounded-[1.5rem] ps-14 pe-14 py-4 border-2 border-[var(--border-main)] focus:border-[var(--primary)] focus:ring-8 focus:ring-[var(--primary)]/5 outline-none text-[var(--text-main)] font-bold text-base transition-all shadow-inner" 
               />
               {searchTerm && (
                 <button onClick={() => setSearchTerm("")} className="absolute end-5 top-1/2 -translate-y-1/2 text-[var(--text-dim)] hover:text-red-500 transition-colors p-2 hover:bg-red-500/10 rounded-full">
@@ -250,7 +259,7 @@ const RecentOrders: React.FC = () => {
             
             <button 
               onClick={() => setShowAdvanced(!showAdvanced)}
-              className={`flex items-center justify-center gap-3 px-8 rounded-[1.5rem] text-[11px] font-black uppercase tracking-[0.2em] transition-all border-2 ${showAdvanced ? "bg-[var(--primary)] text-black border-[var(--primary)] shadow-2xl shadow-[var(--primary)]/20" : "bg-[var(--bg-main)] text-[var(--text-muted)] border-[var(--border-main)] hover:border-[var(--text-dim)] shadow-sm"}`}
+              className={`flex items-center justify-center gap-3 px-8 rounded-[1.5rem] text-[11px] font-black uppercase tracking-[0.2em] transition-all border-2 h-full ${showAdvanced ? "bg-[var(--primary)] text-black border-[var(--primary)] shadow-2xl shadow-[var(--primary)]/20" : "bg-[var(--bg-main)] text-[var(--text-muted)] border-[var(--border-main)] hover:border-[var(--text-dim)] shadow-sm"}`}
             >
               <FaFilter size={12} />
               {t('common.filters')}
@@ -388,7 +397,7 @@ const RecentOrders: React.FC = () => {
           ) : processedOrders.length > 0 ? (
             <motion.div 
                layout
-               className="grid grid-cols-1 gap-6 pb-10"
+               className={`grid gap-6 pb-10 ${isFullscreen ? "grid-cols-1 md:grid-cols-2 xl:grid-cols-3" : "grid-cols-1"}`}
             >
               {processedOrders.map((order: any) => (
                 <OrderList key={order.id} order={order} onReprint={handleReprint} />
