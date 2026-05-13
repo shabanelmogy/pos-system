@@ -1,0 +1,16 @@
+{
+  "orders": {
+    "title": "الطلبات",
+    "no_orders": "لا توجد طلبات",
+    "show_today": "عرض اليوم فقط",
+    "showing_today": "عرض اليوم",
+    "show_mine": "عرض طلباتي",
+    "showing_mine": "عرض طلباتي",
+    "status": {
+      "all": "جميع الحالات",
+      "in_progress": "قيد التنفيذ",
+      "ready": "جاهز",
+      "completed": "مكتمل"
+    }
+  }
+}

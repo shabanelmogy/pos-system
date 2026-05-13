@@ -1,0 +1,26 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Something went wrong",
+    "retry": "Try Again",
+    "search": "Search",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "save": "Save",
+    "close": "Close",
+    "back": "Back",
+    "yes": "Yes",
+    "no": "No",
+    "name": "Name",
+    "email": "Email",
+    "phone": "Phone",
+    "role": "Role",
+    "status": "Status",
+    "actions": "Actions",
+    "no_data": "No data available",
+    "guest": "Guest"
+  }
+}

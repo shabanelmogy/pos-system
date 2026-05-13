@@ -12,22 +12,10 @@ import useAuth from "../../auth/hooks/useAuth";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { getBranches } from "../api/dashboardApi";
-
-const buttons = [
-  { label: "Table", icon: <MdTableBar />, action: "table", color: "from-blue-500 to-indigo-600" },
-  { label: "Category", icon: <MdCategory />, action: "category", color: "from-purple-500 to-pink-600" },
-  { label: "Dish", icon: <BiSolidDish />, action: "dishes", color: "from-orange-500 to-red-600" },
-];
-
-const tabs = [
-  { id: "Metrics", label: "Analytics", icon: <MdSpaceDashboard /> },
-  { id: "Management", label: "Management", icon: <MdCategory /> },
-  { id: "Customers", label: "Customers", icon: <FaUsers /> },
-  { id: "Orders", label: "Order History", icon: <FaHistory /> },
-  { id: "Payments", label: "Transactions", icon: <FaWallet /> },
-];
+import { useTranslation } from "react-i18next";
 
 const Dashboard: React.FC = () => {
+  const { t } = useTranslation();
   const { canManageSettings } = useAuth();
   const [modalState, setModalState] = useState<{ isOpen: boolean; type: string }>({ isOpen: false, type: "" });
   const [activeTab, setActiveTab] = useState("Metrics");
@@ -42,6 +30,20 @@ const Dashboard: React.FC = () => {
     document.title = "POS | Management Center";
   }, []);
 
+  const buttons = [
+    { label: t('dashboard.quick_add.table'), icon: <MdTableBar />, action: "table", color: "from-blue-500 to-indigo-600" },
+    { label: t('dashboard.quick_add.category'), icon: <MdCategory />, action: "category", color: "from-purple-500 to-pink-600" },
+    { label: t('dashboard.quick_add.dish'), icon: <BiSolidDish />, action: "dishes", color: "from-orange-500 to-red-600" },
+  ];
+
+  const tabs = [
+    { id: "Metrics", label: t('dashboard.tabs.analytics'), icon: <MdSpaceDashboard /> },
+    { id: "Management", label: t('dashboard.tabs.management'), icon: <MdCategory /> },
+    { id: "Customers", label: t('dashboard.tabs.customers'), icon: <FaUsers /> },
+    { id: "Orders", label: t('dashboard.tabs.order_history'), icon: <FaHistory /> },
+    { id: "Payments", label: t('dashboard.tabs.transactions'), icon: <FaWallet /> },
+  ];
+
   const handleOpenModal = (action: string) => {
     setActiveTab("Management");
     setModalState({ isOpen: true, type: action });
@@ -52,7 +54,7 @@ const Dashboard: React.FC = () => {
   };
 
   const branchOptions = [
-    { id: "all", name: "All Branches" },
+    { id: "all", name: t('dashboard.all_branches') },
     ...(branches || []).map((b: any) => ({ id: b.id, name: b.name }))
   ];
 
@@ -63,16 +65,16 @@ const Dashboard: React.FC = () => {
         <div className="container mx-auto px-6 py-6 flex flex-col md:flex-row items-center justify-between gap-6">
           <div>
             <div className="flex items-center gap-3 mb-2">
-              <span className="bg-[var(--primary)]/10 text-[var(--primary)] text-[10px] font-black tracking-widest px-2 py-1 rounded-md uppercase">Enterprise Dashboard</span>
+              <span className="bg-[var(--primary)]/10 text-[var(--primary)] text-[10px] font-black tracking-widest px-2 py-1 rounded-md uppercase">{t('dashboard.badge')}</span>
             </div>
             <motion.h1
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               className="text-2xl md:text-3xl font-black text-[var(--text-main)] tracking-tighter uppercase"
             >
-              Management Center
+              {t('dashboard.title')}
             </motion.h1>
-            <p className="text-[var(--text-muted)] mt-1 text-sm font-medium">Infrastructure and inventory control.</p>
+            <p className="text-[var(--text-muted)] mt-1 text-sm font-medium">{t('dashboard.subtitle')}</p>
           </div>
 
           <div className="flex items-center gap-4 flex-wrap justify-center">
@@ -93,7 +95,7 @@ const Dashboard: React.FC = () => {
                 className={`bg-gradient-to-br ${color} px-5 py-2.5 rounded-xl text-white font-bold text-xs flex items-center gap-2 shadow-lg hover:shadow-xl transition-all border border-white/10 h-[44px]`}
               >
                 <MdAddCircleOutline size={18} />
-                Add {label}
+                {t('dashboard.add')} {label}
               </motion.button>
             ))}
           </div>
@@ -139,8 +141,8 @@ const Dashboard: React.FC = () => {
                 <div className="w-20 h-20 bg-[var(--bg-card-alt)] rounded-full flex items-center justify-center mb-6 border border-[var(--border-main)]">
                   <FaWallet className="text-[var(--text-muted)]" size={30} />
                 </div>
-                <h3 className="text-[var(--text-main)] text-xl font-bold">Transaction History Coming Soon</h3>
-                <p className="text-[var(--text-muted)] mt-2 max-w-sm">We are integrating deeper payment analytics into your dashboard.</p>
+                <h3 className="text-[var(--text-main)] text-xl font-bold">{t('dashboard.payments_soon')}</h3>
+                <p className="text-[var(--text-muted)] mt-2 max-w-sm">{t('dashboard.payments_soon_desc')}</p>
               </div>
             )}
           </motion.div>

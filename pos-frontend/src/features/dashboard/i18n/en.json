@@ -1,0 +1,23 @@
+{
+  "dashboard": {
+    "title": "Management Center",
+    "subtitle": "Infrastructure and inventory control.",
+    "badge": "Enterprise Dashboard",
+    "all_branches": "All Branches",
+    "add": "Add",
+    "tabs": {
+      "analytics": "Analytics",
+      "management": "Management",
+      "customers": "Customers",
+      "order_history": "Order History",
+      "transactions": "Transactions"
+    },
+    "quick_add": {
+      "table": "Table",
+      "category": "Category",
+      "dish": "Dish"
+    },
+    "payments_soon": "Transaction History Coming Soon",
+    "payments_soon_desc": "We are integrating deeper payment analytics into your dashboard."
+  }
+}

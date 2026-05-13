@@ -1,0 +1,23 @@
+{
+  "dashboard": {
+    "title": "مركز الإدارة",
+    "subtitle": "التحكم في البنية التحتية والمخزون.",
+    "badge": "لوحة التحكم المؤسسية",
+    "all_branches": "جميع الفروع",
+    "add": "إضافة",
+    "tabs": {
+      "analytics": "التحليلات",
+      "management": "الإدارة",
+      "customers": "العملاء",
+      "order_history": "سجل الطلبات",
+      "transactions": "المعاملات"
+    },
+    "quick_add": {
+      "table": "طاولة",
+      "category": "فئة",
+      "dish": "طبق"
+    },
+    "payments_soon": "سجل المعاملات قريباً",
+    "payments_soon_desc": "نعمل على دمج تحليلات الدفع المتعمقة في لوحة التحكم الخاصة بك."
+  }
+}

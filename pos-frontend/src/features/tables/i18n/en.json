@@ -1,0 +1,18 @@
+{
+  "tables": {
+    "title": "Floor Plan",
+    "subtitle": "Manage your tables and active orders",
+    "active": "Active",
+    "free": "Free",
+    "shown": "Shown",
+    "active_service": "Active Service",
+    "available_tables": "Available Tables",
+    "no_active_tables": "No Active Tables",
+    "no_active_subtitle": "Start an order to see tables here",
+    "status": {
+      "all": "All",
+      "in_progress": "In Progress",
+      "ready": "Ready"
+    }
+  }
+}

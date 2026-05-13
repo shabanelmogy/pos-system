@@ -1,0 +1,11 @@
+{
+  "customers": {
+    "title": "Customer Database",
+    "search_placeholder": "Search by name, phone or email...",
+    "no_customers": "No customers found",
+    "visits": "Visits",
+    "total_spent": "Total Spent",
+    "last_visit": "Last Visit",
+    "add_customer": "Add Customer"
+  }
+}

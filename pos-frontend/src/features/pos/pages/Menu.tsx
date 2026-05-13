@@ -9,8 +9,10 @@ import Bill from "../components/menu/Bill";
 import useCustomerStore from "../../customers/store/useCustomerStore";
 import usePOSStore from "../store/usePOSStore";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 const Menu: React.FC = () => {
+  const { t } = useTranslation();
   const customerData = useCustomerStore();
   const { selectedPOSPoint } = usePOSStore();
   const navigate = useNavigate();
@@ -37,7 +39,7 @@ const Menu: React.FC = () => {
             <div className="flex items-center gap-4">
               <BackButton />
               <h1 className="text-[var(--text-main)] text-2xl font-bold tracking-wider">
-                Menu
+                {t('pos.menu_title')}
               </h1>
             </div>
 
@@ -49,7 +51,7 @@ const Menu: React.FC = () => {
                     {customerData.customerName}
                   </h1>
                   <p className="text-xs text-[var(--text-muted)] font-medium">
-                    Table: {customerData.table?.tableNo || "N/A"}
+                    {t('pos.cart.title')}: {customerData.table?.tableNo || "N/A"}
                   </p>
                 </div>
               </div>

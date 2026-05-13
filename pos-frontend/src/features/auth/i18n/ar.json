@@ -1,0 +1,22 @@
+{
+  "auth": {
+    "login_title": "دخول آمن",
+    "login_subtitle": "أدخل بياناتك للوصول إلى المحطة",
+    "register_title": "انضم للفريق",
+    "register_subtitle": "أنشئ حساب الموظف المحترف الخاص بك",
+    "email_label": "البريد الإلكتروني",
+    "password_label": "كلمة المرور",
+    "name_label": "الاسم الكامل",
+    "phone_label": "الهاتف",
+    "role_label": "اختر مستوى الوصول",
+    "login_button": "دخول آمن",
+    "register_button": "تسجيل موظف",
+    "no_account": "للموظفين المصرح لهم فقط.",
+    "have_account": "جزء من الفريق بالفعل؟",
+    "request_access": "طلب وصول",
+    "sign_in_instead": "تسجيل الدخول بدلاً من ذلك",
+    "enterprise_v": "نظام نقاط البيع للمؤسسات v2.0",
+    "precision_performance": "الدقة. الأداء. الربحية.",
+    "trust_text": "موثوق به من قبل أكثر من 5000 موقع عالمي"
+  }
+}

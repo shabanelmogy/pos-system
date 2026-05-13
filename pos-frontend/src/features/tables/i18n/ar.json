@@ -1,0 +1,18 @@
+{
+  "tables": {
+    "title": "مخطط الطابق",
+    "subtitle": "إدارة طاولاتك والطلبات النشطة",
+    "active": "نشط",
+    "free": "متاح",
+    "shown": "معروض",
+    "active_service": "الخدمة النشطة",
+    "available_tables": "الطاولات المتاحة",
+    "no_active_tables": "لا توجد طاولات نشطة",
+    "no_active_subtitle": "ابدأ طلباً لرؤية الطاولات هنا",
+    "status": {
+      "all": "الكل",
+      "in_progress": "قيد التنفيذ",
+      "ready": "جاهز"
+    }
+  }
+}

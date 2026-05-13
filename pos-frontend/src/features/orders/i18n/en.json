@@ -1,0 +1,16 @@
+{
+  "orders": {
+    "title": "Orders",
+    "no_orders": "No orders found",
+    "show_today": "Show Today Only",
+    "showing_today": "Showing Today",
+    "show_mine": "Show My Orders",
+    "showing_mine": "Showing My Orders",
+    "status": {
+      "all": "All Status",
+      "in_progress": "In Progress",
+      "ready": "Ready",
+      "completed": "Completed"
+    }
+  }
+}

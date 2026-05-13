@@ -1,0 +1,13 @@
+{
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Configure your POS experience",
+    "save": "Save Changes",
+    "saving": "Saving...",
+    "saved": "Settings saved",
+    "general": "General",
+    "terminals": "Terminals",
+    "receipt": "Receipt",
+    "hardware": "Hardware"
+  }
+}

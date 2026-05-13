@@ -1,0 +1,21 @@
+{
+  "pos": {
+    "menu_title": "Menu",
+    "customer": "Customer",
+    "table": "Table",
+    "categories": "Categories",
+    "items": "Items",
+    "cart": {
+      "title": "Your Order",
+      "empty": "Your cart is empty",
+      "total": "Total",
+      "subtotal": "Subtotal",
+      "tax": "Tax",
+      "discount": "Discount",
+      "checkout": "Place Order",
+      "clear": "Clear Cart"
+    },
+    "search_placeholder": "Search items...",
+    "no_items_found": "No items match your search"
+  }
+}

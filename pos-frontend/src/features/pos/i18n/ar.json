@@ -1,0 +1,21 @@
+{
+  "pos": {
+    "menu_title": "القائمة",
+    "customer": "العميل",
+    "table": "الطاولة",
+    "categories": "الفئات",
+    "items": "الأصناف",
+    "cart": {
+      "title": "طلبك",
+      "empty": "عربة التسوق فارغة",
+      "total": "الإجمالي",
+      "subtotal": "المجموع الفرعي",
+      "tax": "الضريبة",
+      "discount": "الخصم",
+      "checkout": "إتمام الطلب",
+      "clear": "مسح العربة"
+    },
+    "search_placeholder": "بحث عن أصناف...",
+    "no_items_found": "لا توجد أصناف تطابق بحثك"
+  }
+}

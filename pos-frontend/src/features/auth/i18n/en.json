@@ -1,0 +1,22 @@
+{
+  "auth": {
+    "login_title": "Secure Entry",
+    "login_subtitle": "Enter your credentials to access the terminal",
+    "register_title": "Join the Force",
+    "register_subtitle": "Create your professional staff account",
+    "email_label": "Email",
+    "password_label": "Password",
+    "name_label": "Full Name",
+    "phone_label": "Phone",
+    "role_label": "Select Access Level",
+    "login_button": "Secure Entry",
+    "register_button": "Register Employee",
+    "no_account": "Authorized personnel only.",
+    "have_account": "Part of the team already?",
+    "request_access": "Request access",
+    "sign_in_instead": "Sign in instead",
+    "enterprise_v": "Enterprise POS v2.0",
+    "precision_performance": "Precision Performance Profitability.",
+    "trust_text": "Trusted by 5,000+ global locations"
+  }
+}
