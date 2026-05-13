@@ -44,14 +44,20 @@ const userController = {
             const user = await userService.loginUser(email, password);
 
             const accessToken = jwt.sign({ _id: user.id }, config.accessTokenSecret, {
-                expiresIn: '1d'
+                expiresIn: '15m' // Short lived
             });
 
-            res.cookie('accessToken', accessToken, {
-                maxAge: 1000 * 60 * 60 * 24 * 30,
+            const refreshToken = jwt.sign({ _id: user.id }, config.refreshTokenSecret, {
+                expiresIn: '7d' // Long lived
+            });
+
+            await userService.updateRefreshToken(user.id, refreshToken);
+
+            res.cookie('refreshToken', refreshToken, {
+                maxAge: 1000 * 60 * 60 * 24 * 7,
                 httpOnly: true,
                 sameSite: 'lax',
-                secure: false,
+                secure: config.nodeEnv === 'production',
                 path: '/' 
             });
 
@@ -86,12 +92,17 @@ const userController = {
 
     async logout(req, res) {
         try {
-            res.clearCookie('accessToken', {
+            res.clearCookie('refreshToken', {
                 httpOnly: true,
                 sameSite: 'lax',
-                secure: false,
+                secure: config.nodeEnv === 'production',
                 path: '/'
             });
+
+            if (req.user && req.user._id) {
+                await userService.updateRefreshToken(req.user._id, null);
+            }
+
             res.status(200).json({
                 success: true, 
                 message: "User logout successfully!"
@@ -167,6 +178,37 @@ const userController = {
             });
         } catch (error) {
             handleError(res, error, "userController.deleteUser");
+        }
+    },
+
+    async refreshToken(req, res) {
+        try {
+            const refreshToken = req.cookies.refreshToken;
+            if (!refreshToken) {
+                return res.status(401).json({ success: false, message: "Refresh token not found" });
+            }
+
+            const user = await userService.findByRefreshToken(refreshToken);
+            if (!user) {
+                return res.status(403).json({ success: false, message: "Invalid refresh token" });
+            }
+
+            jwt.verify(refreshToken, config.refreshTokenSecret, async (err, decoded) => {
+                if (err) {
+                    return res.status(403).json({ success: false, message: "Invalid or expired refresh token" });
+                }
+
+                const accessToken = jwt.sign({ _id: user.id }, config.accessTokenSecret, {
+                    expiresIn: '15m'
+                });
+
+                res.status(200).json({
+                    success: true,
+                    token: accessToken
+                });
+            });
+        } catch (error) {
+            handleError(res, error, "userController.refreshToken");
         }
     }
 };

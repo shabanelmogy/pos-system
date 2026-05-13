@@ -128,6 +128,17 @@ const userService = {
     }
 
     return await userRepository.delete(userId);
+  },
+
+  async updateRefreshToken(userId, refreshToken) {
+    return await db.update(users)
+      .set({ refreshToken, updatedAt: new Date() })
+      .where(eq(users.id, userId));
+  },
+
+  async findByRefreshToken(refreshToken) {
+    const [user] = await db.select().from(users).where(eq(users.refreshToken, refreshToken)).limit(1);
+    return user;
   }
 };
 

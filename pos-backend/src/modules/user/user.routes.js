@@ -8,6 +8,7 @@ router.post("/register", userController.register);
 router.post("/login", userController.login);
 router.get("/me", isVerifiedUser, userController.getUserData);
 router.post("/logout", isVerifiedUser, userController.logout);
+router.post("/refresh-token", userController.refreshToken);
 
 // User Management
 router.get("/", isVerifiedUser, userController.getUsers);
