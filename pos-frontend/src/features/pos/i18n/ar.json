@@ -7,21 +7,21 @@
     "items": "الأصناف",
     "cart": {
       "title": "تفاصيل الطلب",
-      "empty": "عربة التسوق فارغة",
+      "empty": "السلة فارغة",
       "empty_sub": "أضف أصنافاً للبدء!",
       "total": "الإجمالي",
-      "subtotal": "المجموع الفرعي",
+      "subtotal": "الإجمالي الفرعي",
       "tax": "الضريبة (5%)",
       "checkout": "إتمام الطلب",
-      "clear": "مسح العربة",
-      "place_order": "تقديم الطلب",
+      "clear": "مسح السلة",
+      "place_order": "إرسال الطلب",
       "processing": "جاري المعالجة...",
       "bill_summary": "ملخص الفاتورة",
       "payment_method": "طريقة الدفع",
-      "cash": "نقداً",
-      "online": "أونلاين"
+      "cash": "نقدي",
+      "online": "عبر الإنترنت"
     },
-    "search_placeholder": "بحث عن أصناف...",
+    "search_placeholder": "البحث عن أصناف...",
     "no_items_found": "لا توجد أصناف تطابق بحثك",
     "home": {
       "greeting": "صباح الخير",
@@ -29,14 +29,14 @@
       "start_order": "بدء طلب جديد",
       "total_earnings": "إجمالي الأرباح",
       "in_progress": "قيد التنفيذ",
-      "than_yesterday": "مقارنة بالأمس",
+      "than_yesterday": "عن أمس",
       "recent_orders": "الطلبات الأخيرة",
-      "view_history": "عرض السجل الكامل",
-      "search_history": "بحث في السجل...",
-      "fetching": "جاري التحميل...",
-      "no_recent": "لا توجد نشاطات حديثة",
-      "ready_for_first": "جاهز لأول طلب",
-      "popular_dishes": "الأطباق الشائعة",
+      "view_history": "عرض السجل بالكامل",
+      "search_history": "ابحث بالاسم، الطاولة، أو رقم الطلب...",
+      "fetching": "جاري جلب الطلبات...",
+      "no_recent": "لا يوجد نشاط حديث",
+      "ready_for_first": "جاهز لأول طلب لك",
+      "popular_dishes": "الأطباق الشعبية",
       "view_all": "عرض الكل",
       "orders_count": "طلبات",
       "dishes": {
@@ -44,12 +44,12 @@
         "palak_paneer": "بالاك بانير",
         "biryani": "برياني حيدر أباد",
         "masala_dosa": "ماسالا دوسا",
-        "chole_bhature": "تشولي بهاتوري",
+        "chole_bhature": "تشولي بهاتور",
         "rajma_chawal": "راجما شوال",
         "paneer_tikka": "بانير تيكا",
-        "gulab_jamun": "جولاب جامون",
+        "gulab_jamun": "غلاب جامون",
         "poori_sabji": "بوري سابجي",
-        "rogan_josh": "روغان جوش"
+        "rogan_josh": "روجان جوش"
       }
     }
   }

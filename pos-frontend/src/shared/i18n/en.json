@@ -33,11 +33,45 @@
       "guest_error": "Please select at least 1 guest!"
     },
     "order_status": {
+      "title": "Status",
       "in_progress": "In Progress",
       "ready": "Ready",
       "completed": "Completed"
     },
     "table": "Table",
-    "items_ordered": "{{count}} Items Ordered"
+    "items_ordered": "{{count}} Items Ordered",
+    "all": "All",
+    "filter": "Filter",
+    "filters": "Filters",
+    "active": "Active",
+    "clear_filters": "Clear all filters",
+    "no_matches": "No matches found",
+    "try_adjusting": "Try adjusting your search or filters",
+    "sort": {
+      "title": "Sort By",
+      "date_time": "Date & Time",
+      "price": "Total Price",
+      "customer": "Customer Name",
+      "items": "Items Count",
+      "newest": "Newest",
+      "oldest": "Oldest"
+    },
+    "period": {
+      "title": "Period",
+      "today": "Today",
+      "yesterday": "Yesterday"
+    },
+    "volume": {
+      "title": "Volume",
+      "small": "Small (1-2)",
+      "large": "Large (3+)"
+    },
+    "price_range": {
+      "title": "Price Range",
+      "budget": "Budget (<500)",
+      "premium": "Premium (500+)"
+    },
+    "reset_default": "Reset to System Default",
+    "restore_defaults": "Restore Defaults"
   }
 }

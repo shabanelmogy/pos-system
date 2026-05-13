@@ -33,11 +33,45 @@
       "guest_error": "يرجى اختيار ضيف واحد على الأقل!"
     },
     "order_status": {
+      "title": "الحالة",
       "in_progress": "قيد التنفيذ",
       "ready": "جاهز",
       "completed": "مكتمل"
     },
     "table": "طاولة",
-    "items_ordered": "تم طلب {{count}} أصناف"
+    "items_ordered": "تم طلب {{count}} أصناف",
+    "all": "الكل",
+    "filter": "تصفية",
+    "filters": "عوامل التصفية",
+    "active": "نشط",
+    "clear_filters": "مسح التصفية",
+    "no_matches": "لا توجد نتائج مطابقة",
+    "try_adjusting": "حاول تعديل البحث أو عوامل التصفية",
+    "sort": {
+      "title": "ترتيب حسب",
+      "date_time": "التاريخ والوقت",
+      "price": "الإجمالي",
+      "customer": "اسم العميل",
+      "items": "عدد الأصناف",
+      "newest": "الأحدث",
+      "oldest": "الأقدم"
+    },
+    "period": {
+      "title": "الفترة",
+      "today": "اليوم",
+      "yesterday": "أمس"
+    },
+    "volume": {
+      "title": "الحجم",
+      "small": "صغير (1-2)",
+      "large": "كبير (3+)"
+    },
+    "price_range": {
+      "title": "نطاق السعر",
+      "budget": "اقتصادي (<500)",
+      "premium": "مميز (500+)"
+    },
+    "reset_default": "إعادة ضبط النظام",
+    "restore_defaults": "استعادة الافتراضي"
   }
 }

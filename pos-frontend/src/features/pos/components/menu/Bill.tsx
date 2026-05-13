@@ -65,7 +65,12 @@ const Bill: React.FC = () => {
     const isAdmin = user?.role?.toLowerCase() === "admin";
     if (!activeShift && !isAdmin) { enqueueSnackbar("No active shift found. Please start a shift first.", { variant: "error" }); return; }
     if (!user || !user.id) { enqueueSnackbar("User session invalid. Please re-login.", { variant: "error" }); return; }
-    const preparedItems = cartItems.map((item) => ({ menuItemId: item.id, quantity: item.quantity, unitPrice: item.price, name: item.name }));
+    const preparedItems = cartItems.map((item) => ({ 
+      menuItemId: item.id, 
+      quantity: Number(item.quantity), 
+      unitPrice: Number(item.price), 
+      name: item.name 
+    }));
     const baseOrderData = {
       customerDetails: { name: customerName, phone: customerPhone, guests },
       orderStatus: selectedPOSPoint?.settings?.enableTables !== false ? "In Progress" : "Completed",
@@ -91,7 +96,12 @@ const Bill: React.FC = () => {
             const orderData = {
               customerDetails: { name: customerName, phone: customerPhone, guests },
               orderStatus: selectedPOSPoint?.settings?.enableTables !== false ? "In Progress" : "Completed",
-              items: cartItems.map((item) => ({ menuItemId: item.id, quantity: item.quantity, unitPrice: item.price, name: item.name })),
+              items: cartItems.map((item) => ({ 
+                menuItemId: item.id, 
+                quantity: Number(item.quantity), 
+                unitPrice: Number(item.price), 
+                name: item.name 
+              })),
               tableId: table?.tableId, paymentMethod,
               paymentData: { razorpay_order_id: response.razorpay_order_id, razorpay_payment_id: response.razorpay_payment_id, razorpay_signature: response.razorpay_signature },
               branchId: selectedBranch?.id, posPointId: selectedPOSPoint?.id, shiftId: activeShift?.id, cashierId: user.id,
