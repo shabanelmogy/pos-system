@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import React, { useEffect, useRef, useState } from "react";
+import { motion } from "framer-motion";
 import { IoMdClose } from "react-icons/io";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { 
@@ -10,11 +10,20 @@ import {
 import { enqueueSnackbar } from "notistack";
 import CustomDropdown from "../../../shared/components/CustomDropdown";
 import { MdCategory, MdStore, MdPerson, MdEmail, MdLock, MdPhone, MdShield, MdComputer } from "react-icons/md";
+import useManagementForm from "../hooks/useManagementForm";
 
 const ManagementModal = ({ type, isOpen, onClose, initialData = null }) => {
   const queryClient = useQueryClient();
   const isEdit = !!initialData;
+  const firstInputRef = useRef(null);
+  const [selectedPOSPoints, setSelectedPOSPoints] = useState([]);
 
+  const { register, handleSubmit, setValue, watch, errors } = useManagementForm(type, initialData, isOpen);
+
+  const watchedBranchId = watch("branchId");
+  const watchedRole = watch("role");
+
+  // Load Dependencies
   const { data: categories } = useQuery({ 
     queryKey: ["categories"], 
     queryFn: async () => { const res = await getCategories(); return res.data.data || res.data; },
@@ -27,58 +36,22 @@ const ManagementModal = ({ type, isOpen, onClose, initialData = null }) => {
     enabled: type === "posPoint" || type === "user"
   });
 
-  const [formData, setFormData] = useState({
-    tableNo: "", seats: "",
-    name: "",
-    price: "", categoryId: "",
-    code: "", phone: "", email: "", address: "", city: "",
-    branchId: "", role: "cashier", password: ""
-  });
-
-  const [selectedPOSPoints, setSelectedPOSPoints] = useState([]);
-
   const { data: branchPOSPoints } = useQuery({
-    queryKey: ["posPoints", formData.branchId],
-    queryFn: async () => { const res = await getPOSPoints(formData.branchId); return res.data.data || res.data; },
-    enabled: type === "user" && !!formData.branchId
+    queryKey: ["posPoints", watchedBranchId],
+    queryFn: async () => { const res = await getPOSPoints(watchedBranchId); return res.data.data || res.data; },
+    enabled: type === "user" && !!watchedBranchId
   });
-
-  const firstInputRef = useRef(null);
 
   useEffect(() => {
     if (isOpen) {
-      const timer = setTimeout(() => {
-        firstInputRef.current?.focus();
-      }, 100);
-      return () => clearTimeout(timer);
-    }
-  }, [isOpen, type]);
-
-  useEffect(() => {
-    if (initialData) {
-      setFormData({
-        ...formData,
-        ...initialData,
-        price: initialData.price?.toString() || "",
-        password: "" // Don't show password
-      });
-      if (type === "user" && initialData.posPermissions) {
+      setTimeout(() => firstInputRef.current?.focus(), 100);
+      if (type === "user" && initialData?.posPermissions) {
         setSelectedPOSPoints(initialData.posPermissions.map(p => p.posPointId));
+      } else {
+        setSelectedPOSPoints([]);
       }
-    } else {
-      setFormData({ 
-        tableNo: "", seats: "", name: "", price: "", categoryId: "",
-        code: "", phone: "", email: "", address: "", city: "",
-        branchId: "", role: "cashier", password: ""
-      });
-      setSelectedPOSPoints([]);
     }
-  }, [initialData, isOpen, type]);
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
+  }, [isOpen, initialData, type]);
 
   const recursiveFindId = (obj) => {
     if (!obj || typeof obj !== "object") return null;
@@ -87,131 +60,48 @@ const ManagementModal = ({ type, isOpen, onClose, initialData = null }) => {
     for (const key in obj) {
       if (key.toLowerCase().endsWith("id")) return obj[key];
     }
-    for (const key in obj) {
-      const found = recursiveFindId(obj[key]);
-      if (found) return found;
-    }
     return null;
   };
 
   const mutation = useMutation({
-    mutationFn: async (data) => {
-      const preparedData = { ...data };
-      if (preparedData.price) preparedData.price = parseFloat(preparedData.price);
-      if (preparedData.tableNo) preparedData.tableNo = parseInt(preparedData.tableNo);
-      if (preparedData.seats) preparedData.seats = parseInt(preparedData.seats);
-
+    mutationFn: async (preparedData) => {
       if (isEdit) {
         const id = recursiveFindId(initialData);
-        
-        if (!id) {
-          const keys = Object.keys(initialData || {}).join(", ");
-          enqueueSnackbar(`Error: ID not found. Keys: ${keys}`, { variant: "error" });
-          console.error("ManagementModal: Missing ID. Keys found:", keys, initialData);
-          return;
-        }
+        if (!id) throw new Error("ID_NOT_FOUND");
 
-        // Diagnostic snackbar to confirm ID before request
-        enqueueSnackbar(`ID Found: ${id}. Sending PUT to /api/${type}/${id.slice(0, 8)}...`, { variant: "info", autoHideDuration: 2000 });
-        
-        if (type === "table") {
-          const payload = {};
-          if (preparedData.tableNo && !isNaN(parseInt(preparedData.tableNo))) {
-            payload.tableNo = parseInt(preparedData.tableNo);
-          }
-          if (preparedData.seats && !isNaN(parseInt(preparedData.seats))) {
-            payload.seats = parseInt(preparedData.seats);
-          }
-          
-          console.log("[DEBUG] Sending Table Update:", payload);
-          return updateTable(id, payload);
-        }
-        
-        if (type === "dishes") {
-          const payload = {
-            itemId: id,
-            name: preparedData.name,
-            price: parseFloat(preparedData.price),
-            categoryId: preparedData.categoryId
-          };
-          return updateItem(id, payload);
-        }
-
-        if (type === "category") {
-          const payload = {
-            categoryId: id,
-            name: preparedData.name
-          };
-          return updateCategory(id, payload);
-        }
-
-        if (type === "branch") {
-          const payload = {
-            id: id,
-            branchId: id,
-            Id: id,
-            name: preparedData.name,
-            code: preparedData.code,
-            city: preparedData.city || "",
-            phone: preparedData.phone || "",
-            address: preparedData.address || ""
-          };
-          return updateBranch(id, payload);
-        }
-
-        if (type === "posPoint") {
-          const payload = {
-            id: id,
-            name: preparedData.name,
-            code: preparedData.code,
-            branchId: preparedData.branchId
-          };
-          return updatePOSPoint(id, payload);
-        }
-
-        if (type === "user") {
-          const payload = {
-            userId: id,
-            name: preparedData.name,
-            email: preparedData.email,
-            phone: preparedData.phone,
-            role: preparedData.role,
-            branchId: preparedData.branchId
-          };
-          if (preparedData.password) payload.password = preparedData.password;
-          
-          const res = await updateUser(id, payload);
-          await assignPOS({ userId: id, posPointIds: selectedPOSPoints });
-          return res;
+        switch (type) {
+          case "table": return updateTable(id, { tableNo: preparedData.tableNo, seats: preparedData.seats });
+          case "dishes": return updateItem(id, { itemId: id, name: preparedData.name, price: preparedData.price, categoryId: preparedData.categoryId });
+          case "category": return updateCategory(id, { categoryId: id, name: preparedData.name });
+          case "branch": return updateBranch(id, { ...preparedData, id });
+          case "posPoint": return updatePOSPoint(id, preparedData);
+          case "user":
+            const userRes = await updateUser(id, preparedData);
+            await assignPOS({ userId: id, posPointIds: selectedPOSPoints });
+            return userRes;
+          default: return null;
         }
       } else {
-        if (type === "table") return addTable(preparedData);
-        if (type === "category") return addCategory(preparedData);
-        if (type === "dishes") return addItem(preparedData);
-        if (type === "branch") return addBranch(preparedData);
-        if (type === "posPoint") return addPOSPoint(preparedData);
-        if (type === "user") {
-          const res = await createUser(preparedData);
-          if (res.data.data.id) {
-            await assignPOS({ userId: res.data.data.id, posPointIds: selectedPOSPoints });
-          }
-          return res;
+        switch (type) {
+          case "table": return addTable(preparedData);
+          case "category": return addCategory(preparedData);
+          case "dishes": return addItem(preparedData);
+          case "branch": return addBranch(preparedData);
+          case "posPoint": return addPOSPoint(preparedData);
+          case "user":
+            const userRes = await createUser(preparedData);
+            if (userRes.data.data.id) {
+              await assignPOS({ userId: userRes.data.data.id, posPointIds: selectedPOSPoints });
+            }
+            return userRes;
+          default: return null;
         }
       }
     },
     onSuccess: (res) => {
-      const queryMap = {
-        dishes: "items",
-        table: "tables",
-        category: "categories",
-        branch: "branches",
-        posPoint: "posPoints",
-        user: "users"
-      };
-      const queryKey = queryMap[type] || type;
-      queryClient.invalidateQueries({ queryKey: [queryKey] });
-      queryClient.refetchQueries({ queryKey: [queryKey] });
-      enqueueSnackbar(res.data.message || (isEdit ? "Updated successfully!" : "Added successfully!"), { variant: "success" });
+      const queryMap = { dishes: "items", table: "tables", category: "categories", branch: "branches", posPoint: "posPoints", user: "users" };
+      queryClient.invalidateQueries({ queryKey: [queryMap[type] || type] });
+      enqueueSnackbar(res.data.message || "Success", { variant: "success" });
       onClose();
     },
     onError: (error) => {
@@ -219,15 +109,10 @@ const ManagementModal = ({ type, isOpen, onClose, initialData = null }) => {
     }
   });
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    mutation.mutate(formData);
-  };
+  const onSubmitHandler = (data) => mutation.mutate(data);
 
   const togglePOSSelection = (id) => {
-    setSelectedPOSPoints(prev => 
-      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
-    );
+    setSelectedPOSPoints(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
   };
 
   if (!isOpen) return null;
@@ -248,116 +133,104 @@ const ManagementModal = ({ type, isOpen, onClose, initialData = null }) => {
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmitHandler)} className="space-y-4">
           {type === "user" && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-3">
                 <div>
                   <label className="flex items-center gap-2 text-[var(--text-muted)] text-[9px] font-black uppercase tracking-widest mb-1.5"><MdPerson /> Full Name</label>
-                  <input ref={firstInputRef} name="name" type="text" value={formData.name} onChange={handleInputChange} required className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-xl p-3 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-colors font-bold text-sm" />
+                  <input {...register("name")} ref={(e) => { register("name").ref(e); firstInputRef.current = e; }} type="text" className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-xl p-3 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-colors font-bold text-sm" />
+                  {errors.name && <span className="text-[9px] text-red-500 font-bold">{errors.name.message}</span>}
                 </div>
                 <div>
                   <label className="flex items-center gap-2 text-[var(--text-muted)] text-[9px] font-black uppercase tracking-widest mb-1.5"><MdEmail /> Email Address</label>
-                  <input name="email" type="email" value={formData.email} onChange={handleInputChange} required className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-xl p-3 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-colors text-sm" />
+                  <input {...register("email")} type="email" className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-xl p-3 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-colors text-sm" />
+                  {errors.email && <span className="text-[9px] text-red-500 font-bold">{errors.email.message}</span>}
                 </div>
                 <div>
                   <label className="flex items-center gap-2 text-[var(--text-muted)] text-[9px] font-black uppercase tracking-widest mb-1.5"><MdPhone /> Phone Number</label>
-                  <input name="phone" type="text" value={formData.phone} onChange={handleInputChange} required className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-xl p-3 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-colors text-sm" />
+                  <input {...register("phone")} type="text" className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-xl p-3 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-colors text-sm" />
+                  {errors.phone && <span className="text-[9px] text-red-500 font-bold">{errors.phone.message}</span>}
                 </div>
                 <div>
                   <label className="flex items-center gap-2 text-[var(--text-muted)] text-[9px] font-black uppercase tracking-widest mb-1.5"><MdLock /> {isEdit ? "New Password" : "Security Password"}</label>
-                  <input name="password" type="password" value={formData.password} onChange={handleInputChange} required={!isEdit} placeholder={isEdit ? "Optional" : ""} className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-xl p-3 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-colors text-sm" />
+                  <input {...register("password")} type="password" placeholder={isEdit ? "Optional" : ""} className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-xl p-3 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-colors text-sm" />
+                  {errors.password && <span className="text-[9px] text-red-500 font-bold">{errors.password.message}</span>}
                 </div>
               </div>
 
               <div className="space-y-3">
                 <div>
                   <label className="flex items-center gap-2 text-[var(--text-muted)] text-[9px] font-black uppercase tracking-widest mb-1.5"><MdShield /> Role</label>
-                  <CustomDropdown 
-                    options={[{id: "cashier", name: "Cashier"}, {id: "manager", name: "Manager"}, {id: "admin", name: "Global Admin"}]}
-                    value={formData.role}
-                    onChange={(val) => setFormData(prev => ({ ...prev, role: val }))}
-                    placeholder="Select Role"
-                  />
+                  <CustomDropdown options={[{id: "cashier", name: "Cashier"}, {id: "manager", name: "Manager"}, {id: "admin", name: "Global Admin"}]} value={watchedRole} onChange={(val) => setValue("role", val)} placeholder="Select Role" />
                 </div>
                 <div>
                   <label className="flex items-center gap-2 text-[var(--text-muted)] text-[9px] font-black uppercase tracking-widest mb-1.5"><MdStore /> Assigned Branch</label>
-                  <CustomDropdown 
-                    options={branches || []}
-                    value={formData.branchId}
-                    onChange={(val) => setFormData(prev => ({ ...prev, branchId: val }))}
-                    placeholder="Select Branch"
-                  />
+                  <CustomDropdown options={branches || []} value={watchedBranchId} onChange={(val) => setValue("branchId", val)} placeholder="Select Branch" />
                 </div>
-                
-                {formData.branchId && (
+                {watchedBranchId && (
                   <div className="bg-[var(--bg-card)] p-4 rounded-2xl border border-[var(--border-main)]">
                     <label className="flex items-center gap-2 text-[var(--text-muted)] text-[9px] font-black uppercase tracking-widest mb-3"><MdComputer /> Restricted Terminals</label>
                     <div className="space-y-2 max-h-40 overflow-y-auto custom-scrollbar pr-2">
                        {(branchPOSPoints || []).map(pos => (
                          <label key={pos.id} className="flex items-center gap-3 cursor-pointer group">
-                           <input 
-                             type="checkbox" 
-                             checked={selectedPOSPoints.includes(pos.id)} 
-                             onChange={() => togglePOSSelection(pos.id)}
-                             className="w-4 h-4 rounded border-[var(--border-main)] bg-[var(--bg-card-alt)] text-[var(--primary)] focus:ring-[var(--primary)]"
-                           />
+                           <input type="checkbox" checked={selectedPOSPoints.includes(pos.id)} onChange={() => togglePOSSelection(pos.id)} className="w-4 h-4 rounded border-[var(--border-main)] bg-[var(--bg-card-alt)] text-[var(--primary)] focus:ring-[var(--primary)]" />
                            <span className="text-xs text-[var(--text-muted)] group-hover:text-[var(--text-main)] transition-colors font-bold uppercase tracking-tight">{pos.name}</span>
                          </label>
                        ))}
-                       {branchPOSPoints?.length === 0 && <p className="text-[10px] text-[var(--text-dim)] font-bold uppercase italic">No terminals in branch</p>}
                     </div>
-                    <p className="text-[9px] text-[var(--text-dim)] mt-4 font-bold uppercase">If none selected, staff can use all terminals.</p>
                   </div>
                 )}
               </div>
             </div>
           )}
 
-           {type === "table" && (
+          {type === "table" && (
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-[var(--text-muted)] text-[9px] font-black uppercase tracking-widest mb-1.5">Table Number</label>
-                <input ref={type === "table" ? firstInputRef : null} name="tableNo" type="number" value={formData.tableNo} onChange={handleInputChange} required className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-xl p-3 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-colors text-lg font-black" />
+                <input {...register("tableNo")} ref={(e) => { register("tableNo").ref(e); firstInputRef.current = e; }} type="number" className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-xl p-3 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-colors text-lg font-black" />
+                {errors.tableNo && <span className="text-[9px] text-red-500 font-bold">{errors.tableNo.message}</span>}
               </div>
               <div>
                 <label className="block text-[var(--text-muted)] text-[9px] font-black uppercase tracking-widest mb-1.5">Seats</label>
-                <input name="seats" type="number" value={formData.seats} onChange={handleInputChange} required className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-xl p-3 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-colors text-lg font-black" />
+                <input {...register("seats")} type="number" className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-xl p-3 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-colors text-lg font-black" />
+                {errors.seats && <span className="text-[9px] text-red-500 font-bold">{errors.seats.message}</span>}
               </div>
             </div>
           )}
 
           {(type === "category" || type === "dishes" || type === "branch" || type === "posPoint") && (
             <div>
-              <label className="block text-[var(--text-muted)] text-[9px] font-black uppercase tracking-widest mb-1.5">
-                {type === "posPoint" ? "Terminal Name" : "Name"}
-              </label>
-              <input ref={(type === "category" || type === "dishes" || type === "branch" || type === "posPoint") ? firstInputRef : null} name="name" type="text" value={formData.name} onChange={handleInputChange} required className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-xl p-3 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-colors font-bold uppercase tracking-tighter text-sm" />
+              <label className="block text-[var(--text-muted)] text-[9px] font-black uppercase tracking-widest mb-1.5">{type === "posPoint" ? "Terminal Name" : "Name"}</label>
+              <input {...register("name")} ref={(e) => { register("name").ref(e); firstInputRef.current = e; }} type="text" className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-xl p-3 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-colors font-bold uppercase tracking-tighter text-sm" />
+              {errors.name && <span className="text-[9px] text-red-500 font-bold">{errors.name.message}</span>}
             </div>
           )}
 
           {(type === "branch" || type === "posPoint") && (
             <div>
               <label className="block text-[var(--text-muted)] text-[9px] font-black uppercase tracking-widest mb-1.5">Unique Code</label>
-              <input name="code" type="text" value={formData.code} onChange={handleInputChange} required placeholder={type === 'branch' ? 'e.g. BR-01' : 'e.g. POS-01'} className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-xl p-3 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-colors font-mono text-sm" />
+              <input {...register("code")} type="text" placeholder={type === 'branch' ? 'e.g. BR-01' : 'e.g. POS-01'} className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-xl p-3 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-colors font-mono text-sm" />
+              {errors.code && <span className="text-[9px] text-red-500 font-bold">{errors.code.message}</span>}
             </div>
           )}
 
-           {type === "branch" && (
+          {type === "branch" && (
             <>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-[var(--text-muted)] text-[9px] font-black uppercase tracking-widest mb-1.5">City</label>
-                  <input name="city" type="text" value={formData.city} onChange={handleInputChange} className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-xl p-3 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-colors text-sm" />
+                  <input {...register("city")} type="text" className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-xl p-3 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-colors text-sm" />
                 </div>
                 <div>
                   <label className="block text-[var(--text-muted)] text-[9px] font-black uppercase tracking-widest mb-1.5">Phone</label>
-                  <input name="phone" type="text" value={formData.phone} onChange={handleInputChange} className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-xl p-3 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-colors text-sm" />
+                  <input {...register("phone")} type="text" className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-xl p-3 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-colors text-sm" />
                 </div>
               </div>
               <div>
                 <label className="block text-[var(--text-muted)] text-[9px] font-black uppercase tracking-widest mb-1.5">Address</label>
-                <textarea name="address" value={formData.address} onChange={handleInputChange} className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-xl p-3 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-colors h-20 custom-scrollbar text-sm" />
+                <textarea {...register("address")} className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-xl p-3 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-colors h-20 custom-scrollbar text-sm" />
               </div>
             </>
           )}
@@ -365,34 +238,25 @@ const ManagementModal = ({ type, isOpen, onClose, initialData = null }) => {
           {type === "posPoint" && (
             <div>
               <label className="block text-[var(--text-muted)] text-[9px] font-black uppercase tracking-widest mb-1.5">Assign to Branch</label>
-              <CustomDropdown 
-                options={branches || []}
-                value={formData.branchId}
-                onChange={(val) => setFormData(prev => ({ ...prev, branchId: val }))}
-                icon={<MdStore />}
-                placeholder="Select Branch"
-              />
+              <CustomDropdown options={branches || []} value={watchedBranchId} onChange={(val) => setValue("branchId", val)} icon={<MdStore />} placeholder="Select Branch" />
+              {errors.branchId && <span className="text-[9px] text-red-500 font-bold">{errors.branchId.message}</span>}
             </div>
           )}
 
-           {type === "dishes" && (
-             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-               <div>
-                 <label className="block text-[var(--text-muted)] text-[9px] font-black uppercase tracking-widest mb-1.5">Price (₹)</label>
-                 <input name="price" type="number" value={formData.price} onChange={handleInputChange} required className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-xl p-3 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-colors text-xl font-black italic" />
-               </div>
-               <div>
-                 <label className="block text-[var(--text-muted)] text-[9px] font-black uppercase tracking-widest mb-1.5">Category</label>
-                 <CustomDropdown 
-                   options={categories || []}
-                   value={formData.categoryId}
-                   onChange={(val) => setFormData(prev => ({ ...prev, categoryId: val }))}
-                   icon={<MdCategory />}
-                   placeholder="Select Category"
-                 />
-               </div>
-             </div>
-           )}
+          {type === "dishes" && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-[var(--text-muted)] text-[9px] font-black uppercase tracking-widest mb-1.5">Price (₹)</label>
+                <input {...register("price")} type="number" className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-xl p-3 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-colors text-xl font-black italic" />
+                {errors.price && <span className="text-[9px] text-red-500 font-bold">{errors.price.message}</span>}
+              </div>
+              <div>
+                <label className="block text-[var(--text-muted)] text-[9px] font-black uppercase tracking-widest mb-1.5">Category</label>
+                <CustomDropdown options={categories || []} value={watch("categoryId")} onChange={(val) => setValue("categoryId", val)} icon={<MdCategory />} placeholder="Select Category" />
+                {errors.categoryId && <span className="text-[9px] text-red-500 font-bold">{errors.categoryId.message}</span>}
+              </div>
+            </div>
+          )}
 
           <button
             type="submit"

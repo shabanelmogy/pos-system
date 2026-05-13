@@ -1,51 +1,18 @@
-import React, { useState } from "react";
-import { openShift, closeShift } from "../../features/pos/api/posApi";
-import usePOSStore from "../../features/pos/store/usePOSStore";
+import React from "react";
 import { motion } from "framer-motion";
-import { MdPlayArrow, MdStop, MdAttachMoney, MdNotes, MdClose, MdTrendingUp, MdHistory } from "react-icons/md";
-import { enqueueSnackbar } from "notistack";
+import { MdPlayArrow, MdStop, MdAttachMoney, MdClose } from "react-icons/md";
+import useShiftManager from "../hooks/useShiftManager";
 
 const ShiftManager = () => {
-  const { activeShift, selectedBranch, selectedPOSPoint, setActiveShift, setShowShiftModal } = usePOSStore();
-  const [openingBalance, setOpeningBalance] = useState("0");
-  const [closingBalance, setClosingBalance] = useState("0");
-  const [loading, setLoading] = useState(false);
-
-  const handleOpenShift = async (e) => {
-    e.preventDefault();
-    try {
-      setLoading(true);
-      const res = await openShift({
-        branchId: selectedBranch.id,
-        posPointId: selectedPOSPoint.id,
-        openingBalance: parseFloat(openingBalance || 0)
-      });
-      setActiveShift(res.data.data);
-      setShowShiftModal(false);
-      enqueueSnackbar("Shift started successfully", { variant: "success" });
-    } catch (error) {
-      enqueueSnackbar(error.response?.data?.message || "Failed to start shift", { variant: "error" });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleCloseShift = async (e) => {
-    e.preventDefault();
-    try {
-      setLoading(true);
-      const res = await closeShift(activeShift.id, {
-        closingBalance: parseFloat(closingBalance || 0)
-      });
-      setActiveShift(null);
-      setShowShiftModal(false);
-      enqueueSnackbar("Shift closed successfully", { variant: "success" });
-    } catch (error) {
-      enqueueSnackbar(error.response?.data?.message || "Failed to close shift", { variant: "error" });
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { 
+    activeShift, 
+    selectedBranch, 
+    selectedPOSPoint, 
+    setShowShiftModal, 
+    loading,
+    openForm,
+    closeForm
+  } = useShiftManager();
 
   const closeModal = () => {
     setShowShiftModal(false);
@@ -73,7 +40,7 @@ const ShiftManager = () => {
             </div>
           </header>
 
-          <form onSubmit={handleOpenShift} className="space-y-8 relative z-10">
+          <form onSubmit={openForm.onSubmit} className="space-y-8 relative z-10">
             <div className="group">
               <label className="block text-[#555] text-[10px] font-black uppercase tracking-widest mb-4 ms-1 group-focus-within:text-[var(--primary)] transition-colors">Opening Cash Balance (₹)</label>
               <div className="relative">
@@ -82,12 +49,14 @@ const ShiftManager = () => {
                 </div>
                 <input 
                   type="number" 
-                  value={openingBalance}
-                  onChange={(e) => setOpeningBalance(e.target.value)}
+                  {...openForm.register("openingBalance")}
                   placeholder="0.00"
-                  className="w-full bg-[#111] border border-[var(--border-main)] rounded-[1.5rem] p-6 ps-16 text-white text-3xl font-black focus:outline-none focus:border-[var(--primary)] transition-all shadow-inner tracking-tighter"
+                  className={`w-full bg-[#111] border ${openForm.errors.openingBalance ? 'border-red-500' : 'border-[var(--border-main)]'} rounded-[1.5rem] p-6 ps-16 text-white text-3xl font-black focus:outline-none focus:border-[var(--primary)] transition-all shadow-inner tracking-tighter`}
                 />
               </div>
+              {openForm.errors.openingBalance && (
+                <span className="text-[10px] text-red-500 font-black mt-2 ms-2 block uppercase tracking-widest">{openForm.errors.openingBalance.message}</span>
+              )}
             </div>
 
             <div className="flex flex-col gap-4">
@@ -130,7 +99,7 @@ const ShiftManager = () => {
           <p className="text-[#555] text-xs font-bold uppercase tracking-widest mt-2">Finalize your counts before drawer handoff</p>
         </header>
 
-        <form onSubmit={handleCloseShift} className="space-y-8">
+        <form onSubmit={closeForm.onSubmit} className="space-y-8">
            <div className="group">
               <label className="block text-[var(--text-muted)] text-[10px] font-black uppercase tracking-[0.2em] mb-4 ms-1">Actual Cash in Drawer (₹)</label>
               <div className="relative">
@@ -139,12 +108,14 @@ const ShiftManager = () => {
                 </div>
                 <input 
                   type="number" 
-                  value={closingBalance}
-                  onChange={(e) => setClosingBalance(e.target.value)}
+                  {...closeForm.register("closingBalance")}
                   placeholder="0.00"
-                  className="w-full bg-[var(--bg-input)] border border-[var(--border-main)] rounded-[1.5rem] p-6 ps-16 text-[var(--text-main)] text-3xl font-black focus:outline-none focus:border-[var(--primary)] transition-all tracking-tighter shadow-inner"
+                  className={`w-full bg-[var(--bg-input)] border ${closeForm.errors.closingBalance ? 'border-red-500' : 'border-[var(--border-main)]'} rounded-[1.5rem] p-6 ps-16 text-[var(--text-main)] text-3xl font-black focus:outline-none focus:border-[var(--primary)] transition-all tracking-tighter shadow-inner`}
                 />
               </div>
+              {closeForm.errors.closingBalance && (
+                <span className="text-[10px] text-red-500 font-black mt-2 ms-2 block uppercase tracking-widest">{closeForm.errors.closingBalance.message}</span>
+              )}
               <p className="mt-4 text-[9px] text-[#444] font-black uppercase tracking-widest">Include the opening balance in your total count</p>
            </div>
 
