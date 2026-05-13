@@ -121,19 +121,6 @@ const BottomNav: React.FC = () => {
         <span className="text-[10px] mt-1">{t('common.nav.orders')}</span>
       </button>
 
-      {canCompleteOrders && (
-        <div className="flex items-center justify-center w-full">
-          <button
-            disabled={isActive("/tables") || isActive("/menu")}
-            onClick={handleDishClick}
-            className="flex flex-col items-center justify-center font-bold transition-all text-[var(--primary)] bg-[var(--primary)]/10 px-4 py-1.5 rounded-2xl border border-[var(--primary)]/20 shadow-lg shadow-[var(--primary)]/5 disabled:opacity-50 disabled:grayscale"
-          >
-            <BiSolidDish size={26} />
-            <span className="text-[10px] mt-0.5">{t('common.nav.order')}</span>
-          </button>
-        </div>
-      )}
-
       {enableTables && (
         <button
           onClick={() => navigate("/tables")}

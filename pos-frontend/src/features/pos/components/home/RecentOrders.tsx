@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { FaSearch, FaFilter, FaSortAmountDown, FaSortAmountUp, FaWallet, FaChevronDown, FaChevronUp, FaUtensils, FaMoneyBillWave, FaCalendarDay, FaChartPie, FaTimesCircle, FaUser, FaSort, FaTimes, FaLayerGroup, FaExpand, FaCompress } from "react-icons/fa";
+import { FaSearch, FaFilter, FaSortAmountDown, FaSortAmountUp, FaWallet, FaChevronDown, FaChevronUp, FaUtensils, FaCalendarDay, FaSort, FaTimes, FaLayerGroup, FaExpand, FaCompress } from "react-icons/fa";
 import OrderList from "../menu/OrderList";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { enqueueSnackbar } from "notistack";
@@ -152,51 +152,51 @@ const RecentOrders: React.FC = () => {
   ];
 
   return (
-    <div className={`mt-4 mb-6 transition-all duration-700 ${isFullscreen ? "fixed inset-0 z-[100] m-0 p-4 bg-black/40 backdrop-blur-xl" : "relative"}`}>
-      <div className={`bg-[var(--bg-card)] w-full rounded-[3rem] border border-[var(--border-main)] shadow-2xl overflow-hidden flex flex-col transition-all duration-700 ${isFullscreen ? "h-full" : "min-h-[600px] lg:h-[650px] 2xl:h-[850px]"}`}>
+    <div className={`relative mb-3 mt-1.5 transition-all duration-700 ${isFullscreen ? "fixed inset-0 z-[100] m-0 bg-black/40 p-2 backdrop-blur-xl 2xl:p-4" : ""}`}>
+      <div className={`bg-[var(--bg-card)] w-full rounded-[2rem] border border-[var(--border-main)] shadow-lg overflow-hidden flex flex-col transition-all duration-700 2xl:rounded-[2.5rem] ${isFullscreen ? "h-full" : "min-h-[360px] lg:h-[508px] 2xl:h-[635px]"}`}>
         
         {/* Top Header - Analytics & Summary */}
-        <div className="px-8 py-8 border-b border-[var(--border-main)]/50 bg-gradient-to-br from-[var(--bg-card)] via-[var(--bg-card)] to-[var(--primary)]/5 sticky top-0 z-30">
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8">
-            <div className="flex items-center gap-6">
+        <div className="sticky top-0 z-30 border-b border-[var(--border-main)]/50 bg-gradient-to-br from-[var(--bg-card)] via-[var(--bg-card)] to-[var(--primary)]/5 px-3 py-2 2xl:px-5 2xl:py-4">
+          <div className="flex flex-col justify-between gap-2 xl:flex-row xl:items-center xl:gap-3">
+            <div className="flex items-center gap-2 2xl:gap-4">
               <motion.div 
                 whileHover={{ rotate: 180 }}
-                className="bg-[var(--primary)] w-16 h-16 flex items-center justify-center rounded-[2rem] shadow-2xl shadow-[var(--primary)]/30 text-black transform transition-all duration-500"
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[var(--primary)] text-black shadow-md shadow-[var(--primary)]/25 transition-all duration-500 2xl:h-12 2xl:w-12 2xl:rounded-[1.75rem]"
               >
-                <FaLayerGroup size={28} />
+                <FaLayerGroup className="size-[18px] 2xl:size-6" />
               </motion.div>
               <div>
-                <h1 className="text-[var(--text-main)] text-2xl font-black uppercase tracking-tighter leading-none mb-2">
+                <h1 className="mb-0.5 text-sm font-black uppercase leading-none tracking-tighter text-[var(--text-main)] 2xl:mb-1 2xl:text-lg">
                   {t('pos.home.recent_orders')}
                 </h1>
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2 2xl:gap-4">
                   <div className="flex flex-col">
-                    <span className="text-[10px] text-[var(--text-dim)] font-black uppercase tracking-widest">{t('common.items')}</span>
-                    <span className="text-sm text-[var(--text-main)] font-black">{processedOrders.length}</span>
+                    <span className="text-[7px] font-black uppercase tracking-widest text-[var(--text-dim)] 2xl:text-[9px]">{t('common.items')}</span>
+                    <span className="text-[11px] font-black text-[var(--text-main)] 2xl:text-sm">{processedOrders.length}</span>
                   </div>
-                  <div className="w-px h-8 bg-[var(--border-main)]" />
+                  <div className="h-5 w-px bg-[var(--border-main)] 2xl:h-6" />
                   <div className="flex flex-col">
-                    <span className="text-[10px] text-[var(--text-dim)] font-black uppercase tracking-widest">{t('pos.cart.total')}</span>
-                    <span className="text-sm text-[var(--primary)] font-black">₹{filteredTotal.toLocaleString()}</span>
+                    <span className="text-[7px] font-black uppercase tracking-widest text-[var(--text-dim)] 2xl:text-[9px]">{t('pos.cart.total')}</span>
+                    <span className="text-[11px] font-black text-[var(--primary)] 2xl:text-sm">₹{filteredTotal.toLocaleString()}</span>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Distribution Bar */}
-            <div className="flex-1 max-w-md hidden sm:block">
-               <div className="flex justify-between items-end mb-2 px-1">
-                  <span className="text-[9px] font-black uppercase tracking-widest text-[var(--text-dim)]">{t('common.status_distribution')}</span>
-                  <div className="flex gap-3">
+            <div className="hidden max-w-[11rem] flex-1 sm:block 2xl:max-w-sm">
+               <div className="mb-1 flex items-end justify-between px-0.5">
+                  <span className="text-[8px] font-black uppercase tracking-widest text-[var(--text-dim)]">{t('common.status_distribution')}</span>
+                  <div className="flex gap-2">
                      {statusDistribution.map(d => (
-                       <span key={d.label} className="text-[8px] font-bold uppercase text-[var(--text-muted)] flex items-center gap-1">
-                          <div className={`w-1.5 h-1.5 rounded-full ${d.label === 'Completed' ? 'bg-emerald-400' : d.label === 'Ready' ? 'bg-indigo-400' : 'bg-amber-400'}`} />
+                       <span key={d.label} className="flex items-center gap-0.5 text-[7px] font-bold uppercase text-[var(--text-muted)]">
+                          <div className={`h-1 w-1 rounded-full ${d.label === 'Completed' ? 'bg-emerald-400' : d.label === 'Ready' ? 'bg-indigo-400' : 'bg-amber-400'}`} />
                           {d.count}
                        </span>
                      ))}
                   </div>
                </div>
-               <div className="h-2 w-full bg-[var(--bg-card-alt)] rounded-full overflow-hidden flex shadow-inner">
+               <div className="flex h-1.5 w-full overflow-hidden rounded-full bg-[var(--bg-card-alt)] shadow-inner">
                   {statusDistribution.map(d => (
                     <motion.div 
                        key={d.label}
@@ -208,20 +208,20 @@ const RecentOrders: React.FC = () => {
                </div>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1.5 2xl:gap-2">
               <button 
                 onClick={() => setIsFullscreen(!isFullscreen)}
-                className="bg-[var(--bg-card-alt)] p-4 rounded-2xl border border-[var(--border-main)] text-[var(--text-muted)] hover:text-[var(--text-main)] transition-all shadow-xl flex items-center justify-center"
+                className="flex items-center justify-center rounded-xl border border-[var(--border-main)] bg-[var(--bg-card-alt)] p-1.5 text-[var(--text-muted)] shadow-sm transition-all hover:text-[var(--text-main)] 2xl:rounded-2xl 2xl:p-2.5"
                 title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
               >
-                {isFullscreen ? <FaCompress size={18} /> : <FaExpand size={18} />}
+                {isFullscreen ? <FaCompress className="size-3.5 2xl:size-4" /> : <FaExpand className="size-3.5 2xl:size-4" />}
               </button>
 
-              <div className="flex items-center gap-2 bg-[var(--bg-card-alt)] rounded-2xl p-1.5 border border-[var(--border-main)] shadow-xl">
+              <div className="flex items-center gap-0.5 rounded-xl border border-[var(--border-main)] bg-[var(--bg-card-alt)] p-0.5 shadow-sm 2xl:gap-1.5 2xl:rounded-2xl 2xl:p-1.5">
                 <select 
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value as any)}
-                  className="bg-transparent text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] outline-none px-4 py-2 cursor-pointer hover:text-[var(--text-main)] transition-colors"
+                  className="cursor-pointer bg-transparent px-1.5 py-0.5 text-[8px] font-black uppercase tracking-wide text-[var(--text-muted)] outline-none transition-colors hover:text-[var(--text-main)] 2xl:px-3 2xl:py-1.5 2xl:text-[10px] 2xl:tracking-widest"
                 >
                    {sortOptions.map(opt => (
                      <option key={opt.value} value={opt.value} className="bg-[var(--bg-card)] text-[var(--text-main)]">{opt.label}</option>
@@ -229,9 +229,9 @@ const RecentOrders: React.FC = () => {
                 </select>
                 <button 
                   onClick={() => setSortOrder(prev => prev === "desc" ? "asc" : "desc")}
-                  className={`p-2.5 rounded-xl transition-all ${sortOrder === "desc" ? "bg-[var(--primary)] text-black shadow-lg" : "bg-[var(--bg-card)] text-[var(--text-main)] border border-[var(--border-main)]"}`}
+                  className={`rounded-xl p-1 transition-all 2xl:rounded-2xl 2xl:p-2 ${sortOrder === "desc" ? "bg-[var(--primary)] text-black shadow-md" : "border border-[var(--border-main)] bg-[var(--bg-card)] text-[var(--text-main)]"}`}
                 >
-                  {sortOrder === "desc" ? <FaSortAmountDown size={14} /> : <FaSortAmountUp size={14} />}
+                  {sortOrder === "desc" ? <FaSortAmountDown className="size-2.5 2xl:size-3.5" /> : <FaSortAmountUp className="size-2.5 2xl:size-3.5" />}
                 </button>
               </div>
             </div>
@@ -239,31 +239,31 @@ const RecentOrders: React.FC = () => {
         </div>
 
         {/* Search & Filter Toolbar */}
-        <div className="px-8 py-6 bg-[var(--bg-card-alt)]/5 border-b border-[var(--border-main)]/50 space-y-4">
-          <div className="flex flex-col md:flex-row gap-4 items-stretch h-auto md:h-16">
-            <div className="flex-1 relative group h-full">
-              <FaSearch className="absolute start-5 top-1/2 -translate-y-1/2 text-[var(--text-dim)] group-focus-within:text-[var(--primary)] transition-all duration-300" size={18} />
+        <div className="space-y-1.5 border-b border-[var(--border-main)]/50 bg-[var(--bg-card-alt)]/5 px-2.5 py-2 2xl:space-y-3 2xl:px-4 2xl:py-3">
+          <div className="flex h-auto flex-col items-stretch gap-1.5 md:h-9 md:flex-row md:gap-1.5 2xl:h-11 2xl:gap-2">
+            <div className="group relative h-9 flex-1 md:h-full">
+              <FaSearch className="absolute start-2.5 top-1/2 size-3 -translate-y-1/2 text-[var(--text-dim)] transition-all duration-300 group-focus-within:text-[var(--primary)] 2xl:start-3.5 2xl:size-4" />
               <input 
                 type="text" 
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder={t('common.search_cluster')}
-                className="w-full h-full bg-[var(--bg-main)] rounded-[1.5rem] ps-14 pe-14 py-4 border-2 border-[var(--border-main)] focus:border-[var(--primary)] focus:ring-8 focus:ring-[var(--primary)]/5 outline-none text-[var(--text-main)] font-bold text-base transition-all shadow-inner" 
+                className="h-full w-full rounded-2xl border border-[var(--border-main)] bg-[var(--bg-main)] py-1.5 ps-9 pe-9 text-xs font-bold text-[var(--text-main)] shadow-inner outline-none transition-all focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary)]/10 2xl:rounded-[1.5rem] 2xl:py-2 2xl:ps-11 2xl:pe-11 2xl:text-[15px]" 
               />
               {searchTerm && (
-                <button onClick={() => setSearchTerm("")} className="absolute end-5 top-1/2 -translate-y-1/2 text-[var(--text-dim)] hover:text-red-500 transition-colors p-2 hover:bg-red-500/10 rounded-full">
-                  <FaTimes size={14} />
+                <button onClick={() => setSearchTerm("")} className="absolute end-2 top-1/2 -translate-y-1/2 rounded-full p-1 text-[var(--text-dim)] transition-colors hover:bg-red-500/10 hover:text-red-500 2xl:end-3 2xl:p-1.5">
+                  <FaTimes className="size-2.5 2xl:size-3.5" />
                 </button>
               )}
             </div>
             
             <button 
               onClick={() => setShowAdvanced(!showAdvanced)}
-              className={`flex items-center justify-center gap-3 px-8 rounded-[1.5rem] text-[11px] font-black uppercase tracking-[0.2em] transition-all border-2 h-full ${showAdvanced ? "bg-[var(--primary)] text-black border-[var(--primary)] shadow-2xl shadow-[var(--primary)]/20" : "bg-[var(--bg-main)] text-[var(--text-muted)] border-[var(--border-main)] hover:border-[var(--text-dim)] shadow-sm"}`}
+              className={`flex h-9 shrink-0 items-center justify-center gap-1.5 rounded-2xl border px-3 text-[8px] font-black uppercase tracking-wider transition-all md:h-full md:gap-2 2xl:gap-2.5 2xl:rounded-[1.35rem] 2xl:px-5 2xl:text-[10px] 2xl:tracking-[0.15em] ${showAdvanced ? "border-[var(--primary)] bg-[var(--primary)] text-black shadow-md shadow-[var(--primary)]/15" : "border-[var(--border-main)] bg-[var(--bg-main)] text-[var(--text-muted)] shadow-sm hover:border-[var(--text-dim)]"}`}
             >
-              <FaFilter size={12} />
+              <FaFilter className="size-3 shrink-0" />
               {t('common.filters')}
-              {showAdvanced ? <FaChevronUp size={10} /> : <FaChevronDown size={10} />}
+              {showAdvanced ? <FaChevronUp className="size-2.5" /> : <FaChevronDown className="size-2.5" />}
             </button>
           </div>
 
@@ -274,25 +274,25 @@ const RecentOrders: React.FC = () => {
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
-                className="flex flex-wrap gap-2 pt-2"
+                className="flex flex-wrap gap-1 pt-0.5 2xl:gap-2 2xl:pt-1"
               >
                 {activeFilters.map((filter, i) => (
                   <motion.div 
                     key={`${filter.type}-${filter.value}`}
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
-                    className="flex items-center gap-2 px-3 py-1.5 bg-[var(--primary)]/10 border border-[var(--primary)]/30 rounded-xl group hover:bg-[var(--primary)]/20 transition-all cursor-default"
+                    className="group flex cursor-default items-center gap-1 rounded-xl border border-[var(--primary)]/30 bg-[var(--primary)]/10 px-1.5 py-0.5 transition-all hover:bg-[var(--primary)]/20 2xl:gap-1.5 2xl:rounded-2xl 2xl:px-2.5 2xl:py-1"
                   >
-                     <span className="text-[9px] font-black uppercase tracking-widest text-[var(--primary)] opacity-60">{filter.type}:</span>
-                     <span className="text-[10px] font-black uppercase tracking-widest text-[var(--text-main)]">{filter.label}</span>
-                     <button onClick={() => removeFilter(filter)} className="text-[var(--text-dim)] hover:text-red-500 transition-colors">
-                        <FaTimes size={10} />
+                     <span className="text-[6px] font-black uppercase tracking-wide text-[var(--primary)] opacity-70 2xl:text-[8px] 2xl:tracking-widest">{filter.type}:</span>
+                     <span className="text-[7px] font-black uppercase tracking-tight text-[var(--text-main)] 2xl:text-[9px] 2xl:tracking-wider">{filter.label}</span>
+                     <button onClick={() => removeFilter(filter)} className="text-[var(--text-dim)] transition-colors hover:text-red-500">
+                        <FaTimes className="size-2 2xl:size-3" />
                      </button>
                   </motion.div>
                 ))}
                 <button 
                    onClick={() => { setSelectedStatuses([]); setSelectedPayments([]); setSelectedSizes([]); setDatePreset("All"); }}
-                   className="text-[9px] font-black uppercase tracking-widest text-red-500 hover:underline px-2"
+                   className="px-1 text-[7px] font-black uppercase tracking-wide text-red-500 hover:underline 2xl:px-1.5 2xl:text-[9px] 2xl:tracking-widest"
                 >
                    {t('common.clear_filters')}
                 </button>
@@ -307,20 +307,20 @@ const RecentOrders: React.FC = () => {
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: "auto", opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
-                className="overflow-hidden bg-[var(--bg-card)]/50 rounded-3xl mt-4 border border-[var(--border-main)]/30"
+                className="mt-1.5 overflow-hidden rounded-2xl border border-[var(--border-main)]/30 bg-[var(--bg-card)]/50 2xl:mt-3 2xl:rounded-3xl"
               >
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 p-8">
+                <div className="grid grid-cols-1 gap-2.5 p-2.5 md:grid-cols-2 xl:grid-cols-4 xl:gap-3 2xl:gap-5 2xl:p-4">
                   {/* Status Group */}
-                  <div className="space-y-4">
-                     <label className="text-[10px] font-black uppercase tracking-[0.3em] text-[var(--text-dim)] flex items-center gap-2">
-                        <FaSort className="text-[var(--primary)]" size={12} /> {t('common.order_status.title')}
+                  <div className="space-y-1.5 2xl:space-y-3">
+                     <label className="flex items-center gap-1 text-[7px] font-black uppercase tracking-[0.15em] text-[var(--text-dim)] 2xl:gap-1.5 2xl:text-[9px] 2xl:tracking-[0.25em]">
+                        <FaSort className="text-[var(--primary)]" size={10} /> {t('common.order_status.title')}
                      </label>
-                     <div className="flex flex-wrap gap-2">
+                     <div className="flex flex-wrap gap-1.5">
                         {["In Progress", "Ready", "Completed"].map(status => {
                           const isSelected = selectedStatuses.includes(status);
                           const labelMap: any = { "In Progress": t('common.order_status.in_progress'), "Ready": t('common.order_status.ready'), "Completed": t('common.order_status.completed') };
                           return (
-                            <button key={status} onClick={() => toggleFilter(selectedStatuses, setSelectedStatuses, status)} className={`px-4 py-2.5 rounded-2xl text-[10px] font-black uppercase transition-all border-2 ${isSelected ? "bg-[var(--primary)] text-black border-[var(--primary)] shadow-xl scale-105" : "bg-[var(--bg-card)] text-[var(--text-muted)] border-[var(--border-main)] hover:border-[var(--text-dim)]"}`}>
+                            <button key={status} onClick={() => toggleFilter(selectedStatuses, setSelectedStatuses, status)} className={`rounded-xl border px-2 py-1 text-[7px] font-black uppercase transition-all 2xl:rounded-2xl 2xl:px-3 2xl:py-2 2xl:text-[9px] ${isSelected ? "scale-[1.02] border-[var(--primary)] bg-[var(--primary)] text-black shadow-md" : "border-[var(--border-main)] bg-[var(--bg-card)] text-[var(--text-muted)] hover:border-[var(--text-dim)]"}`}>
                                {labelMap[status]}
                             </button>
                           );
@@ -329,15 +329,15 @@ const RecentOrders: React.FC = () => {
                   </div>
 
                   {/* Payment Group */}
-                  <div className="space-y-4">
-                     <label className="text-[10px] font-black uppercase tracking-[0.3em] text-[var(--text-dim)] flex items-center gap-2">
-                        <FaWallet className="text-indigo-400" size={12} /> {t('pos.cart.payment_method')}
+                  <div className="space-y-1.5 2xl:space-y-3">
+                     <label className="flex items-center gap-1.5 text-[7px] font-black uppercase tracking-[0.15em] text-[var(--text-dim)] 2xl:text-[9px]">
+                        <FaWallet className="text-indigo-400" size={10} /> {t('pos.cart.payment_method')}
                      </label>
-                     <div className="flex flex-wrap gap-2">
+                     <div className="flex flex-wrap gap-1.5">
                         {[{v:"Cash", l:t('pos.cart.cash')}, {v:"Online", l:t('pos.cart.online')}].map(method => {
                           const isSelected = selectedPayments.includes(method.v);
                           return (
-                            <button key={method.v} onClick={() => toggleFilter(selectedPayments, setSelectedPayments, method.v)} className={`px-4 py-2.5 rounded-2xl text-[10px] font-black uppercase transition-all border-2 ${isSelected ? "bg-indigo-500 text-white border-indigo-500 shadow-xl scale-105" : "bg-[var(--bg-card)] text-[var(--text-muted)] border-[var(--border-main)] hover:border-[var(--text-dim)]"}`}>
+                            <button key={method.v} onClick={() => toggleFilter(selectedPayments, setSelectedPayments, method.v)} className={`rounded-xl border px-2 py-1 text-[7px] font-black uppercase transition-all 2xl:rounded-2xl 2xl:px-3 2xl:py-2 2xl:text-[9px] ${isSelected ? "scale-[1.02] border-indigo-500 bg-indigo-500 text-white shadow-md" : "border-[var(--border-main)] bg-[var(--bg-card)] text-[var(--text-muted)] hover:border-[var(--text-dim)]"}`}>
                                {method.l}
                             </button>
                           );
@@ -346,15 +346,15 @@ const RecentOrders: React.FC = () => {
                   </div>
 
                   {/* Volume Group */}
-                  <div className="space-y-4">
-                     <label className="text-[10px] font-black uppercase tracking-[0.3em] text-[var(--text-dim)] flex items-center gap-2">
-                        <FaUtensils className="text-emerald-400" size={12} /> {t('common.volume.title')}
+                  <div className="space-y-1.5 2xl:space-y-3">
+                     <label className="flex items-center gap-1.5 text-[7px] font-black uppercase tracking-[0.15em] text-[var(--text-dim)] 2xl:text-[9px]">
+                        <FaUtensils className="text-emerald-400" size={10} /> {t('common.volume.title')}
                      </label>
-                     <div className="flex flex-wrap gap-2">
+                     <div className="flex flex-wrap gap-1.5">
                         {[{v:"Small", l:t('common.volume.small')}, {v:"Large", l:t('common.volume.large')}].map(size => {
                           const isSelected = selectedSizes.includes(size.v);
                           return (
-                            <button key={size.v} onClick={() => toggleFilter(selectedSizes, setSelectedSizes, size.v)} className={`px-4 py-2.5 rounded-2xl text-[10px] font-black uppercase transition-all border-2 ${isSelected ? "bg-emerald-500 text-white border-emerald-500 shadow-xl scale-105" : "bg-[var(--bg-card)] text-[var(--text-muted)] border-[var(--border-main)] hover:border-[var(--text-dim)]"}`}>
+                            <button key={size.v} onClick={() => toggleFilter(selectedSizes, setSelectedSizes, size.v)} className={`rounded-xl border px-2 py-1 text-[7px] font-black uppercase transition-all 2xl:rounded-2xl 2xl:px-3 2xl:py-2 2xl:text-[9px] ${isSelected ? "scale-[1.02] border-emerald-500 bg-emerald-500 text-white shadow-md" : "border-[var(--border-main)] bg-[var(--bg-card)] text-[var(--text-muted)] hover:border-[var(--text-dim)]"}`}>
                                {size.l}
                             </button>
                           );
@@ -363,13 +363,13 @@ const RecentOrders: React.FC = () => {
                   </div>
 
                   {/* Date Preset Group */}
-                  <div className="space-y-4">
-                     <label className="text-[10px] font-black uppercase tracking-[0.3em] text-[var(--text-dim)] flex items-center gap-2">
-                        <FaCalendarDay className="text-rose-400" size={12} /> {t('common.period.title')}
+                  <div className="space-y-1.5 2xl:space-y-3">
+                     <label className="flex items-center gap-1.5 text-[7px] font-black uppercase tracking-[0.15em] text-[var(--text-dim)] 2xl:text-[9px]">
+                        <FaCalendarDay className="text-rose-400" size={10} /> {t('common.period.title')}
                      </label>
-                     <div className="flex flex-wrap gap-2">
+                     <div className="flex flex-wrap gap-1.5">
                         {[{v:"All", l:t('common.all')}, {v:"Today", l:t('common.period.today')}, {v:"Yesterday", l:t('common.period.yesterday')}].map(p => (
-                          <button key={p.v} onClick={() => setDatePreset(p.v)} className={`px-5 py-2.5 rounded-2xl text-[10px] font-black uppercase transition-all border-2 ${datePreset === p.v ? "bg-rose-500 text-white border-rose-500 shadow-xl scale-105" : "bg-[var(--bg-card)] text-[var(--text-muted)] border-[var(--border-main)] hover:border-[var(--text-dim)]"}`}>
+                          <button key={p.v} onClick={() => setDatePreset(p.v)} className={`rounded-xl border px-2.5 py-1 text-[7px] font-black uppercase transition-all 2xl:rounded-2xl 2xl:px-3.5 2xl:py-2 2xl:text-[9px] ${datePreset === p.v ? "scale-[1.02] border-rose-500 bg-rose-500 text-white shadow-md" : "border-[var(--border-main)] bg-[var(--bg-card)] text-[var(--text-muted)] hover:border-[var(--text-dim)]"}`}>
                              {p.l}
                           </button>
                         ))}
@@ -382,22 +382,22 @@ const RecentOrders: React.FC = () => {
         </div>
 
         {/* Results Area */}
-        <div className="flex-1 overflow-y-auto custom-scrollbar p-8 bg-gradient-to-b from-[var(--bg-main)]/5 to-transparent">
+        <div className="custom-scrollbar flex-1 overflow-y-auto bg-gradient-to-b from-[var(--bg-main)]/5 to-transparent p-2 2xl:p-4">
           {isLoading ? (
-            <div className="flex flex-col items-center justify-center h-full gap-10">
-              <div className="relative w-32 h-32">
-                <div className="absolute inset-0 border-[12px] border-[var(--primary)]/10 rounded-[3rem] transform rotate-12" />
-                <div className="absolute inset-0 border-[12px] border-t-[var(--primary)] rounded-[3rem] animate-spin transform rotate-12 shadow-[0_0_50px_var(--primary)]/20" />
+            <div className="flex h-full flex-col items-center justify-center gap-4 2xl:gap-8">
+              <div className="relative h-16 w-16 2xl:h-24 2xl:w-24">
+                <div className="absolute inset-0 rotate-12 rounded-[1.5rem] border-[6px] border-[var(--primary)]/10 2xl:rounded-[2.5rem] 2xl:border-[10px]" />
+                <div className="absolute inset-0 rotate-12 animate-spin rounded-[1.5rem] border-[6px] border-t-[var(--primary)] shadow-[0_0_24px_var(--primary)]/12 2xl:rounded-[2.5rem] 2xl:border-[10px]" />
               </div>
-              <div className="flex flex-col items-center gap-2">
-                 <p className="text-[12px] text-[var(--text-muted)] font-black uppercase tracking-[1em] animate-pulse">{t('common.scanning_grid')}</p>
-                 <span className="text-[9px] text-[var(--text-dim)] font-bold uppercase tracking-widest">{t('common.optimizing_data')}</span>
+              <div className="flex flex-col items-center gap-1">
+                 <p className="animate-pulse text-[9px] font-black uppercase tracking-[0.35em] text-[var(--text-muted)] 2xl:text-[11px] 2xl:tracking-[0.65em]">{t('common.scanning_grid')}</p>
+                 <span className="text-[8px] font-bold uppercase tracking-widest text-[var(--text-dim)]">{t('common.optimizing_data')}</span>
               </div>
             </div>
           ) : processedOrders.length > 0 ? (
             <motion.div 
                layout
-               className={`grid gap-6 pb-10 ${isFullscreen ? "grid-cols-1 md:grid-cols-2 xl:grid-cols-3" : "grid-cols-1"}`}
+               className={`grid gap-2 pb-4 2xl:gap-3 2xl:pb-8 ${isFullscreen ? "grid-cols-1 md:grid-cols-2 xl:grid-cols-3" : "grid-cols-1"}`}
             >
               {processedOrders.map((order: any) => (
                 <OrderList key={order.id} order={order} onReprint={handleReprint} />
@@ -407,20 +407,20 @@ const RecentOrders: React.FC = () => {
             <motion.div 
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="flex flex-col items-center justify-center h-full text-center p-20 bg-[var(--bg-card)]/60 rounded-[4rem] border-4 border-dashed border-[var(--border-main)] shadow-inner"
+              className="flex h-full flex-col items-center justify-center rounded-[2rem] border-2 border-dashed border-[var(--border-main)] bg-[var(--bg-card)]/60 p-5 text-center shadow-inner 2xl:rounded-[2.5rem] 2xl:p-12"
             >
-              <div className="w-40 h-40 bg-[var(--bg-card-alt)] rounded-[3.5rem] flex items-center justify-center mb-12 border border-[var(--border-main)] shadow-2xl group transition-all duration-500 hover:rotate-12">
-                <FaSearch className="text-[var(--text-dim)]/10 group-hover:text-[var(--primary)]/20 transition-colors" size={72} />
+              <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-2xl border border-[var(--border-main)] bg-[var(--bg-card-alt)] shadow-md transition-all duration-500 group hover:rotate-6 2xl:mb-8 2xl:h-28 2xl:w-28 2xl:rounded-[1.75rem]">
+                <FaSearch className="text-[var(--text-dim)]/15 transition-colors group-hover:text-[var(--primary)]/25" size={32} />
               </div>
-              <h3 className="text-[var(--text-main)] font-black uppercase tracking-[0.3em] text-2xl mb-6 leading-tight">
+              <h3 className="mb-2 text-sm font-black uppercase leading-tight tracking-[0.12em] text-[var(--text-main)] 2xl:mb-4 2xl:text-lg 2xl:tracking-[0.2em]">
                 {t('common.no_criteria_match')}
               </h3>
-              <p className="text-[var(--text-dim)] text-xs font-bold uppercase max-w-[360px] leading-relaxed mb-12 opacity-70">
+              <p className="mb-4 max-w-[260px] text-[9px] font-bold uppercase leading-relaxed text-[var(--text-dim)] opacity-70 2xl:mb-8 2xl:max-w-[320px] 2xl:text-xs">
                 {t('common.broaden_results')}
               </p>
               <button 
                 onClick={() => { setSearchTerm(""); setSelectedStatuses([]); setSelectedPayments([]); setSelectedSizes([]); setDatePreset("All"); setSortBy("createdAt"); setSortOrder("desc"); }}
-                className="px-16 py-6 bg-gradient-to-r from-[var(--primary)] to-yellow-600 text-black text-xs font-black rounded-3xl shadow-[0_20px_50px_var(--primary)]/20 uppercase tracking-[0.6em] hover:scale-110 active:scale-95 transition-all transform"
+                className="rounded-2xl bg-gradient-to-r from-[var(--primary)] to-yellow-600 px-6 py-2.5 text-[9px] font-black uppercase tracking-[0.28em] text-black shadow-md shadow-[var(--primary)]/15 transition-all hover:scale-[1.03] active:scale-95 2xl:rounded-3xl 2xl:px-10 2xl:py-4 2xl:text-xs 2xl:tracking-[0.45em]"
               >
                 {t('common.restore_defaults')}
               </button>

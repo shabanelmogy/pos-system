@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import useUserStore from "../../../auth/store/useUserStore";
 import useAuth from "../../../auth/hooks/useAuth";
 import { useTranslation } from "react-i18next";
+import { BiSolidDish } from "react-icons/bi";
 
 const Greetings: React.FC = () => {
   const { t } = useTranslation();
@@ -36,9 +37,9 @@ const Greetings: React.FC = () => {
         {canCompleteOrders && (
           <button
             onClick={handleStartOrder}
-            className="mt-3 bg-[var(--primary)] text-[var(--bg-card)] font-bold py-1.5 px-5 rounded-lg hover:bg-yellow-600 transition-colors shadow-lg flex items-center gap-2 text-sm"
+            className="mt-3 bg-[var(--primary)] text-[var(--bg-card)] font-bold py-1.5 px-5 rounded-xl hover:bg-yellow-600 transition-colors shadow-lg flex items-center gap-2 text-sm hover:scale-105"
           >
-            <span className="text-lg">+</span> {t('pos.home.start_order')}
+            <span className="text-lg">  <BiSolidDish size={26} /></span> {t('pos.home.start_order')}
           </button>
         )}
       </div>

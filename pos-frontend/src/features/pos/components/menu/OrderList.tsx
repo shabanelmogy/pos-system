@@ -1,5 +1,5 @@
 import React from "react";
-import { FaCheckDouble, FaLongArrowAltRight, FaCircle, FaUser, FaClock, FaHashtag, FaWallet } from "react-icons/fa";
+import { FaCheckDouble, FaCircle, FaUser, FaClock, FaHashtag, FaWallet } from "react-icons/fa";
 import { getAvatarName, formatDateAndTime } from "../../../../shared/utils/index";
 import { motion } from "framer-motion";
 import ReprintPill from "../../../../shared/components/ReprintPill";
@@ -33,82 +33,82 @@ const OrderList: React.FC<OrderListProps> = ({ order, onReprint }) => {
       layout
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="flex flex-col sm:flex-row sm:items-center gap-4 bg-[var(--bg-main)] p-5 rounded-2xl border border-transparent hover:border-[var(--border-main)] transition-all group shadow-sm hover:shadow-md relative overflow-hidden"
+      className="group relative flex flex-col gap-1.5 overflow-hidden rounded-2xl border border-transparent bg-[var(--bg-main)] p-2 shadow-sm transition-all hover:border-[var(--border-main)] hover:shadow-md sm:flex-row sm:items-center sm:gap-2 2xl:gap-3 2xl:rounded-3xl 2xl:p-3"
     >
       {/* Decorative background accent */}
-      <div className="absolute top-0 start-0 w-1 h-full bg-[var(--primary)]/20" />
+      <div className="absolute start-0 top-0 h-full w-0.5 bg-[var(--primary)]/20" />
 
       {/* Avatar Section */}
-      <div className="flex items-center gap-4">
-        <div className="bg-[var(--primary)] w-12 h-12 flex items-center justify-center text-black font-black rounded-xl shadow-lg shadow-yellow-500/10 shrink-0 transform group-hover:scale-105 transition-transform">
-          {customerName !== t('common.guest') ? getAvatarName(customerName) : <FaUser size={16} />}
+      <div className="flex items-center gap-1.5 sm:gap-2">
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[var(--primary)] text-[10px] font-black text-black shadow-sm shadow-yellow-500/10 transition-transform group-hover:scale-105 sm:h-9 sm:w-9 sm:rounded-2xl sm:text-xs 2xl:h-10 2xl:w-10 2xl:rounded-[1.25rem] 2xl:text-sm">
+          {customerName !== t('common.guest') ? getAvatarName(customerName) : <FaUser className="size-3.5" />}
         </div>
         <div className="flex flex-col sm:hidden">
-           <h1 className="text-[var(--text-main)] text-sm font-black uppercase tracking-tight truncate group-hover:text-[var(--primary)] transition-colors">
+           <h1 className="truncate text-xs font-black uppercase tracking-tight text-[var(--text-main)] transition-colors group-hover:text-[var(--primary)]">
             {customerName}
           </h1>
-          <div className="flex items-center gap-2 mt-1">
-             <span className="text-[9px] text-[var(--text-dim)] font-bold uppercase tracking-widest flex items-center gap-1">
-                <FaHashtag size={8} /> {orderId}
+          <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
+             <span className="flex items-center gap-0.5 text-[8px] font-bold uppercase tracking-wide text-[var(--text-dim)]">
+                <FaHashtag className="size-2.5 shrink-0" /> {orderId}
              </span>
-             <span className="text-[9px] text-[var(--text-dim)] font-bold uppercase tracking-widest flex items-center gap-1">
-                <FaClock size={8} /> {formatDateAndTime(order.createdAt).split(',')[1]}
+             <span className="flex items-center gap-0.5 text-[8px] font-bold uppercase tracking-wide text-[var(--text-dim)]">
+                <FaClock className="size-2.5 shrink-0" /> {formatDateAndTime(order.createdAt).split(',')[1]}
              </span>
           </div>
         </div>
       </div>
       
       {/* Main Details Section */}
-      <div className="flex-1 flex flex-col sm:flex-row sm:items-center justify-between gap-4 min-w-0">
-        <div className="hidden sm:flex flex-col min-w-0 me-4">
-          <h1 className="text-[var(--text-main)] text-sm font-black uppercase tracking-tight truncate group-hover:text-[var(--primary)] transition-colors">
+      <div className="flex min-w-0 flex-1 flex-col justify-between gap-1.5 sm:flex-row sm:items-center sm:gap-2">
+        <div className="hidden min-w-0 flex-col sm:flex sm:me-1.5">
+          <h1 className="truncate text-[11px] font-black uppercase tracking-tight text-[var(--text-main)] transition-colors group-hover:text-[var(--primary)] 2xl:text-xs">
             {customerName}
           </h1>
-          <div className="flex items-center gap-3 mt-1">
-             <span className="text-[9px] text-[var(--text-dim)] font-bold uppercase tracking-widest flex items-center gap-1 bg-[var(--bg-card-alt)] px-1.5 py-0.5 rounded">
-                <FaHashtag size={8} /> {orderId}
+          <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
+             <span className="flex items-center gap-0.5 rounded-md bg-[var(--bg-card-alt)] px-1 py-px text-[8px] font-bold uppercase tracking-wide text-[var(--text-dim)] 2xl:rounded-lg">
+                <FaHashtag className="size-2.5 shrink-0" /> {orderId}
              </span>
-             <span className="text-[9px] text-[var(--text-dim)] font-bold uppercase tracking-widest flex items-center gap-1 bg-[var(--bg-card-alt)] px-1.5 py-0.5 rounded">
-                <FaClock size={8} /> {formatDateAndTime(order.createdAt).split(',')[1]}
+             <span className="flex items-center gap-0.5 rounded-md bg-[var(--bg-card-alt)] px-1 py-px text-[8px] font-bold uppercase tracking-wide text-[var(--text-dim)] 2xl:rounded-lg">
+                <FaClock className="size-2.5 shrink-0" /> {formatDateAndTime(order.createdAt).split(',')[1]}
              </span>
-             <span className="text-[9px] text-[var(--text-dim)] font-bold uppercase tracking-widest flex items-center gap-1 bg-[var(--bg-card-alt)] px-1.5 py-0.5 rounded">
-                <FaWallet size={8} /> {paymentMethod === "Cash" ? t('pos.cart.cash') : t('pos.cart.online')}
+             <span className="flex items-center gap-0.5 rounded-md bg-[var(--bg-card-alt)] px-1 py-px text-[8px] font-bold uppercase tracking-wide text-[var(--text-dim)] 2xl:rounded-lg">
+                <FaWallet className="size-2.5 shrink-0" /> {paymentMethod === "Cash" ? t('pos.cart.cash') : t('pos.cart.online')}
              </span>
           </div>
         </div>
 
         {/* Stats Section */}
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
           <div className="flex flex-col">
-             <span className="text-[10px] text-[var(--text-muted)] font-black uppercase tracking-widest mb-0.5">{t('common.items')}</span>
-             <span className="text-xs text-[var(--text-main)] font-black">{itemsCount}</span>
+             <span className="mb-px text-[7px] font-black uppercase tracking-wide text-[var(--text-muted)]">{t('common.items')}</span>
+             <span className="text-[10px] font-black text-[var(--text-main)] 2xl:text-[11px]">{itemsCount}</span>
           </div>
 
-          <div className="w-px h-6 bg-[var(--border-main)] hidden sm:block" />
+          <div className="hidden h-4 w-px bg-[var(--border-main)] sm:block" />
 
           {tableNo !== "N/A" && (
             <div className="flex flex-col">
-               <span className="text-[10px] text-[var(--text-muted)] font-black uppercase tracking-widest mb-0.5">{t('common.table')}</span>
-               <span className="text-xs text-[var(--primary)] font-black">{tableNo}</span>
+               <span className="mb-px text-[7px] font-black uppercase tracking-wide text-[var(--text-muted)]">{t('common.table')}</span>
+               <span className="text-[10px] font-black text-[var(--primary)] 2xl:text-[11px]">{tableNo}</span>
             </div>
           )}
 
-          <div className="w-px h-6 bg-[var(--border-main)] hidden sm:block" />
+          <div className="hidden h-4 w-px bg-[var(--border-main)] sm:block" />
 
           <div className="flex flex-col">
-             <span className="text-[10px] text-[var(--text-muted)] font-black uppercase tracking-widest mb-0.5">{t('pos.cart.total')}</span>
-             <span className="text-sm text-[var(--primary)] font-black">₹{parseFloat(total).toFixed(2)}</span>
+             <span className="mb-px text-[7px] font-black uppercase tracking-wide text-[var(--text-muted)]">{t('pos.cart.total')}</span>
+             <span className="text-[11px] font-black text-[var(--primary)] 2xl:text-xs">₹{parseFloat(total).toFixed(2)}</span>
           </div>
         </div>
 
         {/* Status & Actions Section */}
-        <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-3 sm:gap-2 shrink-0 border-t sm:border-t-0 border-[var(--border-main)] pt-3 sm:pt-0">
-           <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest ${
+        <div className="flex shrink-0 flex-row items-center justify-between gap-1.5 border-t border-[var(--border-main)] pt-1.5 sm:flex-col sm:items-end sm:justify-center sm:gap-1 sm:border-t-0 sm:pt-0">
+           <div className={`flex items-center gap-0.5 rounded-lg px-1.5 py-0.5 text-[7px] font-black uppercase tracking-wide 2xl:rounded-xl ${
              status === 'Ready' || status === 'Completed'
-               ? 'bg-[var(--status-success-bg)] text-[var(--status-success)] border border-[var(--status-success)]/10' 
-               : 'bg-[var(--status-warning-bg)] text-[var(--status-warning)] border border-[var(--status-warning)]/10'
+               ? 'border border-[var(--status-success)]/10 bg-[var(--status-success-bg)] text-[var(--status-success)]' 
+               : 'border border-[var(--status-warning)]/10 bg-[var(--status-warning-bg)] text-[var(--status-warning)]'
            }`}>
-              {status === 'Ready' || status === 'Completed' ? <FaCheckDouble size={10} /> : <FaCircle size={8} />}
+              {status === 'Ready' || status === 'Completed' ? <FaCheckDouble className="size-2.5" /> : <FaCircle className="size-2" />}
               {statusLabelMap[status] || status}
            </div>
            

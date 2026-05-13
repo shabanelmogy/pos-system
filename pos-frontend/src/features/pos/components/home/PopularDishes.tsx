@@ -37,7 +37,7 @@ const PopularDishes: React.FC = () => {
 
   return (
     <div className="mt-4">
-      <div className="bg-[var(--bg-card)] w-full rounded-2xl border border-[var(--border-main)] shadow-xl overflow-hidden">
+      <div className="bg-[var(--bg-card)] w-full rounded-2xl border border-[var(--border-main)] shadow-xl overflow-hidden min-h-[480px] lg:h-[625px] 2xl:h-[755px]">
         <div className="flex justify-between items-center px-4 py-3">
           <h1 className="text-[var(--text-main)] text-base font-semibold tracking-wide">
             {t('pos.home.popular_dishes')}

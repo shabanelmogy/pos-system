@@ -44,7 +44,11 @@ const RecentOrders: React.FC<RecentOrdersProps> = ({ branchId = "all" }) => {
   }
 
   if (isLoading) {
-    return <div className="p-10 text-center text-[var(--text-muted)]">{t('dashboard.orders.loading')}</div>;
+    return (
+      <div className="py-4 px-2 text-center text-[9px] text-[var(--text-muted)] 2xl:py-8 2xl:px-3 2xl:text-xs">
+        {t('dashboard.orders.loading')}
+      </div>
+    );
   }
 
   // Filter by branch
@@ -53,82 +57,125 @@ const RecentOrders: React.FC<RecentOrdersProps> = ({ branchId = "all" }) => {
     return order.branchId === branchId;
   });
 
+  const cell = "px-1 py-0.5 align-middle leading-tight 2xl:px-2 2xl:py-1.5 2xl:leading-normal";
+  const thCell = `${cell} text-[6px] font-black uppercase tracking-tight whitespace-nowrap 2xl:text-[8px] 2xl:tracking-wide`;
+
   return (
-    <div className="container mx-auto bg-[var(--bg-card-alt)] p-3 rounded-xl border border-[var(--border-main)]">
-      <div className="flex items-center justify-between mb-3 px-1">
-        <h2 className="text-[var(--text-main)] text-lg font-black uppercase tracking-tighter">
+    <div className="w-full max-w-full rounded-xl border border-[var(--border-main)] bg-[var(--bg-card-alt)] p-1 2xl:rounded-2xl 2xl:p-2.5">
+      <div className="mb-1 flex flex-wrap items-center justify-between gap-1 px-px 2xl:mb-1.5 2xl:gap-1.5">
+        <h2 className="max-w-[min(100%,16rem)] text-[9px] font-black uppercase leading-none tracking-tight text-[var(--text-main)] sm:max-w-none sm:text-[10px] 2xl:text-sm">
           {branchId === "all" ? t('dashboard.orders.all_orders') : t('dashboard.orders.branch_orders')}
         </h2>
-        <button 
+        <button
+          type="button"
           onClick={() => queryClient.invalidateQueries({ queryKey: ["orders"] })}
-          className="text-[var(--text-muted)] hover:text-[var(--text-main)] flex items-center gap-2 text-sm"
+          className="flex shrink-0 items-center gap-0.5 text-[8px] font-semibold text-[var(--text-muted)] hover:text-[var(--text-main)] 2xl:gap-1 2xl:text-[10px]"
         >
-          <GrUpdate size={14} /> {t('dashboard.orders.refresh')}
+          <GrUpdate size={10} className="2xl:h-3 2xl:w-3" /> {t('dashboard.orders.refresh')}
         </button>
       </div>
-      <div className="overflow-x-auto custom-scrollbar">
-        <table className="w-full text-left text-[var(--text-main)]">
-          <thead className="bg-[var(--bg-card)] text-[var(--text-muted)] border-b border-[var(--border-main)]">
+      <div className="-mx-px overflow-x-auto px-px custom-scrollbar sm:mx-0 sm:px-0">
+        <table className="w-full min-w-[38rem] text-left text-[9px] text-[var(--text-main)] md:min-w-[44rem] lg:min-w-0 lg:table-fixed 2xl:text-[11px]">
+          <colgroup>
+            <col style={{ width: "7%" }} />
+            <col style={{ width: "14%" }} />
+            <col style={{ width: "14%" }} />
+            <col style={{ width: "12%" }} />
+            <col style={{ width: "14%" }} />
+            <col style={{ width: "6%" }} />
+            <col style={{ width: "9%" }} />
+            <col style={{ width: "9%" }} />
+            <col style={{ width: "15%" }} />
+          </colgroup>
+          <thead className="border-b border-[var(--border-main)] bg-[var(--bg-card)] text-[var(--text-muted)]">
             <tr>
-              <th className="p-3 text-[9px] font-black uppercase tracking-widest">{t('dashboard.orders.order_id')}</th>
-              <th className="p-3 text-[9px] font-black uppercase tracking-widest">{t('dashboard.orders.source')}</th>
-              <th className="p-3 text-[9px] font-black uppercase tracking-widest">{t('dashboard.orders.customer')}</th>
-              <th className="p-3 text-[9px] font-black uppercase tracking-widest">{t('dashboard.orders.status')}</th>
-              <th className="p-3 text-[9px] font-black uppercase tracking-widest">{t('dashboard.orders.date_time')}</th>
-              <th className="p-3 text-[9px] font-black uppercase tracking-widest">{t('dashboard.orders.items')}</th>
-              <th className="p-3 text-[9px] font-black uppercase tracking-widest">{t('dashboard.orders.table')}</th>
-              <th className="p-3 text-[9px] font-black uppercase tracking-widest">{t('dashboard.orders.total')}</th>
-              <th className="p-3 text-[9px] font-black uppercase tracking-widest text-center">{t('dashboard.orders.payment')}</th>
+              <th className={thCell}>{t('dashboard.orders.order_id')}</th>
+              <th className={thCell}>{t('dashboard.orders.source')}</th>
+              <th className={thCell}>{t('dashboard.orders.customer')}</th>
+              <th className={thCell}>{t('dashboard.orders.status')}</th>
+              <th className={thCell}>{t('dashboard.orders.date_time')}</th>
+              <th className={thCell}>{t('dashboard.orders.items')}</th>
+              <th className={thCell}>{t('dashboard.orders.table')}</th>
+              <th className={thCell}>{t('dashboard.orders.total')}</th>
+              <th className={`${thCell} text-center`}>{t('dashboard.orders.payment')}</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="divide-y divide-[var(--border-main)]/60">
             {(filteredOrders || []).map((order: any) => {
               const isPremium = order.customer?.totalOrders >= 5;
               return (
                 <tr
                   key={order.id}
-                  className="border-b border-gray-600 hover:bg-[var(--border-main)] transition-colors"
+                  className="leading-none transition-colors hover:bg-[var(--border-main)]/40 2xl:leading-normal"
                 >
-                  <td className="p-3 font-mono text-xs">#{Math.floor(new Date(order.createdAt).getTime() / 1000)}</td>
-                  <td className="p-3">
-                    <div className="flex flex-col gap-1">
-                      <div className="flex items-center gap-1 text-[var(--primary)] text-[10px] font-bold uppercase">
-                        <MdStore /> {order.branch?.name || t('dashboard.orders.unknown_branch')}
+                  <td className={`${cell} font-mono text-[8px] whitespace-nowrap tabular-nums 2xl:text-[10px]`}>
+                    #{Math.floor(new Date(order.createdAt).getTime() / 1000)}
+                  </td>
+                  <td className={cell}>
+                    <div className="flex min-w-0 flex-col gap-0">
+                      <div className="flex items-center gap-px truncate text-[7px] font-bold uppercase text-[var(--primary)] 2xl:gap-0.5 2xl:text-[9px]" title={order.branch?.name}>
+                        <MdStore className="size-2.5 shrink-0 2xl:size-3" />
+                        <span className="truncate">{order.branch?.name || t('dashboard.orders.unknown_branch')}</span>
                       </div>
-                      <div className="flex items-center gap-1 text-[var(--text-muted)] text-[9px] font-medium uppercase tracking-tighter">
-                        <MdComputer /> {order.posPoint?.name || t('dashboard.orders.terminal_1')}
+                      <div className="flex items-center gap-px truncate text-[6px] font-medium uppercase tracking-tight text-[var(--text-muted)] 2xl:gap-0.5 2xl:text-[8px]" title={order.posPoint?.name}>
+                        <MdComputer className="size-2 shrink-0 2xl:size-2.5" />
+                        <span className="truncate">{order.posPoint?.name || t('dashboard.orders.terminal_1')}</span>
                       </div>
                     </div>
                   </td>
-                  <td className="p-3">
-                    <div className="flex flex-col">
-                      <span className="font-semibold text-sm">{order.customerDetails?.name || t('common.guest')}</span>
-                      {isPremium && <span className="text-[10px] text-[var(--status-warning)] font-bold uppercase">{t('dashboard.orders.loyal_customer')}</span>}
+                  <td className={cell}>
+                    <div className="flex min-w-0 flex-col gap-0">
+                      <span className="truncate text-[9px] font-semibold leading-tight 2xl:text-[11px]" title={order.customerDetails?.name}>
+                        {order.customerDetails?.name || t('common.guest')}
+                      </span>
+                      {isPremium && (
+                        <span className="text-[6px] font-bold uppercase leading-none text-[var(--status-warning)] 2xl:text-[8px]">
+                          {t('dashboard.orders.loyal_customer')}
+                        </span>
+                      )}
                     </div>
                   </td>
-                  <td className="p-3">
+                  <td className={cell}>
                     <select
-                      className={`bg-[var(--bg-card)] text-[var(--text-main)] border border-[var(--border-main)] p-2 rounded-lg focus:outline-none text-xs ${
-                        order.orderStatus === "Ready" ? "text-[var(--status-success)]" : 
-                        order.orderStatus === "Completed" ? "text-[var(--primary)]" : "text-[var(--status-warning)]"
+                      className={`h-5 w-full min-w-0 max-w-full rounded-md border border-[var(--border-main)] bg-[var(--bg-card)] px-px py-0 text-[8px] leading-none text-[var(--text-main)] focus:outline-none 2xl:h-6 2xl:rounded-lg 2xl:px-1 2xl:py-0.5 2xl:text-[10px] ${
+                        order.orderStatus === "Ready"
+                          ? "text-[var(--status-success)]"
+                          : order.orderStatus === "Completed"
+                            ? "text-[var(--primary)]"
+                            : "text-[var(--status-warning)]"
                       }`}
                       value={order.orderStatus}
-                      onChange={(e) => handleStatusChange({orderId: order.id, orderStatus: e.target.value})}
+                      onChange={(e) => handleStatusChange({ orderId: order.id, orderStatus: e.target.value })}
                     >
                       <option value="In Progress">{t('common.order_status.in_progress')}</option>
                       <option value="Ready">{t('common.order_status.ready')}</option>
                       <option value="Completed">{t('common.order_status.completed')}</option>
                     </select>
                   </td>
-                  <td className="p-3 text-xs">{formatDateAndTime(order.createdAt)}</td>
-                  <td className="p-3 text-sm">{order.orderItems?.length || 0} {t('dashboard.orders.items')}</td>
-                  <td className="p-3">
-                    <span className="bg-[var(--bg-card)] px-2 py-1 rounded text-[10px] font-bold border border-[var(--border-main)]">{t('common.table')} {order.table?.tableNo || "N/A"}</span>
+                  <td className={`${cell} whitespace-nowrap text-[8px] leading-tight md:whitespace-normal md:break-words 2xl:text-[10px]`}>
+                    {formatDateAndTime(order.createdAt)}
                   </td>
-                  <td className="p-3 font-bold text-[var(--primary)] text-sm">₹{parseFloat(order.total || 0).toFixed(2)}</td>
-                  <td className="p-3 text-center">
-                    <span className={`text-[9px] font-bold uppercase px-2 py-0.5 rounded-full ${order.paymentMethod === 'Cash' ? 'bg-[var(--status-success-bg)] text-[var(--status-success)]' : 'bg-[var(--primary-light)] text-[var(--primary)]'}`}>
-                      {order.paymentMethod || t('pos.cart.cash')}
+                  <td className={`${cell} whitespace-nowrap tabular-nums text-[8px] 2xl:text-[10px]`}>
+                    {order.orderItems?.length || 0} {t('dashboard.orders.items')}
+                  </td>
+                  <td className={cell}>
+                    <span className="inline-flex whitespace-nowrap rounded-md border border-[var(--border-main)] bg-[var(--bg-card)] px-0.5 py-px text-[7px] font-bold 2xl:rounded-lg 2xl:px-1 2xl:text-[9px]">
+                      {t('common.table')} {order.table?.tableNo || "N/A"}
+                    </span>
+                  </td>
+                  <td className={`${cell} whitespace-nowrap tabular-nums text-[9px] font-bold text-[var(--primary)] 2xl:text-[11px]`}>
+                    ₹{parseFloat(order.total || 0).toFixed(2)}
+                  </td>
+                  <td className={`${cell} text-center`}>
+                    <span
+                      className={`inline-block max-w-full truncate rounded-full px-0.5 py-px text-[6px] font-bold uppercase 2xl:px-1 2xl:text-[8px] ${
+                        order.paymentMethod === "Cash"
+                          ? "bg-[var(--status-success-bg)] text-[var(--status-success)]"
+                          : "bg-[var(--primary-light)] text-[var(--primary)]"
+                      }`}
+                      title={order.paymentMethod || t("pos.cart.cash")}
+                    >
+                      {order.paymentMethod || t("pos.cart.cash")}
                     </span>
                   </td>
                 </tr>

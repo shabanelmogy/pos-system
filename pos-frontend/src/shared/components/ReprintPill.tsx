@@ -18,9 +18,9 @@ const ReprintPill: React.FC<ReprintPillProps> = ({ onClick }) => {
         e.stopPropagation();
         onClick();
       }}
-      className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-[9px] font-black uppercase tracking-widest text-[var(--primary)] transition-all hover:border-[var(--primary)]/50"
+      className="flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-2 py-1 text-[8px] font-black uppercase tracking-wide text-[var(--primary)] transition-all hover:border-[var(--primary)]/50"
     >
-      <FaPrint size={10} />
+      <FaPrint className="size-2.5" />
       <span>{t('orders.reprint')}</span>
     </motion.button>
   );

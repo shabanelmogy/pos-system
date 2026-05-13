@@ -1,8 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useLayoutEffect, useCallback } from 'react';
 import ReactDOM from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaPalette, FaSun, FaMoon, FaCheck, FaTimes } from 'react-icons/fa';
 import { useThemeStore, Palette, Mode } from '../store/useThemeStore';
+
+const PANEL_WIDTH = 340;
+const PANEL_GAP = 8;
 
 // ─── Palette config ────────────────────────────────────────────────────────
 const PALETTES: { id: Palette; label: string; hex: string; lightHex?: string }[] = [
@@ -16,7 +19,34 @@ const PALETTES: { id: Palette; label: string; hex: string; lightHex?: string }[]
 const ThemeSwitcher: React.FC = () => {
   const { palette, mode, setPalette, setMode } = useThemeStore();
   const [open, setOpen] = useState(false);
+  const [panelPos, setPanelPos] = useState({ top: 0, left: 0 });
+  const triggerRef = useRef<HTMLButtonElement>(null);
   const isLight = mode === 'light';
+
+  const updatePanelPosition = useCallback(() => {
+    const el = triggerRef.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    // Drop-down under the trigger; align panel right edge with button right edge
+    let left = r.right - PANEL_WIDTH;
+    if (left < PANEL_GAP) left = PANEL_GAP;
+    if (left + PANEL_WIDTH > window.innerWidth - PANEL_GAP) {
+      left = Math.max(PANEL_GAP, window.innerWidth - PANEL_WIDTH - PANEL_GAP);
+    }
+    setPanelPos({ top: r.bottom + PANEL_GAP, left });
+  }, []);
+
+  useLayoutEffect(() => {
+    if (!open) return;
+    updatePanelPosition();
+    const onReposition = () => updatePanelPosition();
+    window.addEventListener('resize', onReposition);
+    window.addEventListener('scroll', onReposition, true);
+    return () => {
+      window.removeEventListener('resize', onReposition);
+      window.removeEventListener('scroll', onReposition, true);
+    };
+  }, [open, updatePanelPosition]);
 
   const swatchHex = (p: typeof PALETTES[0]) =>
     p.id === 'black' ? (isLight ? (p.lightHex ?? '#111') : p.hex) : p.hex;
@@ -44,7 +74,7 @@ const ThemeSwitcher: React.FC = () => {
             }}
           />
 
-          {/* Panel — anchored top-right, below header */}
+          {/* Panel — fixed under Appearance trigger */}
           <motion.div
             key="panel"
             initial={{ opacity: 0, scale: 0.94, y: -10 }}
@@ -53,11 +83,11 @@ const ThemeSwitcher: React.FC = () => {
             transition={{ type: 'spring', stiffness: 400, damping: 32 }}
             style={{
               position: 'fixed',
-              top: 70,          // just below the header
-              right: 16,
+              top: panelPos.top,
+              left: panelPos.left,
               zIndex: 9999,
-              width: 340,
-              maxHeight: 'calc(100dvh - 86px)',
+              width: PANEL_WIDTH,
+              maxHeight: `calc(100dvh - ${panelPos.top}px - ${PANEL_GAP}px)`,
               overflowY: 'auto',
               backgroundColor: 'var(--bg-card)',
               border: '1px solid var(--border-main)',
@@ -210,28 +240,24 @@ const ThemeSwitcher: React.FC = () => {
     <>
       {/* ── Trigger ── */}
       <button
+        ref={triggerRef}
         id="theme-switcher-trigger"
+        type="button"
         onClick={() => setOpen(true)}
-        style={{
-          display: 'flex', alignItems: 'center', gap: 7,
-          padding: '7px 12px',
-          borderRadius: 10,
-          backgroundColor: 'var(--bg-card-alt)',
-          border: '1px solid var(--border-main)',
-          color: 'var(--text-muted)',
-          cursor: 'pointer',
-          transition: 'border-color 0.2s, color 0.2s',
-        }}
+        className="flex items-center gap-1.5 rounded-xl border border-[var(--border-main)] bg-[var(--bg-card-alt)] px-2 py-1 text-[var(--text-muted)] transition-[border-color,color] duration-200 hover:border-[var(--primary)] hover:text-[var(--text-main)] 2xl:gap-[7px] 2xl:rounded-2xl 2xl:px-3 2xl:py-[7px]"
         title="Appearance"
       >
-        <span style={{
-          width: 11, height: 11, borderRadius: '50%', flexShrink: 0,
-          backgroundColor: activeSwatch,
-          boxShadow: `0 0 0 2px var(--bg-card), 0 0 0 3px ${activeSwatch}`,
-        }} />
-        <FaPalette size={13} />
-        <span style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', whiteSpace: 'nowrap' }}
-          className="hidden lg:block">
+        <span
+          className="h-2.5 w-2.5 shrink-0 rounded-full 2xl:h-[11px] 2xl:w-[11px]"
+          style={{
+            backgroundColor: activeSwatch,
+            boxShadow: `0 0 0 2px var(--bg-card), 0 0 0 3px ${activeSwatch}`,
+          }}
+        />
+        <FaPalette className="size-3 shrink-0 text-[var(--text-muted)] 2xl:h-[13px] 2xl:w-[13px]" />
+        <span
+          className="hidden text-[9px] font-bold uppercase tracking-wide text-[var(--text-muted)] lg:block 2xl:text-[10px] 2xl:tracking-[0.15em]"
+        >
           Appearance
         </span>
       </button>

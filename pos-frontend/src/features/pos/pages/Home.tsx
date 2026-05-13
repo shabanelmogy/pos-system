@@ -21,10 +21,6 @@ const Home: React.FC = () => {
         {/* Left Div */}
         <div className="flex-[3] flex flex-col min-h-fit">
           <Greetings />
-          <div className="flex flex-col md:flex-row items-center w-full gap-3 mt-4">
-            <MiniCard title={t('pos.home.total_earnings')} icon={<BsCashCoin />} number={512} footerNum={1.6} />
-            <MiniCard title={t('pos.home.in_progress')} icon={<GrInProgress />} number={16} footerNum={3.6} />
-          </div>
           <div className="mt-4">
             <RecentOrders />
           </div>
