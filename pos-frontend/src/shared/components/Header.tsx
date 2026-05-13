@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { FaUserCircle, FaBell, FaSun, FaMoon } from "react-icons/fa";
+import { FaUserCircle, FaBell } from "react-icons/fa";
 import logo from "../../assets/images/logo.png";
 import { useMutation } from "@tanstack/react-query";
 import { logout } from "../../features/auth/api/authApi";
 import useUserStore from "../../features/auth/store/useUserStore";
-import useThemeStore from "../../shared/store/useThemeStore";
 import usePOSStore from "../../features/pos/store/usePOSStore";
 import { useNavigate } from "react-router-dom";
 import { MdDashboard, MdStore, MdComputer, MdSwapHoriz, MdStop, MdSettings } from "react-icons/md";
@@ -13,12 +12,12 @@ import { useTranslation } from "react-i18next";
 import useAuth from "../../features/auth/hooks/useAuth";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { motion, AnimatePresence } from "framer-motion";
+import ThemeSwitcher from "./ThemeSwitcher";
 
 const Header: React.FC = () => {
   const { role, name, canAccessDashboard, isAdmin } = useAuth();
   const { removeUser } = useUserStore();
   const { selectedBranch, selectedPOSPoint, activeShift, clearPOS, setShowShiftModal } = usePOSStore();
-  const { mode, toggleTheme } = useThemeStore();
   const navigate = useNavigate();
   const { i18n } = useTranslation();
   const { enqueueSnackbar } = useSnackbar();
@@ -168,12 +167,7 @@ const Header: React.FC = () => {
         )}
 
         <div className="flex items-center gap-1 bg-[var(--bg-main)]/50 p-1 rounded-2xl border border-[var(--border-main)]">
-          <IconButton 
-            onClick={() => toggleTheme()}
-            title="Toggle Theme"
-          >
-            {mode === 'dark' ? <FaSun size={14} className="text-yellow-400" /> : <FaMoon size={14} className="text-blue-500" />}
-          </IconButton>
+          <ThemeSwitcher />
 
           <LanguageSwitcher />
 

@@ -1,31 +1,38 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
-@import "tw-animate-css";
-@import "shadcn/tailwind.css";
-@import "@fontsource-variable/geist";
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* ============================================================
+   LEGACY DESIGN TOKENS
+   Used by all existing components via var(--primary), var(--bg-card), etc.
+   These are NEVER changed by shadcn and always use plain hex values.
+   ============================================================ */
+
 :root {
-  /* Common */
+  /* ── Primary (Gold - unchanged from original) ── */
   --primary: #f6b100;
   --primary-hover: #e5a600;
   --primary-light: rgba(246, 177, 0, 0.15);
 
-  /* Dark Theme (Default) */
+  /* ── Dark Mode Surfaces (Default) ── */
   --bg-main: #1f1f1f;
   --bg-card: #1a1a1a;
   --bg-card-alt: #262626;
   --bg-input: #1a1a1a;
   --bg-hover: #2e2e2e;
+
+  /* ── Text ── */
   --text-main: #f5f5f5;
   --text-muted: #ababab;
   --text-dim: #666666;
+
+  /* ── Borders & Shadows ── */
   --border-main: #333333;
   --shadow-main: rgba(0, 0, 0, 0.5);
 
-  /* Status Colors */
+  /* ── Status ── */
   --status-success: #10b981;
   --status-success-bg: rgba(16, 185, 129, 0.1);
   --status-warning: #f59e0b;
@@ -34,7 +41,9 @@
   --status-error-bg: rgba(239, 68, 68, 0.1);
 }
 
-[data-theme='light'] {
+/* ── Light Mode overrides ── */
+[data-theme='light'],
+[data-mode='light'] {
   --bg-main: #f3f4f6;
   --bg-card: #ffffff;
   --bg-card-alt: #f9fafb;
@@ -45,8 +54,6 @@
   --text-dim: #9ca3af;
   --border-main: #e5e7eb;
   --shadow-main: rgba(0, 0, 0, 0.08);
-
-  /* Status Colors Light */
   --status-success: #059669;
   --status-success-bg: #ecfdf5;
   --status-warning: #d97706;
@@ -55,156 +62,93 @@
   --status-error-bg: #fef2f2;
 }
 
+/* ============================================================
+   PALETTE OVERRIDES — only change --primary and related tokens.
+   Gold is the default (no override needed, inherits :root).
+   ============================================================ */
+
+[data-palette='blue'] {
+  --primary: #3b82f6;
+  --primary-hover: #2563eb;
+  --primary-light: rgba(59, 130, 246, 0.15);
+}
+
+[data-palette='green'] {
+  --primary: #10b981;
+  --primary-hover: #059669;
+  --primary-light: rgba(16, 185, 129, 0.15);
+}
+
+/* Black: white accent on dark, black accent on light */
+[data-palette='black'] {
+  --primary: #f5f5f5;
+  --primary-hover: #cccccc;
+  --primary-light: rgba(245, 245, 245, 0.1);
+}
+
+[data-palette='black'][data-mode='light'],
+[data-palette='black'][data-theme='light'] {
+  --primary: #111111;
+  --primary-hover: #333333;
+  --primary-light: rgba(0, 0, 0, 0.06);
+}
+
+/* ============================================================
+   GLOBAL STYLES
+   ============================================================ */
+
 body {
   font-family: 'Inter', sans-serif;
   background-color: var(--bg-main);
   color: var(--text-main);
-  transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), color 0.4s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: background-color 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+              color 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-* {
-  transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+*,
+*::before,
+*::after {
+  transition: background-color 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+              border-color 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Fix for specific transition issues if needed */
 .no-transition * {
   transition: none !important;
 }
 
-/* FullScreenLoader.css */
+/* ============================================================
+   SCROLLBARS
+   ============================================================ */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--bg-card); }
+::-webkit-scrollbar-thumb {
+  background: var(--border-main);
+  border-radius: 10px;
+  border: 2px solid var(--bg-card);
+}
+::-webkit-scrollbar-thumb:hover { background: var(--primary); }
+* { scrollbar-width: thin; scrollbar-color: var(--border-main) var(--bg-card); }
 
+/* ============================================================
+   LOADERS
+   ============================================================ */
 .fullscreen-loader {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: var(--bg-main); /* White background with some transparency */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 9999; /* Ensure it's on top of other content */
+  position: fixed; top: 0; left: 0;
+  width: 100%; height: 100%;
+  background-color: var(--bg-main);
+  display: flex; justify-content: center; align-items: center;
+  z-index: 9999;
 }
 
 .spinner {
   border: 4px solid var(--border-main);
-  border-top: 4px solid var(--primary); /* Blue color for spinner */
+  border-top: 4px solid var(--primary);
   border-radius: 50%;
-  width: 50px;
-  height: 50px;
+  width: 50px; height: 50px;
   animation: spin 1s linear infinite;
 }
 
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
-}
-
-/* Custom Scrollbar Styles */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--bg-card);
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--border-main);
-  border-radius: 10px;
-  border: 2px solid var(--bg-card);
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--primary);
-}
-
-/* For Firefox */
-* {
-  scrollbar-width: thin;
-  scrollbar-color: var(--border-main) var(--bg-card);
-}
-
-@layer base {
-  .theme {
-    --font-heading: var(--font-sans);
-    --font-sans: 'Geist Variable', sans-serif;
-  }
-  :root {
-    --background: oklch(1 0 0);
-    --foreground: oklch(0.145 0 0);
-    --card: oklch(1 0 0);
-    --card-foreground: oklch(0.145 0 0);
-    --popover: oklch(1 0 0);
-    --popover-foreground: oklch(0.145 0 0);
-    --primary: oklch(0.205 0 0);
-    --primary-foreground: oklch(0.985 0 0);
-    --secondary: oklch(0.97 0 0);
-    --secondary-foreground: oklch(0.205 0 0);
-    --muted: oklch(0.97 0 0);
-    --muted-foreground: oklch(0.556 0 0);
-    --accent: oklch(0.97 0 0);
-    --accent-foreground: oklch(0.205 0 0);
-    --destructive: oklch(0.577 0.245 27.325);
-    --border: oklch(0.922 0 0);
-    --input: oklch(0.922 0 0);
-    --ring: oklch(0.708 0 0);
-    --chart-1: oklch(0.87 0 0);
-    --chart-2: oklch(0.556 0 0);
-    --chart-3: oklch(0.439 0 0);
-    --chart-4: oklch(0.371 0 0);
-    --chart-5: oklch(0.269 0 0);
-    --radius: 0.625rem;
-    --sidebar: oklch(0.985 0 0);
-    --sidebar-foreground: oklch(0.145 0 0);
-    --sidebar-primary: oklch(0.205 0 0);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.97 0 0);
-    --sidebar-accent-foreground: oklch(0.205 0 0);
-    --sidebar-border: oklch(0.922 0 0);
-    --sidebar-ring: oklch(0.708 0 0);
-  }
-  .dark {
-    --background: oklch(0.145 0 0);
-    --foreground: oklch(0.985 0 0);
-    --card: oklch(0.205 0 0);
-    --card-foreground: oklch(0.985 0 0);
-    --popover: oklch(0.205 0 0);
-    --popover-foreground: oklch(0.985 0 0);
-    --primary: oklch(0.922 0 0);
-    --primary-foreground: oklch(0.205 0 0);
-    --secondary: oklch(0.269 0 0);
-    --secondary-foreground: oklch(0.985 0 0);
-    --muted: oklch(0.269 0 0);
-    --muted-foreground: oklch(0.708 0 0);
-    --accent: oklch(0.269 0 0);
-    --accent-foreground: oklch(0.985 0 0);
-    --destructive: oklch(0.704 0.191 22.216);
-    --border: oklch(1 0 0 / 10%);
-    --input: oklch(1 0 0 / 15%);
-    --ring: oklch(0.556 0 0);
-    --chart-1: oklch(0.87 0 0);
-    --chart-2: oklch(0.556 0 0);
-    --chart-3: oklch(0.439 0 0);
-    --chart-4: oklch(0.371 0 0);
-    --chart-5: oklch(0.269 0 0);
-    --sidebar: oklch(0.205 0 0);
-    --sidebar-foreground: oklch(0.985 0 0);
-    --sidebar-primary: oklch(0.488 0.243 264.376);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.269 0 0);
-    --sidebar-accent-foreground: oklch(0.985 0 0);
-    --sidebar-border: oklch(1 0 0 / 10%);
-    --sidebar-ring: oklch(0.556 0 0);
-  }
-  * {
-    @apply border-border outline-ring/50;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
-  html {
-    @apply font-sans;
-  }
 }

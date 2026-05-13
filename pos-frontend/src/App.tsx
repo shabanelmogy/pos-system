@@ -17,7 +17,7 @@ import TerminalSelector from "./shared/components/TerminalSelector";
 import useUserStore from "./features/auth/store/useUserStore";
 import usePOSStore from "./features/pos/store/usePOSStore";
 import useCustomerStore from "./features/customers/store/useCustomerStore";
-import useThemeStore from "./shared/store/useThemeStore";
+import { ThemeProvider } from "./shared/providers/ThemeProvider";
 
 function Layout() {
   const isLoading = useLoadData();
@@ -38,11 +38,7 @@ function Layout() {
     }
   }, [openOnMenu, isAdmin, isAuth, customerName, setCustomer]);
 
-  // 0. Theme Sync
-  const { mode } = useThemeStore();
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', mode);
-  }, [mode]);
+  // 0. Theme sync is handled by <ThemeProvider> wrapping the app
 
   // 1. Loading Check
   if (isLoading) return <FullScreenLoader />;
@@ -138,9 +134,11 @@ function ProtectedRoutes({ children }: { children: React.ReactNode }) {
 
 function App() {
   return (
-    <Router>
-      <Layout />
-    </Router>
+    <ThemeProvider>
+      <Router>
+        <Layout />
+      </Router>
+    </ThemeProvider>
   );
 }
 
