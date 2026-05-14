@@ -12,7 +12,7 @@ import Modal from "../../../../shared/components/Modal";
 
 const CartInfo: React.FC = () => {
   const { t } = useTranslation();
-  const { items, addItem, removeItem, deleteItem } = useCartStore();
+  const { items, addItem, removeItem, deleteItem, removeAllItems } = useCartStore();
   const { customerName, customerPhone, setCustomer, setGuestCustomer } = useCustomerStore();
   const { selectedPOSPoint } = usePOSStore();
   const scrolLRef = useRef<HTMLDivElement>(null);
@@ -340,12 +340,23 @@ const CartInfo: React.FC = () => {
 
       {/* ── Cart Title ── */}
       <div className="flex items-center justify-between mb-3">
-        <h1 className="text-lg text-[var(--text-main)] font-bold tracking-tight">
-          {t('pos.cart.title')}
-        </h1>
-        <span className="bg-[var(--primary)]/20 text-[var(--primary)] px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider">
-          {items.length} {items.length === 1 ? t('common.item') : t('common.items')}
-        </span>
+        <div className="flex flex-col">
+          <h1 className="text-lg text-[var(--text-main)] font-bold tracking-tight">
+            {t('pos.cart.title')}
+          </h1>
+          <span className="bg-[var(--primary)]/20 text-[var(--primary)] px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider w-fit mt-1">
+            {items.length} {items.length === 1 ? t('common.item') : t('common.items')}
+          </span>
+        </div>
+        <button
+          onClick={() => {
+            removeAllItems();
+            setGuestCustomer();
+          }}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-red-500/30 text-red-500 hover:bg-red-500 hover:text-white transition-all text-[10px] font-black uppercase tracking-widest active:scale-95"
+        >
+          <RiDeleteBin2Fill size={12} /> Reset
+        </button>
       </div>
 
       {/* ── Cart Items ── */}

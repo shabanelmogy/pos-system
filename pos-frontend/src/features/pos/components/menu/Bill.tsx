@@ -44,6 +44,8 @@ const Bill: React.FC = () => {
       const order = res.data.data;
       const handleSuccess = () => {
         queryClient.invalidateQueries({ queryKey: ["orders"] });
+        queryClient.invalidateQueries({ queryKey: ["recentOrders"] });
+        queryClient.invalidateQueries({ queryKey: ["customerLastOrder"] });
         enqueueSnackbar("Order Placed Successfully", { variant: "success" });
         setOrderInfo(order);
         setShowInvoice(true);

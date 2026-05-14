@@ -1,11 +1,16 @@
 import React, { useState, useEffect, useRef } from "react";
-import { FaShoppingCart, FaSearch } from "react-icons/fa";
-import { MdRestaurantMenu, MdChevronLeft, MdChevronRight } from "react-icons/md";
+import { FaShoppingCart, FaSearch, FaClock, FaHistory, FaCopy, FaUserTie, FaStore } from "react-icons/fa";
+import { MdRestaurantMenu, MdChevronLeft, MdChevronRight, MdFullscreen } from "react-icons/md";
 import { RiAddFill, RiSubtractFill } from "react-icons/ri";
 import useCartStore from "../../store/useCartStore";
 import { getCategories, getItems } from "../../api/posApi";
+import { getOrders } from "../../../orders/api/orderApi";
 import { useQuery } from "@tanstack/react-query";
 import { Category, MenuItem } from "../../../../shared/types";
+import useUserStore from "../../../auth/store/useUserStore";
+import usePOSStore from "../../store/usePOSStore";
+import useCustomerStore from "../../../../features/customers/store/useCustomerStore";
+import Modal from "../../../../shared/components/Modal";
 
 const MenuContainer: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
@@ -13,10 +18,70 @@ const MenuContainer: React.FC = () => {
   const [activeItemId, setActiveItemId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const { addItem } = useCartStore();
+  const { name: userName, role: userRole } = useUserStore();
+  const { selectedPOSPoint } = usePOSStore();
+  const { customerName, customerPhone } = useCustomerStore();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const [scrollLeftState, setScrollLeftState] = useState(0);
+  const [currentTime, setCurrentTime] = useState(new Date());
+  
+  const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
+  const [lastOrder, setLastOrder] = useState<any>(null);
+
+  const isGuest = !customerName || customerName === "Guest";
+
+  // Clock Update
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  // Fetch Last Order for the SPECIFIC selected customer
+  const { data: customerLastOrder } = useQuery({
+    queryKey: ["customerLastOrder", customerPhone],
+    queryFn: async () => {
+      if (isGuest || !customerPhone) return null;
+      const res = await getOrders({ phone: customerPhone, limit: 1 });
+      const orders = res.data.data || [];
+      const order = orders.length > 0 ? orders[0] : null;
+      setLastOrder(order);
+      return order;
+    },
+    enabled: !isGuest && !!customerPhone,
+  });
+
+  // Global history for the modal
+  const { data: recentOrders } = useQuery({
+    queryKey: ["recentOrders"],
+    queryFn: async () => {
+      const res = await getOrders({ limit: 10 });
+      return res.data.data || [];
+    },
+  });
+
+  const handleDuplicateOrder = (order: any) => {
+    if (!order || !order.items) return;
+    
+    order.items.forEach((item: any) => {
+      const qty = Number(item.quantity) || 1;
+      const menuItem = {
+        id: item.menuItemId || item.id,
+        name: item.name,
+        price: parseFloat(item.price),
+        category: item.category || "General",
+      };
+
+      // Loop to add the correct quantity to the cart
+      for (let i = 0; i < qty; i++) {
+        addItem(menuItem as any);
+      }
+    });
+    
+    setIsHistoryModalOpen(false);
+    // Optional: Scroll cart to bottom or show a success hint
+  };
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if (!scrollRef.current) return;
@@ -37,7 +102,7 @@ const MenuContainer: React.FC = () => {
     if (!isDragging || !scrollRef.current) return;
     e.preventDefault();
     const x = e.pageX - scrollRef.current.offsetLeft;
-    const walk = (x - startX) * 2; // Scroll speed
+    const walk = (x - startX) * 2; 
     scrollRef.current.scrollLeft = scrollLeftState - walk;
   };
 
@@ -104,12 +169,9 @@ const MenuContainer: React.FC = () => {
 
   const handleAddToCart = (item: MenuItem) => {
     if (activeItemId !== item.id || itemCount === 0) return;
-    
-    // Add multiple times based on itemCount
     for (let i = 0; i < itemCount; i++) {
         addItem(item);
     }
-
     setItemCount(0);
     setActiveItemId(null);
   };
@@ -128,8 +190,98 @@ const MenuContainer: React.FC = () => {
 
   return (
     <>
+      {/* ── Top Actions / Order Context Bar ── */}
+      <div className="flex items-center justify-between px-6 py-3 bg-[var(--bg-card-alt)] border-b border-[var(--border-main)] backdrop-blur-md sticky top-0 z-[40]">
+        <div className="flex items-center gap-6">
+          {/* Last Order Shortcut - ONLY for selected customers (not guest) */}
+          {!isGuest && lastOrder && (
+            <div className="flex items-center gap-3 bg-[var(--bg-card)] px-3 py-1.5 rounded-xl border border-[var(--border-main)] shadow-sm animate-in fade-in slide-in-from-left-2 duration-300">
+               <div className="flex flex-col">
+                  <span className="text-[9px] text-[var(--text-dim)] font-black uppercase tracking-widest">Customer's Last Order</span>
+                  <span className="text-xs font-black text-[var(--text-main)]">₹{lastOrder.totalAmount} • {lastOrder.orderNumber}</span>
+               </div>
+               <button 
+                onClick={() => handleDuplicateOrder(lastOrder)}
+                className="flex items-center gap-1.5 bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-black text-[10px] font-black px-2.5 py-1.5 rounded-lg transition-all active:scale-95 shadow-sm"
+                title="Repeat this order"
+               >
+                  <FaCopy size={10} /> Repeat
+               </button>
+            </div>
+          )}
+
+          <div className="flex items-center gap-2">
+             <button 
+              onClick={() => setIsHistoryModalOpen(true)}
+              className="flex items-center gap-2 bg-[var(--bg-hover)] hover:bg-[var(--primary)]/10 text-[var(--text-muted)] hover:text-[var(--primary)] px-4 py-2 rounded-xl transition-all border border-[var(--border-main)] hover:border-[var(--primary)]/40"
+             >
+                <FaHistory size={14} />
+                <span className="text-[10px] font-black uppercase tracking-widest">Full History</span>
+             </button>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-6">
+           <div className="hidden md:flex flex-col items-end">
+              <span className="text-[10px] font-black text-[var(--text-main)] uppercase tracking-tight">{userName || "Staff"}</span>
+              <span className="text-[9px] text-[var(--text-dim)] font-bold uppercase tracking-widest">Terminal #01</span>
+           </div>
+           <div className="flex items-center gap-2 bg-[var(--bg-card)] px-3 py-1.5 rounded-xl border border-[var(--border-main)]">
+              <FaClock size={12} className="text-[var(--primary)]" />
+              <span className="text-xs font-black text-[var(--text-main)]">
+                {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              </span>
+           </div>
+        </div>
+      </div>
+
+      {/* ── Order History Modal ── */}
+      <Modal isOpen={isHistoryModalOpen} onClose={() => setIsHistoryModalOpen(false)}>
+        <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-2 custom-scrollbar">
+           <div className="flex items-center gap-3 mb-4">
+              <div className="p-3 rounded-2xl bg-[var(--primary)]/10 text-[var(--primary)]">
+                 <FaHistory size={20} />
+              </div>
+              <div>
+                 <h2 className="text-[var(--text-main)] text-lg font-black uppercase tracking-tighter">Recent Orders</h2>
+                 <p className="text-[var(--text-dim)] text-[10px] font-bold uppercase tracking-widest">Select to duplicate or view</p>
+              </div>
+           </div>
+
+           <div className="space-y-3">
+              {recentOrders?.map((order: any) => (
+                <div key={order.id} className="bg-[var(--bg-card-alt)] border border-[var(--border-main)] rounded-2xl p-4 hover:border-[var(--primary)]/40 transition-all group">
+                   <div className="flex items-center justify-between mb-3">
+                      <div className="flex flex-col">
+                         <span className="text-xs font-black text-[var(--text-main)] uppercase tracking-tight">{order.orderNumber}</span>
+                         <span className="text-[10px] text-[var(--text-dim)] font-bold">{new Date(order.createdAt).toLocaleString()}</span>
+                      </div>
+                      <span className="text-sm font-black text-[var(--primary)]">₹{order.totalAmount}</span>
+                   </div>
+                   
+                   <div className="flex flex-wrap gap-1.5 mb-4">
+                      {order.items?.map((item: any, i: number) => (
+                        <span key={i} className="text-[9px] bg-[var(--bg-main)] text-[var(--text-muted)] px-2 py-1 rounded-md border border-[var(--border-main)] font-bold">
+                           {item.quantity}x {item.name}
+                        </span>
+                      ))}
+                   </div>
+
+                   <div className="flex gap-2">
+                      <button 
+                        onClick={() => handleDuplicateOrder(order)}
+                        className="flex-1 bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-black text-[10px] font-black py-2.5 rounded-xl transition-all flex items-center justify-center gap-2 uppercase tracking-widest"
+                      >
+                         <FaCopy size={12} /> Duplicate Order
+                      </button>
+                   </div>
+                </div>
+              ))}
+           </div>
+        </div>
+      </Modal>
+
       <div className="relative group/nav px-6 pt-4">
-        {/* Left Scroll Button */}
         <button
           onClick={() => scroll("left")}
           className="absolute start-1 top-[calc(50%+8px)] -translate-y-1/2 z-10 bg-[var(--bg-card)]/80 hover:bg-[var(--primary)] text-[var(--primary)] hover:text-black p-1.5 rounded-full lg:opacity-0 lg:group-hover/nav:opacity-100 transition-all duration-300 border border-[var(--border-main)] shadow-xl backdrop-blur-sm rtl:rotate-180"
@@ -209,9 +361,9 @@ const MenuContainer: React.FC = () => {
               <div key={i} className="h-44 bg-[var(--bg-card)] rounded-2xl animate-pulse border border-[var(--border-main)]" />
             ))}
           </div>
-        ) : filteredItems?.length > 0 ? (
+        ) : (filteredItems?.length || 0) > 0 ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
-            {filteredItems.map((item) => {
+            {filteredItems?.map((item) => {
               const isActive = activeItemId === item.id && itemCount > 0;
               return (
                 <div
