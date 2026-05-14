@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { RiDeleteBin2Fill, RiShoppingCartLine, RiAddFill, RiSubtractFill } from "react-icons/ri";
-import { FaNotesMedical } from "react-icons/fa6";
+import { FaNotesMedical, FaUserPlus } from "react-icons/fa6";
 import { FiUser, FiPhone, FiChevronDown, FiChevronUp, FiCheck, FiSearch } from "react-icons/fi";
 import useCartStore from "../../store/useCartStore";
 import useCustomerStore from "../../../../features/customers/store/useCustomerStore";
@@ -8,6 +8,7 @@ import usePOSStore from "../../store/usePOSStore";
 import { CartItem } from "../../../../shared/types";
 import { useTranslation } from "react-i18next";
 import { getCustomers, addCustomer } from "../../../../features/customers/api/customerApi";
+import Modal from "../../../../shared/components/Modal";
 
 const CartInfo: React.FC = () => {
   const { t } = useTranslation();
@@ -22,8 +23,10 @@ const CartInfo: React.FC = () => {
 
   // ── Add-customer panel state ──
   const [expanded, setExpanded] = useState(false);
+  const [isFullModalOpen, setIsFullModalOpen] = useState(false);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
   const [error, setError] = useState("");
 
   // ── Search Logic ──
@@ -240,11 +243,18 @@ const CartInfo: React.FC = () => {
                         setError(err.response?.data?.message || "Failed to add customer");
                       }
                     }}
-                    className="w-full bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-black text-[10px] font-black py-2.5 rounded-lg transition-all flex items-center justify-center gap-2 uppercase tracking-widest"
+                    className="w-full bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-black text-[10px] font-black py-2.5 rounded-lg transition-all flex items-center justify-center gap-2 uppercase tracking-widest shadow-lg shadow-yellow-500/20"
                   >
-                    <RiAddFill size={14} /> Add New Customer & Apply
+                    <RiAddFill size={14} /> Quick Add & Apply
                   </button>
                 )}
+
+                <button
+                  onClick={() => setIsFullModalOpen(true)}
+                  className="w-full bg-[var(--bg-hover)] hover:bg-[var(--bg-main)] text-[var(--text-muted)] hover:text-[var(--primary)] text-[9px] font-black py-2 rounded-lg transition-all flex items-center justify-center gap-2 uppercase tracking-widest border border-[var(--border-main)]"
+                >
+                  <FaUserPlus size={10} /> Open Full Form
+                </button>
                 
                 {!isGuest && (
                   <button
@@ -259,6 +269,74 @@ const CartInfo: React.FC = () => {
           )}
         </div>
       )}
+
+      {/* ── Full Registration Modal ── */}
+      <Modal isOpen={isFullModalOpen} onClose={() => setIsFullModalOpen(false)}>
+        <div className="space-y-4">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="p-3 rounded-2xl bg-[var(--primary)]/10 text-[var(--primary)]">
+               <FaUserPlus size={20} />
+            </div>
+            <div>
+               <h2 className="text-[var(--text-main)] text-lg font-black uppercase tracking-tighter">New Customer</h2>
+               <p className="text-[var(--text-dim)] text-[10px] font-bold uppercase tracking-widest">Register full profile</p>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <div>
+              <label className="block text-[var(--text-muted)] text-[10px] font-black uppercase tracking-widest mb-2">Full Name</label>
+              <input 
+                value={name} 
+                onChange={(e) => setName(e.target.value)} 
+                type="text" 
+                placeholder="Enter name" 
+                className="w-full bg-[var(--bg-main)] border border-[var(--border-main)] rounded-xl px-4 py-3 text-sm text-[var(--text-main)] focus:border-[var(--primary)] outline-none transition-all font-bold" 
+              />
+            </div>
+            <div>
+              <label className="block text-[var(--text-muted)] text-[10px] font-black uppercase tracking-widest mb-2">Phone Number</label>
+              <input 
+                value={phone} 
+                onChange={(e) => setPhone(e.target.value)} 
+                type="tel" 
+                placeholder="+91-0000000000" 
+                className="w-full bg-[var(--bg-main)] border border-[var(--border-main)] rounded-xl px-4 py-3 text-sm text-[var(--text-main)] focus:border-[var(--primary)] outline-none transition-all font-bold" 
+              />
+            </div>
+            <div>
+              <label className="block text-[var(--text-muted)] text-[10px] font-black uppercase tracking-widest mb-2">Email (Optional)</label>
+              <input 
+                value={email} 
+                onChange={(e) => setEmail(e.target.value)} 
+                type="email" 
+                placeholder="customer@example.com" 
+                className="w-full bg-[var(--bg-main)] border border-[var(--border-main)] rounded-xl px-4 py-3 text-sm text-[var(--text-main)] focus:border-[var(--primary)] outline-none transition-all font-bold" 
+              />
+            </div>
+          </div>
+
+          {error && <p className="text-red-400 text-[10px] font-bold text-center">{error}</p>}
+
+          <button 
+            onClick={async () => {
+              if (!name.trim() || !phone.trim()) { setError("Name and Phone are required"); return; }
+              try {
+                const res = await addCustomer({ name: name.trim(), phone: phone.trim(), email: email.trim() });
+                selectCustomer(res.data.data || res.data);
+                setIsFullModalOpen(false);
+                setExpanded(false);
+                setEmail("");
+              } catch (err: any) {
+                setError(err.response?.data?.message || "Failed to add customer");
+              }
+            }}
+            className="w-full bg-[var(--primary)] text-black font-black uppercase tracking-widest py-4 rounded-2xl mt-4 hover:shadow-xl hover:shadow-yellow-500/20 transition-all active:scale-[0.98]"
+          >
+            Create & Apply to Order
+          </button>
+        </div>
+      </Modal>
 
       {/* ── Cart Title ── */}
       <div className="flex items-center justify-between mb-3">
