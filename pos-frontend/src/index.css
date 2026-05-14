@@ -29,7 +29,7 @@
   --text-dim: #666666;
 
   /* ── Borders & Shadows ── */
-  --border-main: #333333;
+  --border-main: rgba(246, 177, 0, 0.1);
   --shadow-main: rgba(0, 0, 0, 0.5);
 
   /* ── Status ── */

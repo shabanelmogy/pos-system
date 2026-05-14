@@ -65,7 +65,7 @@ const useManagementForm = (type: string, initialData: any, isOpen: boolean) => {
     watch,
     reset,
     formState: { errors },
-  } = useForm({
+  } = useForm<any>({
     resolver: zodResolver(schema),
     defaultValues: {
         tableNo: "", seats: "", name: "", price: "", categoryId: "",

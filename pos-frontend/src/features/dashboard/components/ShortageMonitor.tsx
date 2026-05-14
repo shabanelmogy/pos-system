@@ -44,7 +44,7 @@ const ShortageMonitor: React.FC<ShortageMonitorProps> = ({ branchId }) => {
     <div className="space-y-6">
       {/* Header Info */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-[var(--bg-card)] border border-[var(--border-main)] rounded-2xl p-6 shadow-sm">
+        <div className="bg-[var(--bg-card)] rounded-2xl p-6 shadow-[0_20px_50px_rgba(0,0,0,0.3)]">
            <div className="flex items-center gap-4">
               <div className="p-4 rounded-xl bg-red-500/10 text-red-500">
                  <FaExclamationTriangle size={24} />
@@ -58,7 +58,7 @@ const ShortageMonitor: React.FC<ShortageMonitorProps> = ({ branchId }) => {
            </div>
         </div>
 
-        <div className="bg-[var(--bg-card)] border border-[var(--border-main)] rounded-2xl p-6 shadow-sm">
+        <div className="bg-[var(--bg-card)] rounded-2xl p-6 shadow-[0_20px_50px_rgba(0,0,0,0.3)]">
            <div className="flex items-center gap-4">
               <div className="p-4 rounded-xl bg-emerald-500/10 text-emerald-500">
                  <FaCheckCircle size={24} />
@@ -72,7 +72,7 @@ const ShortageMonitor: React.FC<ShortageMonitorProps> = ({ branchId }) => {
            </div>
         </div>
 
-        <div className="bg-[var(--bg-card)] border border-[var(--border-main)] rounded-2xl p-6 shadow-sm">
+        <div className="bg-[var(--bg-card)] rounded-2xl p-6 shadow-[0_20px_50px_rgba(0,0,0,0.3)]">
            <div className="flex items-center gap-4">
               <div className="p-4 rounded-xl bg-[var(--primary)]/10 text-[var(--primary)]">
                  <FaWallet size={24} />
@@ -88,8 +88,8 @@ const ShortageMonitor: React.FC<ShortageMonitorProps> = ({ branchId }) => {
       </div>
 
       {/* Shifts Table */}
-      <div className="bg-[var(--bg-card)] border border-[var(--border-main)] rounded-3xl overflow-hidden shadow-sm">
-        <div className="p-6 border-b border-[var(--border-main)] flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-[var(--bg-card)] rounded-3xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.3)]">
+        <div className="p-6 bg-[var(--bg-card-alt)] flex flex-col md:flex-row md:items-center justify-between gap-4">
            <div>
               <div className="flex items-center gap-2 mb-1">
                  <h3 className="text-lg font-black text-[var(--text-main)] uppercase tracking-tight">{t('dashboard.shortage.tracking_title')}</h3>
@@ -117,7 +117,7 @@ const ShortageMonitor: React.FC<ShortageMonitorProps> = ({ branchId }) => {
         <div className="overflow-x-auto">
           <table className="w-full border-collapse">
             <thead>
-              <tr className="bg-[var(--bg-card-alt)] text-[var(--text-dim)] text-[10px] font-black uppercase tracking-widest border-b border-[var(--border-main)]">
+              <tr className="bg-[var(--bg-card-alt)]/50 text-[var(--text-dim)] text-[10px] font-black uppercase tracking-widest border-b border-[var(--border-main)]">
                 <th className="px-6 py-4 text-left">{t('dashboard.shortage.table.shift_date')}</th>
                 <th className="px-6 py-4 text-left">{t('dashboard.shortage.table.cashier_pos')}</th>
                 <th className="px-6 py-4 text-right">{t('dashboard.shortage.table.opening')}</th>
@@ -127,9 +127,9 @@ const ShortageMonitor: React.FC<ShortageMonitorProps> = ({ branchId }) => {
                 <th className="px-6 py-4 text-center">{t('dashboard.shortage.table.variance')}</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[var(--border-main)]">
-              {shifts.length > 0 ? shifts.map((shift: any) => (
-                <tr key={shift.id} className="hover:bg-[var(--bg-hover)] transition-colors group">
+            <tbody className="">
+              {shifts.length > 0 ? shifts.map((shift: any, index: number) => (
+                <tr key={shift.id} className="transition-colors hover:bg-[var(--bg-card-alt)]/50 group border-b border-[var(--bg-card-alt)]">
                   <td className="px-6 py-4">
                     <div className="flex flex-col">
                       <span className="text-xs font-bold text-[var(--text-main)]">{shift.slug}</span>

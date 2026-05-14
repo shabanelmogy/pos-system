@@ -19,6 +19,7 @@ export interface POSPoint {
     openOnMenu?: boolean;
     directPrint?: boolean;
     requireCustomerOnOrder?: boolean;
+    autoPrintReceipt?: boolean;
   };
 }
 

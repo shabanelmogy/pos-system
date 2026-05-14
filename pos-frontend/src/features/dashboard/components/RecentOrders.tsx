@@ -61,7 +61,7 @@ const RecentOrders: React.FC<RecentOrdersProps> = ({ branchId = "all" }) => {
   const thCell = `${cell} text-[6px] font-black uppercase tracking-tight whitespace-nowrap 2xl:text-[8px] 2xl:tracking-wide`;
 
   return (
-    <div className="w-full max-w-full rounded-xl border border-[var(--border-main)] bg-[var(--bg-card-alt)] p-1 2xl:rounded-2xl 2xl:p-2.5">
+    <div className="w-full max-w-full rounded-xl border border-[var(--border-main)] bg-[var(--bg-card-alt)] p-1 2xl:rounded-2xl 2xl:p-2.5 shadow-xl">
       <div className="mb-1 flex flex-wrap items-center justify-between gap-1 px-px 2xl:mb-1.5 2xl:gap-1.5">
         <h2 className="max-w-[min(100%,16rem)] text-[9px] font-black uppercase leading-none tracking-tight text-[var(--text-main)] sm:max-w-none sm:text-[10px] 2xl:text-sm">
           {branchId === "all" ? t('dashboard.orders.all_orders') : t('dashboard.orders.branch_orders')}
@@ -75,7 +75,7 @@ const RecentOrders: React.FC<RecentOrdersProps> = ({ branchId = "all" }) => {
         </button>
       </div>
       <div className="-mx-px overflow-x-auto px-px custom-scrollbar sm:mx-0 sm:px-0">
-        <table className="w-full min-w-[38rem] text-left text-[9px] text-[var(--text-main)] md:min-w-[44rem] lg:min-w-0 lg:table-fixed 2xl:text-[11px]">
+        <table className="w-full min-w-[38rem] text-left text-[9px] text-[var(--text-main)] md:min-w-[44rem] lg:min-w-0 lg:table-fixed 2xl:text-[11px] border-collapse">
           <colgroup>
             <col style={{ width: "7%" }} />
             <col style={{ width: "14%" }} />
@@ -87,7 +87,7 @@ const RecentOrders: React.FC<RecentOrdersProps> = ({ branchId = "all" }) => {
             <col style={{ width: "9%" }} />
             <col style={{ width: "15%" }} />
           </colgroup>
-          <thead className="border-b border-[var(--border-main)] bg-[var(--bg-card)] text-[var(--text-muted)]">
+          <thead className="bg-[var(--bg-card-alt)]/50 border-b border-[var(--border-main)] text-[var(--text-muted)]">
             <tr>
               <th className={thCell}>{t('dashboard.orders.order_id')}</th>
               <th className={thCell}>{t('dashboard.orders.source')}</th>
@@ -100,13 +100,13 @@ const RecentOrders: React.FC<RecentOrdersProps> = ({ branchId = "all" }) => {
               <th className={`${thCell} text-center`}>{t('dashboard.orders.payment')}</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-[var(--border-main)]/60">
-            {(filteredOrders || []).map((order: any) => {
+          <tbody className="">
+            {(filteredOrders || []).map((order: any, index: number) => {
               const isPremium = order.customer?.totalOrders >= 5;
               return (
                 <tr
                   key={order.id}
-                  className="leading-none transition-colors hover:bg-[var(--border-main)]/40 2xl:leading-normal"
+                  className="leading-none transition-colors hover:bg-[var(--bg-card-alt)]/50 border-b border-[var(--bg-card-alt)] 2xl:leading-normal"
                 >
                   <td className={`${cell} font-mono text-[8px] whitespace-nowrap tabular-nums 2xl:text-[10px]`}>
                     #{Math.floor(new Date(order.createdAt).getTime() / 1000)}

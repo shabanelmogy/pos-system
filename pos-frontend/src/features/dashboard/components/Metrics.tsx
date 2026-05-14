@@ -21,7 +21,7 @@ const MetricCard: React.FC<MetricCardProps> = ({ title, value, percentage, icon,
     animate={{ opacity: 1, y: 0 }}
     transition={{ delay }}
     whileHover={{ y: -4, scale: 1.01 }}
-    className="bg-[var(--bg-card)] border border-[var(--border-main)] p-5 rounded-3xl relative overflow-hidden group hover:border-[var(--primary)]/30 transition-all shadow-xl"
+    className="bg-[var(--bg-card)] p-5 rounded-3xl relative overflow-hidden group hover:bg-[var(--bg-card-alt)] transition-all shadow-[0_20px_50px_rgba(0,0,0,0.4)]"
   >
     <div className={`absolute top-0 right-0 w-48 h-48 bg-gradient-to-br ${color} opacity-[0.03] blur-3xl group-hover:opacity-10 transition-opacity`} />
     
@@ -134,8 +134,8 @@ const Metrics: React.FC<MetricsProps> = ({ branchId = "all" }) => {
           </h2>
           <p className="text-[var(--text-muted)] text-xs mt-0.5 font-medium">{t('dashboard.metrics.real_time_financials')}</p>
         </div>
-        <div className="flex items-center gap-4 bg-[var(--bg-card)] p-2 rounded-2xl border border-[var(--border-main)]">
-           <div className="px-4 py-2 bg-[var(--bg-card-alt)] rounded-xl text-[var(--text-main)] text-[10px] font-black uppercase tracking-widest border border-[var(--border-main)]">
+        <div className="flex items-center gap-4 bg-[var(--bg-card)] p-2 rounded-2xl shadow-xl">
+           <div className="px-4 py-2 bg-[var(--bg-card-alt)] rounded-xl text-[var(--text-main)] text-[10px] font-black uppercase tracking-widest">
               {t('dashboard.metrics.data_stream_active')}
            </div>
            <div className="w-10 h-10 rounded-xl bg-green-500/10 flex items-center justify-center">
@@ -154,7 +154,7 @@ const Metrics: React.FC<MetricsProps> = ({ branchId = "all" }) => {
       {/* Secondary Stats Section */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Inventory Summary */}
-        <div className="bg-[var(--bg-card)] border border-[var(--border-main)] p-6 rounded-3xl lg:col-span-1 shadow-2xl">
+        <div className="bg-[var(--bg-card)] p-6 rounded-3xl lg:col-span-1 shadow-[0_20px_50px_rgba(0,0,0,0.3)]">
           <div className="flex items-center gap-4 mb-6">
              <div className="p-2.5 bg-[var(--bg-card-alt)] rounded-xl text-[var(--primary)]">
                 <FaUtensils size={20} />
@@ -182,7 +182,7 @@ const Metrics: React.FC<MetricsProps> = ({ branchId = "all" }) => {
         </div>
 
         {/* Growth Chart */}
-        <div className="bg-[var(--bg-card)] border border-[var(--border-main)] p-6 rounded-3xl lg:col-span-2 relative overflow-hidden group shadow-2xl hover:border-[var(--primary)]/20 transition-all">
+        <div className="bg-[var(--bg-card)] p-6 rounded-3xl lg:col-span-2 relative overflow-hidden group shadow-[0_20px_50px_rgba(0,0,0,0.3)] transition-all">
           <div className="flex items-center justify-between mb-8">
             <div>
               <h3 className="text-[var(--text-main)] text-lg font-black uppercase tracking-tighter">{t('dashboard.metrics.revenue_trajectory')}</h3>

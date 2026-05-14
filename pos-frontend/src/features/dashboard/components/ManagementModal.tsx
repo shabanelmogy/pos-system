@@ -24,7 +24,7 @@ const ManagementModal: React.FC<ManagementModalProps> = ({ type, isOpen, onClose
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const isEdit = !!initialData;
-  const firstInputRef = useRef<HTMLInputElement>(null);
+  const firstInputRef = useRef<HTMLInputElement | null>(null);
   const [selectedPOSPoints, setSelectedPOSPoints] = useState<string[]>([]);
   const [posSearchQuery, setPosSearchQuery] = useState("");
   const [showTerminals, setShowTerminals] = useState(false);
@@ -85,8 +85,8 @@ const ManagementModal: React.FC<ManagementModalProps> = ({ type, isOpen, onClose
 
         switch (type) {
           case "table": return updateTable(id, { tableNo: preparedData.tableNo, seats: preparedData.seats });
-          case "dishes": return updateItem(id, { itemId: id, name: preparedData.name, price: preparedData.price, categoryId: preparedData.categoryId });
-          case "category": return updateCategory(id, { categoryId: id, name: preparedData.name });
+          case "dishes": return updateItem(id, { name: preparedData.name, price: preparedData.price, categoryId: preparedData.categoryId });
+          case "category": return updateCategory(id, { name: preparedData.name });
           case "branch": return updateBranch(id, { ...preparedData, id });
           case "posPoint": return updatePOSPoint(id, preparedData);
           case "user":

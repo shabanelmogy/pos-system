@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Invoice from "../../../orders/components/invoice/Invoice";
 import usePOSStore from "../../store/usePOSStore";
 import { useTranslation } from "react-i18next";
+import { createPortal } from "react-dom";
 
 const RecentOrders: React.FC = () => {
   const { t } = useTranslation();
@@ -151,12 +152,12 @@ const RecentOrders: React.FC = () => {
     { label: t('common.sort.items'), value: "itemsCount" },
   ];
 
-  return (
-    <div className={`relative mb-3 mt-1.5 transition-all duration-700 ${isFullscreen ? "fixed inset-0 z-[100] m-0 bg-black/40 p-2 backdrop-blur-xl 2xl:p-4" : ""}`}>
-      <div className={`bg-[var(--bg-card)] w-full rounded-[2rem] border border-[var(--border-main)] shadow-lg overflow-hidden flex flex-col transition-all duration-700 2xl:rounded-[2.5rem] ${isFullscreen ? "h-full" : "min-h-[360px] lg:h-[508px] 2xl:h-[635px]"}`}>
+  const content = (
+    <div className={`transition-all duration-700 ${isFullscreen ? "fixed inset-0 z-[9999] bg-black/60 p-2 backdrop-blur-2xl 2xl:p-8" : "relative mb-3 mt-1.5"}`}>
+      <div className={`bg-[var(--bg-card)] w-full rounded-[2rem] border border-[var(--bg-card-alt)] shadow-2xl overflow-hidden flex flex-col transition-all duration-700 2xl:rounded-[2.5rem] ${isFullscreen ? "h-full w-full max-w-7xl mx-auto" : "min-h-[360px] lg:h-[508px] 2xl:h-[635px]"}`}>
         
         {/* Top Header - Analytics & Summary */}
-        <div className="sticky top-0 z-30 border-b border-[var(--border-main)]/50 bg-gradient-to-br from-[var(--bg-card)] via-[var(--bg-card)] to-[var(--primary)]/5 px-3 py-2 2xl:px-5 2xl:py-4">
+        <div className="sticky top-0 z-30 border-b border-[var(--bg-card-alt)] bg-gradient-to-br from-[var(--bg-card)] via-[var(--bg-card)] to-[var(--primary)]/5 px-3 py-2 2xl:px-5 2xl:py-4">
           <div className="flex flex-col justify-between gap-2 xl:flex-row xl:items-center xl:gap-3">
             <div className="flex items-center gap-2 2xl:gap-4">
               <motion.div 
@@ -211,13 +212,13 @@ const RecentOrders: React.FC = () => {
             <div className="flex items-center gap-1.5 2xl:gap-2">
               <button 
                 onClick={() => setIsFullscreen(!isFullscreen)}
-                className="flex items-center justify-center rounded-xl border border-[var(--border-main)] bg-[var(--bg-card-alt)] p-1.5 text-[var(--text-muted)] shadow-sm transition-all hover:text-[var(--text-main)] 2xl:rounded-2xl 2xl:p-2.5"
+                className="flex items-center justify-center rounded-xl border border-[var(--bg-card-alt)] bg-[var(--bg-card-alt)] p-1.5 text-[var(--text-muted)] shadow-sm transition-all hover:text-[var(--text-main)] 2xl:rounded-2xl 2xl:p-2.5"
                 title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
               >
                 {isFullscreen ? <FaCompress className="size-3.5 2xl:size-4" /> : <FaExpand className="size-3.5 2xl:size-4" />}
               </button>
 
-              <div className="flex items-center gap-0.5 rounded-xl border border-[var(--border-main)] bg-[var(--bg-card-alt)] p-0.5 shadow-sm 2xl:gap-1.5 2xl:rounded-2xl 2xl:p-1.5">
+              <div className="flex items-center gap-0.5 rounded-xl border border-[var(--bg-card-alt)] bg-[var(--bg-card-alt)] p-0.5 shadow-sm 2xl:gap-1.5 2xl:rounded-2xl 2xl:p-1.5">
                 <select 
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value as any)}
@@ -239,7 +240,7 @@ const RecentOrders: React.FC = () => {
         </div>
 
         {/* Search & Filter Toolbar */}
-        <div className="space-y-1.5 border-b border-[var(--border-main)]/50 bg-[var(--bg-card-alt)]/5 px-2.5 py-2 2xl:space-y-3 2xl:px-4 2xl:py-3">
+        <div className="space-y-1.5 border-b border-[var(--bg-card-alt)] bg-[var(--bg-card-alt)]/5 px-2.5 py-2 2xl:space-y-3 2xl:px-4 2xl:py-3">
           <div className="flex h-auto flex-col items-stretch gap-1.5 md:h-9 md:flex-row md:gap-1.5 2xl:h-11 2xl:gap-2">
             <div className="group relative h-9 flex-1 md:h-full">
               <FaSearch className="absolute start-2.5 top-1/2 size-3 -translate-y-1/2 text-[var(--text-dim)] transition-all duration-300 group-focus-within:text-[var(--primary)] 2xl:start-3.5 2xl:size-4" />
@@ -248,7 +249,7 @@ const RecentOrders: React.FC = () => {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder={t('common.search_cluster')}
-                className="h-full w-full rounded-2xl border border-[var(--border-main)] bg-[var(--bg-main)] py-1.5 ps-9 pe-9 text-xs font-bold text-[var(--text-main)] shadow-inner outline-none transition-all focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary)]/10 2xl:rounded-[1.5rem] 2xl:py-2 2xl:ps-11 2xl:pe-11 2xl:text-[15px]" 
+                className="h-full w-full rounded-2xl border border-[var(--bg-card-alt)] bg-[var(--bg-main)] py-1.5 ps-9 pe-9 text-xs font-bold text-[var(--text-main)] shadow-inner outline-none transition-all focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary)]/10 2xl:rounded-[1.5rem] 2xl:py-2 2xl:ps-11 2xl:pe-11 2xl:text-[15px]" 
               />
               {searchTerm && (
                 <button onClick={() => setSearchTerm("")} className="absolute end-2 top-1/2 -translate-y-1/2 rounded-full p-1 text-[var(--text-dim)] transition-colors hover:bg-red-500/10 hover:text-red-500 2xl:end-3 2xl:p-1.5">
@@ -436,6 +437,12 @@ const RecentOrders: React.FC = () => {
       </AnimatePresence>
     </div>
   );
+
+  if (isFullscreen) {
+    return createPortal(content, document.body);
+  }
+
+  return content;
 };
 
 export default RecentOrders;
