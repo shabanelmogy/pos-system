@@ -155,6 +155,27 @@
         "ready": "Ready",
         "completed": "Completed"
       }
+    },
+    "shortage": {
+      "tab_title": "Shortage Monitoring",
+      "total_shortages": "Total Shortages",
+      "total_overages": "Total Overages",
+      "net_variance": "Net Variance",
+      "tracking_title": "Shift Balance Tracking",
+      "tracking_desc": "Monitoring variance between system expected and staff counted cash.",
+      "closed_shifts": "Closed Shifts",
+      "open_shifts": "Active Shifts",
+      "all_shifts": "All Shifts",
+      "table": {
+        "shift_date": "Shift / Date",
+        "cashier_pos": "Cashier & POS",
+        "opening": "Opening Balance",
+        "cash_sales": "Cash Sales",
+        "expected": "Expected (Sales)",
+        "actual": "Actual (Counted)",
+        "variance": "Variance"
+      },
+      "no_discrepancies": "No shift discrepancies found for the selected filters."
     }
   }
 }

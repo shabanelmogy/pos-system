@@ -7,6 +7,7 @@ import RecentOrders from "../components/RecentOrders";
 import Management from "../components/Management";
 import CustomerList from "../../customers/components/CustomerList";
 import ManagementModal from "../components/ManagementModal";
+import ShortageMonitor from "../components/ShortageMonitor";
 import CustomDropdown from "../../../shared/components/CustomDropdown";
 import useAuth from "../../auth/hooks/useAuth";
 import { motion, AnimatePresence } from "framer-motion";
@@ -41,7 +42,7 @@ const Dashboard: React.FC = () => {
     { id: "Management", label: t('dashboard.tabs.management'), icon: <MdCategory /> },
     { id: "Customers", label: t('dashboard.tabs.customers'), icon: <FaUsers /> },
     { id: "Orders", label: t('dashboard.tabs.order_history'), icon: <FaHistory /> },
-    { id: "Payments", label: t('dashboard.tabs.transactions'), icon: <FaWallet /> },
+    { id: "Shortage", label: t('dashboard.shortage.tab_title'), icon: <FaWallet /> },
   ];
 
   const handleOpenModal = (action: string) => {
@@ -136,15 +137,7 @@ const Dashboard: React.FC = () => {
             {activeTab === "Management" && <Management />}
             {activeTab === "Customers" && <CustomerList />}
             {activeTab === "Orders" && <RecentOrders branchId={selectedBranchId} />}
-            {activeTab === "Payments" && (
-              <div className="bg-[var(--bg-card)] border border-[var(--border-main)] rounded-3xl p-20 flex flex-col items-center justify-center text-center">
-                <div className="w-20 h-20 bg-[var(--bg-card-alt)] rounded-full flex items-center justify-center mb-6 border border-[var(--border-main)]">
-                  <FaWallet className="text-[var(--text-muted)]" size={30} />
-                </div>
-                <h3 className="text-[var(--text-main)] text-xl font-bold">{t('dashboard.payments_soon')}</h3>
-                <p className="text-[var(--text-muted)] mt-2 max-w-sm">{t('dashboard.payments_soon_desc')}</p>
-              </div>
-            )}
+            {activeTab === "Shortage" && <ShortageMonitor branchId={selectedBranchId} />}
           </motion.div>
         </AnimatePresence>
       </div>

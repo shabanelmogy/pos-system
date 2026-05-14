@@ -6,7 +6,7 @@ import { createOrderSchema, updateOrderStatusSchema } from "./order.validation.j
 const orderController = {
   async getAll(req, res) {
     try {
-      let { branchId, posPointId, shiftId, cashierId, startDate, endDate } = req.query;
+      let { branchId, posPointId, shiftId, cashierId, startDate, endDate, customerId } = req.query;
       
       // 1. Fetch full user to check role
       const user = await userService.getUserById(req.user._id);
@@ -45,7 +45,8 @@ const orderController = {
           shiftId, 
           cashierId,
           startDate, 
-          endDate 
+          endDate,
+          customerId
       });
 
       res.status(200).json({ success: true, data: orders });

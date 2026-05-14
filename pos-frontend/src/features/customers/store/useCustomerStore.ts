@@ -4,16 +4,18 @@ import { persist, createJSONStorage } from "zustand/middleware";
 interface CustomerState {
   customerName: string;
   customerPhone: string;
+  customerId: string | null;
   guests: number;
   table: any;
   orderId: string;
 
-  setCustomer: (customerData: { name: string; phone: string; guests: number }) => void;
+  setCustomer: (customerData: { id?: string; name: string; phone: string; guests: number }) => void;
   setGuestCustomer: () => void;
   updateTable: (table: any) => void;
   setOrder: (orderData: { 
     customerName: string; 
     customerPhone: string; 
+    customerId?: string | null;
     table: any; 
     orderId: string; 
     guests: number 
@@ -26,6 +28,7 @@ const useCustomerStore = create<CustomerState>()(
     (set) => ({
       customerName: "",
       customerPhone: "",
+      customerId: null,
       guests: 0,
       table: null,
       orderId: "",
@@ -34,6 +37,7 @@ const useCustomerStore = create<CustomerState>()(
         set({
           customerName: customerData.name,
           customerPhone: customerData.phone,
+          customerId: customerData.id || null,
           guests: customerData.guests,
           orderId: 'new-' + Date.now(),
         }),
@@ -42,6 +46,7 @@ const useCustomerStore = create<CustomerState>()(
         set({
           customerName: "Guest",
           customerPhone: "0000000000",
+          customerId: null,
           guests: 1,
           orderId: 'guest-' + Date.now(),
         }),
@@ -52,6 +57,7 @@ const useCustomerStore = create<CustomerState>()(
         set({
           customerName: orderData.customerName,
           customerPhone: orderData.customerPhone,
+          customerId: orderData.customerId || null,
           table: orderData.table,
           orderId: orderData.orderId,
           guests: orderData.guests,
@@ -61,6 +67,7 @@ const useCustomerStore = create<CustomerState>()(
         set({
           customerName: "",
           customerPhone: "",
+          customerId: null,
           guests: 0,
           table: null,
           orderId: "",

@@ -1,4 +1,4 @@
-import { eq, and, sql } from "drizzle-orm";
+import { eq, and, sql, desc } from "drizzle-orm";
 import { shifts } from "./shift.schema.js";
 import { orders } from "../order/order.schema.js";
 import { branches } from "../branch/branch.schema.js";
@@ -122,6 +122,43 @@ const shiftRepository = {
       cashTotal: parseFloat(result[0]?.cashTotal || 0),
       cardTotal: parseFloat(result[0]?.cardTotal || 0)
     };
+  },
+
+  async findAll(filters = {}) {
+    const { branchId, posPointId, cashierId, startDate, endDate, status } = filters;
+    
+    const query = db.select({
+      shift: shifts,
+      branch: branches,
+      posPoint: posPoints,
+      cashier: users
+    })
+    .from(shifts)
+    .leftJoin(branches, eq(shifts.branchId, branches.id))
+    .leftJoin(posPoints, eq(shifts.posPointId, posPoints.id))
+    .leftJoin(users, eq(shifts.cashierId, users.id));
+
+    const conditions = [];
+    if (branchId) conditions.push(eq(shifts.branchId, branchId));
+    if (posPointId) conditions.push(eq(shifts.posPointId, posPointId));
+    if (cashierId) conditions.push(eq(shifts.cashierId, cashierId));
+    if (status) conditions.push(eq(shifts.status, status));
+    
+    if (startDate) conditions.push(sql`${shifts.openedAt} >= ${new Date(startDate)}`);
+    if (endDate) conditions.push(sql`${shifts.openedAt} <= ${new Date(endDate)}`);
+
+    if (conditions.length > 0) {
+      query.where(and(...conditions));
+    }
+
+    const rows = await query.orderBy(desc(shifts.openedAt));
+
+    return rows.map(r => ({
+      ...r.shift,
+      branch: r.branch,
+      posPoint: r.posPoint,
+      cashier: r.cashier
+    }));
   }
 };
 

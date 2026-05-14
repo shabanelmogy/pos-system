@@ -80,7 +80,7 @@ const CartInfo: React.FC = () => {
     setPhone(c.phone);
     setShowSuggestions(false);
     setShowPhoneSuggestions(false);
-    setCustomer({ name: c.name, phone: c.phone, guests: 1 });
+    setCustomer({ id: c.id, name: c.name, phone: c.phone, guests: 1 });
   };
 
   // Pre-fill if real customer is already set
@@ -237,7 +237,8 @@ const CartInfo: React.FC = () => {
                     onClick={async () => {
                       try {
                         const res = await addCustomer({ name: name.trim(), phone: phone.trim() });
-                        selectCustomer(res.data.data || res.data);
+                        const newCust = res.data.data;
+                        setCustomer({ id: newCust.id, name: newCust.name, phone: newCust.phone, guests: 1 });
                         setExpanded(false);
                       } catch (err: any) {
                         setError(err.response?.data?.message || "Failed to add customer");
@@ -323,7 +324,8 @@ const CartInfo: React.FC = () => {
               if (!name.trim() || !phone.trim()) { setError("Name and Phone are required"); return; }
               try {
                 const res = await addCustomer({ name: name.trim(), phone: phone.trim(), email: email.trim() });
-                selectCustomer(res.data.data || res.data);
+                const newCust = res.data.data;
+                setCustomer({ id: newCust.id, name: newCust.name, phone: newCust.phone, guests: 1 });
                 setIsFullModalOpen(false);
                 setExpanded(false);
                 setEmail("");

@@ -43,6 +43,16 @@ const shiftController = {
     } catch (error) {
       handleError(res, error, "shiftController.getActive");
     }
+  },
+
+  async getAll(req, res) {
+    try {
+      const filters = req.query;
+      const shifts = await shiftService.getAllShifts(filters);
+      res.status(200).json({ success: true, data: shifts });
+    } catch (error) {
+      handleError(res, error, "shiftController.getAll");
+    }
   }
 };
 

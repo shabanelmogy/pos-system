@@ -9,5 +9,6 @@ router.use(isVerifiedUser);
 router.post("/open", shiftController.open);
 router.post("/close/:id", shiftController.close);
 router.get("/active", shiftController.getActive);
+router.get("/", shiftController.getAll);
 
 export default router;

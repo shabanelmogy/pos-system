@@ -45,7 +45,10 @@ const TerminalSelector: React.FC = () => {
 
   // Filter terminals based on user permissions
   const filteredPOSPoints = (posPoints || []).filter(pos => {
-    if (isAdmin || posPermissions.length === 0) return true;
+    // Admins always see all terminals
+    if (isAdmin) return true;
+    
+    // Non-admins must have explicit permissions assigned
     return posPermissions.some(p => p.posPointId === pos.id);
   });
 
@@ -118,9 +121,15 @@ const TerminalSelector: React.FC = () => {
               ))}
               
               {filteredPOSPoints.length === 0 && (
-                <div className="col-span-full py-10 bg-[var(--bg-card)] border border-red-500/20 rounded-3xl text-center">
-                   <p className="text-red-500 font-black uppercase tracking-widest text-xs">Access Denied</p>
-                   <p className="text-[var(--text-muted)] text-sm mt-2">You are not authorized to use any terminals in this branch.</p>
+                <div className="col-span-full py-16 bg-[var(--bg-card)] border border-red-500/20 rounded-[2.5rem] text-center shadow-2xl">
+                   <div className="w-16 h-16 bg-red-500/10 text-red-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                      <MdLock size={32} />
+                   </div>
+                   <p className="text-red-500 font-black uppercase tracking-[0.2em] text-xs mb-2">Unauthorized Access</p>
+                   <h2 className="text-[var(--text-main)] text-xl font-black uppercase tracking-tight mb-4">No Assigned Terminal</h2>
+                   <p className="text-[var(--text-muted)] text-sm max-w-xs mx-auto font-medium">
+                     You are not related to any POS unit in this branch. Please contact your administrator to assign a terminal to your account.
+                   </p>
                 </div>
               )}
 

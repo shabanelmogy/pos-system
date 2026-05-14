@@ -4,6 +4,7 @@ import { z } from "zod";
 import { useState } from "react";
 import { openShift, closeShift } from "../../features/pos/api/posApi";
 import usePOSStore from "../../features/pos/store/usePOSStore";
+import useUserStore from "../../features/auth/store/useUserStore";
 import { enqueueSnackbar } from "notistack";
 import { Branch, POSPoint, Shift } from "../types";
 
@@ -86,6 +87,12 @@ const useShiftManager = (): ShiftManagerHook => {
       setActiveShift(null);
       setShowShiftModal(false);
       enqueueSnackbar("Shift closed successfully", { variant: "success" });
+
+      // Auto-logout for non-admin users (Cashiers, etc.)
+      const user = useUserStore.getState();
+      if (user.role?.toLowerCase() !== "admin") {
+        user.removeUser();
+      }
     } catch (error: any) {
       enqueueSnackbar(error.response?.data?.message || "Failed to close shift", { variant: "error" });
     } finally {

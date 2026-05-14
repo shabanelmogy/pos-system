@@ -5,7 +5,7 @@ import { RiAddFill, RiSubtractFill } from "react-icons/ri";
 import useCartStore from "../../store/useCartStore";
 import { getCategories, getItems } from "../../api/posApi";
 import { getOrders } from "../../../orders/api/orderApi";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Category, MenuItem } from "../../../../shared/types";
 import useUserStore from "../../../auth/store/useUserStore";
 import usePOSStore from "../../store/usePOSStore";
@@ -20,7 +20,7 @@ const MenuContainer: React.FC = () => {
   const { addItem } = useCartStore();
   const { name: userName, role: userRole } = useUserStore();
   const { selectedPOSPoint } = usePOSStore();
-  const { customerName, customerPhone } = useCustomerStore();
+  const { customerName, customerPhone, customerId } = useCustomerStore();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
@@ -28,9 +28,17 @@ const MenuContainer: React.FC = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
   
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
-  const [lastOrder, setLastOrder] = useState<any>(null);
 
   const isGuest = !customerName || customerName === "Guest";
+  const queryClient = useQueryClient();
+
+  // Force refetch when customer changes to ensure no "stale" history shows
+  useEffect(() => {
+    if (customerId) {
+      queryClient.invalidateQueries({ queryKey: ["customerLastOrder", customerId] });
+      queryClient.invalidateQueries({ queryKey: ["historyOrders", customerId] });
+    }
+  }, [customerId, queryClient]);
 
   // Clock Update
   useEffect(() => {
@@ -40,23 +48,27 @@ const MenuContainer: React.FC = () => {
 
   // Fetch Last Order for the SPECIFIC selected customer
   const { data: customerLastOrder } = useQuery({
-    queryKey: ["customerLastOrder", customerPhone],
+    queryKey: ["customerLastOrder", customerId, isGuest],
     queryFn: async () => {
-      if (isGuest || !customerPhone) return null;
-      const res = await getOrders({ phone: customerPhone, limit: 1 });
+      if (isGuest || !customerId) return null;
+      const res = await getOrders({ 
+        customerId, 
+        limit: 1 
+      });
       const orders = res.data.data || [];
-      const order = orders.length > 0 ? orders[0] : null;
-      setLastOrder(order);
-      return order;
+      return orders.length > 0 ? orders[0] : null;
     },
-    enabled: !isGuest && !!customerPhone,
+    enabled: !isGuest && !!customerId,
   });
 
-  // Global history for the modal
-  const { data: recentOrders } = useQuery({
-    queryKey: ["recentOrders"],
+  // History for the modal - Filters by selected customer if they exist
+  const { data: historyOrders } = useQuery({
+    queryKey: ["historyOrders", customerId, isGuest],
     queryFn: async () => {
-      const res = await getOrders({ limit: 10 });
+      const params = (isGuest || !customerId) 
+        ? { limit: 15 } 
+        : { customerId, limit: 15 };
+      const res = await getOrders(params);
       return res.data.data || [];
     },
   });
@@ -138,13 +150,13 @@ const MenuContainer: React.FC = () => {
   }, [categories, selectedCategory]);
 
   const { data: items, isLoading: itemsLoading } = useQuery({
-    queryKey: ["items", selectedCategory?.id],
+    queryKey: ["items", selectedCategory?.id, searchTerm],
     queryFn: async () => {
-      if (!selectedCategory) return [];
-      const res = await getItems(selectedCategory.id);
+      // If there is a search term, fetch ALL items (Global Search)
+      const res = await getItems(searchTerm ? undefined : selectedCategory?.id);
       return res.data.data as MenuItem[];
     },
-    enabled: !!selectedCategory,
+    enabled: !!selectedCategory || !!searchTerm,
   });
 
   const increment = (id: string) => {
@@ -190,18 +202,36 @@ const MenuContainer: React.FC = () => {
 
   return (
     <>
-      {/* ── Top Actions / Order Context Bar ── */}
       <div className="flex items-center justify-between px-6 py-3 bg-[var(--bg-card-alt)] border-b border-[var(--border-main)] backdrop-blur-md sticky top-0 z-[40]">
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-6 flex-1">
+          {/* Global Search Bar */}
+          <div className="relative group w-full max-w-md">
+            <FaSearch className="absolute start-4 top-1/2 -translate-y-1/2 text-[var(--text-dim)] group-focus-within:text-[var(--primary)] transition-colors text-sm" />
+            <input
+              type="text"
+              placeholder={`Search anywhere in menu...`}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full bg-[var(--bg-input)] border border-[var(--border-main)] focus:border-[var(--primary)]/60 text-[var(--text-main)] text-sm rounded-xl ps-11 pe-10 py-2.5 outline-none transition-all placeholder-[var(--text-dim)] font-bold shadow-sm"
+            />
+            {searchTerm && (
+              <button
+                onClick={() => setSearchTerm("")}
+                className="absolute end-4 top-1/2 -translate-y-1/2 text-[var(--text-dim)] hover:text-[var(--text-main)] transition-colors text-xs"
+              >
+                ✕
+              </button>
+            )}
+          </div>
           {/* Last Order Shortcut - ONLY for selected customers (not guest) */}
-          {!isGuest && lastOrder && (
+          {!isGuest && customerLastOrder && (
             <div className="flex items-center gap-3 bg-[var(--bg-card)] px-3 py-1.5 rounded-xl border border-[var(--border-main)] shadow-sm animate-in fade-in slide-in-from-left-2 duration-300">
                <div className="flex flex-col">
                   <span className="text-[9px] text-[var(--text-dim)] font-black uppercase tracking-widest">Customer's Last Order</span>
-                  <span className="text-xs font-black text-[var(--text-main)]">₹{lastOrder.totalAmount} • {lastOrder.orderNumber}</span>
+                  <span className="text-xs font-black text-[var(--text-main)]">₹{customerLastOrder.totalAmount} • {customerLastOrder.orderNumber}</span>
                </div>
                <button 
-                onClick={() => handleDuplicateOrder(lastOrder)}
+                onClick={() => handleDuplicateOrder(customerLastOrder)}
                 className="flex items-center gap-1.5 bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-black text-[10px] font-black px-2.5 py-1.5 rounded-lg transition-all active:scale-95 shadow-sm"
                 title="Repeat this order"
                >
@@ -243,13 +273,17 @@ const MenuContainer: React.FC = () => {
                  <FaHistory size={20} />
               </div>
               <div>
-                 <h2 className="text-[var(--text-main)] text-lg font-black uppercase tracking-tighter">Recent Orders</h2>
-                 <p className="text-[var(--text-dim)] text-[10px] font-bold uppercase tracking-widest">Select to duplicate or view</p>
+                 <h2 className="text-[var(--text-main)] text-lg font-black uppercase tracking-tighter">
+                   {isGuest ? "Recent Orders" : `History: ${customerName}`}
+                 </h2>
+                 <p className="text-[var(--text-dim)] text-[10px] font-bold uppercase tracking-widest">
+                   {isGuest ? "Global order history" : `Past orders for this customer`}
+                 </p>
               </div>
            </div>
 
            <div className="space-y-3">
-              {recentOrders?.map((order: any) => (
+              {historyOrders?.map((order: any) => (
                 <div key={order.id} className="bg-[var(--bg-card-alt)] border border-[var(--border-main)] rounded-2xl p-4 hover:border-[var(--primary)]/40 transition-all group">
                    <div className="flex items-center justify-between mb-3">
                       <div className="flex flex-col">
@@ -329,28 +363,6 @@ const MenuContainer: React.FC = () => {
         >
           <MdChevronRight size={20} />
         </button>
-      </div>
-
-      {/* ── Search Bar ── */}
-      <div className="px-6 py-4">
-        <div className="relative group">
-          <FaSearch className="absolute start-4 top-1/2 -translate-y-1/2 text-[var(--text-dim)] group-focus-within:text-[var(--primary)] transition-colors text-sm" />
-          <input
-            type="text"
-            placeholder={`Search in ${selectedCategory?.name || "menu"}…`}
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-[var(--bg-input)] border border-[var(--border-main)] focus:border-[var(--primary)]/60 text-[var(--text-main)] text-sm rounded-xl ps-11 pe-10 py-2.5 outline-none transition-all placeholder-[var(--text-dim)]"
-          />
-          {searchTerm && (
-            <button
-              onClick={() => setSearchTerm("")}
-              className="absolute end-4 top-1/2 -translate-y-1/2 text-[var(--text-dim)] hover:text-[var(--text-main)] transition-colors text-xs"
-            >
-              ✕
-            </button>
-          )}
-        </div>
       </div>
 
       {/* ── Items Grid ── */}

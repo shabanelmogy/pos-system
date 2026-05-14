@@ -60,6 +60,10 @@ const shiftService = {
 
   async getActiveShift(posPointId) {
     return await shiftRepository.findActiveShift(posPointId);
+  },
+
+  async getAllShifts(filters = {}) {
+    return await shiftRepository.findAll(filters);
   }
 };
 

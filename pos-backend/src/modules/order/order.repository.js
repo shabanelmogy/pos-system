@@ -9,7 +9,7 @@ import { db } from "../../config/database.js";
 
 const orderRepository = {
   async findAll(filters = {}) {
-    const { branchId, posPointId, shiftId, cashierId, startDate, endDate } = filters;
+    const { branchId, posPointId, shiftId, cashierId, startDate, endDate, customerId } = filters;
 
     const rows = await db
       .select({
@@ -30,16 +30,14 @@ const orderRepository = {
         if (posPointId) conditions.push(eq(orders.posPointId, posPointId));
         if (shiftId) conditions.push(eq(orders.shiftId, shiftId));
         if (cashierId) conditions.push(eq(orders.cashierId, cashierId));
+        if (customerId && customerId !== "null" && customerId !== "undefined") {
+            conditions.push(eq(orders.customerId, customerId));
+        }
         
-        if (startDate) {
-            conditions.push(sql`${orders.createdAt} >= ${new Date(startDate)}`);
-        }
-        if (endDate) {
-            conditions.push(sql`${orders.createdAt} <= ${new Date(endDate)}`);
-        }
+        if (startDate) conditions.push(sql`${orders.createdAt} >= ${new Date(startDate)}`);
+        if (endDate) conditions.push(sql`${orders.createdAt} <= ${new Date(endDate)}`);
 
         if (conditions.length === 0) return undefined;
-        if (conditions.length === 1) return conditions[0];
         return and(...conditions);
       })
       .orderBy(desc(orders.createdAt));

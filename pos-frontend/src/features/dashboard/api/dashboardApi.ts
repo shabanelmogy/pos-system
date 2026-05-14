@@ -27,6 +27,7 @@ export const getTables = () => axiosWrapper.get<{ data: Table[] }>("/api/table")
 export const getUsers = () => axiosWrapper.get<{ data: User[] }>("/api/user");
 export const getCustomers = () => axiosWrapper.get<{ data: any[] }>("/api/customer");
 export const getOrders = () => axiosWrapper.get<{ data: any[] }>("/api/order");
+export const getShifts = (params: any = {}) => axiosWrapper.get<{ data: any[] }>("/api/shift", { params });
 export const updateOrderStatus = ({ orderId, orderStatus }: { orderId: string; orderStatus: string }) => 
     axiosWrapper.put(`/api/order/status/${orderId}`, { orderStatus });
 
