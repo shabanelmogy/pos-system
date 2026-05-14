@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
-import { motion } from "framer-motion";
-import { IoMdClose } from "react-icons/io";
+import { motion, AnimatePresence } from "framer-motion";
+import { IoMdClose, IoMdArrowDropdown } from "react-icons/io";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { 
   addTable, addCategory, addItem, updateItem, updateCategory, getCategories,
@@ -26,6 +26,8 @@ const ManagementModal: React.FC<ManagementModalProps> = ({ type, isOpen, onClose
   const isEdit = !!initialData;
   const firstInputRef = useRef<HTMLInputElement>(null);
   const [selectedPOSPoints, setSelectedPOSPoints] = useState<string[]>([]);
+  const [posSearchQuery, setPosSearchQuery] = useState("");
+  const [showTerminals, setShowTerminals] = useState(false);
 
   const { register, handleSubmit, setValue, watch, errors } = useManagementForm(type, initialData, isOpen);
 
@@ -55,9 +57,12 @@ const ManagementModal: React.FC<ManagementModalProps> = ({ type, isOpen, onClose
     if (isOpen) {
       setTimeout(() => firstInputRef.current?.focus(), 100);
       if (type === "user" && initialData?.posPermissions) {
-        setSelectedPOSPoints(initialData.posPermissions.map((p: any) => p.posPointId));
+        const ids = initialData.posPermissions.map((p: any) => p.posPointId);
+        setSelectedPOSPoints(ids);
+        setShowTerminals(ids.length > 0);
       } else {
         setSelectedPOSPoints([]);
+        setShowTerminals(false);
       }
     }
   }, [isOpen, initialData, type]);
@@ -140,172 +145,247 @@ const ManagementModal: React.FC<ManagementModalProps> = ({ type, isOpen, onClose
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[250] p-4">
+    <div className="fixed inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center z-[250] p-4 sm:p-6">
       <motion.div
-        initial={{ opacity: 0, scale: 0.9, y: 20 }}
+        initial={{ opacity: 0, scale: 0.95, y: 30 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        className="bg-[var(--bg-card-alt)] p-6 rounded-3xl shadow-2xl w-full max-w-xl border border-[var(--border-main)] max-h-[90vh] overflow-y-auto custom-scrollbar relative"
+        className={`bg-[var(--bg-card-alt)] rounded-[2.5rem] shadow-[0_0_100px_rgba(0,0,0,0.5)] w-full ${type === "user" ? "max-w-3xl" : "max-w-xl"} border border-[var(--border-main)] flex flex-col relative overflow-hidden max-h-[90vh]`}
       >
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-[var(--text-main)] text-2xl font-black uppercase tracking-tighter">
-            {getModalTitle()}
-          </h2>
-          <button onClick={onClose} className="p-2 hover:bg-[var(--border-main)] rounded-full text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors">
+        {/* Header */}
+        <div className="px-8 py-6 border-b border-[var(--border-main)]/50 flex justify-between items-center bg-[var(--bg-card-alt)]/50 backdrop-blur-xl z-10">
+          <div className="flex items-center gap-4">
+             <div className={`p-3 rounded-2xl ${type === 'user' ? 'bg-blue-500/10 text-blue-500' : 'bg-[var(--primary)]/10 text-[var(--primary)]'}`}>
+                {type === 'user' ? <MdPerson size={24} /> : type === 'branch' ? <MdStore size={24} /> : <MdCategory size={24} />}
+             </div>
+             <div>
+               <p className="text-[var(--text-dim)] text-[9px] font-black uppercase tracking-[0.3em] mb-0.5">{isEdit ? "Secure Update" : "Registration"}</p>
+               <h2 className="text-[var(--text-main)] text-2xl font-black uppercase tracking-tight">
+                 {getModalTitle()}
+               </h2>
+             </div>
+          </div>
+          <button 
+            onClick={onClose} 
+            className="w-10 h-10 hover:bg-[var(--border-main)] rounded-xl flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-main)] transition-all"
+          >
             <IoMdClose size={24} />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit(onSubmitHandler)} className="space-y-4">
-          {type === "user" && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-3">
-                <div>
-                  <label className="flex items-center gap-2 text-[var(--text-muted)] text-[9px] font-black uppercase tracking-widest mb-1.5"><MdPerson /> {t('dashboard.management.modal.full_name')}</label>
-                  <input {...register("name")} ref={(e) => { 
-                    register("name").ref(e); 
-                    // @ts-ignore
-                    firstInputRef.current = e; 
-                  }} type="text" className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-xl p-3 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-colors font-bold text-sm" />
-                  {errors.name && <span className="text-[9px] text-red-500 font-bold">{errors.name.message as string}</span>}
+        {/* Content Area */}
+        <div className="flex-1 overflow-y-auto custom-scrollbar p-8">
+          <form id="management-form" onSubmit={handleSubmit(onSubmitHandler)} className="space-y-8">
+            {type === "user" && (
+              <div className="space-y-8">
+                {/* Profile Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-5">
+                    <div className="group">
+                      <label className="flex items-center gap-2 text-[var(--text-dim)] text-[9px] font-black uppercase tracking-widest mb-2 px-1"><MdPerson /> {t('dashboard.management.modal.full_name')}</label>
+                      <input {...register("name")} ref={(e) => { 
+                        register("name").ref(e); 
+                        if (e) firstInputRef.current = e; 
+                      }} type="text" className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-2xl p-4 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-all font-bold text-sm shadow-inner" />
+                      {errors.name && <span className="text-[9px] text-red-500 font-bold mt-2 block">{errors.name.message as string}</span>}
+                    </div>
+                    <div className="group">
+                      <label className="flex items-center gap-2 text-[var(--text-dim)] text-[9px] font-black uppercase tracking-widest mb-2 px-1"><MdEmail /> {t('dashboard.management.modal.email')}</label>
+                      <input {...register("email")} type="email" className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-2xl p-4 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-all text-sm font-bold shadow-inner" />
+                      {errors.email && <span className="text-[9px] text-red-500 font-bold mt-2 block">{errors.email.message as string}</span>}
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-5">
+                    <div className="group">
+                      <label className="flex items-center gap-2 text-[var(--text-dim)] text-[9px] font-black uppercase tracking-widest mb-2 px-1"><MdPhone /> {t('dashboard.management.modal.phone')}</label>
+                      <input {...register("phone")} type="text" className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-2xl p-4 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-all text-sm font-bold shadow-inner" />
+                      {errors.phone && <span className="text-[9px] text-red-500 font-bold mt-2 block">{errors.phone.message as string}</span>}
+                    </div>
+                    <div className="group">
+                      <label className="flex items-center gap-2 text-[var(--text-dim)] text-[9px] font-black uppercase tracking-widest mb-2 px-1"><MdLock /> {isEdit ? t('dashboard.management.modal.new_password') : t('dashboard.management.modal.security_password')}</label>
+                      <input {...register("password")} type="password" placeholder={isEdit ? t('dashboard.management.modal.optional') : ""} className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-2xl p-4 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-all text-sm font-bold shadow-inner" />
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <label className="flex items-center gap-2 text-[var(--text-muted)] text-[9px] font-black uppercase tracking-widest mb-1.5"><MdEmail /> {t('dashboard.management.modal.email')}</label>
-                  <input {...register("email")} type="email" className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-xl p-3 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-colors text-sm" />
-                  {errors.email && <span className="text-[9px] text-red-500 font-bold">{errors.email.message as string}</span>}
-                </div>
-                <div>
-                  <label className="flex items-center gap-2 text-[var(--text-muted)] text-[9px] font-black uppercase tracking-widest mb-1.5"><MdPhone /> {t('dashboard.management.modal.phone')}</label>
-                  <input {...register("phone")} type="text" className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-xl p-3 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-colors text-sm" />
-                  {errors.phone && <span className="text-[9px] text-red-500 font-bold">{errors.phone.message as string}</span>}
-                </div>
-                <div>
-                  <label className="flex items-center gap-2 text-[var(--text-muted)] text-[9px] font-black uppercase tracking-widest mb-1.5"><MdLock /> {isEdit ? t('dashboard.management.modal.new_password') : t('dashboard.management.modal.security_password')}</label>
-                  <input {...register("password")} type="password" placeholder={isEdit ? t('dashboard.management.modal.optional') : ""} className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-xl p-3 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-colors text-sm" />
-                  {errors.password && <span className="text-[9px] text-red-500 font-bold">{errors.password.message as string}</span>}
-                </div>
-              </div>
 
-              <div className="space-y-3">
-                <div>
-                  <label className="flex items-center gap-2 text-[var(--text-muted)] text-[9px] font-black uppercase tracking-widest mb-1.5"><MdShield /> {t('dashboard.management.modal.role')}</label>
-                  <CustomDropdown options={[{id: "cashier", name: t('dashboard.management.modal.roles.cashier')}, {id: "manager", name: t('dashboard.management.modal.roles.manager')}, {id: "admin", name: t('dashboard.management.modal.roles.admin')}]} value={watchedRole} onChange={(val) => setValue("role", val)} placeholder={t('dashboard.management.modal.select_role')} />
+                {/* Role & Branch */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-[var(--bg-card)]/50 p-6 rounded-3xl border border-[var(--border-main)]">
+                  <div className="group">
+                    <label className="flex items-center gap-2 text-[var(--text-dim)] text-[9px] font-black uppercase tracking-widest mb-2 px-1"><MdShield /> {t('dashboard.management.modal.role')}</label>
+                    <CustomDropdown options={[{id: "cashier", name: t('dashboard.management.modal.roles.cashier')}, {id: "manager", name: t('dashboard.management.modal.roles.manager')}, {id: "admin", name: t('dashboard.management.modal.roles.admin')}]} value={watchedRole} onChange={(val) => setValue("role", val)} placeholder={t('dashboard.management.modal.select_role')} />
+                  </div>
+                  <div className="group">
+                    <label className="flex items-center gap-2 text-[var(--text-dim)] text-[9px] font-black uppercase tracking-widest mb-2 px-1"><MdStore /> {t('dashboard.management.modal.assigned_branch')}</label>
+                    <CustomDropdown options={branches || []} value={watchedBranchId} onChange={(val) => setValue("branchId", val)} placeholder={t('dashboard.management.modal.select_branch')} />
+                  </div>
                 </div>
-                <div>
-                  <label className="flex items-center gap-2 text-[var(--text-muted)] text-[9px] font-black uppercase tracking-widest mb-1.5"><MdStore /> {t('dashboard.management.modal.assigned_branch')}</label>
-                  <CustomDropdown options={branches || []} value={watchedBranchId} onChange={(val) => setValue("branchId", val)} placeholder={t('dashboard.management.modal.select_branch')} />
-                </div>
+
+                {/* Collapsible Terminal Section */}
                 {watchedBranchId && (
-                  <div className="bg-[var(--bg-card)] p-4 rounded-2xl border border-[var(--border-main)]">
-                    <label className="flex items-center gap-2 text-[var(--text-muted)] text-[9px] font-black uppercase tracking-widest mb-3"><MdComputer /> {t('dashboard.management.modal.restricted_terminals')}</label>
-                    <div className="space-y-2 max-h-40 overflow-y-auto custom-scrollbar pr-2">
-                       {(branchPOSPoints || []).map((pos: any) => (
-                         <label key={pos.id} className="flex items-center gap-3 cursor-pointer group">
-                           <input 
-                             type="radio" 
-                             name="posSelection"
-                             checked={selectedPOSPoints.includes(pos.id)} 
-                             onChange={() => togglePOSSelection(pos.id)} 
-                             className="w-4 h-4 border-[var(--border-main)] bg-[var(--bg-card-alt)] text-[var(--primary)] focus:ring-[var(--primary)]" 
-                           />
-                           <span className="text-xs text-[var(--text-muted)] group-hover:text-[var(--text-main)] transition-colors font-bold uppercase tracking-tight">{pos.name}</span>
-                         </label>
-                       ))}
+                  <div className={`overflow-hidden transition-all duration-500 ease-in-out ${showTerminals ? 'max-h-[800px] opacity-100' : 'max-h-20 opacity-90'}`}>
+                    <div className="bg-[var(--bg-card)] rounded-3xl border border-[var(--border-main)] overflow-hidden shadow-2xl">
+                      <button 
+                        type="button"
+                        onClick={() => setShowTerminals(!showTerminals)}
+                        className="w-full px-8 py-5 flex items-center justify-between hover:bg-[var(--bg-card-alt)] transition-colors group"
+                      >
+                         <div className="flex items-center gap-4">
+                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${showTerminals ? 'bg-[var(--primary)]/20 text-[var(--primary)]' : 'bg-[var(--text-dim)]/10 text-[var(--text-dim)]'}`}>
+                               <MdComputer size={20} />
+                            </div>
+                            <div className="text-left">
+                               <p className="text-[var(--text-main)] text-xs font-black uppercase tracking-widest leading-none mb-1">Terminal Restrictions</p>
+                               <p className="text-[var(--text-dim)] text-[10px] font-bold">
+                                 {selectedPOSPoints.length > 0 ? "1 Terminal Linked" : "No Terminals Assigned"}
+                               </p>
+                            </div>
+                         </div>
+                         <div className={`transition-transform duration-300 ${showTerminals ? 'rotate-180' : ''}`}>
+                            <IoMdArrowDropdown size={24} />
+                         </div>
+                      </button>
+
+                      <AnimatePresence>
+                        {showTerminals && (
+                          <motion.div 
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: "auto", opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            className="px-8 pb-8 space-y-6 overflow-hidden"
+                          >
+                            <div className="relative group">
+                              <input 
+                                type="text" 
+                                placeholder="Search terminals..." 
+                                value={posSearchQuery}
+                                onChange={(e) => setPosSearchQuery(e.target.value)}
+                                className="w-full bg-[var(--bg-card-alt)] border border-[var(--border-main)] rounded-2xl px-5 py-4 text-xs text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-all font-bold placeholder:text-[var(--text-dim)] shadow-inner"
+                              />
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-h-[300px] overflow-y-auto custom-scrollbar pr-2">
+                               {(branchPOSPoints || [])
+                                .filter((pos: any) => pos.name.toLowerCase().includes(posSearchQuery.toLowerCase()) || pos.code.toLowerCase().includes(posSearchQuery.toLowerCase()))
+                                .map((pos: any) => (
+                                 <label key={pos.id} className={`flex items-center gap-4 cursor-pointer group p-4 rounded-2xl border-2 transition-all ${selectedPOSPoints.includes(pos.id) ? 'bg-[var(--primary)]/5 border-[var(--primary)]' : 'bg-transparent border-[var(--border-main)] hover:border-[var(--text-dim)]'}`}>
+                                   <input type="radio" name="posSelection" checked={selectedPOSPoints.includes(pos.id)} onChange={() => togglePOSSelection(pos.id)} className="w-4 h-4 text-[var(--primary)] focus:ring-[var(--primary)] bg-[var(--bg-card-alt)] border-[var(--border-main)]" />
+                                   <div className="flex flex-col">
+                                     <span className={`text-[10px] font-black uppercase tracking-tight leading-none mb-1 ${selectedPOSPoints.includes(pos.id) ? 'text-[var(--primary)]' : 'text-[var(--text-muted)] group-hover:text-[var(--text-main)]'}`}>{pos.name}</span>
+                                     <span className="text-[8px] text-[var(--text-dim)] font-bold">{pos.code}</span>
+                                   </div>
+                                 </label>
+                               ))}
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     </div>
                   </div>
                 )}
               </div>
-            </div>
-          )}
+            )}
 
-          {type === "table" && (
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-[var(--text-muted)] text-[9px] font-black uppercase tracking-widest mb-1.5">{t('dashboard.management.modal.table_no')}</label>
-                <input {...register("tableNo")} ref={(e) => { 
-                  register("tableNo").ref(e); 
-                  // @ts-ignore
-                  firstInputRef.current = e; 
-                }} type="number" className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-xl p-3 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-colors text-lg font-black" />
-                {errors.tableNo && <span className="text-[9px] text-red-500 font-bold">{errors.tableNo.message as string}</span>}
-              </div>
-              <div>
-                <label className="block text-[var(--text-muted)] text-[9px] font-black uppercase tracking-widest mb-1.5">{t('dashboard.management.modal.seats')}</label>
-                <input {...register("seats")} type="number" className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-xl p-3 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-colors text-lg font-black" />
-                {errors.seats && <span className="text-[9px] text-red-500 font-bold">{errors.seats.message as string}</span>}
-              </div>
-            </div>
-          )}
-
-          {(type === "category" || type === "dishes" || type === "branch" || type === "posPoint") && (
-            <div>
-              <label className="block text-[var(--text-muted)] text-[9px] font-black uppercase tracking-widest mb-1.5">{type === "posPoint" ? t('dashboard.management.modal.terminal_name') : t('dashboard.management.modal.name')}</label>
-              <input {...register("name")} ref={(e) => { 
-                register("name").ref(e); 
-                // @ts-ignore
-                firstInputRef.current = e; 
-              }} type="text" className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-xl p-3 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-colors font-bold uppercase tracking-tighter text-sm" />
-              {errors.name && <span className="text-[9px] text-red-500 font-bold">{errors.name.message as string}</span>}
-            </div>
-          )}
-
-          {(type === "branch" || type === "posPoint") && (
-            <div>
-              <label className="block text-[var(--text-muted)] text-[9px] font-black uppercase tracking-widest mb-1.5">{t('dashboard.management.modal.unique_code')}</label>
-              <input {...register("code")} type="text" placeholder={type === 'branch' ? 'e.g. BR-01' : 'e.g. POS-01'} className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-xl p-3 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-colors font-mono text-sm" />
-              {errors.code && <span className="text-[9px] text-red-500 font-bold">{errors.code.message as string}</span>}
-            </div>
-          )}
-
-          {type === "branch" && (
-            <>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-[var(--text-muted)] text-[9px] font-black uppercase tracking-widest mb-1.5">{t('dashboard.management.modal.city')}</label>
-                  <input {...register("city")} type="text" className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-xl p-3 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-colors text-sm" />
+            {type === "table" && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-lg mx-auto py-10">
+                <div className="group">
+                  <label className="block text-[var(--text-dim)] text-[9px] font-black uppercase tracking-widest mb-3 px-1">{t('dashboard.management.modal.table_no')}</label>
+                  <input {...register("tableNo")} ref={(e) => { 
+                    register("tableNo").ref(e); 
+                    if (e) firstInputRef.current = e; 
+                  }} type="number" className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-2xl p-5 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-all text-2xl font-black shadow-inner" />
+                  {errors.tableNo && <span className="text-[9px] text-red-500 font-bold mt-2 block">{errors.tableNo.message as string}</span>}
                 </div>
-                <div>
-                  <label className="block text-[var(--text-muted)] text-[9px] font-black uppercase tracking-widest mb-1.5">{t('dashboard.management.modal.phone')}</label>
-                  <input {...register("phone")} type="text" className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-xl p-3 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-colors text-sm" />
+                <div className="group">
+                  <label className="block text-[var(--text-dim)] text-[9px] font-black uppercase tracking-widest mb-3 px-1">{t('dashboard.management.modal.seats')}</label>
+                  <input {...register("seats")} type="number" className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-2xl p-5 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-all text-2xl font-black shadow-inner" />
+                  {errors.seats && <span className="text-[9px] text-red-500 font-bold mt-2 block">{errors.seats.message as string}</span>}
                 </div>
               </div>
-              <div>
-                <label className="block text-[var(--text-muted)] text-[9px] font-black uppercase tracking-widest mb-1.5">{t('dashboard.management.modal.address')}</label>
-                <textarea {...register("address")} className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-xl p-3 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-colors h-20 custom-scrollbar text-sm" />
-              </div>
-            </>
-          )}
+            )}
 
-          {type === "posPoint" && (
-            <div>
-              <label className="block text-[var(--text-muted)] text-[9px] font-black uppercase tracking-widest mb-1.5">{t('dashboard.management.modal.assign_branch')}</label>
-              <CustomDropdown options={branches || []} value={watchedBranchId} onChange={(val) => setValue("branchId", val)} icon={<MdStore />} placeholder={t('dashboard.management.modal.select_branch')} />
-              {errors.branchId && <span className="text-[9px] text-red-500 font-bold">{errors.branchId.message as string}</span>}
-            </div>
-          )}
+            {(type === "category" || type === "dishes" || type === "branch" || type === "posPoint") && (
+              <div className="space-y-8 max-w-lg mx-auto py-10">
+                <div className="group">
+                  <label className="block text-[var(--text-dim)] text-[9px] font-black uppercase tracking-widest mb-3 px-1">{type === "posPoint" ? t('dashboard.management.modal.terminal_name') : t('dashboard.management.modal.name')}</label>
+                  <input {...register("name")} ref={(e) => { 
+                    register("name").ref(e); 
+                    if (e) firstInputRef.current = e; 
+                  }} type="text" className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-2xl p-5 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-all font-black uppercase tracking-tighter text-xl shadow-inner" />
+                  {errors.name && <span className="text-[9px] text-red-500 font-bold mt-2 block">{errors.name.message as string}</span>}
+                </div>
 
-          {type === "dishes" && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-[var(--text-muted)] text-[9px] font-black uppercase tracking-widest mb-1.5">{t('dashboard.management.modal.price')} (₹)</label>
-                <input {...register("price")} type="number" className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-xl p-3 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-colors text-xl font-black italic" />
-                {errors.price && <span className="text-[9px] text-red-500 font-bold">{errors.price.message as string}</span>}
-              </div>
-              <div>
-                <label className="block text-[var(--text-muted)] text-[9px] font-black uppercase tracking-widest mb-1.5">{t('dashboard.management.modal.category')}</label>
-                <CustomDropdown options={categories || []} value={watch("categoryId")} onChange={(val) => setValue("categoryId", val)} icon={<MdCategory />} placeholder={t('dashboard.management.modal.select_category')} />
-                {errors.categoryId && <span className="text-[9px] text-red-500 font-bold">{errors.categoryId.message as string}</span>}
-              </div>
-            </div>
-          )}
+                {(type === "branch" || type === "posPoint") && (
+                  <div className="group">
+                    <label className="block text-[var(--text-dim)] text-[9px] font-black uppercase tracking-widest mb-3 px-1">{t('dashboard.management.modal.unique_code')}</label>
+                    <input {...register("code")} type="text" placeholder={type === 'branch' ? 'e.g. BR-01' : 'e.g. POS-01'} className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-2xl p-5 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-all font-mono text-base shadow-inner" />
+                    {errors.code && <span className="text-[9px] text-red-500 font-bold mt-2 block">{errors.code.message as string}</span>}
+                  </div>
+                )}
 
-          <button
-            type="submit"
-            disabled={mutation.isPending}
-            className="w-full bg-[var(--primary)] text-[var(--bg-card)] font-black py-4 rounded-xl mt-2 hover:bg-yellow-600 transition-all uppercase tracking-[0.3em] shadow-2xl shadow-yellow-500/20 disabled:opacity-50 text-[10px]"
-          >
-            {mutation.isPending ? t('dashboard.management.modal.syncing') : `${isEdit ? t('dashboard.management.modal.update') : t('dashboard.management.modal.register')} ${type === "dishes" ? t('dashboard.management.modal.dish') : type === "posPoint" ? t('dashboard.management.modal.terminal') : type === "user" ? t('dashboard.management.modal.staff') : type}`}
-          </button>
-        </form>
+                {type === "branch" && (
+                  <>
+                    <div className="grid grid-cols-2 gap-6">
+                      <div className="group">
+                        <label className="block text-[var(--text-dim)] text-[9px] font-black uppercase tracking-widest mb-3 px-1">{t('dashboard.management.modal.city')}</label>
+                        <input {...register("city")} type="text" className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-2xl p-4 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-all text-sm font-bold shadow-inner" />
+                      </div>
+                      <div className="group">
+                        <label className="block text-[var(--text-dim)] text-[9px] font-black uppercase tracking-widest mb-3 px-1">{t('dashboard.management.modal.phone')}</label>
+                        <input {...register("phone")} type="text" className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-2xl p-4 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-all text-sm font-bold shadow-inner" />
+                      </div>
+                    </div>
+                    <div className="group">
+                      <label className="block text-[var(--text-dim)] text-[9px] font-black uppercase tracking-widest mb-3 px-1">{t('dashboard.management.modal.address')}</label>
+                      <textarea {...register("address")} className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-2xl p-5 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-all h-24 custom-scrollbar text-sm shadow-inner" />
+                    </div>
+                  </>
+                )}
+
+                {type === "posPoint" && (
+                  <div className="group">
+                    <label className="block text-[var(--text-dim)] text-[9px] font-black uppercase tracking-widest mb-3 px-1">{t('dashboard.management.modal.assign_branch')}</label>
+                    <CustomDropdown options={branches || []} value={watchedBranchId} onChange={(val) => setValue("branchId", val)} icon={<MdStore />} placeholder={t('dashboard.management.modal.select_branch')} />
+                    {errors.branchId && <span className="text-[9px] text-red-500 font-bold mt-2 block">{errors.branchId.message as string}</span>}
+                  </div>
+                )}
+
+                {type === "dishes" && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="group">
+                      <label className="block text-[var(--text-dim)] text-[9px] font-black uppercase tracking-widest mb-3 px-1">{t('dashboard.management.modal.price')} (₹)</label>
+                      <input {...register("price")} type="number" className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-2xl p-5 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-all text-2xl font-black shadow-inner" />
+                      {errors.price && <span className="text-[9px] text-red-500 font-bold mt-2 block">{errors.price.message as string}</span>}
+                    </div>
+                    <div className="group">
+                      <label className="block text-[var(--text-dim)] text-[9px] font-black uppercase tracking-widest mb-3 px-1">{t('dashboard.management.modal.category')}</label>
+                      <CustomDropdown options={categories || []} value={watch("categoryId")} onChange={(val) => setValue("categoryId", val)} icon={<MdCategory />} placeholder={t('dashboard.management.modal.select_category')} />
+                      {errors.categoryId && <span className="text-[9px] text-red-500 font-bold mt-2 block">{errors.categoryId.message as string}</span>}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </form>
+        </div>
+
+        {/* Footer */}
+        <div className="px-8 py-6 border-t border-[var(--border-main)]/50 bg-[var(--bg-card)]/50 flex gap-4">
+           <button 
+             type="button" 
+             onClick={onClose}
+             className="flex-1 px-8 py-4 text-[var(--text-muted)] hover:text-[var(--text-main)] font-black text-[10px] uppercase tracking-widest transition-all hover:bg-[var(--border-main)] rounded-2xl"
+           >
+             Cancel
+           </button>
+           <button
+             form="management-form"
+             type="submit"
+             disabled={mutation.isPending}
+             className="flex-[2] bg-[var(--primary)] text-[var(--bg-card)] font-black px-12 py-4 rounded-2xl transition-all uppercase tracking-[0.3em] shadow-2xl shadow-[var(--primary)]/20 disabled:opacity-50 text-[11px] hover:scale-[1.02] active:scale-[0.98]"
+           >
+             {mutation.isPending ? t('dashboard.management.modal.syncing') : `${isEdit ? t('dashboard.management.modal.update') : t('dashboard.management.modal.register')} ${type}`}
+           </button>
+        </div>
       </motion.div>
     </div>
   );
