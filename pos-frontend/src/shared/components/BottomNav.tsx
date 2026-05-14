@@ -9,6 +9,8 @@ import useCartStore from "../../features/pos/store/useCartStore";
 import usePOSStore from "../../features/pos/store/usePOSStore";
 import useAuth from "../../features/auth/hooks/useAuth";
 import { useTranslation } from "react-i18next";
+import { getCustomers } from "../../features/customers/api/customerApi";
+import { FiCheck, FiUser } from "react-icons/fi";
 
 const BottomNav: React.FC = () => {
   const { t } = useTranslation();
@@ -24,8 +26,47 @@ const BottomNav: React.FC = () => {
   const [name, setName] = useState<string>("");
   const [phone, setPhone] = useState<string>("");
 
+  // ── Customer Search Logic ──
+  const [allCustomers, setAllCustomers] = useState<any[]>([]);
+  const [suggestions, setSuggestions] = useState<any[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+
+  useEffect(() => {
+    if (isModalOpen) {
+      getCustomers().then((res: any) => {
+        const customers = Array.isArray(res.data) ? res.data : (res.data?.data || []);
+        setAllCustomers(customers);
+      }).catch(err => console.error("Failed to fetch customers", err));
+    }
+  }, [isModalOpen]);
+
+  const handleNameChange = (val: string) => {
+    setName(val);
+    if (val.length > 0) {
+      const filtered = allCustomers.filter(c => 
+        c.name.toLowerCase().includes(val.toLowerCase()) || 
+        c.phone.includes(val)
+      );
+      setSuggestions(filtered.slice(0, 5));
+      setShowSuggestions(true);
+    } else {
+      setSuggestions([]);
+      setShowSuggestions(false);
+    }
+  };
+
+  const selectCustomer = (c: any) => {
+    setName(c.name);
+    setPhone(c.phone);
+    setShowSuggestions(false);
+  };
+
   const openModal = () => setIsModalOpen(true);
-  const closeModal = () => setIsModalOpen(false);
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setShowSuggestions(false);
+    setSuggestions([]);
+  };
 
   const { canCompleteOrders, isAdmin } = useAuth();
   const requireCustomer = selectedPOSPoint?.settings?.requireCustomerOnOrder;
@@ -153,13 +194,42 @@ const BottomNav: React.FC = () => {
 
 
       <Modal isOpen={isModalOpen} onClose={closeModal}>
-        <div>
+        <div className="relative">
           <label className="block text-[var(--text-muted)] mb-2 text-sm font-medium">
             {t('common.modal.customer_name')} {requireCustomer === false && <span className="text-[var(--text-dim)] text-xs ms-1">({t('common.modal.optional')})</span>}
           </label>
           <div className="flex items-center rounded-lg p-3 px-4 bg-[var(--bg-main)]">
-            <input value={name} onChange={(e) => setName(e.target.value)} type="text" placeholder={t('common.modal.enter_name')} className="bg-transparent flex-1 text-[var(--text-main)] focus:outline-none placeholder:text-[var(--text-dim)]" />
+            <input 
+              value={name} 
+              onChange={(e) => handleNameChange(e.target.value)} 
+              onFocus={() => name.length > 0 && suggestions.length > 0 && setShowSuggestions(true)}
+              type="text" 
+              placeholder={t('common.modal.enter_name')} 
+              className="bg-transparent flex-1 text-[var(--text-main)] focus:outline-none placeholder:text-[var(--text-dim)]" 
+            />
           </div>
+
+          {/* Suggestions Dropdown */}
+          {showSuggestions && suggestions.length > 0 && (
+            <div className="absolute z-[60] w-full mt-1 bg-[var(--bg-card)] border border-[var(--border-main)] rounded-lg shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+              {suggestions.map((c, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => selectCustomer(c)}
+                  className="w-full flex items-center justify-between px-4 py-3 hover:bg-[var(--primary)]/10 transition-colors border-b border-[var(--border-main)] last:border-0 group"
+                >
+                  <div className="flex flex-col items-start text-start">
+                    <span className="text-xs font-bold text-[var(--text-main)] group-hover:text-[var(--primary)] transition-colors">{c.name}</span>
+                    <span className="text-[10px] text-[var(--text-dim)]">{c.phone}</span>
+                  </div>
+                  <div className="w-5 h-5 rounded-full flex items-center justify-center bg-[var(--bg-main)] text-[var(--text-dim)] group-hover:bg-[var(--primary)] group-hover:text-black transition-all">
+                      <FiCheck size={10} />
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
         </div>
         <div>
           <label className="block text-[var(--text-muted)] mb-2 mt-3 text-sm font-medium">

@@ -6,7 +6,11 @@ import { formatDateAndTime } from "../../../shared/utils";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 
-const CustomerList: React.FC = () => {
+interface CustomerListProps {
+  searchQuery?: string;
+}
+
+const CustomerList: React.FC<CustomerListProps> = ({ searchQuery = "" }) => {
   const { t } = useTranslation();
   const { data: resData, isLoading } = useQuery({
     queryKey: ["customers"],
@@ -15,6 +19,11 @@ const CustomerList: React.FC = () => {
       return res.data.data;
     },
   });
+
+  const filteredCustomers = (resData || []).filter((customer: any) =>
+    customer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    customer.phone.includes(searchQuery)
+  );
 
   if (isLoading) {
     return (
@@ -26,14 +35,18 @@ const CustomerList: React.FC = () => {
     );
   }
 
-  if (resData?.length === 0) {
+  if (filteredCustomers.length === 0) {
     return (
       <div className="py-40 flex flex-col items-center justify-center text-center">
         <div className="w-24 h-24 bg-[var(--bg-card)] rounded-full flex items-center justify-center mb-6 border border-[var(--border-main)] text-[var(--text-dim)]">
           <FaUsers size={40} />
         </div>
-        <h3 className="text-[var(--text-main)] text-xl font-black uppercase tracking-tighter">{t('customers.no_customers')}</h3>
-        <p className="text-[var(--text-muted)] text-sm mt-2 max-w-xs font-medium">{t('customers.no_customers_sub')}</p>
+        <h3 className="text-[var(--text-main)] text-xl font-black uppercase tracking-tighter">
+          {searchQuery ? t('customers.no_match') || "No results match your search" : t('customers.no_customers')}
+        </h3>
+        <p className="text-[var(--text-muted)] text-sm mt-2 max-w-xs font-medium">
+          {searchQuery ? "Try a different name or phone number" : t('customers.no_customers_sub')}
+        </p>
       </div>
     );
   }
@@ -44,7 +57,7 @@ const CustomerList: React.FC = () => {
       animate={{ opacity: 1 }}
       className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8"
     >
-      {(resData || []).map((customer: any, index: number) => {
+      {filteredCustomers.map((customer: any, index: number) => {
         const isLoyal = customer.totalOrders >= 5;
         return (
           <motion.div

@@ -1,13 +1,13 @@
 import React, { useEffect, useRef, useState } from "react";
 import { RiDeleteBin2Fill, RiShoppingCartLine, RiAddFill, RiSubtractFill } from "react-icons/ri";
 import { FaNotesMedical } from "react-icons/fa6";
-import { FiUser, FiPhone, FiChevronDown, FiChevronUp, FiCheck } from "react-icons/fi";
+import { FiUser, FiPhone, FiChevronDown, FiChevronUp, FiCheck, FiSearch } from "react-icons/fi";
 import useCartStore from "../../store/useCartStore";
 import useCustomerStore from "../../../../features/customers/store/useCustomerStore";
 import usePOSStore from "../../store/usePOSStore";
 import { CartItem } from "../../../../shared/types";
 import { useTranslation } from "react-i18next";
-import { getCustomers } from "../../../../features/customers/api/customerApi";
+import { getCustomers, addCustomer } from "../../../../features/customers/api/customerApi";
 
 const CartInfo: React.FC = () => {
   const { t } = useTranslation();
@@ -30,11 +30,14 @@ const CartInfo: React.FC = () => {
   const [allCustomers, setAllCustomers] = useState<any[]>([]);
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [phoneSuggestions, setPhoneSuggestions] = useState<any[]>([]);
+  const [showPhoneSuggestions, setShowPhoneSuggestions] = useState(false);
 
   useEffect(() => {
     if (expanded) {
       getCustomers().then((res: any) => {
-        if (res?.data) setAllCustomers(res.data);
+        const customers = Array.isArray(res.data) ? res.data : (res.data?.data || []);
+        setAllCustomers(customers);
       }).catch(err => console.error("Failed to fetch customers", err));
     }
   }, [expanded]);
@@ -43,9 +46,8 @@ const CartInfo: React.FC = () => {
     setName(val);
     setError("");
     if (val.length > 0) {
-      const filtered = allCustomers.filter(c => 
-        c.name.toLowerCase().includes(val.toLowerCase()) || 
-        c.phone.includes(val)
+      const filtered = allCustomers.filter(c =>
+        c.name.toLowerCase().includes(val.toLowerCase())
       );
       setSuggestions(filtered.slice(0, 5));
       setShowSuggestions(true);
@@ -55,10 +57,26 @@ const CartInfo: React.FC = () => {
     }
   };
 
+  const handlePhoneChange = (val: string) => {
+    setPhone(val);
+    setError("");
+    if (val.length > 0) {
+      const filtered = allCustomers.filter(c =>
+        c.phone.includes(val)
+      );
+      setPhoneSuggestions(filtered.slice(0, 5));
+      setShowPhoneSuggestions(true);
+    } else {
+      setPhoneSuggestions([]);
+      setShowPhoneSuggestions(false);
+    }
+  };
+
   const selectCustomer = (c: any) => {
     setName(c.name);
     setPhone(c.phone);
     setShowSuggestions(false);
+    setShowPhoneSuggestions(false);
     setCustomer({ name: c.name, phone: c.phone, guests: 1 });
   };
 
@@ -99,105 +117,141 @@ const CartInfo: React.FC = () => {
 
       {/* ── Optional Add-Customer Bar ── */}
       {showCustomerBar && (
-        <div className="mb-3 rounded-xl overflow-hidden border border-[var(--border-main)] bg-[var(--bg-card-alt)]">
+        <div className="mb-3 rounded-xl overflow-hidden border border-[var(--border-main)] bg-[var(--bg-card-alt)] transition-all duration-300">
           {/* Header row — always visible */}
           <button
             onClick={() => setExpanded((p) => !p)}
-            className="w-full flex items-center justify-between px-3 py-2.5 hover:bg-[var(--bg-hover)] transition-colors"
+            className="w-full flex items-center justify-between px-3 py-3 hover:bg-[var(--bg-hover)] transition-colors group"
           >
             <div className="flex items-center gap-2.5">
               {/* Avatar bubble */}
-              <div className={`w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-black uppercase
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-black uppercase transition-all
                 ${isGuest
-                  ? "bg-[var(--bg-hover)] text-[var(--text-muted)]"
-                  : "bg-[var(--primary)]/20 text-[var(--primary)]"}`}>
-                {isGuest ? <FiUser size={13} /> : customerName.slice(0, 2)}
+                  ? "bg-[var(--bg-main)] text-[var(--text-muted)] border border-[var(--border-main)]"
+                  : "bg-[var(--primary)] text-black shadow-lg shadow-yellow-500/20"}`}>
+                {isGuest ? <FiUser size={14} /> : customerName.slice(0, 2)}
               </div>
-              <div className="flex flex-col items-start">
-                <span className={`text-xs font-bold leading-none ${isGuest ? "text-[var(--text-muted)]" : "text-[var(--text-main)]"}`}>
+              <div className="flex flex-col items-start text-start">
+                <span className={`text-xs font-bold leading-tight ${isGuest ? "text-[var(--text-muted)]" : "text-[var(--text-main)]"}`}>
                   {isGuest ? "Walk-in / Guest" : customerName}
                 </span>
                 {!isGuest && (
                   <span className="text-[10px] text-[var(--text-dim)] mt-0.5">{customerPhone}</span>
                 )}
                 {isGuest && (
-                  <span className="text-[10px] text-[var(--primary)] mt-0.5 font-medium">+ Add customer (optional)</span>
+                  <span className="text-[10px] text-[var(--primary)] mt-0.5 font-bold">+ Add customer</span>
                 )}
               </div>
             </div>
-            <div className="text-[var(--text-muted)]">
-              {expanded ? <FiChevronUp size={14} /> : <FiChevronDown size={14} />}
+            <div className="text-[var(--text-muted)] group-hover:text-[var(--primary)] transition-colors">
+              {expanded ? <FiChevronUp size={16} /> : <FiChevronDown size={16} />}
             </div>
           </button>
 
           {/* Expandable form */}
           {expanded && (
-            <div className="px-3 pb-3 border-t border-[var(--border-main)] pt-3 space-y-2.5">
-              {/* Name */}
-              <div className="relative">
-                <FiUser className="absolute start-3 top-1/2 -translate-y-1/2 text-[var(--text-dim)] text-xs" />
+            <div className="px-3 pb-3 border-t border-[var(--border-main)] pt-3 space-y-3 bg-[var(--bg-card)]">
+              {/* Name Search Input */}
+              <div className="relative group/input">
+                <FiUser className="absolute start-3 top-1/2 -translate-y-1/2 text-[var(--text-dim)] group-focus-within/input:text-[var(--primary)] transition-colors text-xs" />
                 <input
                   type="text"
-                  placeholder="Search existing or enter name..."
+                  placeholder="Customer Name"
                   value={name}
                   onChange={(e) => handleNameChange(e.target.value)}
                   onFocus={() => name.length > 0 && suggestions.length > 0 && setShowSuggestions(true)}
-                  className="w-full bg-[var(--bg-input)] border border-[var(--border-main)] focus:border-[var(--primary)]/60 text-[var(--text-main)] text-xs rounded-lg ps-8 pe-3 py-2 outline-none transition-all placeholder-[var(--text-dim)]"
+                  className="w-full bg-[var(--bg-input)] border border-[var(--border-main)] focus:border-[var(--primary)]/60 text-[var(--text-main)] text-xs rounded-lg ps-8 pe-3 py-2.5 outline-none transition-all placeholder-[var(--text-dim)] font-bold"
                 />
-                
-                {/* Suggestions Dropdown */}
+
+                {/* Name Suggestions */}
                 {showSuggestions && suggestions.length > 0 && (
-                  <div className="absolute z-50 w-full mt-1 bg-[var(--bg-card)] border border-[var(--border-main)] rounded-lg shadow-2xl overflow-hidden border-[var(--primary)]/20 animate-in fade-in slide-in-from-top-2 duration-200">
+                  <div className="absolute z-[100] w-full mt-1.5 bg-[var(--bg-card)] border border-[var(--border-main)] rounded-xl shadow-2xl overflow-hidden border-[var(--primary)]/20 animate-in fade-in zoom-in-95 duration-200">
                     <div className="bg-[var(--bg-hover)] px-3 py-1.5 border-b border-[var(--border-main)] flex items-center justify-between">
-                      <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider">Matched Customers</span>
-                      <span className="text-[9px] text-[var(--primary)] font-medium">{suggestions.length} found</span>
+                      <span className="text-[9px] font-black text-[var(--text-muted)] uppercase">Match By Name</span>
+                      <span className="text-[9px] text-[var(--primary)] font-black">{suggestions.length} MATCHES</span>
                     </div>
                     {suggestions.map((c, i) => (
                       <button
                         key={i}
                         type="button"
                         onClick={() => selectCustomer(c)}
-                        className="w-full flex items-center justify-between px-3 py-2.5 hover:bg-[var(--primary)]/10 transition-colors border-b border-[var(--border-main)] last:border-0 group"
+                        className="w-full flex items-center justify-between px-3 py-3 hover:bg-[var(--primary)]/10 transition-colors border-b border-[var(--border-main)] last:border-0 group/item"
                       >
                         <div className="flex flex-col items-start">
-                          <span className="text-xs font-bold text-[var(--text-main)] group-hover:text-[var(--primary)] transition-colors">{c.name}</span>
-                          <span className="text-[10px] text-[var(--text-dim)]">{c.phone}</span>
+                          <span className="text-xs font-black text-[var(--text-main)] group-hover/item:text-[var(--primary)] transition-colors">{c.name}</span>
+                          <span className="text-[10px] text-[var(--text-dim)] font-bold">{c.phone}</span>
                         </div>
-                        <div className="w-5 h-5 rounded-full flex items-center justify-center bg-[var(--bg-hover)] text-[var(--text-dim)] group-hover:bg-[var(--primary)] group-hover:text-black transition-all">
-                           <FiCheck size={10} />
-                        </div>
+                        <FiCheck size={12} className="text-[var(--primary)]" />
                       </button>
                     ))}
                   </div>
                 )}
               </div>
-              {/* Phone */}
-              <div className="relative">
-                <FiPhone className="absolute start-3 top-1/2 -translate-y-1/2 text-[var(--text-dim)] text-xs" />
+
+              {/* Phone Search Input */}
+              <div className="relative group/input">
+                <FiPhone className="absolute start-3 top-1/2 -translate-y-1/2 text-[var(--text-dim)] group-focus-within/input:text-[var(--primary)] transition-colors text-xs" />
                 <input
                   type="tel"
-                  placeholder="Phone number"
+                  placeholder="Phone Number"
                   value={phone}
-                  onChange={(e) => { setPhone(e.target.value); setError(""); }}
-                  className="w-full bg-[var(--bg-input)] border border-[var(--border-main)] focus:border-[var(--primary)]/60 text-[var(--text-main)] text-xs rounded-lg ps-8 pe-3 py-2 outline-none transition-all placeholder-[var(--text-dim)]"
+                  onChange={(e) => handlePhoneChange(e.target.value)}
+                  onFocus={() => phone.length > 0 && phoneSuggestions.length > 0 && setShowPhoneSuggestions(true)}
+                  className="w-full bg-[var(--bg-input)] border border-[var(--border-main)] focus:border-[var(--primary)]/60 text-[var(--text-main)] text-xs rounded-lg ps-8 pe-3 py-2.5 outline-none transition-all placeholder-[var(--text-dim)] font-bold"
                 />
+
+                {/* Phone Suggestions */}
+                {showPhoneSuggestions && phoneSuggestions.length > 0 && (
+                  <div className="absolute z-[100] w-full mt-1.5 bg-[var(--bg-card)] border border-[var(--border-main)] rounded-xl shadow-2xl overflow-hidden border-[var(--primary)]/20 animate-in fade-in zoom-in-95 duration-200">
+                    <div className="bg-[var(--bg-hover)] px-3 py-1.5 border-b border-[var(--border-main)] flex items-center justify-between">
+                      <span className="text-[9px] font-black text-[var(--text-muted)] uppercase">Match By Phone</span>
+                      <span className="text-[9px] text-[var(--primary)] font-black">{phoneSuggestions.length} MATCHES</span>
+                    </div>
+                    {phoneSuggestions.map((c, i) => (
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={() => selectCustomer(c)}
+                        className="w-full flex items-center justify-between px-3 py-3 hover:bg-[var(--primary)]/10 transition-colors border-b border-[var(--border-main)] last:border-0 group/item"
+                      >
+                        <div className="flex flex-col items-start">
+                          <span className="text-[10px] font-black text-[var(--text-dim)]">{c.phone}</span>
+                          <span className="text-xs font-black text-[var(--text-main)] group-hover/item:text-[var(--primary)] transition-colors">{c.name}</span>
+                        </div>
+                        <FiCheck size={12} className="text-[var(--primary)]" />
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
 
-              {error && <p className="text-red-400 text-[10px] font-semibold">{error}</p>}
+              {error && <p className="text-red-400 text-[10px] font-bold px-1">{error}</p>}
 
-              <div className="flex gap-2 pt-0.5">
-                <button
-                  onClick={handleSaveCustomer}
-                  className="flex-1 flex items-center justify-center gap-1.5 bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-black text-xs font-black py-2 rounded-lg transition-all active:scale-95"
-                >
-                  <FiCheck size={12} /> Save
-                </button>
-                {!isGuest && requireCustomer === false && (
+              <div className="flex flex-col gap-2 pt-1">
+                {/* Only show 'Add New' if it's a valid new customer (not in allCustomers) */}
+                {name.trim() && phone.trim().length >= 7 && !allCustomers.find(c => c.phone === phone) && (
+                  <button
+                    onClick={async () => {
+                      try {
+                        const res = await addCustomer({ name: name.trim(), phone: phone.trim() });
+                        selectCustomer(res.data.data || res.data);
+                        setExpanded(false);
+                      } catch (err: any) {
+                        setError(err.response?.data?.message || "Failed to add customer");
+                      }
+                    }}
+                    className="w-full bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-black text-[10px] font-black py-2.5 rounded-lg transition-all flex items-center justify-center gap-2 uppercase tracking-widest"
+                  >
+                    <RiAddFill size={14} /> Add New Customer & Apply
+                  </button>
+                )}
+                
+                {!isGuest && (
                   <button
                     onClick={handleResetToGuest}
-                    className="px-3 text-[var(--text-muted)] hover:text-red-400 text-xs font-semibold bg-[var(--bg-hover)] rounded-lg transition-colors"
+                    className="w-full bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white text-[10px] font-black py-2.5 rounded-lg uppercase tracking-widest transition-all"
                   >
-                    Reset
+                    Reset to Guest
                   </button>
                 )}
               </div>
