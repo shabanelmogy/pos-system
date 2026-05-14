@@ -3,7 +3,6 @@ import BottomNav from "../../../shared/components/BottomNav";
 import BackButton from "../../../shared/components/BackButton";
 import { MdRestaurantMenu } from "react-icons/md";
 import MenuContainer from "../components/menu/MenuContainer";
-import CustomerInfo from "../components/menu/CustomerInfo";
 import CartInfo from "../components/menu/CartInfo";
 import Bill from "../components/menu/Bill";
 import useCustomerStore from "../../customers/store/useCustomerStore";
@@ -22,10 +21,20 @@ const Menu: React.FC = () => {
 
   useEffect(() => {
     document.title = "POS | Menu";
+
+    if (requireCustomer === false) {
+      // Customer is optional — auto-seed a Guest so every order has a customer snapshot
+      if (!customerData.customerName) {
+        customerData.setGuestCustomer();
+      }
+      return; // never redirect when customer is optional
+    }
+
+    // requireCustomer is true (or undefined/null → default behaviour): must have a customer or table
     if (!customerData.customerName && !customerData.table) {
       navigate("/");
     }
-  }, [customerData, navigate]);
+  }, [customerData, navigate, requireCustomer]);
 
   return (
     <>
@@ -43,7 +52,8 @@ const Menu: React.FC = () => {
               </h1>
             </div>
 
-            {requireCustomer && !isGuest && (
+            {/* Show customer chip in header when customer is known (real, not guest) */}
+            {!isGuest && (
               <div className="flex items-center gap-3 cursor-pointer">
                 <MdRestaurantMenu className="text-[var(--text-main)] text-4xl" />
                 <div className="flex flex-col items-start">
@@ -67,14 +77,7 @@ const Menu: React.FC = () => {
         {/* ── Right: Cart ── */}
         <div className="flex-[2.5] lg:flex-[1.2] flex flex-col min-h-0 bg-[var(--bg-card)] lg:my-4 lg:me-3 rounded-lg overflow-hidden pb-2 lg:pb-0 border border-[var(--border-main)]">
 
-          {requireCustomer && !isGuest && (
-            <div className="flex-none">
-              <CustomerInfo />
-              <hr className="border-[var(--border-main)]" />
-            </div>
-          )}
-
-          {/* Scrollable cart items */}
+          {/* Scrollable cart items — CartInfo renders the optional add-customer bar when requireCustomer=false */}
           <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar pe-2">
             <CartInfo />
           </div>

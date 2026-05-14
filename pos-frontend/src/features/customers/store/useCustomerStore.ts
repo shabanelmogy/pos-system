@@ -9,6 +9,7 @@ interface CustomerState {
   orderId: string;
 
   setCustomer: (customerData: { name: string; phone: string; guests: number }) => void;
+  setGuestCustomer: () => void;
   updateTable: (table: any) => void;
   setOrder: (orderData: { 
     customerName: string; 
@@ -35,6 +36,15 @@ const useCustomerStore = create<CustomerState>()(
           customerPhone: customerData.phone,
           guests: customerData.guests,
           orderId: 'new-' + Date.now(),
+          table: null,
+        }),
+
+      setGuestCustomer: () =>
+        set({
+          customerName: "Guest",
+          customerPhone: "0000000000",
+          guests: 1,
+          orderId: 'guest-' + Date.now(),
           table: null,
         }),
 

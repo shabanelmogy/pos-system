@@ -10,11 +10,11 @@ const orderItemSchema = z.object({
 
 export const createOrderSchema = z.object({
   customerId: z.string().uuid().optional(),
-  customerDetails: z.object({ // Snapshot of legacy info
-    name: z.string().min(1),
-    phone: z.string().min(1),
-    guests: z.number().int().positive(),
-  }),
+  customerDetails: z.object({ // Snapshot — all fields optional; service fills Guest defaults
+    name: z.string().optional(),
+    phone: z.string().optional(),
+    guests: z.number().int().nonnegative().optional(),
+  }).optional(),
   orderStatus: z.string().min(1),
   items: z.array(orderItemSchema).min(1),
   tableId: z.string().uuid().optional(),

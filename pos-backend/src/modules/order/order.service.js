@@ -63,13 +63,13 @@ const orderService = {
 
     // 2. Start Transaction
     return await db.transaction(async (tx) => {
-      // Handle Customer
+      // Handle Customer — use Guest fallback when customer is not required / not provided
+      const resolvedName  = customerDetails?.name?.trim()  || "Guest";
+      const resolvedPhone = customerDetails?.phone?.trim() || "0000000000";
+
       let currentCustomerId = orderHeader.customerId;
-      if (!currentCustomerId && customerDetails?.phone) {
-        const customer = await customerService.findOrCreateByPhone(
-          customerDetails.name,
-          customerDetails.phone
-        );
+      if (!currentCustomerId) {
+        const customer = await customerService.findOrCreateByPhone(resolvedName, resolvedPhone);
         currentCustomerId = customer.id;
       }
 
@@ -97,6 +97,13 @@ const orderService = {
       const tax = subtotal * 0.05; 
       const total = subtotal + tax;
 
+      // Build a guaranteed snapshot (never null) for display in orders/invoices
+      const resolvedSnapshot = {
+        name:   resolvedName,
+        phone:  resolvedPhone,
+        guests: customerDetails?.guests || 1,
+      };
+
       const finalOrderData = {
         ...orderHeader,
         branchId: branchId || null,
@@ -104,7 +111,7 @@ const orderService = {
         shiftId: shiftId || null,
         cashierId,
         customerId: currentCustomerId,
-        customerSnapshot: customerDetails,
+        customerSnapshot: resolvedSnapshot,
         subtotal: subtotal.toFixed(2),
         tax: tax.toFixed(2),
         total: total.toFixed(2),

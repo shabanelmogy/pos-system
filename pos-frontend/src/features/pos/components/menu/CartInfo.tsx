@@ -1,14 +1,40 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { RiDeleteBin2Fill, RiShoppingCartLine, RiAddFill, RiSubtractFill } from "react-icons/ri";
 import { FaNotesMedical } from "react-icons/fa6";
+import { FiUser, FiPhone, FiChevronDown, FiChevronUp, FiCheck } from "react-icons/fi";
 import useCartStore from "../../store/useCartStore";
+import useCustomerStore from "../../../../features/customers/store/useCustomerStore";
+import usePOSStore from "../../store/usePOSStore";
 import { CartItem } from "../../../../shared/types";
 import { useTranslation } from "react-i18next";
 
 const CartInfo: React.FC = () => {
   const { t } = useTranslation();
   const { items, addItem, removeItem, deleteItem } = useCartStore();
+  const { customerName, customerPhone, setCustomer, setGuestCustomer } = useCustomerStore();
+  const { selectedPOSPoint } = usePOSStore();
   const scrolLRef = useRef<HTMLDivElement>(null);
+
+  const requireCustomer = selectedPOSPoint?.settings?.requireCustomerOnOrder;
+  const isGuest = !customerName || customerName === "Guest";
+  const showCustomerBar = true; // Always show customer bar
+
+  // ── Add-customer panel state ──
+  const [expanded, setExpanded] = useState(false);
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [error, setError] = useState("");
+
+  // Pre-fill if real customer is already set
+  useEffect(() => {
+    if (!isGuest) {
+      setName(customerName);
+      setPhone(customerPhone);
+    } else {
+      setName("");
+      setPhone("");
+    }
+  }, [customerName, customerPhone, isGuest]);
 
   useEffect(() => {
     if (scrolLRef.current) {
@@ -16,8 +42,107 @@ const CartInfo: React.FC = () => {
     }
   }, [items]);
 
+  const handleSaveCustomer = () => {
+    if (!name.trim()) { setError("Name is required"); return; }
+    if (!phone.trim() || phone.trim().length < 7) { setError("Valid phone is required"); return; }
+    setError("");
+    setCustomer({ name: name.trim(), phone: phone.trim(), guests: 1 });
+    setExpanded(false);
+  };
+
+  const handleResetToGuest = () => {
+    setGuestCustomer();
+    setName("");
+    setPhone("");
+    setExpanded(false);
+  };
+
   return (
     <div className="flex flex-col h-full px-3 py-2">
+
+      {/* ── Optional Add-Customer Bar ── */}
+      {showCustomerBar && (
+        <div className="mb-3 rounded-xl overflow-hidden border border-[var(--border-main)] bg-[var(--bg-card-alt)]">
+          {/* Header row — always visible */}
+          <button
+            onClick={() => setExpanded((p) => !p)}
+            className="w-full flex items-center justify-between px-3 py-2.5 hover:bg-[var(--bg-hover)] transition-colors"
+          >
+            <div className="flex items-center gap-2.5">
+              {/* Avatar bubble */}
+              <div className={`w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-black uppercase
+                ${isGuest
+                  ? "bg-[var(--bg-hover)] text-[var(--text-muted)]"
+                  : "bg-[var(--primary)]/20 text-[var(--primary)]"}`}>
+                {isGuest ? <FiUser size={13} /> : customerName.slice(0, 2)}
+              </div>
+              <div className="flex flex-col items-start">
+                <span className={`text-xs font-bold leading-none ${isGuest ? "text-[var(--text-muted)]" : "text-[var(--text-main)]"}`}>
+                  {isGuest ? "Walk-in / Guest" : customerName}
+                </span>
+                {!isGuest && (
+                  <span className="text-[10px] text-[var(--text-dim)] mt-0.5">{customerPhone}</span>
+                )}
+                {isGuest && (
+                  <span className="text-[10px] text-[var(--primary)] mt-0.5 font-medium">+ Add customer (optional)</span>
+                )}
+              </div>
+            </div>
+            <div className="text-[var(--text-muted)]">
+              {expanded ? <FiChevronUp size={14} /> : <FiChevronDown size={14} />}
+            </div>
+          </button>
+
+          {/* Expandable form */}
+          {expanded && (
+            <div className="px-3 pb-3 border-t border-[var(--border-main)] pt-3 space-y-2.5">
+              {/* Name */}
+              <div className="relative">
+                <FiUser className="absolute start-3 top-1/2 -translate-y-1/2 text-[var(--text-dim)] text-xs" />
+                <input
+                  type="text"
+                  placeholder="Customer name"
+                  value={name}
+                  onChange={(e) => { setName(e.target.value); setError(""); }}
+                  className="w-full bg-[var(--bg-input)] border border-[var(--border-main)] focus:border-[var(--primary)]/60 text-[var(--text-main)] text-xs rounded-lg ps-8 pe-3 py-2 outline-none transition-all placeholder-[var(--text-dim)]"
+                />
+              </div>
+              {/* Phone */}
+              <div className="relative">
+                <FiPhone className="absolute start-3 top-1/2 -translate-y-1/2 text-[var(--text-dim)] text-xs" />
+                <input
+                  type="tel"
+                  placeholder="Phone number"
+                  value={phone}
+                  onChange={(e) => { setPhone(e.target.value); setError(""); }}
+                  className="w-full bg-[var(--bg-input)] border border-[var(--border-main)] focus:border-[var(--primary)]/60 text-[var(--text-main)] text-xs rounded-lg ps-8 pe-3 py-2 outline-none transition-all placeholder-[var(--text-dim)]"
+                />
+              </div>
+
+              {error && <p className="text-red-400 text-[10px] font-semibold">{error}</p>}
+
+              <div className="flex gap-2 pt-0.5">
+                <button
+                  onClick={handleSaveCustomer}
+                  className="flex-1 flex items-center justify-center gap-1.5 bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-black text-xs font-black py-2 rounded-lg transition-all active:scale-95"
+                >
+                  <FiCheck size={12} /> Save
+                </button>
+                {!isGuest && requireCustomer === false && (
+                  <button
+                    onClick={handleResetToGuest}
+                    className="px-3 text-[var(--text-muted)] hover:text-red-400 text-xs font-semibold bg-[var(--bg-hover)] rounded-lg transition-colors"
+                  >
+                    Reset
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── Cart Title ── */}
       <div className="flex items-center justify-between mb-3">
         <h1 className="text-lg text-[var(--text-main)] font-bold tracking-tight">
           {t('pos.cart.title')}
@@ -27,6 +152,7 @@ const CartInfo: React.FC = () => {
         </span>
       </div>
 
+      {/* ── Cart Items ── */}
       <div className="flex-1 overflow-y-auto pe-1 scrollbar-hide space-y-1.5" ref={scrolLRef} style={{ maxHeight: '480px' }}>
         {items.length === 0 ? (
           <div className="flex flex-col justify-center items-center h-[380px] opacity-60">

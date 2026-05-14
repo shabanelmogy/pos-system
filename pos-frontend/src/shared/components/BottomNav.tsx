@@ -27,11 +27,34 @@ const BottomNav: React.FC = () => {
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
 
+  const { canCompleteOrders, isAdmin } = useAuth();
+  const requireCustomer = selectedPOSPoint?.settings?.requireCustomerOnOrder;
+
+  const handleDishClick = () => {
+    if (requireCustomer === false) {
+      // Bypass modal and start order immediately
+      setCustomer({
+        name: t('common.guest'),
+        phone: "N/A",
+        guests: 1
+      });
+      removeAllItems();
+
+      if (!enableTables) {
+        navigate("/menu");
+      } else {
+        navigate("/tables");
+      }
+    } else {
+      openModal();
+    }
+  };
+
   useEffect(() => {
-    const handleOpenModal = () => openModal();
+    const handleOpenModal = () => handleDishClick();
     window.addEventListener("open-create-order-modal", handleOpenModal);
     return () => window.removeEventListener("open-create-order-modal", handleOpenModal);
-  }, []);
+  }, [requireCustomer, enableTables]);
 
   const increment = () => {
     if (guestCount >= 6) return;
@@ -45,9 +68,7 @@ const BottomNav: React.FC = () => {
   const isActive = (path: string) => location.pathname === path;
 
   const handleCreateOrder = () => {
-    const requireCustomer = selectedPOSPoint?.settings?.requireCustomerOnOrder;
-
-    if (requireCustomer) {
+    if (requireCustomer !== false) {
       if (!name || !phone) {
         alert(t('common.modal.validation_error'));
         return;
@@ -75,29 +96,6 @@ const BottomNav: React.FC = () => {
       navigate("/menu");
     } else {
       navigate("/tables");
-    }
-  };
-
-  const { canCompleteOrders, isAdmin } = useAuth();
-  const requireCustomer = selectedPOSPoint?.settings?.requireCustomerOnOrder;
-
-  const handleDishClick = () => {
-    if (!requireCustomer) {
-      // Bypass modal and start order immediately
-      setCustomer({
-        name: t('common.guest'),
-        phone: "N/A",
-        guests: 1
-      });
-      removeAllItems();
-
-      if (!enableTables) {
-        navigate("/menu");
-      } else {
-        navigate("/tables");
-      }
-    } else {
-      openModal();
     }
   };
 
@@ -157,7 +155,7 @@ const BottomNav: React.FC = () => {
       <Modal isOpen={isModalOpen} onClose={closeModal}>
         <div>
           <label className="block text-[var(--text-muted)] mb-2 text-sm font-medium">
-            {t('common.modal.customer_name')} {!requireCustomer && <span className="text-[var(--text-dim)] text-xs ms-1">({t('common.modal.optional')})</span>}
+            {t('common.modal.customer_name')} {requireCustomer === false && <span className="text-[var(--text-dim)] text-xs ms-1">({t('common.modal.optional')})</span>}
           </label>
           <div className="flex items-center rounded-lg p-3 px-4 bg-[var(--bg-main)]">
             <input value={name} onChange={(e) => setName(e.target.value)} type="text" placeholder={t('common.modal.enter_name')} className="bg-transparent flex-1 text-[var(--text-main)] focus:outline-none placeholder:text-[var(--text-dim)]" />
@@ -165,7 +163,7 @@ const BottomNav: React.FC = () => {
         </div>
         <div>
           <label className="block text-[var(--text-muted)] mb-2 mt-3 text-sm font-medium">
-            {t('common.modal.customer_phone')} {!requireCustomer && <span className="text-[var(--text-dim)] text-xs ms-1">({t('common.modal.optional')})</span>}
+            {t('common.modal.customer_phone')} {requireCustomer === false && <span className="text-[var(--text-dim)] text-xs ms-1">({t('common.modal.optional')})</span>}
           </label>
           <div className="flex items-center rounded-lg p-3 px-4 bg-[var(--bg-main)]">
             <input value={phone} onChange={(e) => setPhone(e.target.value)} type="number" placeholder="+91-9999999999" className="bg-transparent flex-1 text-[var(--text-main)] focus:outline-none placeholder:text-[var(--text-dim)]" />
