@@ -121,7 +121,7 @@ const ManagementModal: React.FC<ManagementModalProps> = ({ type, isOpen, onClose
   const onSubmitHandler = (data: any) => mutation.mutate(data);
 
   const togglePOSSelection = (id: string) => {
-    setSelectedPOSPoints(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
+    setSelectedPOSPoints(prev => prev.includes(id) ? [] : [id]);
   };
 
   const getModalTitle = () => {
@@ -200,7 +200,13 @@ const ManagementModal: React.FC<ManagementModalProps> = ({ type, isOpen, onClose
                     <div className="space-y-2 max-h-40 overflow-y-auto custom-scrollbar pr-2">
                        {(branchPOSPoints || []).map((pos: any) => (
                          <label key={pos.id} className="flex items-center gap-3 cursor-pointer group">
-                           <input type="checkbox" checked={selectedPOSPoints.includes(pos.id)} onChange={() => togglePOSSelection(pos.id)} className="w-4 h-4 rounded border-[var(--border-main)] bg-[var(--bg-card-alt)] text-[var(--primary)] focus:ring-[var(--primary)]" />
+                           <input 
+                             type="radio" 
+                             name="posSelection"
+                             checked={selectedPOSPoints.includes(pos.id)} 
+                             onChange={() => togglePOSSelection(pos.id)} 
+                             className="w-4 h-4 border-[var(--border-main)] bg-[var(--bg-card-alt)] text-[var(--primary)] focus:ring-[var(--primary)]" 
+                           />
                            <span className="text-xs text-[var(--text-muted)] group-hover:text-[var(--text-main)] transition-colors font-bold uppercase tracking-tight">{pos.name}</span>
                          </label>
                        ))}
