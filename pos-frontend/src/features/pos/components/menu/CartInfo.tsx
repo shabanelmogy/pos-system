@@ -7,6 +7,7 @@ import useCustomerStore from "../../../../features/customers/store/useCustomerSt
 import usePOSStore from "../../store/usePOSStore";
 import { CartItem } from "../../../../shared/types";
 import { useTranslation } from "react-i18next";
+import { getCustomers } from "../../../../features/customers/api/customerApi";
 
 const CartInfo: React.FC = () => {
   const { t } = useTranslation();
@@ -24,6 +25,42 @@ const CartInfo: React.FC = () => {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [error, setError] = useState("");
+
+  // ── Search Logic ──
+  const [allCustomers, setAllCustomers] = useState<any[]>([]);
+  const [suggestions, setSuggestions] = useState<any[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+
+  useEffect(() => {
+    if (expanded) {
+      getCustomers().then((res: any) => {
+        if (res?.data) setAllCustomers(res.data);
+      }).catch(err => console.error("Failed to fetch customers", err));
+    }
+  }, [expanded]);
+
+  const handleNameChange = (val: string) => {
+    setName(val);
+    setError("");
+    if (val.length > 0) {
+      const filtered = allCustomers.filter(c => 
+        c.name.toLowerCase().includes(val.toLowerCase()) || 
+        c.phone.includes(val)
+      );
+      setSuggestions(filtered.slice(0, 5));
+      setShowSuggestions(true);
+    } else {
+      setSuggestions([]);
+      setShowSuggestions(false);
+    }
+  };
+
+  const selectCustomer = (c: any) => {
+    setName(c.name);
+    setPhone(c.phone);
+    setShowSuggestions(false);
+    setCustomer({ name: c.name, phone: c.phone, guests: 1 });
+  };
 
   // Pre-fill if real customer is already set
   useEffect(() => {
@@ -101,11 +138,38 @@ const CartInfo: React.FC = () => {
                 <FiUser className="absolute start-3 top-1/2 -translate-y-1/2 text-[var(--text-dim)] text-xs" />
                 <input
                   type="text"
-                  placeholder="Customer name"
+                  placeholder="Search existing or enter name..."
                   value={name}
-                  onChange={(e) => { setName(e.target.value); setError(""); }}
+                  onChange={(e) => handleNameChange(e.target.value)}
+                  onFocus={() => name.length > 0 && suggestions.length > 0 && setShowSuggestions(true)}
                   className="w-full bg-[var(--bg-input)] border border-[var(--border-main)] focus:border-[var(--primary)]/60 text-[var(--text-main)] text-xs rounded-lg ps-8 pe-3 py-2 outline-none transition-all placeholder-[var(--text-dim)]"
                 />
+                
+                {/* Suggestions Dropdown */}
+                {showSuggestions && suggestions.length > 0 && (
+                  <div className="absolute z-50 w-full mt-1 bg-[var(--bg-card)] border border-[var(--border-main)] rounded-lg shadow-2xl overflow-hidden border-[var(--primary)]/20 animate-in fade-in slide-in-from-top-2 duration-200">
+                    <div className="bg-[var(--bg-hover)] px-3 py-1.5 border-b border-[var(--border-main)] flex items-center justify-between">
+                      <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider">Matched Customers</span>
+                      <span className="text-[9px] text-[var(--primary)] font-medium">{suggestions.length} found</span>
+                    </div>
+                    {suggestions.map((c, i) => (
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={() => selectCustomer(c)}
+                        className="w-full flex items-center justify-between px-3 py-2.5 hover:bg-[var(--primary)]/10 transition-colors border-b border-[var(--border-main)] last:border-0 group"
+                      >
+                        <div className="flex flex-col items-start">
+                          <span className="text-xs font-bold text-[var(--text-main)] group-hover:text-[var(--primary)] transition-colors">{c.name}</span>
+                          <span className="text-[10px] text-[var(--text-dim)]">{c.phone}</span>
+                        </div>
+                        <div className="w-5 h-5 rounded-full flex items-center justify-center bg-[var(--bg-hover)] text-[var(--text-dim)] group-hover:bg-[var(--primary)] group-hover:text-black transition-all">
+                           <FiCheck size={10} />
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
               {/* Phone */}
               <div className="relative">

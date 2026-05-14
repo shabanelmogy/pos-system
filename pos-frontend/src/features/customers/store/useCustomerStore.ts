@@ -36,7 +36,6 @@ const useCustomerStore = create<CustomerState>()(
           customerPhone: customerData.phone,
           guests: customerData.guests,
           orderId: 'new-' + Date.now(),
-          table: null,
         }),
 
       setGuestCustomer: () =>
@@ -45,7 +44,6 @@ const useCustomerStore = create<CustomerState>()(
           customerPhone: "0000000000",
           guests: 1,
           orderId: 'guest-' + Date.now(),
-          table: null,
         }),
 
       updateTable: (table) => set({ table }),
