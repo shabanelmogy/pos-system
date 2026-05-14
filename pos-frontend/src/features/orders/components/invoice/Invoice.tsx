@@ -54,12 +54,12 @@ const Invoice: React.FC<InvoiceProps> = ({ orderInfo, setShowInvoice, isReprint 
   }, [isReprint, selectedPOSPoint, removeAllItems, setCustomer, removeCustomer, navigate, setShowInvoice, isAdmin]);
 
   const handlePrint = useCallback(() => {
-    const width = 750;
-    const height = 850;
-    const left = Math.round((window.screen.width / 2) - (width / 2));
-    const top = Math.round((window.screen.height / 2) - (height / 2));
+    const width = Math.round(window.screen.availWidth * 0.9);
+    const height = Math.round(window.screen.availHeight * 0.9);
+    const left = Math.round((window.screen.availWidth - width) / 2);
+    const top = Math.round((window.screen.availHeight - height) / 2);
 
-    const printWindow = window.open('', '_blank', `width=${width},height=${height},left=${left},top=${top},toolbar=0,menubar=0,scrollbars=1`);
+    const printWindow = window.open('', '_blank', `width=${width},height=${height},left=${left},top=${top},toolbar=0,menubar=0,scrollbars=1,resizable=1`);
     if (!printWindow) return;
 
     printWindow.document.write(`
@@ -75,13 +75,13 @@ const Invoice: React.FC<InvoiceProps> = ({ orderInfo, setShowInvoice, isReprint 
             .receipt {
               background: #fff;
               width: 100%;
-              max-width: 380px;
-              padding: 24px;
+              max-width: 520px;
+              padding: 32px;
               box-shadow: 0 4px 32px rgba(0,0,0,0.12);
               border-radius: 4px;
               color: #000;
-              line-height: 1.4;
-              font-size: 13px;
+              line-height: 1.5;
+              font-size: 14px;
             }
             @media print {
               html, body { background: #fff; display: block; padding: 0; }
