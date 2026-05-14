@@ -38,7 +38,19 @@ function Layout() {
     }
   }, [openOnMenu, isAdmin, isAuth, customerName, setCustomer]);
 
-  // 0. Theme sync is handled by <ThemeProvider> wrapping the app
+  // 0. Terminal Permission Verification - Prevent bypassing selection with stale localStorage data
+  const { posPermissions } = useAuth();
+  const { clearPOS } = usePOSStore();
+  
+  useEffect(() => {
+    if (isAuth && !isAdmin && selectedPOSPoint) {
+      // If user has NO permissions, or if the selected terminal is not in their permissions list
+      const hasPermission = posPermissions.some((p: any) => p.posPointId === selectedPOSPoint.id);
+      if (!hasPermission) {
+        clearPOS();
+      }
+    }
+  }, [isAuth, isAdmin, selectedPOSPoint, posPermissions, clearPOS]);
 
   // 1. Loading Check
   if (isLoading) return <FullScreenLoader />;
