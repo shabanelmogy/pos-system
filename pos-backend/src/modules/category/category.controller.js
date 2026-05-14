@@ -5,7 +5,10 @@ import { createCategorySchema, updateCategorySchema } from "./category.validatio
 const categoryController = {
   async getAll(req, res) {
     try {
-      const categories = await categoryService.getAllCategories();
+      const { q } = req.query;
+      const categories = q 
+        ? await categoryService.searchCategories(q)
+        : await categoryService.getAllCategories();
       res.status(200).json({ success: true, data: categories });
     } catch (error) {
       handleError(res, error, "categoryController.getAll");

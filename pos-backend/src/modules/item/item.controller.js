@@ -5,10 +5,17 @@ import { createItemSchema, updateItemSchema } from "./item.validation.js";
 const itemController = {
   async getAll(req, res) {
     try {
-      const { categoryId } = req.query;
-      const items = categoryId 
-        ? await itemService.getItemsByCategory(categoryId)
-        : await itemService.getAllItems();
+      const { categoryId, q } = req.query;
+      
+      let items;
+      if (q) {
+        items = await itemService.searchItems(q);
+      } else if (categoryId) {
+        items = await itemService.getItemsByCategory(categoryId);
+      } else {
+        items = await itemService.getAllItems();
+      }
+      
       res.status(200).json({ success: true, data: items });
     } catch (error) {
       handleError(res, error, "itemController.getAll");

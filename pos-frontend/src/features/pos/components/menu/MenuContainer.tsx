@@ -4,14 +4,20 @@ import { MdRestaurantMenu, MdChevronLeft, MdChevronRight } from "react-icons/md"
 import { RiAddFill, RiSubtractFill } from "react-icons/ri";
 import useCartStore from "../../store/useCartStore";
 import { getCategories, getItems } from "../../api/posApi";
+import { configApi } from "../../../product-configurator/api/configApi";
 import { useQuery } from "@tanstack/react-query";
 import { Category, MenuItem } from "../../../../shared/types";
+import { ProductConfigurator } from "../../../product-configurator";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 const MenuContainer: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [itemCount, setItemCount] = useState(0);
   const [activeItemId, setActiveItemId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [configuringItem, setConfiguringItem] = useState<any | null>(null);
+  const [activeProfile, setActiveProfile] = useState<any | null>(null);
+  const [isConfiguring, setIsConfiguring] = useState(false);
   const { addItem } = useCartStore();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -102,14 +108,50 @@ const MenuContainer: React.FC = () => {
     setItemCount((prev) => prev - 1);
   };
 
-  const handleAddToCart = (item: MenuItem) => {
+  const handleAddToCart = async (item: MenuItem | any) => {
     if (activeItemId !== item.id || itemCount === 0) return;
     
+    // Check if item has a configuration profile
+    if (item.configProfileId) {
+        try {
+            const res = await configApi.getProfile(item.configProfileId);
+            setActiveProfile(res.data.data);
+            setConfiguringItem(item);
+            setIsConfiguring(true);
+            return; // Don't add to cart yet
+        } catch (err) {
+            console.error("Failed to load configuration profile", err);
+            // Fallback: add without configuration if failed? 
+            // Or show error. Let's add directly for now as fallback.
+        }
+    }
+
     // Add multiple times based on itemCount
     for (let i = 0; i < itemCount; i++) {
         addItem(item);
     }
 
+    setItemCount(0);
+    setActiveItemId(null);
+  };
+
+  const handleConfigComplete = (configData: any) => {
+    // Add configured item to cart
+    const configuredItem = {
+        ...configuringItem,
+        price: configData.pricing.finalPrice, // Use the dynamically calculated price
+        configuration: configData.selections,
+        configDetails: configData.pricing.details
+    };
+
+    for (let i = 0; i < itemCount; i++) {
+        addItem(configuredItem);
+    }
+
+    // Reset state
+    setIsConfiguring(false);
+    setActiveProfile(null);
+    setConfiguringItem(null);
     setItemCount(0);
     setActiveItemId(null);
   };
@@ -296,6 +338,20 @@ const MenuContainer: React.FC = () => {
           </div>
         )}
       </div>
+      
+      {/* ── Configuration Modal ── */}
+      <Dialog open={isConfiguring} onOpenChange={setIsConfiguring}>
+        <DialogContent className="max-w-3xl p-8 bg-[var(--bg-main)]/95 backdrop-blur-2xl border-[var(--border-main)] rounded-[3rem] shadow-2xl overflow-hidden">
+          {activeProfile && (
+            <ProductConfigurator 
+              profile={activeProfile}
+              basePrice={configuringItem?.price || 0}
+              onComplete={handleConfigComplete}
+              onCancel={() => setIsConfiguring(false)}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </>
   );
 };

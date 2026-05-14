@@ -1,10 +1,41 @@
-import { eq, sql } from "drizzle-orm";
+import { eq, sql, ilike } from "drizzle-orm";
 import { items } from "./item.schema.js";
+import { configAssignments } from "../config/config.schema.js";
 import { db } from "../../config/database.js";
 
 const itemRepository = {
   async findAll() {
-    return await db.select().from(items);
+    return await db.select({
+      id: items.id,
+      name: items.name,
+      price: items.price,
+      categoryId: items.categoryId,
+      description: items.description,
+      configProfileId: configAssignments.profileId,
+    })
+    .from(items)
+    .leftJoin(configAssignments, eq(items.id, configAssignments.targetId));
+  },
+
+  async findByCategoryId(categoryId) {
+    return await db.select({
+      id: items.id,
+      name: items.name,
+      price: items.price,
+      categoryId: items.categoryId,
+      description: items.description,
+      configProfileId: configAssignments.profileId,
+    })
+    .from(items)
+    .leftJoin(configAssignments, eq(items.id, configAssignments.targetId))
+    .where(eq(items.categoryId, categoryId));
+  },
+
+  async search(query) {
+    return await db.select()
+      .from(items)
+      .where(ilike(items.name, `%${query}%`))
+      .limit(20);
   },
 
   async findByCategoryId(categoryId) {

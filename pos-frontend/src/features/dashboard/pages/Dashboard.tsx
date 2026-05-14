@@ -14,6 +14,8 @@ import { useQuery } from "@tanstack/react-query";
 import { getBranches } from "../api/dashboardApi";
 import { useTranslation } from "react-i18next";
 
+import ConfigDashboard from "../../product-configurator/admin/pages/ConfigDashboard";
+
 const Dashboard: React.FC = () => {
   const { t } = useTranslation();
   const { canManageSettings } = useAuth();
@@ -39,6 +41,7 @@ const Dashboard: React.FC = () => {
   const tabs = [
     { id: "Metrics", label: t('dashboard.tabs.analytics'), icon: <MdSpaceDashboard /> },
     { id: "Management", label: t('dashboard.tabs.management'), icon: <MdCategory /> },
+    { id: "Configurator", label: "Product Config", icon: <MdStore /> },
     { id: "Customers", label: t('dashboard.tabs.customers'), icon: <FaUsers /> },
     { id: "Orders", label: t('dashboard.tabs.order_history'), icon: <FaHistory /> },
     { id: "Payments", label: t('dashboard.tabs.transactions'), icon: <FaWallet /> },
@@ -134,6 +137,7 @@ const Dashboard: React.FC = () => {
           >
             {activeTab === "Metrics" && <Metrics branchId={selectedBranchId} />}
             {activeTab === "Management" && <Management />}
+            {activeTab === "Configurator" && <ConfigDashboard />}
             {activeTab === "Customers" && <CustomerList />}
             {activeTab === "Orders" && <RecentOrders branchId={selectedBranchId} />}
             {activeTab === "Payments" && (

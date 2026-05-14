@@ -6,6 +6,10 @@ const categoryService = {
     return await categoryRepository.findAll();
   },
 
+  async searchCategories(query) {
+    return await categoryRepository.search(query);
+  },
+
   async getCategoryById(id) {
     const category = await categoryRepository.findById(id);
     if (!category) {

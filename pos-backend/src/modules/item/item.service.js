@@ -6,6 +6,10 @@ const itemService = {
     return await itemRepository.findAll();
   },
 
+  async searchItems(query) {
+    return await itemRepository.search(query);
+  },
+
   async getItemsByCategory(categoryId) {
     return await itemRepository.findByCategoryId(categoryId);
   },

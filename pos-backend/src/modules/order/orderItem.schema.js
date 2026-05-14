@@ -11,5 +11,7 @@ export const orderItems = pgTable("order_items", {
   totalPrice: numeric("total_price", { precision: 12, scale: 2 }).notNull(),
   notes: text("notes"),
   itemSnapshot: jsonb("item_snapshot").notNull(), 
+  configSnapshot: jsonb("config_snapshot"), // Stores the full immutable config
+  configPriceAdjustment: numeric("config_price_adjustment", { precision: 12, scale: 2 }).default("0.00"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });

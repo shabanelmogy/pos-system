@@ -12,6 +12,25 @@ import { branches } from "./branch/branch.schema.js";
 import { posPoints } from "./posPoint/posPoint.schema.js";
 import { shifts } from "./shift/shift.schema.js";
 import { posSettings } from "./posSettings/posSettings.schema.js";
+import {
+  configProfiles,
+  configComponents,
+  configOptions,
+  configPriceRules,
+  configLogicRules,
+  configInventoryRules,
+  configAssignments,
+  lifecycleStatusEnum,
+  componentTypeEnum,
+  pricingStrategyEnum,
+  ruleActionEnum,
+  assignmentTargetEnum,
+  inventoryBehaviorEnum,
+} from "./config/config.schema.js";
+
+import { configSnapshots } from "./config/configSnapshot.schema.js";
+
+
 
 // Users Relations
 export const usersRelations = relations(users, ({ one, many }) => ({
@@ -88,7 +107,34 @@ export const tablesRelations = relations(tables, ({ many }) => ({
 export const itemsRelations = relations(items, ({ one, many }) => ({
   category: one(categories, { fields: [items.categoryId], references: [categories.id] }),
   orderItems: many(orderItems),
+  configAssignments: many(configAssignments),
 }));
+
+// Configuration Relations
+export const configProfilesRelations = relations(configProfiles, ({ many }) => ({
+  components: many(configComponents),
+  priceRules: many(configPriceRules),
+  logicRules: many(configLogicRules),
+  assignments: many(configAssignments),
+}));
+
+export const configComponentsRelations = relations(configComponents, ({ one, many }) => ({
+  profile: one(configProfiles, { fields: [configComponents.profileId], references: [configProfiles.id] }),
+  parent: one(configComponents, { fields: [configComponents.parentComponentId], references: [configComponents.id], relationName: "componentHierarchy" }),
+  children: many(configComponents, { relationName: "componentHierarchy" }),
+  options: many(configOptions),
+}));
+
+export const configOptionsRelations = relations(configOptions, ({ one, many }) => ({
+  component: one(configComponents, { fields: [configOptions.componentId], references: [configComponents.id] }),
+  inventoryRules: many(configInventoryRules),
+}));
+
+export const configAssignmentsRelations = relations(configAssignments, ({ one }) => ({
+  profile: one(configProfiles, { fields: [configAssignments.profileId], references: [configProfiles.id] }),
+}));
+
+
 
 export {
   users,
@@ -105,4 +151,21 @@ export {
   posPoints,
   shifts,
   posSettings,
+  configProfiles,
+  configComponents,
+  configOptions,
+  configPriceRules,
+  configLogicRules,
+  configInventoryRules,
+  configAssignments,
+  configSnapshots,
+  lifecycleStatusEnum,
+  componentTypeEnum,
+  pricingStrategyEnum,
+  ruleActionEnum,
+  assignmentTargetEnum,
+  inventoryBehaviorEnum,
 };
+
+
+

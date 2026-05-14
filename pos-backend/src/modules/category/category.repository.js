@@ -1,10 +1,17 @@
-import { eq, sql } from "drizzle-orm";
+import { eq, sql, ilike } from "drizzle-orm";
 import { categories } from "./category.schema.js";
 import { db } from "../../config/database.js";
 
 const categoryRepository = {
   async findAll() {
     return await db.select().from(categories);
+  },
+
+  async search(query) {
+    return await db.select()
+      .from(categories)
+      .where(ilike(categories.name, `%${query}%`))
+      .limit(20);
   },
 
   async findById(id) {
