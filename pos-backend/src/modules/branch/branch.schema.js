@@ -1,4 +1,4 @@
-import { pgTable, text, uuid, timestamp, boolean } from "drizzle-orm/pg-core";
+import { pgTable, text, uuid, timestamp, boolean, numeric } from "drizzle-orm/pg-core";
 
 export const branches = pgTable("branches", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -10,6 +10,8 @@ export const branches = pgTable("branches", {
   city: text("city"),
   country: text("country").default("India"),
   isActive: boolean("is_active").default(true),
+  taxRate: numeric("tax_rate", { precision: 5, scale: 2 }).default("0.00"),
+  serviceChargeRate: numeric("service_charge_rate", { precision: 5, scale: 2 }).default("0.00"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

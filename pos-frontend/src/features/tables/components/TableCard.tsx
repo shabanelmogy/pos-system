@@ -11,7 +11,7 @@ interface TableCardProps {
   id: string;
   name: string;
   status: string;
-  initials: string;
+  initials: string | null;
   seats: number;
   order: any;
   onViewOrder: (order: any) => void;
@@ -22,7 +22,7 @@ const TableCard: React.FC<TableCardProps> = ({id, name, status, initials, seats,
   const { canCompleteOrders } = useAuth();
   const { selectedPOSPoint } = usePOSStore();
   const { customerName, customerPhone, setCustomer, updateTable } = useCustomerStore();
-  const { removeAllItems } = useCartStore();
+  const { clearCart } = useCartStore();
 
   const handleClick = (name: string) => {
     // 1. If Table is Booked, Show Quick Summary Modal
@@ -49,7 +49,7 @@ const TableCard: React.FC<TableCardProps> = ({id, name, status, initials, seats,
         });
       } else {
         // Force modal if required
-        removeAllItems(); 
+        clearCart(); 
         window.dispatchEvent(new CustomEvent("open-create-order-modal"));
         return;
       }
@@ -58,7 +58,7 @@ const TableCard: React.FC<TableCardProps> = ({id, name, status, initials, seats,
     const table = { tableId: id, tableNo: name }
     updateTable(table)
     // FINAL SAFETY: Clear cart before going to a fresh table menu
-    removeAllItems(); 
+    clearCart(); 
     navigate(`/menu`);
   };
 
@@ -74,7 +74,7 @@ const TableCard: React.FC<TableCardProps> = ({id, name, status, initials, seats,
         <h1 className="text-[var(--text-main)] text-lg font-bold">T-{name}</h1>
         <div className="flex items-center gap-2">
            <span className="text-[var(--text-muted)] text-xs flex items-center gap-1">
-             <FaShoppingCart size={10}/> {order?.items?.length || 0}
+             <FaShoppingCart size={10}/> -
            </span>
            <p className={`text-[10px] uppercase font-bold px-2 py-1 rounded ${
              status === "Booked" ? "bg-[var(--status-success-bg)] text-[var(--status-success)]" : "bg-[var(--border-main)] text-[var(--text-muted)]"
@@ -100,9 +100,9 @@ const TableCard: React.FC<TableCardProps> = ({id, name, status, initials, seats,
         <p className="text-[var(--text-muted)] text-[10px] font-medium">Seats: {seats}</p>
         {status === "Booked" && (
           <div className="flex items-center gap-1">
-            <FaCircle className={`text-[8px] ${order?.orderStatus === "Ready" ? "text-green-500 animate-pulse" : "text-yellow-500"}`} />
-            <span className="text-[var(--text-main)] text-[10px] font-bold">
-               {order?.orderStatus || "In Progress"}
+            <FaCircle className={`text-[8px] ${order?.fulfillmentStatus === "READY" ? "text-green-500 animate-pulse" : "text-yellow-500"}`} />
+            <span className="text-[var(--text-main)] text-[10px] font-bold uppercase">
+               {order?.lifecycle === "COMPLETED" ? "COMPLETED" : order?.fulfillmentStatus || "PREPARING"}
             </span>
           </div>
         )}

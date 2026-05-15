@@ -1,6 +1,6 @@
 {
-  "id": "d8a2408c-47c4-4ad0-94d8-9881d700db11",
-  "prevId": "5a8e8cf1-491f-472f-8acb-46d3c25525aa",
+  "id": "5e058f93-48a2-475a-b0a1-9216dd499678",
+  "prevId": "98d09d00-336d-4692-98a9-b4c48f6af50d",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -165,6 +165,20 @@
           "notNull": false,
           "default": true
         },
+        "tax_rate": {
+          "name": "tax_rate",
+          "type": "numeric(5, 2)",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'0.00'"
+        },
+        "service_charge_rate": {
+          "name": "service_charge_rate",
+          "type": "numeric(5, 2)",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'0.00'"
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp",
@@ -219,6 +233,12 @@
           "primaryKey": false,
           "notNull": true,
           "default": "'[]'::jsonb"
+        },
+        "kitchen_station_id": {
+          "name": "kitchen_station_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
         },
         "created_at": {
           "name": "created_at",
@@ -338,6 +358,65 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+    "public.item_modifiers": {
+      "name": "item_modifiers",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "item_id": {
+          "name": "item_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "price": {
+          "name": "price",
+          "type": "numeric(10, 2)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "item_modifiers_item_id_items_id_fk": {
+          "name": "item_modifiers_item_id_items_id_fk",
+          "tableFrom": "item_modifiers",
+          "tableTo": "items",
+          "columnsFrom": [
+            "item_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.items": {
       "name": "items",
       "schema": "",
@@ -440,9 +519,9 @@
           "primaryKey": false,
           "notNull": false
         },
-        "quantity": {
-          "name": "quantity",
-          "type": "integer",
+        "name_snapshot": {
+          "name": "name_snapshot",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
@@ -452,11 +531,39 @@
           "primaryKey": false,
           "notNull": true
         },
-        "total_price": {
-          "name": "total_price",
+        "quantity": {
+          "name": "quantity",
           "type": "numeric(12, 2)",
           "primaryKey": false,
           "notNull": true
+        },
+        "subtotal": {
+          "name": "subtotal",
+          "type": "numeric(12, 2)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tax_amount": {
+          "name": "tax_amount",
+          "type": "numeric(12, 2)",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'0'"
+        },
+        "discount_amount": {
+          "name": "discount_amount",
+          "type": "numeric(12, 2)",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'0'"
+        },
+        "status": {
+          "name": "status",
+          "type": "item_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'PENDING'"
         },
         "notes": {
           "name": "notes",
@@ -464,11 +571,36 @@
           "primaryKey": false,
           "notNull": false
         },
-        "item_snapshot": {
-          "name": "item_snapshot",
-          "type": "jsonb",
+        "is_voided": {
+          "name": "is_voided",
+          "type": "boolean",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false,
+          "default": false
+        },
+        "void_reason": {
+          "name": "void_reason",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "voided_at": {
+          "name": "voided_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "voided_by_id": {
+          "name": "voided_by_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "kitchen_station_id": {
+          "name": "kitchen_station_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
         },
         "created_at": {
           "name": "created_at",
@@ -528,28 +660,84 @@
           "name": "branch_id",
           "type": "uuid",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "pos_point_id": {
           "name": "pos_point_id",
           "type": "uuid",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "shift_id": {
           "name": "shift_id",
           "type": "uuid",
           "primaryKey": false,
+          "notNull": true
+        },
+        "order_number": {
+          "name": "order_number",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "idempotency_key": {
+          "name": "idempotency_key",
+          "type": "varchar(100)",
+          "primaryKey": false,
           "notNull": false
         },
-        "cashier_id": {
-          "name": "cashier_id",
+        "lifecycle": {
+          "name": "lifecycle",
+          "type": "order_lifecycle",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'DRAFT'"
+        },
+        "fulfillment_status": {
+          "name": "fulfillment_status",
+          "type": "fulfillment_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'PENDING'"
+        },
+        "payment_status": {
+          "name": "payment_status",
+          "type": "payment_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'UNPAID'"
+        },
+        "type": {
+          "name": "type",
+          "type": "order_type",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'DINE_IN'"
+        },
+        "opened_by_id": {
+          "name": "opened_by_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "waiter_id": {
+          "name": "waiter_id",
           "type": "uuid",
           "primaryKey": false,
           "notNull": false
         },
-        "customer_id": {
-          "name": "customer_id",
+        "closed_by_id": {
+          "name": "closed_by_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "voided_by_id": {
+          "name": "voided_by_id",
           "type": "uuid",
           "primaryKey": false,
           "notNull": false
@@ -560,63 +748,79 @@
           "primaryKey": false,
           "notNull": false
         },
-        "order_status": {
-          "name": "order_status",
-          "type": "varchar(50)",
+        "customer_id": {
+          "name": "customer_id",
+          "type": "uuid",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
+        },
+        "guest_count": {
+          "name": "guest_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 1
         },
         "subtotal": {
           "name": "subtotal",
           "type": "numeric(12, 2)",
           "primaryKey": false,
           "notNull": true,
-          "default": "'0.00'"
+          "default": "'0'"
         },
-        "tax": {
-          "name": "tax",
+        "tax_total": {
+          "name": "tax_total",
           "type": "numeric(12, 2)",
           "primaryKey": false,
           "notNull": true,
-          "default": "'0.00'"
+          "default": "'0'"
         },
-        "total": {
-          "name": "total",
+        "discount_total": {
+          "name": "discount_total",
           "type": "numeric(12, 2)",
           "primaryKey": false,
           "notNull": true,
-          "default": "'0.00'"
+          "default": "'0'"
         },
-        "payment_method": {
-          "name": "payment_method",
+        "service_charge": {
+          "name": "service_charge",
+          "type": "numeric(12, 2)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'0'"
+        },
+        "grand_total": {
+          "name": "grand_total",
+          "type": "numeric(12, 2)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'0'"
+        },
+        "coupon_code": {
+          "name": "coupon_code",
           "type": "varchar(50)",
           "primaryKey": false,
           "notNull": false
         },
-        "payment_status": {
-          "name": "payment_status",
-          "type": "varchar(50)",
+        "total_paid": {
+          "name": "total_paid",
+          "type": "numeric(12, 2)",
           "primaryKey": false,
-          "notNull": false,
-          "default": "'Pending'"
+          "notNull": true,
+          "default": "'0'"
         },
-        "payment_data": {
-          "name": "payment_data",
+        "metadata": {
+          "name": "metadata",
           "type": "jsonb",
           "primaryKey": false,
           "notNull": false
         },
-        "notes": {
-          "name": "notes",
-          "type": "text",
+        "version": {
+          "name": "version",
+          "type": "integer",
           "primaryKey": false,
-          "notNull": false
-        },
-        "customer_snapshot": {
-          "name": "customer_snapshot",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": false
+          "notNull": true,
+          "default": 1
         },
         "created_at": {
           "name": "created_at",
@@ -631,9 +835,100 @@
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
+        },
+        "first_printed_at": {
+          "name": "first_printed_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "closed_at": {
+          "name": "closed_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "voided_at": {
+          "name": "voided_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "branch_created_idx": {
+          "name": "branch_created_idx",
+          "columns": [
+            {
+              "expression": "branch_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "shift_idx": {
+          "name": "shift_idx",
+          "columns": [
+            {
+              "expression": "shift_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "customer_idx": {
+          "name": "customer_idx",
+          "columns": [
+            {
+              "expression": "customer_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "status_idx": {
+          "name": "status_idx",
+          "columns": [
+            {
+              "expression": "lifecycle",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "fulfillment_status",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "orders_branch_id_branches_id_fk": {
           "name": "orders_branch_id_branches_id_fk",
@@ -674,12 +969,12 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "orders_cashier_id_users_id_fk": {
-          "name": "orders_cashier_id_users_id_fk",
+        "orders_opened_by_id_users_id_fk": {
+          "name": "orders_opened_by_id_users_id_fk",
           "tableFrom": "orders",
           "tableTo": "users",
           "columnsFrom": [
-            "cashier_id"
+            "opened_by_id"
           ],
           "columnsTo": [
             "id"
@@ -687,12 +982,38 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "orders_customer_id_customers_id_fk": {
-          "name": "orders_customer_id_customers_id_fk",
+        "orders_waiter_id_users_id_fk": {
+          "name": "orders_waiter_id_users_id_fk",
           "tableFrom": "orders",
-          "tableTo": "customers",
+          "tableTo": "users",
           "columnsFrom": [
-            "customer_id"
+            "waiter_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "orders_closed_by_id_users_id_fk": {
+          "name": "orders_closed_by_id_users_id_fk",
+          "tableFrom": "orders",
+          "tableTo": "users",
+          "columnsFrom": [
+            "closed_by_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "orders_voided_by_id_users_id_fk": {
+          "name": "orders_voided_by_id_users_id_fk",
+          "tableFrom": "orders",
+          "tableTo": "users",
+          "columnsFrom": [
+            "voided_by_id"
           ],
           "columnsTo": [
             "id"
@@ -712,12 +1033,53 @@
           ],
           "onDelete": "no action",
           "onUpdate": "no action"
+        },
+        "orders_customer_id_customers_id_fk": {
+          "name": "orders_customer_id_customers_id_fk",
+          "tableFrom": "orders",
+          "tableTo": "customers",
+          "columnsFrom": [
+            "customer_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
+      "uniqueConstraints": {
+        "orders_order_number_unique": {
+          "name": "orders_order_number_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "order_number"
+          ]
+        },
+        "orders_idempotency_key_unique": {
+          "name": "orders_idempotency_key_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "idempotency_key"
+          ]
+        }
+      },
       "policies": {},
-      "checkConstraints": {},
+      "checkConstraints": {
+        "dine_in_table_check": {
+          "name": "dine_in_table_check",
+          "value": "\"orders\".\"type\" NOT IN ('DINE_IN', 'QR_SELF') OR \"orders\".\"table_id\" IS NOT NULL"
+        },
+        "guest_count_check": {
+          "name": "guest_count_check",
+          "value": "\"orders\".\"guest_count\" > 0"
+        },
+        "positive_total_check": {
+          "name": "positive_total_check",
+          "value": "\"orders\".\"grand_total\" >= 0"
+        }
+      },
       "isRLSEnabled": false
     },
     "public.payments": {
@@ -739,9 +1101,9 @@
         },
         "order_id": {
           "name": "order_id",
-          "type": "varchar(255)",
+          "type": "uuid",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "amount": {
           "name": "amount",
@@ -767,6 +1129,19 @@
           "primaryKey": false,
           "notNull": false
         },
+        "is_refunded": {
+          "name": "is_refunded",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "refund_id": {
+          "name": "refund_id",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
         "email": {
           "name": "email",
           "type": "varchar(255)",
@@ -788,7 +1163,21 @@
         }
       },
       "indexes": {},
-      "foreignKeys": {},
+      "foreignKeys": {
+        "payments_order_id_orders_id_fk": {
+          "name": "payments_order_id_orders_id_fk",
+          "tableFrom": "payments",
+          "tableTo": "orders",
+          "columnsFrom": [
+            "order_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},
@@ -907,8 +1296,29 @@
           "notNull": false,
           "default": false
         },
+        "enable_tables": {
+          "name": "enable_tables",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": true
+        },
         "require_customer_on_order": {
           "name": "require_customer_on_order",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "open_on_menu": {
+          "name": "open_on_menu",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "direct_print": {
+          "name": "direct_print",
           "type": "boolean",
           "primaryKey": false,
           "notNull": false,
@@ -1323,6 +1733,12 @@
           "primaryKey": false,
           "notNull": false
         },
+        "refresh_token": {
+          "name": "refresh_token",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp",
@@ -1369,7 +1785,66 @@
       "isRLSEnabled": false
     }
   },
-  "enums": {},
+  "enums": {
+    "public.fulfillment_status": {
+      "name": "fulfillment_status",
+      "schema": "public",
+      "values": [
+        "PENDING",
+        "PREPARING",
+        "PARTIALLY_READY",
+        "READY",
+        "SERVED",
+        "DISPATCHED",
+        "DELIVERED",
+        "PICKED_UP"
+      ]
+    },
+    "public.item_status": {
+      "name": "item_status",
+      "schema": "public",
+      "values": [
+        "PENDING",
+        "PREPARING",
+        "READY",
+        "SERVED",
+        "VOIDED",
+        "CANCELLED"
+      ]
+    },
+    "public.order_lifecycle": {
+      "name": "order_lifecycle",
+      "schema": "public",
+      "values": [
+        "DRAFT",
+        "ACTIVE",
+        "COMPLETED",
+        "VOIDED",
+        "CANCELLED"
+      ]
+    },
+    "public.order_type": {
+      "name": "order_type",
+      "schema": "public",
+      "values": [
+        "DINE_IN",
+        "TAKE_AWAY",
+        "DELIVERY",
+        "QR_SELF",
+        "PHONE"
+      ]
+    },
+    "public.payment_status": {
+      "name": "payment_status",
+      "schema": "public",
+      "values": [
+        "UNPAID",
+        "PARTIALLY_PAID",
+        "PAID",
+        "REFUNDED"
+      ]
+    }
+  },
   "schemas": {},
   "sequences": {},
   "roles": {},

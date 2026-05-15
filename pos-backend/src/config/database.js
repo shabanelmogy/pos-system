@@ -11,9 +11,12 @@ if (!config.databaseURL) {
 
 export const pool = new Pool({
     connectionString: config.databaseURL,
-    max: 10,                    // Max connections in pool
-    idleTimeoutMillis: 30000,   // Close idle connections after 30s
-    connectionTimeoutMillis: 5000, // Fail fast if can't connect in 5s
+    max: 10,                    
+    idleTimeoutMillis: 30000,   
+    connectionTimeoutMillis: 30000, 
+    ssl: {
+        rejectUnauthorized: false // Required for Neon/Supabase poolers
+    }
 });
 
 // CRITICAL: Handle pool errors to prevent server crashes

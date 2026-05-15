@@ -16,11 +16,11 @@ interface OrderCardProps {
 
 const OrderCard: React.FC<OrderCardProps> = ({ order, onReprint }) => {
   const { t } = useTranslation();
-  const { canCompleteOrders } = useAuth();
+  const { canCompleteOrders, user } = useAuth();
   const queryClient = useQueryClient();
 
   const statusMutation = useMutation({
-    mutationFn: updateOrderStatus,
+    mutationFn: updateOrderLifecycle,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["orders"] });
       enqueueSnackbar(t('dashboard.orders.status_updated'), { variant: "success" });
@@ -37,26 +37,36 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onReprint }) => {
   });
 
   const handleCompleteOrder = () => {
-    statusMutation.mutate({ orderId: order.id, orderStatus: "Completed" });
+    statusMutation.mutate({ orderId: order.id, lifecycle: "COMPLETED", settleWithCash: order.paymentStatus !== "PAID" });
+  };
+
+  const handleVoidOrder = () => {
+    if (window.confirm("Are you sure you want to VOID this order?")) {
+      statusMutation.mutate({ orderId: order.id, lifecycle: "VOIDED" });
+    }
   };
 
   const isPremiumCustomer = order.customer?.totalOrders >= 5;
-  const status = order.orderStatus || "In Progress";
+  const isReady = order.fulfillmentStatus === "READY" || order.fulfillmentStatus === "SERVED";
+  const isCompleted = order.lifecycle === "COMPLETED";
+  const isVoided = order.lifecycle === "VOIDED";
 
   const statusLabelMap: { [key: string]: string } = {
-    "In Progress": t('common.order_status.in_progress'),
-    "Ready": t('common.order_status.ready'),
-    "Completed": t('common.order_status.completed')
+    "PENDING": t('common.order_status.in_progress'),
+    "PREPARING": t('orders.preparing'),
+    "PARTIALLY_READY": "PARTIALLY READY",
+    "READY": t('common.order_status.ready'),
+    "SERVED": t('orders.served')
   };
 
   return (
-    <div className="w-full bg-[var(--bg-card-alt)] p-4 rounded-lg mb-4 shadow-xl border border-[var(--border-main)]">
+    <div className={`w-full bg-[var(--bg-card-alt)] p-4 rounded-lg mb-4 shadow-xl border ${isVoided ? 'border-red-500 opacity-70' : 'border-[var(--border-main)]'}`}>
       <div className="flex items-center gap-5">
         <div className="relative">
-          <button className="bg-[var(--primary)] p-3 text-xl font-bold rounded-lg min-w-[50px]">
+          <button className={`${isVoided ? 'bg-red-500/20 text-red-500' : 'bg-[var(--primary)] text-[var(--bg-card)]'} p-3 text-xl font-bold rounded-lg min-w-[50px]`}>
             {getAvatarName(order.customerDetails?.name || t('common.guest'))}
           </button>
-          {isPremiumCustomer && (
+          {isPremiumCustomer && !isVoided && (
             <div className="absolute -top-2 -end-2 bg-yellow-500 text-black p-1 rounded-full border-2 border-[var(--bg-card-alt)]" title="Premium Customer">
               <FaCrown size={12} />
             </div>
@@ -74,27 +84,31 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onReprint }) => {
                 </span>
               )}
             </div>
-            <p className="text-[var(--text-muted)] text-xs font-medium">#{Math.floor(new Date(order.orderDate).getTime() / 1000)} / {order.paymentMethod || t('pos.cart.cash')}</p>
+            <p className="text-[var(--text-muted)] text-xs font-medium">#{Math.floor(new Date(order.createdAt || order.orderDate).getTime() / 1000)} / {order.paymentMethod || t('pos.cart.cash')}</p>
             <p className="text-[var(--text-muted)] text-sm">{t('tables.title')} <FaLongArrowAltRight className="text-[var(--text-muted)] ms-2 inline rtl:rotate-180" /> {order.table?.tableNo || "N/A"}</p>
           </div>
           <div className="flex flex-col items-end gap-2">
-            {status === "Ready" ? (
+            {isVoided ? (
+               <p className="text-red-500 bg-red-500/10 px-2 py-1 rounded-lg text-xs font-bold uppercase tracking-widest">
+                 <FaCircle className="inline me-2" size={8} /> VOIDED
+               </p>
+            ) : isReady ? (
               <>
                 <p className="text-[var(--status-success)] bg-[var(--status-success-bg)] px-2 py-1 rounded-lg text-xs font-bold uppercase tracking-widest">
-                  <FaCheckDouble className="inline me-2" /> {statusLabelMap[status]}
+                  <FaCheckDouble className="inline me-2" /> {isCompleted ? t('common.order_status.completed') : statusLabelMap[order.fulfillmentStatus] || order.fulfillmentStatus}
                 </p>
                 <p className="text-[var(--text-muted)] text-sm font-medium">
-                  <FaCircle className="inline me-2 text-[var(--status-success)]" size={8} /> {t('orders.ready_to_serve')}
+                  <FaCircle className="inline me-2 text-[var(--status-success)]" size={8} /> {isCompleted ? t('orders.order_served') : t('orders.ready_to_serve')}
                 </p>
               </>
             ) : (
               <>
-                <p className={`px-2 py-1 rounded-lg text-xs font-bold uppercase tracking-widest ${status === "Completed" ? "text-[var(--status-success)] bg-[var(--status-success-bg)]" : "text-[var(--status-warning)] bg-[var(--status-warning-bg)]"}`}>
-                  <FaCircle className="inline me-2" size={8} /> {statusLabelMap[status] || status}
+                <p className={`px-2 py-1 rounded-lg text-xs font-bold uppercase tracking-widest ${isCompleted ? "text-[var(--status-success)] bg-[var(--status-success-bg)]" : "text-[var(--status-warning)] bg-[var(--status-warning-bg)]"}`}>
+                  <FaCircle className="inline me-2" size={8} /> {statusLabelMap[order.fulfillmentStatus] || order.fulfillmentStatus}
                 </p>
                 <p className="text-[var(--text-muted)] text-sm font-medium">
-                  <FaCircle className={`inline me-2 ${status === "Completed" ? "text-[var(--status-success)]" : "text-[var(--status-warning)]"}`} size={8} />
-                  {status === "Completed" ? t('orders.order_served') : t('orders.preparing')}
+                  <FaCircle className={`inline me-2 ${isCompleted ? "text-[var(--status-success)]" : "text-[var(--status-warning)]"}`} size={8} />
+                  {isCompleted ? t('orders.order_served') : t('orders.preparing')}
                 </p>
               </>
             )}
@@ -102,20 +116,24 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onReprint }) => {
         </div>
       </div>
       <div className="flex justify-between items-center mt-4 text-[var(--text-muted)] text-sm font-medium">
-        <p>{formatDateAndTime(order.orderDate)}</p>
-        <p>{(order.items || []).length} {t('common.items')}</p>
+        <p>{formatDateAndTime(order.createdAt || order.orderDate)}</p>
+        {/* Item count hidden to optimize payload */}
       </div>
       <hr className="w-full mt-4 border-t-1 border-[var(--border-main)]" />
       <div className="flex items-center justify-between mt-4">
         <h1 className="text-[var(--text-main)] text-lg font-semibold">{t('pos.cart.total')}</h1>
-        <p className="text-[var(--primary)] text-lg font-black">₹{parseFloat(order.bills?.totalWithTax || 0).toFixed(2)}</p>
+        <p className="text-[var(--primary)] text-lg font-black">₹{parseFloat(order.bills?.[0]?.grandTotal || order.total || 0).toFixed(2)}</p>
       </div>
       <div className="grid grid-cols-2 gap-3 mt-4">
         <button onClick={() => onReprint && onReprint(order)}
           className="flex items-center justify-center gap-2 bg-[var(--bg-hover)] text-[var(--text-main)] font-bold py-2 rounded-lg hover:bg-[var(--border-main)] transition-colors border border-[var(--border-main)] text-sm uppercase tracking-widest">
           <FaPrint size={14} /> {t('orders.reprint')}
         </button>
-        {canCompleteOrders && status !== "Completed" ? (
+        {isVoided ? (
+           <div className="bg-red-500/10 text-red-500 font-bold py-2 rounded-lg text-center text-[10px] flex items-center justify-center gap-2 uppercase tracking-widest border border-red-500/20">
+             VOIDED
+           </div>
+        ) : canCompleteOrders && !isCompleted ? (
           <button onClick={handleCompleteOrder} disabled={statusMutation.isPending}
             className="bg-[var(--primary)] text-[var(--bg-card)] font-bold py-2 rounded-lg hover:bg-yellow-600 transition-colors text-sm uppercase tracking-widest disabled:opacity-50">
             {statusMutation.isPending ? t('orders.serving') : t('orders.serve')}
@@ -126,6 +144,12 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onReprint }) => {
           </div>
         )}
       </div>
+      {/* Void Order Guard */}
+      {!isCompleted && !isVoided && user?.role !== "cashier" && (
+         <button onClick={handleVoidOrder} disabled={statusMutation.isPending} className="w-full mt-3 bg-transparent text-red-500 border border-red-500/20 hover:bg-red-500/10 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-colors">
+            Void Order
+         </button>
+      )}
     </div>
   );
 };

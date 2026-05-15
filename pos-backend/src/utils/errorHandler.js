@@ -1,3 +1,5 @@
+import logger from "./logger.js";
+
 /**
  * Standardized error thrower for services
  * @param {string} message 
@@ -16,7 +18,7 @@ export const fail = (message, status = 400) => {
  * @param {string} context - Where the error occurred
  */
 export const handleError = (res, error, context) => {
-    console.error(`[ERROR] ${context}:`, error);
+    logger.error(`Error in ${context}`, error, { context });
     
     let statusCode = error.statusCode || 500;
     let message = error.message || "Internal Server Error";

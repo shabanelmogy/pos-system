@@ -77,7 +77,7 @@ const userController = {
 
     async getUserData(req, res) {
         try {
-            const user = await userService.getUserById(req.user._id);
+            const user = await userService.getUserById(req.user.id);
             const activeShift = await findUserActiveShift(user);
             
             res.status(200).json({
@@ -99,8 +99,8 @@ const userController = {
                 path: '/'
             });
 
-            if (req.user && req.user._id) {
-                await userService.updateRefreshToken(req.user._id, null);
+            if (req.user && req.user.id) {
+                await userService.updateRefreshToken(req.user.id, null);
             }
 
             res.status(200).json({

@@ -10,6 +10,7 @@ const ShiftManager: React.FC = () => {
     selectedPOSPoint, 
     setShowShiftModal, 
     loading,
+    reconciliationData,
     openForm,
     closeForm
   } = useShiftManager();
@@ -84,13 +85,13 @@ const ShiftManager: React.FC = () => {
       <motion.div 
         initial={{ y: 50, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        className="bg-[var(--bg-card)] border border-[var(--border-main)] p-8 lg:p-12 rounded-[3.5rem] max-w-2xl w-full shadow-2xl relative"
+        className="bg-[var(--bg-card)] border border-[var(--border-main)] p-8 lg:p-12 rounded-[3.5rem] max-w-2xl w-full shadow-2xl relative max-h-[90vh] overflow-y-auto scrollbar-hide"
       >
         <button onClick={closeModal} className="absolute top-8 end-8 text-[#444] hover:text-white transition-colors">
            <MdClose size={32} />
         </button>
 
-        <header className="mb-10">
+        <header className="mb-8">
           <div className="inline-flex items-center gap-3 px-4 py-2 bg-red-500/10 text-red-500 rounded-full mb-6 border border-red-500/10">
              <MdStop size={20} />
              <span className="text-[10px] font-black uppercase tracking-widest">End Session</span>
@@ -98,6 +99,27 @@ const ShiftManager: React.FC = () => {
           <h1 className="text-4xl font-black text-white uppercase tracking-tighter leading-tight">Closing Reconciliation</h1>
           <p className="text-[#555] text-xs font-bold uppercase tracking-widest mt-2">Finalize your counts before drawer handoff</p>
         </header>
+
+        {reconciliationData && (
+          <div className="grid grid-cols-2 gap-4 mb-8">
+            <div className="bg-[#111] p-5 rounded-2xl border border-[var(--border-main)]">
+              <p className="text-[var(--text-muted)] text-[9px] font-black uppercase tracking-widest mb-1">Opening Cash</p>
+              <p className="text-white text-xl font-black tracking-tighter">₹{parseFloat(reconciliationData.openingBalance || 0).toFixed(2)}</p>
+            </div>
+            <div className="bg-[#111] p-5 rounded-2xl border border-[var(--border-main)]">
+              <p className="text-[var(--text-muted)] text-[9px] font-black uppercase tracking-widest mb-1">Expected Cash Sales</p>
+              <p className="text-emerald-500 text-xl font-black tracking-tighter">+₹{parseFloat(reconciliationData.cashSales || 0).toFixed(2)}</p>
+            </div>
+            <div className="bg-[#111] p-5 rounded-2xl border border-[var(--border-main)]">
+              <p className="text-[var(--text-muted)] text-[9px] font-black uppercase tracking-widest mb-1">Expected Online Sales</p>
+              <p className="text-blue-500 text-xl font-black tracking-tighter">+₹{parseFloat(reconciliationData.onlineSales || 0).toFixed(2)}</p>
+            </div>
+            <div className="bg-[var(--primary)]/10 p-5 rounded-2xl border border-[var(--primary)]/20">
+              <p className="text-[var(--primary)] text-[9px] font-black uppercase tracking-widest mb-1">Total Expected Cash</p>
+              <p className="text-[var(--primary)] text-xl font-black tracking-tighter">₹{parseFloat(reconciliationData.expectedClosingBalance || 0).toFixed(2)}</p>
+            </div>
+          </div>
+        )}
 
         <form onSubmit={closeForm.onSubmit} className="space-y-8">
            <div className="group">

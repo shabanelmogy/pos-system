@@ -28,8 +28,15 @@ export const getUsers = () => axiosWrapper.get<{ data: User[] }>("/api/user");
 export const getCustomers = () => axiosWrapper.get<{ data: any[] }>("/api/customer");
 export const getOrders = () => axiosWrapper.get<{ data: any[] }>("/api/order");
 export const getShifts = (params: any = {}) => axiosWrapper.get<{ data: any[] }>("/api/shift", { params });
-export const updateOrderStatus = ({ orderId, orderStatus }: { orderId: string; orderStatus: string }) => 
-    axiosWrapper.put(`/api/order/status/${orderId}`, { orderStatus });
+export const updateOrderLifecycle = ({ orderId, lifecycle, settleWithCash }: { orderId: string; lifecycle: string; settleWithCash?: boolean }) => 
+    axiosWrapper.patch(`/api/order/${orderId}/lifecycle`, { lifecycle, settleWithCash });
+export const updateOrderFulfillment = ({ orderId, fulfillmentStatus }: { orderId: string; fulfillmentStatus: string }) => 
+    axiosWrapper.patch(`/api/order/${orderId}/fulfillment`, { fulfillmentStatus });
+
+// Coupons
+export const getCoupons = () => axiosWrapper.get("/api/coupon");
+export const addCoupon = (data: any) => axiosWrapper.post("/api/coupon", data);
+export const updateCoupon = (id: string, data: any) => axiosWrapper.put(`/api/coupon/${id}`, data);
 
 // Management - Create
 export const addBranch = (data: Partial<Branch>) => axiosWrapper.post("/api/branch", data);

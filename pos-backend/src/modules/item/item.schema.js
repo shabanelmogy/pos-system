@@ -11,3 +11,11 @@ export const items = pgTable("items", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
+
+export const itemModifiers = pgTable("item_modifiers", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  itemId: uuid("item_id").references(() => items.id, { onDelete: "cascade" }),
+  name: varchar("name", { length: 255 }).notNull(),
+  price: numeric("price", { precision: 10, scale: 2 }).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});

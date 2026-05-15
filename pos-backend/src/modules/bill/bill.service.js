@@ -1,5 +1,6 @@
 import billRepository from "./bill.repository.js";
 import { fail } from "../../utils/errorHandler.js";
+import { randomBytes } from "crypto";
 
 const billService = {
   async getAllBills() {
@@ -21,7 +22,7 @@ const billService = {
     const existing = await billRepository.findByOrderId(data.orderId);
     if (existing) return existing;
 
-    const billNo = `INV-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+    const billNo = `INV-${Date.now()}-${randomBytes(4).toString('hex')}`;
     const payableAmount = parseFloat(data.totalAmount) + parseFloat(data.taxAmount) - parseFloat(data.discountAmount || 0);
 
     const billData = {

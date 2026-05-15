@@ -11,6 +11,8 @@ import swaggerUi from "swagger-ui-express";
 import swaggerSpec from "./config/swagger.js";
 import modularRoutes from "./src/modules/routes.js";
 import { pool } from "./src/config/database.js";
+import { runWithCorrelationId } from "./src/utils/logger.js";
+import { randomBytes } from "crypto";
 
 const app = express();
 const PORT = config.port || 8000;
@@ -27,6 +29,13 @@ app.use(cors(corsOptions));
 app.options("*", cors(corsOptions));
 app.use(express.json());
 app.use(cookieParser());
+
+// Correlation ID Middleware (Phase 5)
+app.use((req, res, next) => {
+  const correlationId = req.headers['x-correlation-id'] || randomBytes(8).toString('hex');
+  res.setHeader('x-correlation-id', correlationId);
+  runWithCorrelationId(correlationId, next);
+});
 
 // Debug Middleware
 app.use((req, res, next) => {

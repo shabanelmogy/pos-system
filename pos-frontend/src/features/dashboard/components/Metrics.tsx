@@ -75,8 +75,8 @@ const Metrics: React.FC<MetricsProps> = ({ branchId = "all" }) => {
   const tablesList = Array.isArray(tables) ? tables : [];
 
   const totalRevenue = ordersList.reduce((acc: number, order: any) => acc + parseFloat(order.total || 0), 0);
-  const activeOrders = ordersList.filter((o: any) => o.orderStatus !== "Completed").length;
-  const completedOrders = ordersList.filter((o: any) => o.orderStatus === "Completed").length;
+  const activeOrders = ordersList.filter((o: any) => o.lifecycle !== "COMPLETED" && o.lifecycle !== "VOIDED").length;
+  const completedOrders = ordersList.filter((o: any) => o.lifecycle === "COMPLETED").length;
 
   const performanceMetrics = [
     { 

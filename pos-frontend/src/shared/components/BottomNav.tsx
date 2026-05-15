@@ -18,7 +18,7 @@ const BottomNav: React.FC = () => {
   const location = useLocation();
   const { selectedPOSPoint } = usePOSStore();
   const { setCustomer } = useCustomerStore();
-  const { removeAllItems } = useCartStore();
+  const { clearCart } = useCartStore();
   const enableTables = selectedPOSPoint?.settings?.enableTables !== false;
 
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
@@ -79,7 +79,7 @@ const BottomNav: React.FC = () => {
         phone: "N/A",
         guests: 1
       });
-      removeAllItems();
+      clearCart();
 
       if (!enableTables) {
         navigate("/menu");
@@ -125,7 +125,7 @@ const BottomNav: React.FC = () => {
       phone: phone || "N/A",
       guests: guestCount || 1
     });
-    removeAllItems();
+    clearCart();
 
     // Clear local state
     setName("");

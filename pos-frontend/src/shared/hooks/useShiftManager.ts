@@ -2,7 +2,8 @@ import { useForm, UseFormRegister, FieldErrors } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useState } from "react";
-import { openShift, closeShift } from "../../features/pos/api/posApi";
+import { useQuery } from "@tanstack/react-query";
+import { openShift, closeShift, getShiftReconciliation } from "../../features/pos/api/posApi";
 import usePOSStore from "../../features/pos/store/usePOSStore";
 import useUserStore from "../../features/auth/store/useUserStore";
 import { enqueueSnackbar } from "notistack";
@@ -25,6 +26,7 @@ interface ShiftManagerHook {
   selectedPOSPoint: POSPoint | null;
   setShowShiftModal: (show: boolean) => void;
   loading: boolean;
+  reconciliationData: any;
   openForm: {
     register: UseFormRegister<OpenShiftData>;
     onSubmit: (e?: React.BaseSyntheticEvent) => Promise<void>;
@@ -56,6 +58,15 @@ const useShiftManager = (): ShiftManagerHook => {
   const closeForm = useForm<CloseShiftData>({
     resolver: zodResolver(closeShiftSchema),
     defaultValues: { closingBalance: 0 },
+  });
+
+  const { data: reconData } = useQuery({
+    queryKey: ["shiftReconciliation", activeShift?.id],
+    queryFn: async () => {
+      const res = await getShiftReconciliation(activeShift!.id);
+      return res.data.data;
+    },
+    enabled: !!activeShift,
   });
 
   const handleOpenShift = async (data: OpenShiftData) => {
@@ -106,6 +117,7 @@ const useShiftManager = (): ShiftManagerHook => {
     selectedPOSPoint,
     setShowShiftModal,
     loading,
+    reconciliationData: reconData,
     openForm: {
       register: openForm.register,
       onSubmit: openForm.handleSubmit(handleOpenShift),

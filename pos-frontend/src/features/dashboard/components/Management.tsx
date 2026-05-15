@@ -1,5 +1,6 @@
 import React from "react";
 import { MdTableBar, MdCategory, MdRestaurantMenu, MdStore, MdComputer, MdPeople } from "react-icons/md";
+import { FaTag } from "react-icons/fa";
 import { AnimatePresence, motion } from "framer-motion";
 import ConfirmModal from "../../../shared/components/ConfirmModal";
 import ManagementModal from "./ManagementModal";
@@ -16,6 +17,7 @@ import ItemList from "./management/ItemList";
 import BranchList from "./management/BranchList";
 import POSPointList from "./management/POSPointList";
 import StaffList from "./management/StaffList";
+import CouponList from "./management/CouponList";
 
 const Management: React.FC = () => {
   const { t } = useTranslation();
@@ -38,6 +40,7 @@ const Management: React.FC = () => {
     { id: "Branches", icon: <MdStore />, label: t('dashboard.management.tabs.branches') },
     { id: "POSPoints", icon: <MdComputer />, label: t('dashboard.management.tabs.terminals') },
     { id: "Users", icon: <MdPeople />, label: t('dashboard.management.tabs.staff') },
+    { id: "Coupons", icon: <FaTag />, label: "Coupons" },
   ];
 
   const containerVariants = {
@@ -142,6 +145,15 @@ const Management: React.FC = () => {
               onRetry={handleManualRefresh}
               searchQuery={searchQuery}
             />
+          )}
+
+          {activeSubTab === "Coupons" && (
+            <div className="col-span-full">
+              <CouponList 
+                onAdd={() => openEditModal("coupon")}
+                onEdit={(coupon) => openEditModal("coupon", coupon)}
+              />
+            </div>
           )}
         </motion.div>
       </AnimatePresence>

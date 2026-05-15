@@ -14,6 +14,7 @@ export const updatePOSPoint = ({ id, ...data }: { id: string; [key: string]: any
 export const openShift = (data: any) => axiosWrapper.post("/api/shift/open", data);
 export const closeShift = (shiftId: string, data: any) => axiosWrapper.post(`/api/shift/close/${shiftId}`, data);
 export const getActiveShift = (posPointId: string) => axiosWrapper.get(`/api/shift/active?posPointId=${posPointId}`);
+export const getShiftReconciliation = (shiftId: string) => axiosWrapper.get(`/api/shift/${shiftId}/reconciliation`);
 
 // Category Endpoints
 export const getCategories = () => axiosWrapper.get("/api/category");

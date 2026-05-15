@@ -1,6 +1,7 @@
 import { eq, desc } from "drizzle-orm";
 import { bills } from "./bill.schema.js";
 import { db } from "../../config/database.js";
+import { randomBytes } from "crypto";
 
 const billRepository = {
   async findAll() {
@@ -12,8 +13,9 @@ const billRepository = {
     return result[0];
   },
 
-  async findByOrderId(orderId) {
-    const result = await db.select().from(bills).where(eq(bills.orderId, orderId));
+  async findByOrderId(orderId, externalTx = null) {
+    const tx = externalTx || db;
+    const result = await tx.select().from(bills).where(eq(bills.orderId, orderId));
     return result[0];
   },
 

@@ -69,9 +69,9 @@ const Orders: React.FC = () => {
 
   const filteredOrders = orders.filter((order: any) => {
     if (status === "all") return true;
-    if (status === "progress") return order.orderStatus === "In Progress";
-    if (status === "ready") return order.orderStatus === "Ready";
-    if (status === "completed") return order.orderStatus === "Completed";
+    if (status === "progress") return order.lifecycle === "ACTIVE" && ["PENDING", "PREPARING", "PARTIALLY_READY"].includes(order.fulfillmentStatus);
+    if (status === "ready") return order.lifecycle === "ACTIVE" && order.fulfillmentStatus === "READY";
+    if (status === "completed") return order.lifecycle === "COMPLETED";
     return true;
   });
 

@@ -32,6 +32,23 @@ const MenuContainer: React.FC = () => {
   const isGuest = !customerName || customerName === "Guest";
   const queryClient = useQueryClient();
 
+  // Load Data
+  const { data: categories, isLoading: categoriesLoading } = useQuery<Category[]>({
+    queryKey: ["categories"],
+    queryFn: async () => {
+      const res = await getCategories();
+      return res.data.data || res.data;
+    },
+  });
+
+  const { data: items, isLoading: itemsLoading } = useQuery<MenuItem[]>({
+    queryKey: ["items", selectedCategory?.id],
+    queryFn: async () => {
+      const res = await getItems(selectedCategory?.id);
+      return res.data.data || res.data;
+    },
+  });
+
   // Force refetch when customer changes to ensure no "stale" history shows
   useEffect(() => {
     if (customerId) {
@@ -74,25 +91,23 @@ const MenuContainer: React.FC = () => {
   });
 
   const handleDuplicateOrder = (order: any) => {
-    if (!order || !order.items) return;
+    if (!order || !order.orderItems) return;
     
-    order.items.forEach((item: any) => {
+    order.orderItems.forEach((item: any) => {
       const qty = Number(item.quantity) || 1;
-      const menuItem = {
+      const product = {
         id: item.menuItemId || item.id,
-        name: item.name,
-        price: parseFloat(item.price),
-        category: item.category || "General",
+        name: item.nameSnapshot || item.name,
+        price: parseFloat(item.unitPrice),
       };
 
-      // Loop to add the correct quantity to the cart
+      // Add with existing modifiers if available
       for (let i = 0; i < qty; i++) {
-        addItem(menuItem as any);
+        addItem(product, item.modifiers || [], item.notes);
       }
     });
     
     setIsHistoryModalOpen(false);
-    // Optional: Scroll cart to bottom or show a success hint
   };
 
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -135,30 +150,6 @@ const MenuContainer: React.FC = () => {
     }
   };
 
-  const { data: categories, isLoading: categoriesLoading } = useQuery({
-    queryKey: ["categories"],
-    queryFn: async () => {
-      const res = await getCategories();
-      return res.data.data as Category[];
-    },
-  });
-
-  useEffect(() => {
-    if (categories && categories.length > 0 && !selectedCategory) {
-      setSelectedCategory(categories[0]);
-    }
-  }, [categories, selectedCategory]);
-
-  const { data: items, isLoading: itemsLoading } = useQuery({
-    queryKey: ["items", selectedCategory?.id, searchTerm],
-    queryFn: async () => {
-      // If there is a search term, fetch ALL items (Global Search)
-      const res = await getItems(searchTerm ? undefined : selectedCategory?.id);
-      return res.data.data as MenuItem[];
-    },
-    enabled: !!selectedCategory || !!searchTerm,
-  });
-
   const increment = (id: string) => {
     if (activeItemId !== id) {
       setActiveItemId(id);
@@ -182,7 +173,7 @@ const MenuContainer: React.FC = () => {
   const handleAddToCart = (item: MenuItem) => {
     if (activeItemId !== item.id || itemCount === 0) return;
     for (let i = 0; i < itemCount; i++) {
-        addItem(item);
+        addItem(item, [], ""); // Default empty modifiers for now
     }
     setItemCount(0);
     setActiveItemId(null);

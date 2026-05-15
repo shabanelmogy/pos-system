@@ -5,7 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { 
   addTable, addCategory, addItem, updateItem, updateCategory, getCategories,
   addBranch, updateBranch, addPOSPoint, updatePOSPoint, getBranches, updateTable,
-  createUser, updateUser, assignPOS, getPOSPoints
+  createUser, updateUser, assignPOS, getPOSPoints, addCoupon, updateCoupon
 } from "../api/dashboardApi";
 import { enqueueSnackbar } from "notistack";
 import CustomDropdown from "../../../shared/components/CustomDropdown";
@@ -89,6 +89,7 @@ const ManagementModal: React.FC<ManagementModalProps> = ({ type, isOpen, onClose
           case "category": return updateCategory(id, { name: preparedData.name });
           case "branch": return updateBranch(id, { ...preparedData, id });
           case "posPoint": return updatePOSPoint(id, preparedData);
+          case "coupon": return updateCoupon(id, preparedData);
           case "user":
             const userRes = await updateUser(id, preparedData);
             await assignPOS({ userId: id, posPointIds: selectedPOSPoints });
@@ -102,6 +103,7 @@ const ManagementModal: React.FC<ManagementModalProps> = ({ type, isOpen, onClose
           case "dishes": return addItem(preparedData);
           case "branch": return addBranch(preparedData);
           case "posPoint": return addPOSPoint(preparedData);
+          case "coupon": return addCoupon(preparedData);
           case "user":
             const userRes = await createUser(preparedData);
             if (userRes.data.data.id) {
@@ -303,7 +305,7 @@ const ManagementModal: React.FC<ManagementModalProps> = ({ type, isOpen, onClose
               </div>
             )}
 
-            {(type === "category" || type === "dishes" || type === "branch" || type === "posPoint") && (
+            {(type === "category" || type === "dishes" || type === "branch" || type === "posPoint" || type === "coupon") && (
               <div className="space-y-8 max-w-lg mx-auto py-10">
                 <div className="group">
                   <label className="block text-[var(--text-dim)] text-[9px] font-black uppercase tracking-widest mb-3 px-1">{type === "posPoint" ? t('dashboard.management.modal.terminal_name') : t('dashboard.management.modal.name')}</label>
@@ -338,6 +340,24 @@ const ManagementModal: React.FC<ManagementModalProps> = ({ type, isOpen, onClose
                       <label className="block text-[var(--text-dim)] text-[9px] font-black uppercase tracking-widest mb-3 px-1">{t('dashboard.management.modal.address')}</label>
                       <textarea {...register("address")} className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-2xl p-5 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-all h-24 custom-scrollbar text-sm shadow-inner" />
                     </div>
+
+                    <div className="bg-[var(--bg-card)]/50 p-6 rounded-3xl border border-[var(--border-main)] space-y-6">
+                      <p className="text-[var(--text-dim)] text-[9px] font-black uppercase tracking-[0.2em] mb-2 px-1">Financial Configuration</p>
+                      <div className="grid grid-cols-2 gap-6">
+                        <div className="group">
+                          <label className="block text-[var(--text-dim)] text-[9px] font-black uppercase tracking-widest mb-3 px-1">Tax Rate (%)</label>
+                          <input {...register("taxRate")} type="number" step="0.01" className="w-full bg-[var(--bg-card-alt)] border border-[var(--border-main)] rounded-2xl p-4 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-all text-sm font-bold shadow-inner" />
+                        </div>
+                        <div className="group">
+                          <label className="block text-[var(--text-dim)] text-[9px] font-black uppercase tracking-widest mb-3 px-1">Service Charge (%)</label>
+                          <input {...register("serviceChargeRate")} type="number" step="0.01" className="w-full bg-[var(--bg-card-alt)] border border-[var(--border-main)] rounded-2xl p-4 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-all text-sm font-bold shadow-inner" />
+                        </div>
+                      </div>
+                      <div className="group">
+                        <label className="block text-[var(--text-dim)] text-[9px] font-black uppercase tracking-widest mb-3 px-1">Base Currency</label>
+                        <CustomDropdown options={[{id: "INR", name: "Indian Rupee (₹)"}, {id: "USD", name: "US Dollar ($)"}, {id: "AED", name: "UAE Dirham (AED)"}]} value={watch("currency")} onChange={(val) => setValue("currency", val)} placeholder="Select Currency" />
+                      </div>
+                    </div>
                   </>
                 )}
 
@@ -360,6 +380,40 @@ const ManagementModal: React.FC<ManagementModalProps> = ({ type, isOpen, onClose
                       <label className="block text-[var(--text-dim)] text-[9px] font-black uppercase tracking-widest mb-3 px-1">{t('dashboard.management.modal.category')}</label>
                       <CustomDropdown options={categories || []} value={watch("categoryId")} onChange={(val) => setValue("categoryId", val)} icon={<MdCategory />} placeholder={t('dashboard.management.modal.select_category')} />
                       {errors.categoryId && <span className="text-[9px] text-red-500 font-bold mt-2 block">{errors.categoryId.message as string}</span>}
+                    </div>
+                  </div>
+                )}
+
+                {type === "coupon" && (
+                  <div className="space-y-6">
+                    <div className="group">
+                      <label className="block text-[var(--text-dim)] text-[9px] font-black uppercase tracking-widest mb-3 px-1">Coupon Code</label>
+                      <input {...register("code")} ref={(e) => { register("code").ref(e); if (e) firstInputRef.current = e; }} type="text" className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-2xl p-5 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-all font-black uppercase tracking-widest text-2xl shadow-inner" />
+                      {errors.code && <span className="text-[9px] text-red-500 font-bold mt-2 block">{errors.code.message as string}</span>}
+                    </div>
+                    <div className="grid grid-cols-2 gap-6">
+                      <div className="group">
+                        <label className="block text-[var(--text-dim)] text-[9px] font-black uppercase tracking-widest mb-3 px-1">Type</label>
+                        <CustomDropdown options={[{id: "PERCENTAGE", name: "Percentage (%)"}, {id: "FIXED", name: "Fixed Amount (₹)"}]} value={watch("type")} onChange={(val) => setValue("type", val)} placeholder="Select Type" />
+                      </div>
+                      <div className="group">
+                        <label className="block text-[var(--text-dim)] text-[9px] font-black uppercase tracking-widest mb-3 px-1">Value</label>
+                        <input {...register("value")} type="number" className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-2xl p-4 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-all font-bold shadow-inner" />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-6">
+                      <div className="group">
+                        <label className="block text-[var(--text-dim)] text-[9px] font-black uppercase tracking-widest mb-3 px-1">Min Order Amount (₹)</label>
+                        <input {...register("minOrderAmount")} type="number" className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-2xl p-4 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-all font-bold shadow-inner" />
+                      </div>
+                      <div className="group">
+                        <label className="block text-[var(--text-dim)] text-[9px] font-black uppercase tracking-widest mb-3 px-1">Max Discount (₹)</label>
+                        <input {...register("maxDiscountAmount")} type="number" placeholder="Optional" className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-2xl p-4 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-all font-bold shadow-inner" />
+                      </div>
+                    </div>
+                    <div className="group">
+                      <label className="block text-[var(--text-dim)] text-[9px] font-black uppercase tracking-widest mb-3 px-1">Expiry Date</label>
+                      <input {...register("validUntil")} type="date" className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-2xl p-4 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-all font-bold shadow-inner" />
                     </div>
                   </div>
                 )}

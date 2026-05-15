@@ -5,36 +5,22 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1778398540466,
-      "tag": "0000_lying_punisher",
+      "when": 1778854932736,
+      "tag": "0000_dizzy_plazm",
       "breakpoints": true
     },
     {
       "idx": 1,
       "version": "7",
-      "when": 1778412617658,
-      "tag": "0001_loose_plazm",
+      "when": 1778881707730,
+      "tag": "0001_fancy_mojo",
       "breakpoints": true
     },
     {
       "idx": 2,
       "version": "7",
-      "when": 1778442968323,
-      "tag": "0002_steep_skullbuster",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1778477043352,
-      "tag": "0003_colossal_colleen_wing",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1778657240743,
-      "tag": "0004_nostalgic_cannonball",
+      "when": 1778882782586,
+      "tag": "0002_stale_bloodscream",
       "breakpoints": true
     }
   ]

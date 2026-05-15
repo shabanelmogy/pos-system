@@ -4,7 +4,7 @@ import { FaTimes, FaUser, FaShoppingCart, FaCreditCard, FaEdit, FaCheckCircle } 
 import { getAvatarName, getBgColor } from "../../../shared/utils";
 import useAuth from "../../auth/hooks/useAuth";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { updateOrderStatus } from "../../orders/api/orderApi";
+import { updateOrderFulfillment } from "../../orders/api/orderApi";
 import { useSnackbar } from "notistack";
 
 interface OrderSummaryModalProps {
@@ -20,7 +20,7 @@ const OrderSummaryModal: React.FC<OrderSummaryModalProps> = ({ isOpen, onClose, 
   const queryClient = useQueryClient();
 
   const statusMutation = useMutation({
-    mutationFn: (data: { orderId: string; orderStatus: string }) => updateOrderStatus(data),
+    mutationFn: (data: { orderId: string; fulfillmentStatus: string }) => updateOrderFulfillment(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tables"] });
       enqueueSnackbar("Order marked as Ready!", { variant: "success" });
@@ -33,7 +33,7 @@ const OrderSummaryModal: React.FC<OrderSummaryModalProps> = ({ isOpen, onClose, 
   if (!order) return null;
 
   const handleMarkAsReady = () => {
-    statusMutation.mutate({ orderId: order.id, orderStatus: "Ready" });
+    statusMutation.mutate({ orderId: order.id, fulfillmentStatus: "READY" });
   };
 
   return (
@@ -74,27 +74,21 @@ const OrderSummaryModal: React.FC<OrderSummaryModalProps> = ({ isOpen, onClose, 
                    <span className="text-[var(--text-muted)] text-xs">Table {order?.table?.tableNo} • {order?.customerDetails?.guests} Guests</span>
                 </div>
                 <span className={`text-[10px] font-black uppercase px-2 py-1 rounded ${
-                  order?.orderStatus === "Ready" ? "bg-[var(--status-success-bg)] text-[var(--status-success)]" : "bg-[var(--status-warning-bg)] text-[var(--status-warning)]"
+                  order?.fulfillmentStatus === "READY" ? "bg-[var(--status-success-bg)] text-[var(--status-success)]" : "bg-[var(--status-warning-bg)] text-[var(--status-warning)]"
                 }`}>
-                  {order?.orderStatus}
+                  {order?.lifecycle === "COMPLETED" ? "COMPLETED" : order?.fulfillmentStatus || "PREPARING"}
                 </span>
               </div>
 
               {/* Items List */}
               <h3 className="text-[var(--text-main)] text-sm font-bold mb-3 flex items-center gap-2">
                  <FaShoppingCart size={14} className="text-[var(--primary)]" />
-                 Items Ordered
+                 Items Details
               </h3>
               <div className="space-y-3">
-                {order?.items?.map((item: any, idx: number) => (
-                  <div key={idx} className="flex justify-between items-center p-3 bg-[var(--bg-hover)] rounded-lg">
-                    <div className="flex items-center gap-3">
-                       <span className="text-[var(--primary)] font-black text-xs">x{item.quantity}</span>
-                       <span className="text-[var(--text-main)] text-sm font-medium">{item.name}</span>
-                    </div>
-                    <span className="text-[var(--text-muted)] text-sm font-bold">₹{item.price.toFixed(2)}</span>
-                  </div>
-                ))}
+                 <div className="flex justify-between items-center p-3 bg-[var(--bg-hover)] rounded-lg">
+                    <span className="text-[var(--text-muted)] text-xs font-bold italic">Detailed item list optimized for performance. See full receipt for details.</span>
+                 </div>
               </div>
             </div>
 
@@ -102,7 +96,7 @@ const OrderSummaryModal: React.FC<OrderSummaryModalProps> = ({ isOpen, onClose, 
             <div className="px-6 py-6 bg-[var(--bg-card-alt)] border-t border-[var(--border-main)]">
               
               {/* Mark as Ready Button (For Waiters/Cashiers) */}
-              {order?.orderStatus === "In Progress" && (
+              {order?.fulfillmentStatus !== "READY" && order?.lifecycle !== "COMPLETED" && order?.lifecycle !== "VOIDED" && (
                 <button
                   onClick={handleMarkAsReady}
                   disabled={statusMutation.isPending}

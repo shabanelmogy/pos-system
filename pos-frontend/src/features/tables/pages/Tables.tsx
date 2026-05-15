@@ -16,7 +16,7 @@ import { useTranslation } from "react-i18next";
 const Tables: React.FC = () => {
   const { t } = useTranslation();
   const { setOrder } = useCustomerStore();
-  const { addItem, removeAllItems } = useCartStore();
+  const { addItem, clearCart } = useCartStore();
 
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [isSummaryModalOpen, setIsSummaryModalOpen] = useState(false);
@@ -39,8 +39,8 @@ const Tables: React.FC = () => {
       guests: order.customerDetails.guests
     });
 
-    removeAllItems();
-    order.items.forEach((item: any) => {
+    clearCart();
+    (order.items || []).forEach((item: any) => {
       for (let i = 0; i < item.quantity; i++) {
         addItem({
           id: item.menuItem.id,
@@ -78,7 +78,8 @@ const Tables: React.FC = () => {
 
   const activeTables = activeTablesRaw.filter(table => {
     if (serviceStatus === "all") return true;
-    return table.currentOrder?.orderStatus === serviceStatus;
+    const fulfillment = table.currentOrder?.fulfillmentStatus || "PREPARING";
+    return fulfillment === serviceStatus;
   });
 
   return (
@@ -125,20 +126,20 @@ const Tables: React.FC = () => {
                   {t('tables.status.all')} ({activeTablesRaw.length})
                 </button>
                 <button
-                  onClick={() => setServiceStatus("In Progress")}
+                  onClick={() => setServiceStatus("PREPARING")}
                   className={`text-[10px] font-bold px-3 py-1 rounded-full border transition-all ${
-                    serviceStatus === "In Progress" ? "bg-yellow-500/20 text-yellow-500 border-yellow-500/50" : "text-[var(--text-muted)] border-[var(--border-main)] hover:border-[var(--text-muted)]"
+                    serviceStatus === "PREPARING" ? "bg-yellow-500/20 text-yellow-500 border-yellow-500/50" : "text-[var(--text-muted)] border-[var(--border-main)] hover:border-[var(--text-muted)]"
                   }`}
                 >
-                  {t('tables.status.in_progress')} ({activeTablesRaw.filter(t => t.currentOrder?.orderStatus === "In Progress").length})
+                  {t('tables.status.in_progress')} ({activeTablesRaw.filter(t => (t.currentOrder?.fulfillmentStatus || "PREPARING") === "PREPARING").length})
                 </button>
                 <button
-                  onClick={() => setServiceStatus("Ready")}
+                  onClick={() => setServiceStatus("READY")}
                   className={`text-[10px] font-bold px-3 py-1 rounded-full border transition-all ${
-                    serviceStatus === "Ready" ? "bg-green-500/20 text-green-500 border-green-500/50" : "text-[var(--text-muted)] border-[var(--border-main)] hover:border-[var(--text-muted)]"
+                    serviceStatus === "READY" ? "bg-green-500/20 text-green-500 border-green-500/50" : "text-[var(--text-muted)] border-[var(--border-main)] hover:border-[var(--text-muted)]"
                   }`}
                 >
-                  {t('tables.status.ready')} ({activeTablesRaw.filter(t => t.currentOrder?.orderStatus === "Ready").length})
+                  {t('tables.status.ready')} ({activeTablesRaw.filter(t => t.currentOrder?.fulfillmentStatus === "READY").length})
                 </button>
               </div>
             </div>

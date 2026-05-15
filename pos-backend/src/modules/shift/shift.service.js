@@ -64,6 +64,27 @@ const shiftService = {
 
   async getAllShifts(filters = {}) {
     return await shiftRepository.findAll(filters);
+  },
+
+  async getReconciliation(shiftId) {
+    const shift = await shiftRepository.findById(shiftId);
+    if (!shift) fail("Shift not found", 404);
+
+    const salesSummary = await shiftRepository.getShiftSalesSummary(shiftId);
+    const voidedItems = await shiftRepository.getShiftVoidedItems(shiftId);
+
+    return {
+      shiftId: shift.id,
+      slug: shift.slug,
+      openedAt: shift.openedAt,
+      closedAt: shift.closedAt,
+      openingBalance: parseFloat(shift.openingBalance),
+      closingBalance: parseFloat(shift.closingBalance || 0),
+      expectedBalance: parseFloat(shift.expectedBalance || 0),
+      variance: parseFloat(shift.variance || 0),
+      sales: salesSummary,
+      voidedItems: voidedItems.rows || voidedItems
+    };
   }
 };
 

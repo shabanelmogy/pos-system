@@ -38,6 +38,11 @@ const tableRepository = {
     };
   },
 
+  async findByIdWithLock(id, tx = db) {
+    const result = await tx.select().from(tables).where(eq(tables.id, id)).forUpdate();
+    return result[0] || null;
+  },
+
   async findByTableNo(tableNo) {
     const result = await db.select().from(tables).where(eq(tables.tableNo, tableNo)).limit(1);
     return result[0];
@@ -48,7 +53,8 @@ const tableRepository = {
     return result[0];
   },
 
-  async update(id, tableData) {
+  async update(id, tableData, externalTx = null) {
+    const tx = externalTx || db;
     const updateObj = { updatedAt: new Date() };
     if (tableData.tableNo !== undefined) updateObj.tableNo = tableData.tableNo;
     if (tableData.seats !== undefined) updateObj.seats = tableData.seats;
@@ -56,7 +62,7 @@ const tableRepository = {
     if (tableData.currentOrderId !== undefined) updateObj.currentOrderId = tableData.currentOrderId;
 
     console.log(`[DEBUG] Repository Update - ID: ${id}, UpdateObj:`, updateObj);
-    const result = await db.update(tables)
+    const result = await tx.update(tables)
       .set(updateObj)
       .where(eq(tables.id, id))
       .returning();

@@ -1,17 +1,18 @@
 import { relations } from "drizzle-orm";
 import { users, userPosPermissions } from "./user/user.schema.js";
 import { tables } from "./table/table.schema.js";
-import { orders } from "./order/order.schema.js";
-import { orderItems } from "./order/orderItem.schema.js";
+import { orders, orderLifecycleEnum, fulfillmentStatusEnum, paymentStatusEnum, orderTypeEnum } from "./order/order.schema.js";
+import { orderItems, itemStatusEnum } from "./order/orderItem.schema.js";
 import { payments } from "./payment/payment.schema.js";
 import { categories } from "./category/category.schema.js";
-import { items } from "./item/item.schema.js";
+import { items, itemModifiers } from "./item/item.schema.js";
 import { customers } from "./customer/customer.schema.js";
 import { bills } from "./bill/bill.schema.js";
 import { branches } from "./branch/branch.schema.js";
 import { posPoints } from "./posPoint/posPoint.schema.js";
 import { shifts } from "./shift/shift.schema.js";
 import { posSettings } from "./posSettings/posSettings.schema.js";
+import { coupons, couponTypeEnum } from "./coupon/coupon.schema.js";
 
 // Users Relations
 export const usersRelations = relations(users, ({ one, many }) => ({
@@ -60,7 +61,10 @@ export const ordersRelations = relations(orders, ({ many, one }) => ({
   branch: one(branches, { fields: [orders.branchId], references: [branches.id] }),
   posPoint: one(posPoints, { fields: [orders.posPointId], references: [posPoints.id] }),
   shift: one(shifts, { fields: [orders.shiftId], references: [shifts.id] }),
-  cashier: one(users, { fields: [orders.cashierId], references: [users.id] }),
+  openedBy: one(users, { fields: [orders.openedById], references: [users.id] }),
+  waiter: one(users, { fields: [orders.waiterId], references: [users.id] }),
+  closedBy: one(users, { fields: [orders.closedById], references: [users.id] }),
+  voidedBy: one(users, { fields: [orders.voidedById], references: [users.id] }),
 }));
 
 // Order Items Relations
@@ -88,6 +92,11 @@ export const tablesRelations = relations(tables, ({ many }) => ({
 export const itemsRelations = relations(items, ({ one, many }) => ({
   category: one(categories, { fields: [items.categoryId], references: [categories.id] }),
   orderItems: many(orderItems),
+  modifiers: many(itemModifiers),
+}));
+
+export const itemModifiersRelations = relations(itemModifiers, ({ one }) => ({
+  item: one(items, { fields: [itemModifiers.itemId], references: [items.id] }),
 }));
 
 export {
@@ -95,14 +104,22 @@ export {
   userPosPermissions,
   tables,
   orders,
+  orderLifecycleEnum,
+  fulfillmentStatusEnum,
+  paymentStatusEnum,
+  orderTypeEnum,
   orderItems,
+  itemStatusEnum,
   payments,
   categories,
   items,
+  itemModifiers,
   customers,
   bills,
   branches,
   posPoints,
   shifts,
   posSettings,
+  coupons,
+  couponTypeEnum
 };

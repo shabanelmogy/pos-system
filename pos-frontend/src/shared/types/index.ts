@@ -58,6 +58,44 @@ export interface MenuItem {
   description?: string;
 }
 
-export interface CartItem extends MenuItem {
+// Order Types
+export type OrderStatus = 
+  | "PENDING" | "CONFIRMED" | "PREPARING" | "READY" | "SERVED" 
+  | "ON_THE_WAY" | "DELIVERED" | "COMPLETED" | "CANCELLED" | "VOIDED";
+
+export type OrderType = "DINE_IN" | "TAKE_AWAY" | "PICKUP" | "DELIVERY";
+
+export interface OrderModifier {
+  modifierId: string;
+  name: string;
+  price: number;
   quantity: number;
+}
+
+export interface OrderItem {
+  id: string;
+  orderId: string;
+  menuItemId: string;
+  nameSnapshot: string;
+  unitPrice: number;
+  quantity: number;
+  subtotal: number;
+  status: string;
+  notes?: string;
+  modifiers?: OrderModifier[];
+}
+
+export interface Order {
+  id: string;
+  orderNumber: string;
+  type: OrderType;
+  status: OrderStatus;
+  branchId: string;
+  customerId?: string;
+  tableId?: string;
+  subtotal: number;
+  taxTotal: number;
+  grandTotal: number;
+  orderItems: OrderItem[];
+  createdAt: string;
 }

@@ -10,6 +10,8 @@ import usePOSStore from "../../store/usePOSStore";
 import Invoice from "../../../../features/orders/components/invoice/Invoice";
 import { FaChevronDown, FaChevronUp } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
+import CouponInput from "./CouponInput";
+import { confirmOrderDraft, addOrderPayment, applyOrderCoupon } from "../../../../features/orders/api/orderApi";
 
 declare global {
   interface Window { Razorpay: any; }
@@ -17,41 +19,87 @@ declare global {
 
 const Bill: React.FC = () => {
   const { t } = useTranslation();
-  const { items: cartItems, removeAllItems, getTotalPrice } = useCartStore();
+  const { items: cartItems, clearCart, getSubtotal } = useCartStore();
   const { customerName, customerPhone, guests, table, removeCustomer } = useCustomerStore();
   const user = useUserStore();
-  const { selectedBranch, selectedPOSPoint, activeShift } = usePOSStore();
+  const { activeShift, selectedPOSPoint } = usePOSStore();
 
   const [paymentMethod, setPaymentMethod] = useState("Cash");
   const [showInvoice, setShowInvoice] = useState(false);
   const [orderInfo, setOrderInfo] = useState<any>(null);
   const [isMinimized, setIsMinimized] = useState(true);
+  const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
 
   const { enqueueSnackbar } = useSnackbar();
   const queryClient = useQueryClient();
 
-  const total = getTotalPrice();
-  const tax = total * 0.05;
-  const totalWithTax = total + tax;
+  const subtotal = getSubtotal();
+  let discountAmount = 0;
+  if (appliedCoupon) {
+    if (appliedCoupon.type === "PERCENTAGE") {
+       discountAmount = (subtotal * appliedCoupon.value) / 100;
+       if (appliedCoupon.maxDiscountAmount && discountAmount > appliedCoupon.maxDiscountAmount) {
+         discountAmount = appliedCoupon.maxDiscountAmount;
+       }
+    } else {
+       discountAmount = parseFloat(appliedCoupon.value);
+    }
+  }
+
+  const subtotalAfterDiscount = Math.max(0, subtotal - discountAmount);
+  const tax = subtotalAfterDiscount * 0.05; // Visual estimate for the UI
+  const totalWithTax = subtotalAfterDiscount + tax;
 
   const tableMutation = useMutation({
     mutationFn: (data: { tableId: string; [key: string]: any }) => updateTable(data),
   });
 
+  const confirmMutation = useMutation({
+    mutationFn: (id: string) => confirmOrderDraft(id),
+  });
+
+  const paymentMutation = useMutation({
+    mutationFn: (data: any) => addOrderPayment(data),
+  });
+
+  const applyBackendCouponMutation = useMutation({
+    mutationFn: (data: { orderId: string; code: string }) => applyOrderCoupon(data),
+  });
+
   const orderMutation = useMutation({
     mutationFn: (data: any) => addOrder(data),
-    onSuccess: (res: any) => {
+    onSuccess: async (res: any, variables: any) => {
       const order = res.data.data;
+      
+      // Apply Coupon if exists
+      if (appliedCoupon) {
+         await applyBackendCouponMutation.mutateAsync({ orderId: order.id, code: appliedCoupon.code });
+      }
+
+      // Chain confirm draft to make it ACTIVE
+      await confirmMutation.mutateAsync(order.id);
+
+      // If Razorpay, add payment
+      if (variables.metadata?.razorpay_payment_id) {
+        await paymentMutation.mutateAsync({
+           orderId: order.id,
+           amount: variables.amount,
+           method: "Razorpay",
+           transactionId: variables.metadata.razorpay_payment_id
+        });
+      }
+
       const handleSuccess = () => {
         queryClient.invalidateQueries({ queryKey: ["orders"] });
         queryClient.invalidateQueries({ queryKey: ["recentOrders"] });
-        queryClient.invalidateQueries({ queryKey: ["customerLastOrder"] });
-        enqueueSnackbar("Order Placed Successfully", { variant: "success" });
+        enqueueSnackbar(t('pos.cart.order_success'), { variant: "success" });
         setOrderInfo(order);
         setShowInvoice(true);
-        removeAllItems();
+        clearCart();
         removeCustomer();
+        setAppliedCoupon(null);
       };
+      
       if (order.tableId) {
         tableMutation.mutate({ status: "Booked", orderId: order.id, tableId: order.tableId }, { onSuccess: handleSuccess });
       } else {
@@ -65,56 +113,77 @@ const Bill: React.FC = () => {
 
   const handlePlaceOrder = () => {
     const isAdmin = user?.role?.toLowerCase() === "admin";
-    if (!activeShift && !isAdmin) { enqueueSnackbar("No active shift found. Please start a shift first.", { variant: "error" }); return; }
-    if (!user || !user.id) { enqueueSnackbar("User session invalid. Please re-login.", { variant: "error" }); return; }
-    const preparedItems = cartItems.map((item) => ({ 
-      menuItemId: item.id, 
-      quantity: Number(item.quantity), 
-      unitPrice: Number(item.price), 
-      name: item.name 
+    if (!activeShift && !isAdmin) {
+      enqueueSnackbar("No active shift found. Please start a shift first.", { variant: "error" });
+      return;
+    }
+
+    // 1. Prepare Items according to the new backend DTO
+    // We NO LONGER send unitPrice, as the backend derives it from the catalog.
+    const preparedItems = cartItems.map((item) => ({
+      menuItemId: item.productId,
+      quantity: item.quantity,
+      notes: item.notes,
+      modifiers: item.modifiers.map(m => ({
+        modifierId: m.modifierId,
+        quantity: m.quantity
+      }))
     }));
-    const baseOrderData = {
-      customerDetails: { name: customerName, phone: customerPhone, guests },
-      orderStatus: selectedPOSPoint?.settings?.enableTables !== false ? "In Progress" : "Completed",
-      items: preparedItems, tableId: table?.tableId, paymentMethod,
-      branchId: selectedBranch?.id, posPointId: selectedPOSPoint?.id, shiftId: activeShift?.id, cashierId: user.id,
+
+    // 2. Build the Payload (Strict following CreateOrderDTO)
+    const orderPayload: any = {
+      type: table?.tableId ? "DINE_IN" : "TAKE_AWAY",
+      items: preparedItems,
+      notes: "POS Order",
     };
-    if (paymentMethod === "Razorpay") { razorpayMutation.mutate({ amount: totalWithTax }); } else { orderMutation.mutate(baseOrderData); }
+
+    if (table?.tableId) {
+      orderPayload.tableId = table.tableId;
+      orderPayload.customerDetails = {
+        name: customerName || "Guest",
+        phone: customerPhone || "0000000000",
+        guests: guests || 1
+      };
+    }
+
+    // Razorpay Flow
+    if (paymentMethod === "Razorpay") {
+      razorpayMutation.mutate({ amount: totalWithTax, orderPayload });
+    } else {
+      orderMutation.mutate(orderPayload);
+    }
   };
 
   const razorpayMutation = useMutation({
     mutationFn: (data: any) => createOrderRazorpay(data),
-    onSuccess: (res: any) => {
+    onSuccess: (res: any, variables: any) => {
       const { data } = res;
       const options = {
         key: import.meta.env.VITE_RAZORPAY_KEY_ID,
-        amount: data.order.amount, currency: data.order.currency,
-        name: selectedBranch?.name || "POS Order",
-        description: `POS Order - ${selectedPOSPoint?.name || "Terminal"}`,
+        amount: data.order.amount,
+        currency: data.order.currency,
+        name: "Restaurant POS",
         order_id: data.order.id,
         handler: async function (response: any) {
           try {
             await verifyPaymentRazorpay(response);
-            const orderData = {
-              customerDetails: { name: customerName, phone: customerPhone, guests },
-              orderStatus: selectedPOSPoint?.settings?.enableTables !== false ? "In Progress" : "Completed",
-              items: cartItems.map((item) => ({ 
-                menuItemId: item.id, 
-                quantity: Number(item.quantity), 
-                unitPrice: Number(item.price), 
-                name: item.name 
-              })),
-              tableId: table?.tableId, paymentMethod,
-              paymentData: { razorpay_order_id: response.razorpay_order_id, razorpay_payment_id: response.razorpay_payment_id, razorpay_signature: response.razorpay_signature },
-              branchId: selectedBranch?.id, posPointId: selectedPOSPoint?.id, shiftId: activeShift?.id, cashierId: user.id,
+            // Append payment info to our payload
+            const finalPayload = {
+              ...variables.orderPayload,
+              metadata: { 
+                razorpay_order_id: response.razorpay_order_id, 
+                razorpay_payment_id: response.razorpay_payment_id 
+              }
             };
-            orderMutation.mutate(orderData);
-          } catch { enqueueSnackbar("Payment Verification Failed", { variant: "error" }); }
+            orderMutation.mutate(finalPayload);
+          } catch {
+            enqueueSnackbar("Payment Verification Failed", { variant: "error" });
+          }
         },
         prefill: { name: customerName, contact: customerPhone },
         theme: { color: "var(--primary)" },
       };
-      const rzp = new window.Razorpay(options);
+      const rzp = new (window as any).Razorpay(options);
       rzp.open();
     },
   });
@@ -142,17 +211,31 @@ const Bill: React.FC = () => {
           <div className="space-y-3 mb-4">
             <div className="flex justify-between text-[var(--text-muted)] text-sm">
               <span className="font-medium">{t('pos.cart.subtotal')}</span>
-              <span className="font-bold text-[var(--text-main)]">₹{total.toFixed(2)}</span>
+              <span className="font-bold text-[var(--text-main)]">₹{subtotal.toFixed(2)}</span>
             </div>
             <div className="flex justify-between text-[var(--text-muted)] text-sm">
               <span className="font-medium">{t('pos.cart.tax')}</span>
               <span className="font-bold text-[var(--text-main)]">₹{tax.toFixed(2)}</span>
             </div>
+            {discountAmount > 0 && (
+              <div className="flex justify-between text-green-500 text-sm">
+                <span className="font-medium">Discount ({appliedCoupon?.code})</span>
+                <span className="font-bold">-₹{discountAmount.toFixed(2)}</span>
+              </div>
+            )}
             <div className="h-px bg-[var(--border-main)]"></div>
             <div className="flex justify-between text-[var(--primary)]">
               <span className="text-base font-black uppercase">{t('pos.cart.total')}</span>
               <span className="text-lg font-black">₹{totalWithTax.toFixed(2)}</span>
             </div>
+          </div>
+
+          <div className="mb-4">
+            <CouponInput 
+               orderAmount={subtotal} 
+               onSuccess={(coupon) => setAppliedCoupon(coupon)} 
+               onRemove={() => setAppliedCoupon(null)} 
+            />
           </div>
 
           <div className="mb-4">

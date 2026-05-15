@@ -100,6 +100,16 @@ const shiftRepository = {
     };
   },
 
+  async findShiftMinimal(id, tx) {
+    const [shift] = await (tx ?? db).select({
+      id: shifts.id,
+      status: shifts.status,
+      branchId: shifts.branchId,
+      posPointId: shifts.posPointId
+    }).from(shifts).where(eq(shifts.id, id)).limit(1);
+    return shift || null;
+  },
+
   async findCashierById(cashierId) {
     const result = await db.select().from(users).where(eq(users.id, cashierId)).limit(1);
     return result[0] || null;
@@ -107,21 +117,46 @@ const shiftRepository = {
 
   async getShiftSalesSummary(shiftId) {
     const result = await db.select({
-      total: sql`SUM(total)`,
-      cashTotal: sql`SUM(CASE WHEN payment_method = 'Cash' THEN total ELSE 0 END)`,
-      cardTotal: sql`SUM(CASE WHEN payment_method = 'Card' OR payment_method = 'Razorpay' THEN total ELSE 0 END)`
+      method: payments.method,
+      total: sql`SUM(${payments.amount})`
     })
-    .from(orders)
+    .from(payments)
+    .innerJoin(orders, eq(payments.orderId, orders.id))
     .where(and(
       eq(orders.shiftId, shiftId),
-      eq(orders.orderStatus, "Completed")
-    ));
+      eq(orders.lifecycle, "COMPLETED"),
+      eq(payments.isRefunded, false)
+    ))
+    .groupBy(payments.method);
 
-    return {
-      total: parseFloat(result[0]?.total || 0),
-      cashTotal: parseFloat(result[0]?.cashTotal || 0),
-      cardTotal: parseFloat(result[0]?.cardTotal || 0)
+    const summary = {
+      total: 0,
+      cashTotal: 0,
+      cardTotal: 0,
+      upiTotal: 0,
+      methods: {}
     };
+
+    result.forEach(row => {
+      const amount = parseFloat(row.total || 0);
+      summary.total += amount;
+      summary.methods[row.method] = amount;
+      if (row.method === "Cash") summary.cashTotal += amount;
+      else if (row.method === "Card") summary.cardTotal += amount;
+      else if (row.method === "UPI") summary.upiTotal += amount;
+    });
+
+    return summary;
+  },
+
+  async getShiftVoidedItems(shiftId) {
+    return await db.execute(sql`
+      SELECT oi.*, u.name as voided_by_name
+      FROM order_items oi
+      JOIN orders o ON oi.order_id = o.id
+      LEFT JOIN users u ON o.voided_by_id = u.id
+      WHERE o.shift_id = ${shiftId} AND oi.is_voided = true
+    `);
   },
 
   async findAll(filters = {}) {

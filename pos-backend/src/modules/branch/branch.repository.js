@@ -10,8 +10,9 @@ const branchRepository = {
     const result = await db.insert(branches).values(data).returning();
     return result[0];
   },
-  async findById(id) {
-    const result = await db.select().from(branches).where(eq(branches.id, id)).limit(1);
+  async findById(id, externalTx = null) {
+    const tx = externalTx || db;
+    const result = await tx.select().from(branches).where(eq(branches.id, id)).limit(1);
     return result[0];
   },
   async update(id, data) {

@@ -53,6 +53,16 @@ const shiftController = {
     } catch (error) {
       handleError(res, error, "shiftController.getAll");
     }
+  },
+
+  async getReconciliation(req, res) {
+    try {
+      const { id } = req.params;
+      const report = await shiftService.getReconciliation(id);
+      res.status(200).json({ success: true, data: report });
+    } catch (error) {
+      handleError(res, error, "shiftController.getReconciliation");
+    }
   }
 };
 

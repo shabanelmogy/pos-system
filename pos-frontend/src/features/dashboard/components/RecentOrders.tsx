@@ -2,7 +2,7 @@ import React from "react";
 import { GrUpdate } from "react-icons/gr";
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { enqueueSnackbar } from "notistack";
-import { getOrders, updateOrderStatus } from "../api/dashboardApi";
+import { getOrders, updateOrderLifecycle, updateOrderFulfillment } from "../api/dashboardApi";
 import { formatDateAndTime } from "../../../shared/utils";
 import { MdStore, MdComputer } from "react-icons/md";
 import { useTranslation } from "react-i18next";
@@ -15,12 +15,18 @@ const RecentOrders: React.FC<RecentOrdersProps> = ({ branchId = "all" }) => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   
-  const handleStatusChange = ({orderId, orderStatus}: {orderId: string, orderStatus: string}) => {
-    orderStatusUpdateMutation.mutate({orderId, orderStatus});
+  const handleStatusChange = ({orderId, status}: {orderId: string, status: string}) => {
+    orderStatusUpdateMutation.mutate({orderId, status});
   };
 
   const orderStatusUpdateMutation = useMutation({
-    mutationFn: ({orderId, orderStatus}: {orderId: string, orderStatus: string}) => updateOrderStatus({orderId, orderStatus}),
+    mutationFn: async ({orderId, status}: {orderId: string, status: string}) => {
+      if (status === "COMPLETED") {
+        return updateOrderLifecycle({ orderId, lifecycle: "COMPLETED", settleWithCash: true });
+      } else {
+        return updateOrderFulfillment({ orderId, fulfillmentStatus: status });
+      }
+    },
     onSuccess: () => {
       enqueueSnackbar(t('dashboard.orders.status_updated'), { variant: "success" });
       queryClient.invalidateQueries({ queryKey: ["orders"] }); 
@@ -138,25 +144,26 @@ const RecentOrders: React.FC<RecentOrdersProps> = ({ branchId = "all" }) => {
                   <td className={cell}>
                     <select
                       className={`h-5 w-full min-w-0 max-w-full rounded-md border border-[var(--border-main)] bg-[var(--bg-card)] px-px py-0 text-[8px] leading-none text-[var(--text-main)] focus:outline-none 2xl:h-6 2xl:rounded-lg 2xl:px-1 2xl:py-0.5 2xl:text-[10px] ${
-                        order.orderStatus === "Ready"
-                          ? "text-[var(--status-success)]"
-                          : order.orderStatus === "Completed"
-                            ? "text-[var(--primary)]"
+                        order.lifecycle === "COMPLETED"
+                          ? "text-[var(--primary)]"
+                          : order.fulfillmentStatus === "READY"
+                            ? "text-[var(--status-success)]"
                             : "text-[var(--status-warning)]"
                       }`}
-                      value={order.orderStatus}
-                      onChange={(e) => handleStatusChange({ orderId: order.id, orderStatus: e.target.value })}
+                      value={order.lifecycle === "COMPLETED" ? "COMPLETED" : order.fulfillmentStatus === "READY" ? "READY" : "PREPARING"}
+                      onChange={(e) => handleStatusChange({ orderId: order.id, status: e.target.value })}
+                      disabled={order.lifecycle === "COMPLETED" || order.lifecycle === "VOIDED"}
                     >
-                      <option value="In Progress">{t('common.order_status.in_progress')}</option>
-                      <option value="Ready">{t('common.order_status.ready')}</option>
-                      <option value="Completed">{t('common.order_status.completed')}</option>
+                      <option value="PREPARING">{t('common.order_status.in_progress')}</option>
+                      <option value="READY">{t('common.order_status.ready')}</option>
+                      <option value="COMPLETED">{t('common.order_status.completed')}</option>
                     </select>
                   </td>
                   <td className={`${cell} whitespace-nowrap text-[8px] leading-tight md:whitespace-normal md:break-words 2xl:text-[10px]`}>
                     {formatDateAndTime(order.createdAt)}
                   </td>
-                  <td className={`${cell} whitespace-nowrap tabular-nums text-[8px] 2xl:text-[10px]`}>
-                    {order.orderItems?.length || 0} {t('dashboard.orders.items')}
+                  <td className={`${cell} whitespace-nowrap tabular-nums text-[8px] 2xl:text-[10px] text-[var(--text-muted)]`}>
+                    --
                   </td>
                   <td className={cell}>
                     <span className="inline-flex whitespace-nowrap rounded-md border border-[var(--border-main)] bg-[var(--bg-card)] px-0.5 py-px text-[7px] font-bold 2xl:rounded-lg 2xl:px-1 2xl:text-[9px]">
@@ -164,18 +171,18 @@ const RecentOrders: React.FC<RecentOrdersProps> = ({ branchId = "all" }) => {
                     </span>
                   </td>
                   <td className={`${cell} whitespace-nowrap tabular-nums text-[9px] font-bold text-[var(--primary)] 2xl:text-[11px]`}>
-                    ₹{parseFloat(order.total || 0).toFixed(2)}
+                    ₹{parseFloat(order.bills?.[0]?.grandTotal || order.total || 0).toFixed(2)}
                   </td>
                   <td className={`${cell} text-center`}>
                     <span
                       className={`inline-block max-w-full truncate rounded-full px-0.5 py-px text-[6px] font-bold uppercase 2xl:px-1 2xl:text-[8px] ${
-                        order.paymentMethod === "Cash"
+                        order.paymentStatus === "PAID"
                           ? "bg-[var(--status-success-bg)] text-[var(--status-success)]"
-                          : "bg-[var(--primary-light)] text-[var(--primary)]"
+                          : "bg-[var(--status-warning-bg)] text-[var(--status-warning)]"
                       }`}
-                      title={order.paymentMethod || t("pos.cart.cash")}
+                      title={order.paymentStatus || t("pos.cart.cash")}
                     >
-                      {order.paymentMethod || t("pos.cart.cash")}
+                      {order.paymentStatus || "UNPAID"}
                     </span>
                   </td>
                 </tr>

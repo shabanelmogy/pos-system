@@ -30,6 +30,9 @@ const getValidationSchema = (type: string, isEdit: boolean) => {
         city: z.string().optional(),
         phone: z.string().optional(),
         address: z.string().optional(),
+        taxRate: z.coerce.number().min(0, "Tax rate cannot be negative").default(0),
+        serviceChargeRate: z.coerce.number().min(0, "Service charge cannot be negative").default(0),
+        currency: z.string().default("INR"),
       });
     case "posPoint":
       return z.object({
@@ -45,6 +48,16 @@ const getValidationSchema = (type: string, isEdit: boolean) => {
         role: z.string().min(1, "Role is required"),
         branchId: z.string().min(1, "Branch is required"),
         password: isEdit ? z.string().optional() : z.string().min(6, "Password must be at least 6 characters"),
+      });
+    case "coupon":
+      return z.object({
+        code: z.string().min(1, "Code is required"),
+        type: z.enum(["PERCENTAGE", "FIXED"]),
+        value: z.coerce.number().min(0, "Value cannot be negative"),
+        minOrderAmount: z.coerce.number().min(0).default(0),
+        maxDiscountAmount: z.coerce.number().min(0).optional(),
+        validUntil: z.string().optional(),
+        isActive: z.boolean().default(true),
       });
     default:
       return z.object({});
@@ -70,7 +83,9 @@ const useManagementForm = (type: string, initialData: any, isOpen: boolean) => {
     defaultValues: {
         tableNo: "", seats: "", name: "", price: "", categoryId: "",
         code: "", phone: "", email: "", address: "", city: "",
-        branchId: "", role: "cashier", password: ""
+        branchId: "", role: "cashier", password: "",
+        taxRate: 0, serviceChargeRate: 0, currency: "INR",
+        type: "PERCENTAGE", value: 0, minOrderAmount: 0, maxDiscountAmount: "", validUntil: "", isActive: true
     }
   });
 
@@ -81,13 +96,21 @@ const useManagementForm = (type: string, initialData: any, isOpen: boolean) => {
         reset({
           ...initialData,
           price: initialData.price?.toString() || "",
+          taxRate: initialData.taxRate?.toString() || "0",
+          serviceChargeRate: initialData.serviceChargeRate?.toString() || "0",
+          value: initialData.value?.toString() || "0",
+          minOrderAmount: initialData.minOrderAmount?.toString() || "0",
+          maxDiscountAmount: initialData.maxDiscountAmount?.toString() || "",
+          validUntil: initialData.validUntil ? new Date(initialData.validUntil).toISOString().split('T')[0] : "",
           password: "", // Don't show password
         });
       } else {
         reset({
           tableNo: "", seats: "", name: "", price: "", categoryId: "",
           code: "", phone: "", email: "", address: "", city: "",
-          branchId: "", role: "cashier", password: ""
+          branchId: "", role: "cashier", password: "",
+          taxRate: 0, serviceChargeRate: 0, currency: "INR",
+          type: "PERCENTAGE", value: 0, minOrderAmount: 0, maxDiscountAmount: "", validUntil: "", isActive: true
         });
       }
     }

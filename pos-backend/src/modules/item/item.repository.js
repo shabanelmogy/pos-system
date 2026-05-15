@@ -1,5 +1,6 @@
-import { eq, sql } from "drizzle-orm";
-import { items } from "./item.schema.js";
+import { eq, sql, inArray } from "drizzle-orm";
+import { items, itemModifiers } from "./item.schema.js";
+import { categories } from "../category/category.schema.js";
 import { db } from "../../config/database.js";
 
 const itemRepository = {
@@ -12,8 +13,32 @@ const itemRepository = {
   },
 
   async findById(id) {
-    const result = await db.select().from(items).where(eq(items.id, id)).limit(1);
+    const result = await db.select({
+      id: items.id,
+      name: items.name,
+      price: items.price,
+      categoryId: items.categoryId,
+      kitchenStationId: categories.kitchenStationId
+    })
+    .from(items)
+    .leftJoin(categories, eq(items.categoryId, categories.id))
+    .where(eq(items.id, id))
+    .limit(1);
     return result[0];
+  },
+
+  async findByIds(ids) {
+    if (!ids || ids.length === 0) return [];
+    return await db.select({
+      id: items.id,
+      name: items.name,
+      price: items.price,
+      categoryId: items.categoryId,
+      kitchenStationId: categories.kitchenStationId
+    })
+    .from(items)
+    .leftJoin(categories, eq(items.categoryId, categories.id))
+    .where(inArray(items.id, ids));
   },
 
   async create(itemData) {
@@ -37,6 +62,16 @@ const itemRepository = {
   async delete(id) {
     const result = await db.delete(items).where(eq(items.id, id)).returning();
     return result[0];
+  },
+
+  async findModifierById(id) {
+    const result = await db.select().from(itemModifiers).where(eq(itemModifiers.id, id)).limit(1);
+    return result[0];
+  },
+
+  async findModifiersByIds(ids) {
+    if (!ids || ids.length === 0) return [];
+    return await db.select().from(itemModifiers).where(inArray(itemModifiers.id, ids));
   }
 };
 
