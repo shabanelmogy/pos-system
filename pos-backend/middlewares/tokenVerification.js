@@ -41,7 +41,16 @@ export const isVerifiedUser = async (req, res, next) => {
         let activeShiftId = null;
         let activePosPointId = null;
 
-        if (cached && cached.expiresAt > now) {
+        // --- Header-first resolution (fastest, most reliable) ---
+        // The POS frontend sends these from its persisted Zustand store,
+        // so we don't need a round-trip to the DB on every order request.
+        const headerShiftId = req.headers["x-shift-id"];
+        const headerPosPointId = req.headers["x-pos-point-id"];
+
+        if (headerShiftId && headerPosPointId) {
+            activeShiftId = headerShiftId;
+            activePosPointId = headerPosPointId;
+        } else if (cached && cached.expiresAt > now) {
             activeShiftId = cached.activeShiftId;
             activePosPointId = cached.activePosPointId;
         } else {

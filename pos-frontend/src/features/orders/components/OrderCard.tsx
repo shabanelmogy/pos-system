@@ -4,7 +4,7 @@ import { FaCircle } from "react-icons/fa";
 import { formatDateAndTime, getAvatarName } from "../../../shared/utils/index";
 import useAuth from "../../auth/hooks/useAuth";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { updateOrderStatus } from "../api/orderApi";
+import { updateOrderLifecycle } from "../api/orderApi";
 import { updateTable } from "../../tables/api/tableApi";
 import { enqueueSnackbar } from "notistack";
 import { useTranslation } from "react-i18next";
@@ -16,7 +16,7 @@ interface OrderCardProps {
 
 const OrderCard: React.FC<OrderCardProps> = ({ order, onReprint }) => {
   const { t } = useTranslation();
-  const { canCompleteOrders, user } = useAuth();
+  const { canCompleteOrders, role } = useAuth();
   const queryClient = useQueryClient();
 
   const statusMutation = useMutation({
@@ -48,6 +48,7 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onReprint }) => {
 
   const isPremiumCustomer = order.customer?.totalOrders >= 5;
   const isReady = order.fulfillmentStatus === "READY" || order.fulfillmentStatus === "SERVED";
+  const isActive = order.lifecycle === "ACTIVE";
   const isCompleted = order.lifecycle === "COMPLETED";
   const isVoided = order.lifecycle === "VOIDED";
 
@@ -133,7 +134,7 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onReprint }) => {
            <div className="bg-red-500/10 text-red-500 font-bold py-2 rounded-lg text-center text-[10px] flex items-center justify-center gap-2 uppercase tracking-widest border border-red-500/20">
              VOIDED
            </div>
-        ) : canCompleteOrders && !isCompleted ? (
+        ) : canCompleteOrders && isActive && !isCompleted ? (
           <button onClick={handleCompleteOrder} disabled={statusMutation.isPending}
             className="bg-[var(--primary)] text-[var(--bg-card)] font-bold py-2 rounded-lg hover:bg-yellow-600 transition-colors text-sm uppercase tracking-widest disabled:opacity-50">
             {statusMutation.isPending ? t('orders.serving') : t('orders.serve')}
@@ -145,7 +146,7 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onReprint }) => {
         )}
       </div>
       {/* Void Order Guard */}
-      {!isCompleted && !isVoided && user?.role !== "cashier" && (
+      {isActive && !isCompleted && !isVoided && role !== "cashier" && (
          <button onClick={handleVoidOrder} disabled={statusMutation.isPending} className="w-full mt-3 bg-transparent text-red-500 border border-red-500/20 hover:bg-red-500/10 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-colors">
             Void Order
          </button>

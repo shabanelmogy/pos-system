@@ -13,6 +13,7 @@ import modularRoutes from "./src/modules/routes.js";
 import { pool } from "./src/config/database.js";
 import { runWithCorrelationId } from "./src/utils/logger.js";
 import { randomBytes } from "crypto";
+import { initSocket } from "./src/utils/socket.js";
 
 const app = express();
 const PORT = config.port || 8000;
@@ -21,7 +22,7 @@ const corsOptions = {
   credentials: true,
   origin: (config.corsOrigin || "").split(",").map((url) => url.trim()),
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization", "Accept"]
+  allowedHeaders: ["Content-Type", "Authorization", "Accept", "x-shift-id", "x-pos-point-id"]
 };
 
 // Middlewares
@@ -110,6 +111,9 @@ const startServer = async () => {
     server = app.listen(PORT);
     console.log(`✅ POS Server is running on HTTP port ${PORT}`);
   }
+
+  // Initialize Sockets
+  initSocket(server, corsOptions);
 
   server.on("listening", () => {
     console.log(`📚 Swagger Docs: ${fs.existsSync(certPath) ? 'https' : 'http'}://localhost:${PORT}/api-docs`);

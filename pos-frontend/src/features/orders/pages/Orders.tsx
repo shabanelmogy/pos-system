@@ -68,7 +68,7 @@ const Orders: React.FC = () => {
   ];
 
   const filteredOrders = orders.filter((order: any) => {
-    if (status === "all") return true;
+    if (status === "all") return order.lifecycle !== "DRAFT"; // Never show unconfirmed drafts
     if (status === "progress") return order.lifecycle === "ACTIVE" && ["PENDING", "PREPARING", "PARTIALLY_READY"].includes(order.fulfillmentStatus);
     if (status === "ready") return order.lifecycle === "ACTIVE" && order.fulfillmentStatus === "READY";
     if (status === "completed") return order.lifecycle === "COMPLETED";

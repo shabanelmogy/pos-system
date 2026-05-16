@@ -3,7 +3,7 @@ import { axiosWrapper } from "../../../shared/api/axiosWrapper";
 // Order Endpoints
 export const getOrders = (params: any = {}) => axiosWrapper.get("/api/order", { params });
 export const updateOrderLifecycle = ({ orderId, lifecycle, settleWithCash }: { orderId: string; lifecycle: string; settleWithCash?: boolean }) =>
-  axiosWrapper.patch(`/api/order/${orderId}/lifecycle`, { lifecycle, settleWithCash });
+  axiosWrapper.patch(`/api/order/${orderId}/lifecycle`, { status: lifecycle, settleWithCash });
 
 export const updateOrderFulfillment = ({ orderId, fulfillmentStatus }: { orderId: string; fulfillmentStatus: string }) =>
   axiosWrapper.patch(`/api/order/${orderId}/fulfillment`, { fulfillmentStatus });

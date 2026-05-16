@@ -1,29 +1,37 @@
 import React, { useEffect, useState } from "react";
 import useKdsStore from "../store/useKdsStore";
+import { motion } from "framer-motion";
+import { initSocket } from "../../../shared/utils/socket";
 import Ticket from "../components/Ticket";
 import { updateOrderFulfillment, getKitchenStations } from "../api/kdsApi";
 import { useTranslation } from "react-i18next";
+import usePOSStore from "../../pos/store/usePOSStore";
 
 const KitchenBoard: React.FC = () => {
   const { t } = useTranslation();
   const { activeOrders, currentStationId, setStationId, fetchOrders, isLoading } = useKdsStore();
+  const { selectedBranch } = usePOSStore();
   const [stations, setStations] = useState<any[]>([]);
 
   useEffect(() => {
     fetchOrders();
+    const socket = initSocket(selectedBranch?.id);
+    socket?.emit("join_branch", selectedBranch?.id);
+    socket?.on("order_update", () => {
+      console.log("Real-time Order Update Received");
+      fetchOrders();
+    });
+
     const loadStations = async () => {
       const res = await getKitchenStations();
       setStations(res.data);
     };
     loadStations();
 
-    // Polling every 10 seconds for new orders
-    const interval = setInterval(() => {
-      fetchOrders();
-    }, 10000);
-
-    return () => clearInterval(interval);
-  }, [fetchOrders]);
+    return () => {
+      socket?.off("order_update");
+    };
+  }, [fetchOrders, selectedBranch?.id]);
 
   const [isUpdating, setIsUpdating] = useState(false);
 

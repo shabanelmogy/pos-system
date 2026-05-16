@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import BottomNav from "../../../shared/components/BottomNav";
 import BackButton from "../../../shared/components/BackButton";
 import TableCard from "../components/TableCard";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getTables } from "../api/tableApi";
 import { MdTableBar } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
@@ -12,9 +12,12 @@ import OrderSummaryModal from "../components/OrderSummaryModal";
 import useCustomerStore from "../../customers/store/useCustomerStore";
 import useCartStore from "../../pos/store/useCartStore";
 import { useTranslation } from "react-i18next";
+import { initSocket } from "../../../shared/utils/socket";
+import usePOSStore from "../../pos/store/usePOSStore";
 
 const Tables: React.FC = () => {
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
   const { setOrder } = useCustomerStore();
   const { addItem, clearCart } = useCartStore();
 
@@ -60,8 +63,30 @@ const Tables: React.FC = () => {
       return response.data.data as any[];
     },
     placeholderData: keepPreviousData,
-    refetchInterval: 5000,
+    refetchInterval: 30000,
+    refetchOnMount: "always",
+    refetchOnWindowFocus: true,
   });
+
+  const { selectedBranch } = usePOSStore();
+
+  useEffect(() => {
+    const socket = initSocket(selectedBranch?.id);
+    socket?.emit("join_branch", selectedBranch?.id);
+    
+    const handleUpdate = () => {
+      console.log("Real-time Update Received for Tables");
+      queryClient.invalidateQueries({ queryKey: ["tables"] });
+    };
+
+    socket?.on("table_update", handleUpdate);
+    socket?.on("order_update", handleUpdate);
+
+    return () => {
+      socket?.off("table_update", handleUpdate);
+      socket?.off("order_update", handleUpdate);
+    };
+  }, [queryClient, selectedBranch?.id]);
 
   useEffect(() => {
     document.title = "POS | Tables";

@@ -8,8 +8,8 @@ import shiftRepository from "../../shift/shift.repository.js";
 import tableRepository from "../../table/table.repository.js";
 import pricingService from "../../../utils/pricingService.js";
 import paymentRepository from "../../payment/payment.repository.js";
-import customerService from "../../customer/customer.service.js";
 import orderEventEmitter, { ORDER_EVENTS } from "../../../utils/events.js";
+import customerService from "../../customer/customer.service.js";
 import { 
   orderBaseService, 
   FULFILLMENT_TRANSITIONS, 
@@ -185,7 +185,7 @@ export const orderLifecycleService = {
     const { userId, branchId, role } = context;
     const { settleWithCash } = options;
 
-    return await db.transaction(async (tx) => {
+    const { updatedOrder, tableId } = await db.transaction(async (tx) => {
       const order = await orderRepository.findByIdWithLock(id, tx);
       if (!order) fail("Order not found", 404);
       if (role !== "admin" && order.branchId !== branchId) fail("Access denied", 403);
@@ -208,31 +208,26 @@ export const orderLifecycleService = {
         if (balance.gt(0)) {
           if (!settleWithCash) fail(`Cannot complete order with outstanding balance of ${balance.toFixed(2)}`, 422);
           
-          // 1. Record the cash payment
           await paymentRepository.create({
             orderId: id, amount: balance.toFixed(2), method: "Cash",
             receivedById: userId, status: "SUCCESS"
           }, tx);
 
-          // 2. Record PAYMENT status change to PAID
           const afterPayment = await orderRepository.recordStatusChange({
             orderId: id, changeType: "PAYMENT", fromValue: order.paymentStatus, toValue: "PAID",
             actorId: userId, reasonCode: "SETTLE_ON_COMPLETE", notes: "Settled with cash on completion",
             grandTotal: order.grandTotal, currentVersion
           }, tx);
 
-          // 3. Update order totalPaid
           const afterUpdate = await orderRepository.update(id, { totalPaid: order.grandTotal, version: afterPayment.version }, tx);
-          
-          // Update local state for the final lifecycle change
           currentVersion = afterUpdate.version;
         } else if (order.paymentStatus !== "PAID") {
-          // Data integrity divergence: balance is zero but paymentStatus is not PAID.
-          // This should never happen with correct totalPaid tracking — treat as an
-          // internal error rather than a user-facing validation failure.
           logger.error("Data integrity error: zero balance but paymentStatus is not PAID", { orderId: id, paymentStatus: order.paymentStatus });
           fail("Internal error: payment status inconsistency detected. Contact support.", 500);
         }
+
+        // Free up the table when order is completed
+        if (order.tableId) await tableRepository.update(order.tableId, { status: "Available", currentOrderId: null }, tx);
       }
 
       await orderRepository.recordStatusChange({
@@ -242,9 +237,18 @@ export const orderLifecycleService = {
       }, tx);
 
       const updatedOrder = await orderRepository.findById(id, tx);
-      orderEventEmitter.emit(ORDER_EVENTS.LIFECYCLE_CHANGED, { order: updatedOrder, context });
-      return updatedOrder;
+      return { updatedOrder, tableId: order.tableId };
     });
+
+    // Emit socket events AFTER the transaction commits so clients fetch committed data
+    setImmediate(() => {
+      orderEventEmitter.emit(ORDER_EVENTS.LIFECYCLE_CHANGED, { order: updatedOrder, context });
+      if (tableId && (status === "COMPLETED" || status === "VOIDED" || status === "CANCELLED")) {
+        orderEventEmitter.emit("table_updated", { table: { id: tableId, status: "Available" }, branchId: context.branchId });
+      }
+    });
+
+    return updatedOrder;
   },
 
   async recordPrint(id, context) {

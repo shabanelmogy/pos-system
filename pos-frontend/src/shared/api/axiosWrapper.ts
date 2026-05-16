@@ -96,6 +96,23 @@ axiosWrapper.interceptors.request.use(
     if (token && !config.headers.Authorization) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+
+    // Attach active shift/pos context from persisted store so the backend
+    // doesn't have to derive it from DB permissions (which can be stale or missing).
+    try {
+      const posStorage = localStorage.getItem("pos-storage");
+      if (posStorage) {
+        const { state } = JSON.parse(posStorage);
+        if (state?.activeShift?.id) {
+          config.headers["x-shift-id"] = state.activeShift.id;
+        }
+        if (state?.selectedPOSPoint?.id) {
+          config.headers["x-pos-point-id"] = state.selectedPOSPoint.id;
+        }
+      }
+    } catch (_) {
+      // silently ignore if localStorage is unavailable
+    }
     
     return config;
   },

@@ -2,6 +2,7 @@ import { eq, sql } from "drizzle-orm";
 import { tables } from "./table.schema.js";
 import { orders } from "../order/order.schema.js";
 import { db } from "../../config/database.js";
+import orderEventEmitter from "../../utils/events.js";
 
 const tableRepository = {
   async findAll() {
@@ -62,14 +63,19 @@ const tableRepository = {
     if (tableData.status !== undefined) updateObj.status = tableData.status;
     if (tableData.currentOrderId !== undefined) updateObj.currentOrderId = tableData.currentOrderId;
 
-    console.log(`[DEBUG] Repository Update - ID: ${id}, UpdateObj:`, updateObj);
     const result = await tx.update(tables)
       .set(updateObj)
       .where(eq(tables.id, id))
       .returning();
-    
-    console.log(`[DEBUG] Repository Result:`, result[0]);
-    return result[0];
+    const updated = result[0];
+
+    // Defer the socket emit to AFTER the transaction commits.
+    // If emitted inside a transaction, the frontend refetches before the DB has committed.
+    setImmediate(() => {
+      orderEventEmitter.emit("table_updated", { table: updated, branchId: null });
+    });
+
+    return updated;
   },
 
   async delete(id) {

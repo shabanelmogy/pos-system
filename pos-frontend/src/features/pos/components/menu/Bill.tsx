@@ -101,7 +101,7 @@ const Bill: React.FC = () => {
       };
       
       if (order.tableId) {
-        tableMutation.mutate({ status: "Booked", orderId: order.id, tableId: order.tableId }, { onSuccess: handleSuccess });
+        tableMutation.mutate({ status: "Occupied", orderId: order.id, tableId: order.tableId }, { onSuccess: handleSuccess });
       } else {
         handleSuccess();
       }
