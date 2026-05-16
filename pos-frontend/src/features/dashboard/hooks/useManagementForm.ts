@@ -22,6 +22,7 @@ const getValidationSchema = (type: string, isEdit: boolean) => {
     case "category":
       return z.object({
         name: z.string().min(1, "Name is required"),
+        kitchenStationId: z.string().optional().nullable(),
       });
     case "branch":
       return z.object({
@@ -85,7 +86,8 @@ const useManagementForm = (type: string, initialData: any, isOpen: boolean) => {
         code: "", phone: "", email: "", address: "", city: "",
         branchId: "", role: "cashier", password: "",
         taxRate: 0, serviceChargeRate: 0, currency: "INR",
-        type: "PERCENTAGE", value: 0, minOrderAmount: 0, maxDiscountAmount: "", validUntil: "", isActive: true
+        type: "PERCENTAGE", value: 0, minOrderAmount: 0, maxDiscountAmount: "", validUntil: "", isActive: true,
+        kitchenStationId: null
     }
   });
 
@@ -110,7 +112,8 @@ const useManagementForm = (type: string, initialData: any, isOpen: boolean) => {
           code: "", phone: "", email: "", address: "", city: "",
           branchId: "", role: "cashier", password: "",
           taxRate: 0, serviceChargeRate: 0, currency: "INR",
-          type: "PERCENTAGE", value: 0, minOrderAmount: 0, maxDiscountAmount: "", validUntil: "", isActive: true
+          type: "PERCENTAGE", value: 0, minOrderAmount: 0, maxDiscountAmount: "", validUntil: "", isActive: true,
+          kitchenStationId: null
         });
       }
     }

@@ -28,11 +28,13 @@ const orderController = {
         type, 
         tableId, 
         shiftId, 
-        customerId 
+        customerId,
+        includeItems
       } = req.query;
 
       const filters = {
         page, pageSize, lifecycle, fulfillmentStatus, paymentStatus, type, tableId, shiftId, customerId,
+        includeItems: includeItems === 'true',
         branchId: (() => {
           if (req.user.role !== "admin") return req.user.branchId;
           const raw = req.query.branchId;

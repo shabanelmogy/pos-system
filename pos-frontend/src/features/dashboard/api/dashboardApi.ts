@@ -28,6 +28,7 @@ export const getUsers = () => axiosWrapper.get<{ data: User[] }>("/api/user");
 export const getCustomers = () => axiosWrapper.get<{ data: any[] }>("/api/customer");
 export const getOrders = () => axiosWrapper.get<{ data: any[] }>("/api/order");
 export const getShifts = (params: any = {}) => axiosWrapper.get<{ data: any[] }>("/api/shift", { params });
+export const getKitchenStations = (branchId?: string) => axiosWrapper.get<{ data: any[] }>("/api/kitchen-station", { params: { branchId } });
 export const updateOrderLifecycle = ({ orderId, lifecycle, settleWithCash }: { orderId: string; lifecycle: string; settleWithCash?: boolean }) => 
     axiosWrapper.patch(`/api/order/${orderId}/lifecycle`, { lifecycle, settleWithCash });
 export const updateOrderFulfillment = ({ orderId, fulfillmentStatus }: { orderId: string; fulfillmentStatus: string }) => 
@@ -44,6 +45,7 @@ export const addPOSPoint = (data: Partial<POSPoint>) => axiosWrapper.post("/api/
 export const addCategory = (data: Partial<Category>) => axiosWrapper.post("/api/category", data);
 export const addItem = (data: Partial<Item>) => axiosWrapper.post("/api/item", data);
 export const addTable = (data: Partial<Table>) => axiosWrapper.post("/api/table", data);
+export const addKitchenStation = (data: any) => axiosWrapper.post("/api/kitchen-station", data);
 export const createUser = (data: Partial<User>) => axiosWrapper.post("/api/user", data);
 
 // Management - Update
@@ -52,6 +54,7 @@ export const updatePOSPoint = (id: string, data: Partial<POSPoint>) => axiosWrap
 export const updateCategory = (id: string, data: Partial<Category>) => axiosWrapper.put(`/api/category/${id}`, data);
 export const updateItem = (id: string, data: Partial<Item>) => axiosWrapper.put(`/api/item/${id}`, data);
 export const updateTable = (id: string, data: Partial<Table>) => axiosWrapper.put(`/api/table/${id}`, data);
+export const updateKitchenStation = (id: string, data: any) => axiosWrapper.put(`/api/kitchen-station/${id}`, data);
 export const updateUser = (id: string, data: Partial<User>) => axiosWrapper.put(`/api/user/${id}`, data);
 export const assignPOS = (data: { userId: string; posPointIds: string[] }) => axiosWrapper.post("/api/user/assign-pos", data);
 
@@ -59,6 +62,7 @@ export const assignPOS = (data: { userId: string; posPointIds: string[] }) => ax
 export const deleteCategory = (id: string) => axiosWrapper.delete(`/api/category/${id}`);
 export const deleteItem = (id: string) => axiosWrapper.delete(`/api/item/${id}`);
 export const deleteTable = (id: string) => axiosWrapper.delete(`/api/table/${id}`);
+export const deleteKitchenStation = (id: string) => axiosWrapper.delete(`/api/kitchen-station/${id}`);
 export const deleteUser = (id: string) => axiosWrapper.delete(`/api/user/${id}`);
 
 // Analytics

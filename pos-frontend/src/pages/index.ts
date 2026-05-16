@@ -6,3 +6,4 @@ export { default as Tables } from '../features/tables/pages/Tables'
 export { default as Dashboard } from "../features/dashboard/pages/Dashboard"
 export { default as Customers } from "../features/customers/pages/Customers"
 export { default as Settings } from "../features/settings/pages/Settings"
+export { default as KitchenBoard } from "../features/kds/pages/KitchenBoard"

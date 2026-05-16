@@ -5,7 +5,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { 
   addTable, addCategory, addItem, updateItem, updateCategory, getCategories,
   addBranch, updateBranch, addPOSPoint, updatePOSPoint, getBranches, updateTable,
-  createUser, updateUser, assignPOS, getPOSPoints, addCoupon, updateCoupon
+  createUser, updateUser, assignPOS, getPOSPoints, addCoupon, updateCoupon,
+  getKitchenStations
 } from "../api/dashboardApi";
 import { enqueueSnackbar } from "notistack";
 import CustomDropdown from "../../../shared/components/CustomDropdown";
@@ -39,6 +40,12 @@ const ManagementModal: React.FC<ManagementModalProps> = ({ type, isOpen, onClose
     queryKey: ["categories"], 
     queryFn: async () => { const res = await getCategories(); return res.data.data || res.data; },
     enabled: type === "dishes"
+  });
+  
+  const { data: kitchenStations } = useQuery({
+    queryKey: ["kitchenStations"],
+    queryFn: async () => { const res = await getKitchenStations(); return res.data.data || res.data; },
+    enabled: type === "category"
   });
 
   const { data: branches } = useQuery({
@@ -86,7 +93,7 @@ const ManagementModal: React.FC<ManagementModalProps> = ({ type, isOpen, onClose
         switch (type) {
           case "table": return updateTable(id, { tableNo: preparedData.tableNo, seats: preparedData.seats });
           case "dishes": return updateItem(id, { name: preparedData.name, price: preparedData.price, categoryId: preparedData.categoryId });
-          case "category": return updateCategory(id, { name: preparedData.name });
+          case "category": return updateCategory(id, { name: preparedData.name, kitchenStationId: preparedData.kitchenStationId });
           case "branch": return updateBranch(id, { ...preparedData, id });
           case "posPoint": return updatePOSPoint(id, preparedData);
           case "coupon": return updateCoupon(id, preparedData);
@@ -214,7 +221,7 @@ const ManagementModal: React.FC<ManagementModalProps> = ({ type, isOpen, onClose
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-[var(--bg-card)]/50 p-6 rounded-3xl border border-[var(--border-main)]">
                   <div className="group">
                     <label className="flex items-center gap-2 text-[var(--text-dim)] text-[9px] font-black uppercase tracking-widest mb-2 px-1"><MdShield /> {t('dashboard.management.modal.role')}</label>
-                    <CustomDropdown options={[{id: "cashier", name: t('dashboard.management.modal.roles.cashier')}, {id: "manager", name: t('dashboard.management.modal.roles.manager')}, {id: "admin", name: t('dashboard.management.modal.roles.admin')}]} value={watchedRole} onChange={(val) => setValue("role", val)} placeholder={t('dashboard.management.modal.select_role')} />
+                    <CustomDropdown options={[{id: "cashier", name: t('dashboard.management.modal.roles.cashier')}, {id: "manager", name: t('dashboard.management.modal.roles.manager')}, {id: "admin", name: t('dashboard.management.modal.roles.admin')}, {id: "kitchen", name: "Kitchen Staff"}]} value={watchedRole} onChange={(val) => setValue("role", val)} placeholder={t('dashboard.management.modal.select_role')} />
                   </div>
                   <div className="group">
                     <label className="flex items-center gap-2 text-[var(--text-dim)] text-[9px] font-black uppercase tracking-widest mb-2 px-1"><MdStore /> {t('dashboard.management.modal.assigned_branch')}</label>
@@ -315,6 +322,19 @@ const ManagementModal: React.FC<ManagementModalProps> = ({ type, isOpen, onClose
                   }} type="text" className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-2xl p-5 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-all font-black uppercase tracking-tighter text-xl shadow-inner" />
                   {errors.name && <span className="text-[9px] text-red-500 font-bold mt-2 block">{errors.name.message as string}</span>}
                 </div>
+
+                {type === "category" && (
+                  <div className="group">
+                    <label className="block text-[var(--text-dim)] text-[9px] font-black uppercase tracking-widest mb-3 px-1">Kitchen Station (Routing)</label>
+                    <CustomDropdown 
+                      options={kitchenStations || []} 
+                      value={watch("kitchenStationId")} 
+                      onChange={(val) => setValue("kitchenStationId", val)} 
+                      placeholder="Select Kitchen Station" 
+                    />
+                    <p className="text-[9px] text-[var(--text-dim)] mt-2 italic font-bold">Routing this category will send its items to the selected KDS screen.</p>
+                  </div>
+                )}
 
                 {(type === "branch" || type === "posPoint") && (
                   <div className="group">

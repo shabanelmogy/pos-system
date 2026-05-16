@@ -6,7 +6,7 @@ import {
   useLocation,
   Navigate,
 } from "react-router-dom";
-import { Home, Auth, Orders, Tables, Menu, Dashboard, Customers, Settings } from "./pages";
+import { Home, Auth, Orders, Tables, Menu, Dashboard, Customers, Settings, KitchenBoard } from "./pages";
 import Header from "./shared/components/Header";
 import useLoadData from "./shared/hooks/useLoadData";
 import FullScreenLoader from "./shared/components/FullScreenLoader"
@@ -27,6 +27,7 @@ function Layout() {
   const { customerName, setCustomer } = useCustomerStore();
   const location = useLocation();
   const isOnAuthPage = location.pathname.startsWith("/auth");
+  const isOnKdsPage = location.pathname.startsWith("/kds");
   
   const enableTables = selectedPOSPoint?.settings?.enableTables !== false;
   const openOnMenu = selectedPOSPoint?.settings?.openOnMenu === true;
@@ -68,7 +69,7 @@ function Layout() {
 
   return (
     <>
-      {!isOnAuthPage && <Header />}
+      {!isOnAuthPage && !isOnKdsPage && <Header />}
       {/* Shift close modal overlay — only when shift is open and user requests it */}
       {showShiftModal && activeShift && <ShiftManager />}
       <Routes>
@@ -129,6 +130,7 @@ function Layout() {
             </ProtectedRoutes>
           }
         />
+        <Route path="/kds" element={<KitchenBoard />} />
         <Route path="*" element={<div>Not Found</div>} />
       </Routes>
     </>

@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { tables } from "./table.schema.js";
 import { orders } from "../order/order.schema.js";
 import { db } from "../../config/database.js";
@@ -20,8 +20,9 @@ const tableRepository = {
     }));
   },
 
-  async findById(id) {
-    const result = await db
+  async findById(id, externalTx = null) {
+    const tx = externalTx || db;
+    const result = await tx
       .select({
         table: tables,
         order: orders,
@@ -39,8 +40,8 @@ const tableRepository = {
   },
 
   async findByIdWithLock(id, tx = db) {
-    const result = await tx.select().from(tables).where(eq(tables.id, id)).forUpdate();
-    return result[0] || null;
+    await tx.execute(sql`SELECT 1 FROM tables WHERE id = ${id} FOR UPDATE`);
+    return await this.findById(id, tx);
   },
 
   async findByTableNo(tableNo) {

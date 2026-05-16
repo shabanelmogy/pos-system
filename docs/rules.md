@@ -43,3 +43,10 @@ To ensure consistency and high quality across the POS system, all future develop
 
 ## 7. Precise Filtering
 - **Rule**: All history and analytics queries must strictly use IDs (e.g., `customerId`, `branchId`) rather than ambiguous strings like names or phone numbers.
+
+## 8. Database Integrity & Locking
+- **Canonical Locking**: When a transaction requires locking multiple rows of the same table (e.g., Merging Orders), you **MUST** acquire locks in a deterministic order (ascending UUID) to prevent deadlocks.
+- **Lock-then-Select Pattern**: To ensure reliable row-level locking with Drizzle ORM across all environments:
+  1. Acquire the lock first using raw SQL: `await tx.execute(sql`SELECT 1 FROM table WHERE id = ${id} FOR UPDATE`)`.
+  2. Fetch the mapped data second using Drizzle: `return await tx.query.table.findFirst(...)`.
+- **Atomic Sequences**: Use `ON CONFLICT DO UPDATE` with a dedicated sequence table (e.g., `order_sequences`) to generate business-safe sequential numbers without table-wide locks.

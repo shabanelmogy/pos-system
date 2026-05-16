@@ -1,7 +1,7 @@
 import { relations } from "drizzle-orm";
 import { users, userPosPermissions } from "./user/user.schema.js";
 import { tables } from "./table/table.schema.js";
-import { orders, orderLifecycleEnum, fulfillmentStatusEnum, paymentStatusEnum, orderTypeEnum } from "./order/order.schema.js";
+import { orders, orderLifecycleEnum, fulfillmentStatusEnum, paymentStatusEnum, orderTypeEnum, orderStatusHistory } from "./order/order.schema.js";
 import { orderItems, itemStatusEnum } from "./order/orderItem.schema.js";
 import { payments } from "./payment/payment.schema.js";
 import { categories } from "./category/category.schema.js";
@@ -13,6 +13,9 @@ import { posPoints } from "./posPoint/posPoint.schema.js";
 import { shifts } from "./shift/shift.schema.js";
 import { posSettings } from "./posSettings/posSettings.schema.js";
 import { coupons, couponTypeEnum } from "./coupon/coupon.schema.js";
+import { kitchenStations } from "./kitchenStation/kitchenStation.schema.js";
+import { orderSequences } from "./order/orderSequence.schema.js";
+import { orderItemModifiers } from "./order/orderItem.schema.js";
 
 // Users Relations
 export const usersRelations = relations(users, ({ one, many }) => ({
@@ -65,12 +68,18 @@ export const ordersRelations = relations(orders, ({ many, one }) => ({
   waiter: one(users, { fields: [orders.waiterId], references: [users.id] }),
   closedBy: one(users, { fields: [orders.closedById], references: [users.id] }),
   voidedBy: one(users, { fields: [orders.voidedById], references: [users.id] }),
+  statusHistory: many(orderStatusHistory),
 }));
 
 // Order Items Relations
-export const orderItemsRelations = relations(orderItems, ({ one }) => ({
+export const orderItemsRelations = relations(orderItems, ({ one, many }) => ({
   order: one(orders, { fields: [orderItems.orderId], references: [orders.id] }),
   menuItem: one(items, { fields: [orderItems.menuItemId], references: [items.id] }),
+  modifiers: many(orderItemModifiers),
+}));
+
+export const orderItemModifiersRelations = relations(orderItemModifiers, ({ one }) => ({
+  orderItem: one(orderItems, { fields: [orderItemModifiers.orderItemId], references: [orderItems.id] }),
 }));
 
 // Customers Relations
@@ -99,6 +108,34 @@ export const itemModifiersRelations = relations(itemModifiers, ({ one }) => ({
   item: one(items, { fields: [itemModifiers.itemId], references: [items.id] }),
 }));
 
+// Kitchen Stations Relations
+export const kitchenStationsRelations = relations(kitchenStations, ({ one, many }) => ({
+  branch: one(branches, { fields: [kitchenStations.branchId], references: [branches.id] }),
+  categories: many(categories),
+}));
+
+// Categories Relations
+export const categoriesRelations = relations(categories, ({ one, many }) => ({
+  kitchenStation: one(kitchenStations, { fields: [categories.kitchenStationId], references: [kitchenStations.id] }),
+  items: many(items),
+}));
+
+// Payments Relations
+export const paymentsRelations = relations(payments, ({ one }) => ({
+  order: one(orders, { fields: [payments.orderId], references: [orders.id] }),
+}));
+
+// Order Status History Relations
+export const orderStatusHistoryRelations = relations(orderStatusHistory, ({ one }) => ({
+  order: one(orders, { fields: [orderStatusHistory.orderId], references: [orders.id] }),
+  actor: one(users, { fields: [orderStatusHistory.actorId], references: [users.id] }),
+}));
+
+// Order Sequences Relations
+export const orderSequencesRelations = relations(orderSequences, ({ one }) => ({
+  branch: one(branches, { fields: [orderSequences.branchId], references: [branches.id] }),
+}));
+
 export {
   users,
   userPosPermissions,
@@ -121,5 +158,9 @@ export {
   shifts,
   posSettings,
   coupons,
-  couponTypeEnum
+  couponTypeEnum,
+  kitchenStations,
+  orderSequences,
+  orderStatusHistory,
+  orderItemModifiers
 };

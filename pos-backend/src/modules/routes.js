@@ -12,6 +12,7 @@ import branchRouter from "./branch/branch.routes.js";
 import posPointRouter from "./posPoint/posPoint.routes.js";
 import posSettingsRouter from "./posSettings/posSettings.routes.js";
 import couponRouter from "./coupon/coupon.routes.js";
+import kitchenStationRouter from "./kitchenStation/kitchenStation.routes.js";
 
 const router = express.Router();
 
@@ -28,5 +29,6 @@ router.use("/branch", branchRouter);
 router.use("/pos-point", posPointRouter);
 router.use("/pos-settings", posSettingsRouter);
 router.use("/coupon", couponRouter);
+router.use("/kitchen-station", kitchenStationRouter);
 
 export default router;

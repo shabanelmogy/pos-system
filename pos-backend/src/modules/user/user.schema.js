@@ -8,7 +8,7 @@ export const users = pgTable("users", {
   email: varchar("email", { length: 255 }).notNull().unique(),
   phone: varchar("phone", { length: 20 }).notNull(),
   password: text("password").notNull(),
-  role: varchar("role", { length: 50 }).notNull(), // admin, manager, cashier
+  role: varchar("role", { length: 50 }).notNull(), // admin, manager, cashier, kitchen
   branchId: uuid("branch_id").references(() => branches.id), // Nullable for global admins
   refreshToken: text("refresh_token"),
   createdAt: timestamp("created_at").defaultNow().notNull(),

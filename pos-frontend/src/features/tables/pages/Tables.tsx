@@ -73,8 +73,8 @@ const Tables: React.FC = () => {
     enqueueSnackbar(t('common.error'), { variant: "error" });
   }
 
-  const activeTablesRaw = resData?.filter(table => table.status === "Booked") || [];
-  const freeTables = resData?.filter(table => table.status !== "Booked") || [];
+  const activeTablesRaw = resData?.filter(table => table.status === "Occupied") || [];
+  const freeTables = resData?.filter(table => table.status !== "Occupied") || [];
 
   const activeTables = activeTablesRaw.filter(table => {
     if (serviceStatus === "all") return true;

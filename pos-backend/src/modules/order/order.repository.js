@@ -16,7 +16,8 @@ const orderRepository = {
       type,
       tableId,
       shiftId,
-      customerId
+      customerId,
+      includeItems = false
     } = filters;
     const limit = Number(pageSize);
     const offset = (Number(page) - 1) * limit;
@@ -43,6 +44,14 @@ const orderRepository = {
       orderBy: [desc(orders.createdAt)],
       limit,
       offset,
+      with: includeItems ? {
+        orderItems: {
+          with: {
+            menuItem: true,
+            modifiers: true,
+          }
+        }
+      } : undefined
     });
 
     return {
@@ -53,7 +62,7 @@ const orderRepository = {
         pageSize: limit,
         totalPages: Math.ceil(total / limit)
       },
-      slim: true // Explicitly indicate that orders do not include items
+      slim: !includeItems
     };
   },
 
@@ -63,6 +72,7 @@ const orderRepository = {
       with: {
         orderItems: {
           with: {
+            menuItem: true,
             modifiers: true,
           }
         }
@@ -71,8 +81,8 @@ const orderRepository = {
   },
 
   async findByIdWithLock(id, tx = db) {
-    const [order] = await tx.select().from(orders).where(eq(orders.id, id)).forUpdate();
-    return order || null;
+    await tx.execute(sql`SELECT 1 FROM orders WHERE id = ${id} FOR UPDATE`);
+    return await this.findById(id, tx);
   },
 
   /**

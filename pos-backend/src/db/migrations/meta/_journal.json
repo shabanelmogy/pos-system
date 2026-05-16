@@ -22,6 +22,20 @@
       "when": 1778882782586,
       "tag": "0002_stale_bloodscream",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1778897276767,
+      "tag": "0003_loose_jackal",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1778898004164,
+      "tag": "0004_lowly_purifiers",
+      "breakpoints": true
     }
   ]
 }
