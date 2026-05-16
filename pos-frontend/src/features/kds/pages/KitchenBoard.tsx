@@ -46,13 +46,13 @@ const KitchenBoard: React.FC = () => {
   const readyOrders = safeOrders.filter(o => o.fulfillmentStatus === "READY");
 
   return (
-    <div className="h-screen bg-[var(--bg-main)] flex flex-col">
+    <div className="h-screen bg-[var(--bg-main)] flex flex-col overflow-hidden">
       {/* KDS Header */}
       <header className="bg-[var(--bg-card)] border-b border-[var(--border-main)] p-4 flex justify-between items-center shadow-md">
         <div className="flex items-center gap-4">
           <h1 className="text-2xl font-black text-[var(--primary)] tracking-tighter">KITCHEN DISPLAY</h1>
-          <select 
-            value={currentStationId || ""} 
+          <select
+            value={currentStationId || ""}
             onChange={(e) => setStationId(e.target.value || null)}
             className="bg-[var(--bg-main)] text-[var(--text-main)] border border-[var(--border-main)] rounded-lg px-3 py-1 text-sm font-bold focus:ring-2 focus:ring-[var(--primary)]"
           >
@@ -69,9 +69,9 @@ const KitchenBoard: React.FC = () => {
       </header>
 
       {/* Kanban Board */}
-      <main className="flex-1 overflow-hidden p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+      <main className="flex-1 min-h-0 overflow-x-auto p-6 flex gap-6">
         {/* PENDING COLUMN */}
-        <section className="flex flex-col h-full bg-orange-500/5 rounded-2xl border-2 border-dashed border-orange-500/20">
+        <section className="flex-1 min-w-[320px] max-w-[450px] flex flex-col h-full bg-orange-500/5 rounded-2xl border-2 border-dashed border-orange-500/20 shadow-inner">
           <div className="p-4 flex justify-between items-center border-b border-orange-500/10 bg-orange-500/10 rounded-t-2xl">
             <h2 className="font-black text-orange-600 uppercase tracking-tighter flex items-center gap-2">
               <span className="h-2 w-2 bg-orange-500 rounded-full animate-pulse" />
@@ -79,7 +79,7 @@ const KitchenBoard: React.FC = () => {
             </h2>
             <span className="bg-orange-600 text-white text-xs font-black px-2 py-0.5 rounded-full">{pendingOrders.length}</span>
           </div>
-          <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
+          <div className="flex-1 overflow-y-auto p-4 custom-scrollbar space-y-4">
             {pendingOrders.map(order => (
               <Ticket key={order.id} order={order} onStatusChange={handleStatusChange} isUpdating={isUpdating} />
             ))}
@@ -87,15 +87,15 @@ const KitchenBoard: React.FC = () => {
         </section>
 
         {/* PREPARING COLUMN */}
-        <section className="flex flex-col h-full bg-blue-500/5 rounded-2xl border-2 border-dashed border-blue-500/20">
+        <section className="flex-1 min-w-[320px] max-w-[450px] flex flex-col h-full bg-blue-500/5 rounded-2xl border-2 border-dashed border-blue-500/20 shadow-inner">
           <div className="p-4 flex justify-between items-center border-b border-blue-500/10 bg-blue-500/10 rounded-t-2xl">
             <h2 className="font-black text-blue-600 uppercase tracking-tighter flex items-center gap-2">
               <span className="h-2 w-2 bg-blue-500 rounded-full animate-pulse" />
-              Cooking
+              Preparing
             </h2>
             <span className="bg-blue-600 text-white text-xs font-black px-2 py-0.5 rounded-full">{preparingOrders.length}</span>
           </div>
-          <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
+          <div className="flex-1 overflow-y-auto p-4 custom-scrollbar space-y-4">
             {preparingOrders.map(order => (
               <Ticket key={order.id} order={order} onStatusChange={handleStatusChange} isUpdating={isUpdating} />
             ))}
@@ -103,17 +103,17 @@ const KitchenBoard: React.FC = () => {
         </section>
 
         {/* READY COLUMN */}
-        <section className="flex flex-col h-full bg-green-500/5 rounded-2xl border-2 border-dashed border-green-500/20">
+        <section className="flex-1 min-w-[320px] max-w-[450px] flex flex-col h-full bg-green-500/5 rounded-2xl border-2 border-dashed border-green-500/20 shadow-inner">
           <div className="p-4 flex justify-between items-center border-b border-green-500/10 bg-green-500/10 rounded-t-2xl">
             <h2 className="font-black text-green-600 uppercase tracking-tighter flex items-center gap-2">
-              <span className="h-2 w-2 bg-green-500 rounded-full" />
-              Finished
+              <span className="h-2 w-2 bg-green-500 rounded-full animate-pulse" />
+              Ready
             </h2>
             <span className="bg-green-600 text-white text-xs font-black px-2 py-0.5 rounded-full">{readyOrders.length}</span>
           </div>
-          <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
+          <div className="flex-1 overflow-y-auto p-4 custom-scrollbar space-y-4">
             {readyOrders.map(order => (
-              <Ticket key={order.id} order={order} onStatusChange={handleStatusChange} />
+              <Ticket key={order.id} order={order} onStatusChange={handleStatusChange} isUpdating={isUpdating} />
             ))}
           </div>
         </section>

@@ -8,6 +8,9 @@ interface CustomerState {
   guests: number;
   table: any;
   orderId: string;
+  orderType: "DINE_IN" | "TAKE_AWAY" | "DELIVERY" | "QR_SELF" | "PHONE";
+
+  setOrderType: (type: "DINE_IN" | "TAKE_AWAY" | "DELIVERY" | "QR_SELF" | "PHONE") => void;
 
   setCustomer: (customerData: { id?: string; name: string; phone: string; guests: number }) => void;
   setGuestCustomer: () => void;
@@ -25,13 +28,16 @@ interface CustomerState {
 
 const useCustomerStore = create<CustomerState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       customerName: "",
       customerPhone: "",
       customerId: null,
       guests: 0,
       table: null,
       orderId: "",
+      orderType: "TAKE_AWAY",
+
+      setOrderType: (type) => set({ orderType: type }),
 
       setCustomer: (customerData) =>
         set({
@@ -40,6 +46,7 @@ const useCustomerStore = create<CustomerState>()(
           customerId: customerData.id || null,
           guests: customerData.guests,
           orderId: 'new-' + Date.now(),
+          orderType: get().table ? "DINE_IN" : "TAKE_AWAY",
         }),
 
       setGuestCustomer: () =>
@@ -49,9 +56,10 @@ const useCustomerStore = create<CustomerState>()(
           customerId: null,
           guests: 1,
           orderId: 'guest-' + Date.now(),
+          orderType: get().table ? "DINE_IN" : "TAKE_AWAY",
         }),
 
-      updateTable: (table) => set({ table }),
+      updateTable: (table) => set({ table, orderType: table ? "DINE_IN" : "TAKE_AWAY" }),
 
       setOrder: (orderData) =>
         set({
@@ -71,6 +79,7 @@ const useCustomerStore = create<CustomerState>()(
           guests: 0,
           table: null,
           orderId: "",
+          orderType: "TAKE_AWAY",
         }),
     }),
     {

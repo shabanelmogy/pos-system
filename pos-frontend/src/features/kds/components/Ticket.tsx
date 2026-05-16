@@ -39,7 +39,12 @@ const Ticket: React.FC<TicketProps> = ({ order, onStatusChange, isUpdating }) =>
       <div className="p-4 border-b border-[var(--border-main)] flex justify-between items-center">
         <div>
           <h2 className="text-xl font-bold text-[var(--text-main)]">#{order.orderNumber || order.id.slice(0, 4)}</h2>
-          <p className="text-xs text-[var(--text-muted)]">{order.table?.name || "Takeaway"}</p>
+          <p className="text-xs text-[var(--text-muted)] font-bold uppercase">
+            {order.orderType === "DINE_IN" ? `Table ${order.table?.tableNo || "?"}` : 
+             order.orderType === "TAKE_AWAY" ? "Takeaway" :
+             order.orderType === "DELIVERY" ? "Delivery" : 
+             order.orderType}
+          </p>
         </div>
         <div className="text-right">
           <p className="text-lg font-mono font-bold text-orange-500">{timeElapsed}</p>
@@ -47,7 +52,7 @@ const Ticket: React.FC<TicketProps> = ({ order, onStatusChange, isUpdating }) =>
         </div>
       </div>
 
-      <div className="p-4 space-y-3">
+      <div className="p-4 space-y-3 max-h-[250px] overflow-y-auto custom-scrollbar">
         {order.orderItems?.map((item: any) => (
           <div key={item.id} className="flex justify-between items-start">
             <div className="flex-1">

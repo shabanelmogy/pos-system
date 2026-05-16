@@ -45,6 +45,7 @@ const orderRepository = {
       limit,
       offset,
       with: includeItems ? {
+        table: true,
         orderItems: {
           with: {
             menuItem: true,

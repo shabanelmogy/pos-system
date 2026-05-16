@@ -12,7 +12,7 @@ import Modal from "../../../../shared/components/Modal";
 const CartInfo: React.FC = () => {
   const { t } = useTranslation();
   const { items, updateQuantity, removeItem, clearCart, getItemCount } = useCartStore();
-  const { customerName, customerPhone, setCustomer, setGuestCustomer } = useCustomerStore();
+  const { customerName, customerPhone, setCustomer, setGuestCustomer, orderType, setOrderType } = useCustomerStore();
   const { selectedPOSPoint } = usePOSStore();
   const scrolLRef = useRef<HTMLDivElement>(null);
 
@@ -193,6 +193,27 @@ const CartInfo: React.FC = () => {
           )}
         </div>
       )}
+
+      {/* Order Type Selector */}
+      <div className="mb-4 bg-[var(--bg-card-alt)] p-1 rounded-xl border border-[var(--border-main)] flex gap-1">
+        {[
+          { id: "DINE_IN", label: "Dine-in" },
+          { id: "TAKE_AWAY", label: "Takeaway" },
+          { id: "DELIVERY", label: "Delivery" }
+        ].map((type) => (
+          <button
+            key={type.id}
+            onClick={() => setOrderType(type.id as any)}
+            className={`flex-1 py-2 text-[10px] font-black uppercase tracking-wider rounded-lg transition-all ${
+              orderType === type.id 
+                ? "bg-[var(--primary)] text-black shadow-lg shadow-yellow-500/20" 
+                : "text-[var(--text-muted)] hover:text-[var(--text-main)]"
+            }`}
+          >
+            {type.label}
+          </button>
+        ))}
+      </div>
 
       {/* Cart Title */}
       <div className="flex items-center justify-between mb-3">

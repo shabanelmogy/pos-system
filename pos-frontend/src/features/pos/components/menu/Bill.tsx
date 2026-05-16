@@ -20,7 +20,7 @@ declare global {
 const Bill: React.FC = () => {
   const { t } = useTranslation();
   const { items: cartItems, clearCart, getSubtotal } = useCartStore();
-  const { customerName, customerPhone, guests, table, removeCustomer } = useCustomerStore();
+  const { customerName, customerPhone, guests, table, removeCustomer, orderType } = useCustomerStore();
   const user = useUserStore();
   const { activeShift, selectedPOSPoint } = usePOSStore();
 
@@ -132,7 +132,7 @@ const Bill: React.FC = () => {
 
     // 2. Build the Payload (Strict following CreateOrderDTO)
     const orderPayload: any = {
-      type: table?.tableId ? "DINE_IN" : "TAKE_AWAY",
+      type: orderType,
       items: preparedItems,
       notes: "POS Order",
     };
