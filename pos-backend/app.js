@@ -1,3 +1,4 @@
+import "./src/utils/terminalColorizer.js";
 console.log("Starting POS Backend Server...");
 import express from "express";
 import { exec } from "child_process";
@@ -120,7 +121,10 @@ const startServer = async () => {
 
     // Test DB connection
     pool.connect()
-      .then(() => console.log("✅ PostgreSQL connected successfully"))
+      .then((client) => {
+        console.log("✅ PostgreSQL connected successfully");
+        client.release(); // CRITICAL: Return client to pool to prevent leaks & idle crashes
+      })
       .catch(err => console.error("❌ PostgreSQL Connection Failed:", err.message));
   });
 

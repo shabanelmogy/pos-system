@@ -52,7 +52,7 @@
  *           format: uuid
  *     responses:
  *       200:
- *         description: List of orders. Note that for performance reasons, this endpoint returns a slim representation of orders without their associated order items. A `slim: true` flag is included in the response. Use GET /api/orders/{id} to retrieve a full order with items.
+ *         description: 'List of orders. Note that for performance reasons, this endpoint returns a slim representation of orders without their associated order items. A `slim: true` flag is included in the response. Use GET /api/orders/{id} to retrieve a full order with items.'
  *
  *   post:
  *     summary: Create order
