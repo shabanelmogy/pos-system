@@ -7,7 +7,7 @@ export const createCouponSchema = z.object({
   minOrderAmount: z.union([z.string(), z.number()]).optional(),
   maxDiscountAmount: z.union([z.string(), z.number()]).optional().nullable(),
   isActive: z.boolean().optional(),
-  validUntil: z.preprocess((val) => (val === "" || !val ? null : new Date(val)), z.date().optional().nullable()),
+  validUntil: z.preprocess((val) => (val === "" || !val ? null : new Date(val as any)), z.date().optional().nullable()),
   usageLimitPerCustomer: z.number().int().positive().optional().nullable(),
   totalUsageLimit: z.number().int().positive().optional().nullable(),
 });

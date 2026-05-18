@@ -136,3 +136,5 @@
  *       422:
  *         description: Invalid, inactive, or expired coupon
  */
+
+export default {};
