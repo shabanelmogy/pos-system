@@ -13,3 +13,6 @@ export const bills = pgTable("bills", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
+
+export type Bill = typeof bills.$inferSelect;
+export type NewBill = typeof bills.$inferInsert;
