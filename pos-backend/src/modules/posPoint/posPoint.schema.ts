@@ -10,3 +10,6 @@ export const posPoints = pgTable("pos_points", {
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
+
+export type PosPoint = typeof posPoints.$inferSelect;
+export type NewPosPoint = typeof posPoints.$inferInsert;
