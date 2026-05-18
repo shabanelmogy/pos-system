@@ -15,6 +15,17 @@ import useManagementForm from "../hooks/useManagementForm";
 import useLocalize from "../../../hooks/useLocalize";
 import { useTranslation } from "react-i18next";
 
+const QWERTY_TO_ARABIC_MAP: Record<string, string> = {
+  'q': 'ض', 'w': 'ص', 'e': 'ث', 'r': 'ق', 't': 'ف', 'y': 'غ', 'u': 'ع', 'i': 'ه', 'o': 'خ', 'p': 'ح',
+  '[': 'ج', ']': 'د', 'a': 'ش', 's': 'س', 'd': 'ي', 'f': 'ب', 'g': 'ل', 'h': 'ا', 'j': 'ت', 'k': 'ن',
+  'l': 'م', ';': 'ك', "'": 'ط', 'z': 'ئ', 'x': 'ء', 'c': 'ؤ', 'v': 'ر', 'b': 'لا', 'n': 'ى', 'm': 'ة',
+  ',': 'و', '.': 'ز', '/': 'ظ',
+  'Q': 'َ', 'W': 'ً', 'E': 'ُ', 'R': 'ٌ', 'T': 'لإ', 'Y': 'إ', 'U': '`', 'I': '÷', 'O': '×', 'P': '؛',
+  '{': '<', '}': '>', 'A': 'ِ', 'S': 'ٍ', 'D': 'إ', 'F': 'لأ', 'G': 'لأ', 'H': 'أ', 'J': 'ـ', 'K': '،',
+  'L': '/', ':': ':', '"': '"', 'Z': '~', 'X': 'ْ', 'C': '}', 'V': '{', 'B': 'لآ', 'N': 'آ', 'M': '’',
+  '<': ',', '>': '.', '?': '؟'
+};
+
 interface ManagementModalProps {
   type: string;
   isOpen: boolean;
@@ -23,7 +34,7 @@ interface ManagementModalProps {
 }
 
 const ManagementModal: React.FC<ManagementModalProps> = ({ type, isOpen, onClose, initialData = null }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { localize } = useLocalize();
   const queryClient = useQueryClient();
   const isEdit = !!initialData;
@@ -33,6 +44,25 @@ const ManagementModal: React.FC<ManagementModalProps> = ({ type, isOpen, onClose
   const [showTerminals, setShowTerminals] = useState(false);
 
   const { register, handleSubmit, setValue, watch, errors } = useManagementForm(type, initialData, isOpen);
+
+  const handleArabicKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
+      const mappedChar = QWERTY_TO_ARABIC_MAP[e.key];
+      if (mappedChar !== undefined) {
+        e.preventDefault();
+        const input = e.currentTarget;
+        const start = input.selectionStart ?? 0;
+        const end = input.selectionEnd ?? 0;
+        const value = input.value;
+        const newValue = value.substring(0, start) + mappedChar + value.substring(end);
+        input.value = newValue;
+        const newCursorPos = start + mappedChar.length;
+        input.setSelectionRange(newCursorPos, newCursorPos);
+        const event = new Event('input', { bubbles: true });
+        input.dispatchEvent(event);
+      }
+    }
+  };
 
   const watchedBranchId = watch("branchId");
   const watchedRole = watch("role");
@@ -336,7 +366,7 @@ const ManagementModal: React.FC<ManagementModalProps> = ({ type, isOpen, onClose
                       <div className="relative flex items-center">
                         <input {...register("nameEn")} lang="en" dir="ltr" ref={(e) => { 
                           register("nameEn").ref(e); 
-                          if (e) firstInputRef.current = e; 
+                          if (e && !i18n.language.startsWith('ar')) firstInputRef.current = e; 
                         }} type="text" className="peer w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-2xl p-5 pr-14 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-all font-black uppercase tracking-tighter text-xl shadow-inner" />
                         <span className="absolute right-4 text-[10px] font-black bg-[var(--bg-card-alt)] border border-[var(--border-main)] text-[var(--text-muted)] peer-focus:border-[var(--primary)] peer-focus:text-[var(--primary)] px-2.5 py-1 rounded-lg uppercase tracking-wider select-none pointer-events-none transition-all">EN</span>
                       </div>
@@ -347,7 +377,10 @@ const ManagementModal: React.FC<ManagementModalProps> = ({ type, isOpen, onClose
                         الاسم بالعربية
                       </label>
                       <div className="relative flex items-center">
-                        <input {...register("nameAr")} lang="ar" dir="rtl" type="text" className="peer w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-2xl p-5 pl-14 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-all font-black text-xl shadow-inner text-right" />
+                        <input {...register("nameAr")} lang="ar" dir="rtl" ref={(e) => { 
+                          register("nameAr").ref(e); 
+                          if (e && i18n.language.startsWith('ar')) firstInputRef.current = e; 
+                        }} onKeyDown={handleArabicKeyPress} type="text" className="peer w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-2xl p-5 pl-14 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-all font-black text-xl shadow-inner text-right" />
                         <span className="absolute left-4 text-[10px] font-black bg-[var(--bg-card-alt)] border border-[var(--border-main)] text-[var(--text-muted)] peer-focus:border-[var(--primary)] peer-focus:text-[var(--primary)] px-2.5 py-1 rounded-lg select-none pointer-events-none transition-all">عربي</span>
                       </div>
                       {errors.nameAr && <span className="text-[9px] text-red-500 font-bold mt-2 block">{errors.nameAr.message as string}</span>}
