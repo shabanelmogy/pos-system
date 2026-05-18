@@ -29,6 +29,9 @@
     "placeholder_name": "Employee Name",
     "placeholder_phone": "Contact Number",
     "placeholder_pro_email": "Professional Email",
-    "placeholder_password": "Security Pass"
+    "placeholder_password": "Security Pass",
+    "welcome_message": "The world's most intuitive point of sale architecture, designed for high-volume enterprise environments. Manage multiple branches, terminals, and your workforce from a single secure gateway.",
+    "copyright": "© 2026 RestroPOS Enterprise Logic. All rights reserved.",
+    "welcome_back": "Welcome back, {{name}}"
   }
 }

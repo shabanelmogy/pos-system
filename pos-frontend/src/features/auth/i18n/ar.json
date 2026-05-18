@@ -29,6 +29,9 @@
     "placeholder_name": "اسم الموظف",
     "placeholder_phone": "رقم التواصل",
     "placeholder_pro_email": "البريد الإلكتروني المهني",
-    "placeholder_password": "رمز الأمان"
+    "placeholder_password": "رمز الأمان",
+    "welcome_message": "أكثر أنظمة نقاط البيع بديهية في العالم، مصمم لبيئات المؤسسات ذات الحجم الكبير. قم بإدارة الفروع المتعددة، ومحطات العمل، وقوة العمل الخاصة بك من بوابة أمنة واحدة.",
+    "copyright": "© 2026 RestroPOS Enterprise Logic. جميع الحقوق محفوظة.",
+    "welcome_back": "مرحباً بعودتك، {{name}}"
   }
 }

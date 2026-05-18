@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { useForm, UseFormRegister, FieldErrors } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useTranslation } from "react-i18next";
 
 /**
  * Zod schema for login validation
@@ -33,6 +34,7 @@ const useLogin = (): LoginHook => {
   const navigate = useNavigate();
   const { setUser } = useUserStore();
   const { setActiveShift, setSelectedBranch, setSelectedPOSPoint } = usePOSStore();
+  const { t } = useTranslation();
   
   const {
     register,
@@ -66,7 +68,7 @@ const useLogin = (): LoginHook => {
       }
 
       setUser(userData);
-      enqueueSnackbar(`Welcome back, ${userData.name}`, { variant: "success" });
+      enqueueSnackbar(t('auth.welcome_back', { name: userData.name }), { variant: "success" });
       navigate("/");
     },
     onError: (error: any) => {

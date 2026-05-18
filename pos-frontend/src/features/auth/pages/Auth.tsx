@@ -61,8 +61,7 @@ const Auth: React.FC = () => {
               {t('auth.precision_performance')}
             </h1>
             <p className="text-[var(--text-muted)] text-lg font-medium max-w-lg leading-relaxed">
-              The world's most intuitive point of sale architecture, designed for high-volume enterprise environments.
-              Manage multiple branches, terminals, and your workforce from a single secure gateway.
+              {t('auth.welcome_message')}
             </p>
           </motion.div>
 
@@ -165,7 +164,7 @@ const Auth: React.FC = () => {
 
         <div className="absolute bottom-10 inset-x-0 text-center">
           <p className="text-[9px] text-[var(--border-main)] font-black uppercase tracking-[0.4em]">
-            &copy; 2026 RestroPOS Enterprise Logic. All rights reserved.
+            {t('auth.copyright')}
           </p>
         </div>
       </div>
