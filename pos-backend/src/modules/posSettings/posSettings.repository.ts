@@ -1,10 +1,10 @@
 import { db } from "../../config/database.js";
-import { posSettings } from "./posSettings.schema.js";
+import { posSettings, PosSettings, NewPosSettings } from "./posSettings.schema.js";
 import { posPoints } from "../posPoint/posPoint.schema.js";
 import { eq } from "drizzle-orm";
 
 const posSettingsRepository = {
-  async findAllWithSettings() {
+  async findAllWithSettings(): Promise<any[]> {
     const points = await db.select().from(posPoints);
     const settings = await db.select().from(posSettings);
     
@@ -15,20 +15,20 @@ const posSettingsRepository = {
     }));
   },
 
-  async findByPosId(posPointId) {
+  async findByPosId(posPointId: string): Promise<PosSettings | null> {
     try {
       console.log(`[DB] Finding settings for POS: ${posPointId}`);
       const results = await db.select().from(posSettings).where(eq(posSettings.posPointId, posPointId));
       return results[0] || null;
-    } catch (error) {
+    } catch (error: any) {
       console.error(`[DB ERROR] findByPosId failed:`, error.message);
       throw error;
     }
   },
 
-  async upsert(posPointId, data) {
+  async upsert(posPointId: string, data: Partial<NewPosSettings>): Promise<PosSettings> {
     // Sanitize data to prevent updating read-only or primary key fields
-    const { id, createdAt, updatedAt, posPointId: _, ...safeData } = data;
+    const { id, createdAt, updatedAt, posPointId: _, ...safeData } = data as any;
 
     // Check if exists first using the local method
     const results = await db.select().from(posSettings).where(eq(posSettings.posPointId, posPointId));

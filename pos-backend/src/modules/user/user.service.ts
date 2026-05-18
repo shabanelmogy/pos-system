@@ -2,13 +2,13 @@ import userRepository from "./user.repository.js";
 import bcrypt from "bcryptjs";
 import { fail } from "../../utils/errorHandler.js";
 import { db } from "../../config/database.js";
-import { users, userPosPermissions } from "./user.schema.js";
+import { users, userPosPermissions, User, NewUser } from "./user.schema.js";
 import { orders } from "../order/order.schema.js";
 import { shifts } from "../shift/shift.schema.js";
-import { eq } from "drizzle-orm";
+import { eq, or } from "drizzle-orm";
 
 const userService = {
-  async registerUser(userData) {
+  async registerUser(userData: NewUser): Promise<User> {
     const existingUser = await userRepository.findByEmail(userData.email);
     if (existingUser) {
       fail("User with this email already exists", 409);
@@ -23,7 +23,7 @@ const userService = {
     });
   },
 
-  async loginUser(email, password) {
+  async loginUser(email: string, password: string): Promise<any> {
     const user = await userRepository.findByEmail(email);
     if (!user) {
       fail("Invalid email or password", 401);
@@ -34,18 +34,18 @@ const userService = {
       fail("Invalid email or password", 401);
     }
 
-    return user;
+    return user!;
   },
 
-  async getUserById(id) {
+  async getUserById(id: string): Promise<any> {
     const user = await userRepository.findById(id);
     if (!user) {
       fail("User not found", 404);
     }
-    return user;
+    return user!;
   },
 
-  async getAllUsers() {
+  async getAllUsers(): Promise<any[]> {
     return await db.query.users.findMany({
       with: {
         branch: true,
@@ -55,10 +55,10 @@ const userService = {
           }
         }
       }
-    });
+    }) as any[];
   },
 
-  async createUser(userData) {
+  async createUser(userData: any): Promise<User> {
     const { password, name, email, phone, role, branchId } = userData;
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
@@ -72,12 +72,12 @@ const userService = {
       password: hashedPassword
     }).returning();
     
-    return user;
+    return user!;
   },
 
-  async updateUser(userId, userData) {
+  async updateUser(userId: string, userData: any): Promise<User> {
     const { password, name, email, phone, role, branchId } = userData;
-    const updateData = { 
+    const updateData: any = { 
       name, 
       email, 
       phone, 
@@ -96,10 +96,10 @@ const userService = {
       .where(eq(users.id, userId))
       .returning();
       
-    return user;
+    return user!;
   },
 
-  async assignPOS(userId, posPointIds) {
+  async assignPOS(userId: string, posPointIds: string[]): Promise<{ success: boolean }> {
     // Clear existing
     await db.delete(userPosPermissions).where(eq(userPosPermissions.userId, userId));
     
@@ -114,9 +114,16 @@ const userService = {
     return { success: true };
   },
 
-  async deleteUser(userId) {
-    // Check if user has orders
-    const userOrders = await db.select().from(orders).where(eq(orders.cashierId, userId)).limit(1);
+  async deleteUser(userId: string): Promise<any> {
+    // Check if user has orders (as openedBy, waiter, closedBy, voidedBy)
+    const userOrders = await db.select().from(orders).where(
+      or(
+        eq(orders.openedById, userId),
+        eq(orders.waiterId, userId),
+        eq(orders.closedById, userId),
+        eq(orders.voidedById, userId)
+      )
+    ).limit(1);
     if (userOrders.length > 0) {
       fail("Cannot delete user because they have associated orders. Try deactivating them instead.", 400);
     }
@@ -130,15 +137,15 @@ const userService = {
     return await userRepository.delete(userId);
   },
 
-  async updateRefreshToken(userId, refreshToken) {
+  async updateRefreshToken(userId: string, refreshToken: string | null): Promise<any> {
     return await db.update(users)
       .set({ refreshToken, updatedAt: new Date() })
       .where(eq(users.id, userId));
   },
 
-  async findByRefreshToken(refreshToken) {
+  async findByRefreshToken(refreshToken: string): Promise<User | null> {
     const [user] = await db.select().from(users).where(eq(users.refreshToken, refreshToken)).limit(1);
-    return user;
+    return user || null;
   }
 };
 

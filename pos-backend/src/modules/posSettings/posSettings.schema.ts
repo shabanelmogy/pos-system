@@ -15,3 +15,6 @@ export const posSettings = pgTable("pos_settings", {
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
+
+export type PosSettings = typeof posSettings.$inferSelect;
+export type NewPosSettings = typeof posSettings.$inferInsert;

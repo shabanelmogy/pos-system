@@ -1,7 +1,8 @@
 import posSettingsRepository from "./posSettings.repository.js";
+import { PosSettings, NewPosSettings } from "./posSettings.schema.js";
 
 const posSettingsService = {
-  async getAllAndSync() {
+  async getAllAndSync(): Promise<any[]> {
     const list = await posSettingsRepository.findAllWithSettings();
     
     // Sync missing settings
@@ -26,7 +27,7 @@ const posSettingsService = {
     return syncedList;
   },
 
-  async getSettings(posPointId) {
+  async getSettings(posPointId: string): Promise<PosSettings> {
     let settings = await posSettingsRepository.findByPosId(posPointId);
     
     // If no settings exist for this POS, create default ones
@@ -46,7 +47,7 @@ const posSettingsService = {
     return settings;
   },
 
-  async updateSettings(posPointId, data) {
+  async updateSettings(posPointId: string, data: Partial<NewPosSettings>): Promise<PosSettings> {
     return await posSettingsRepository.upsert(posPointId, data);
   }
 };

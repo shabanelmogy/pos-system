@@ -21,3 +21,9 @@ export const userPosPermissions = pgTable("user_pos_permissions", {
   posPointId: uuid("pos_point_id").references(() => posPoints.id).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
+
+export type User = typeof users.$inferSelect;
+export type NewUser = typeof users.$inferInsert;
+
+export type UserPosPermission = typeof userPosPermissions.$inferSelect;
+export type NewUserPosPermission = typeof userPosPermissions.$inferInsert;
