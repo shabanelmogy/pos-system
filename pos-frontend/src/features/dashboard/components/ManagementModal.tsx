@@ -26,6 +26,16 @@ const QWERTY_TO_ARABIC_MAP: Record<string, string> = {
   '<': ',', '>': '.', '?': '؟'
 };
 
+const ARABIC_TO_QWERTY_MAP: Record<string, string> = {
+  'ض': 'q', 'ص': 'w', 'ث': 'e', 'ق': 'r', 'ف': 't', 'غ': 'y', 'ع': 'u', 'ه': 'i', 'خ': 'o', 'ح': 'p',
+  'ج': '[', 'د': ']', 'ش': 'a', 'س': 's', 'ي': 'd', 'ب': 'f', 'ل': 'g', 'ا': 'h', 'ت': 'j', 'ن': 'k',
+  'م': 'l', 'ك': ';', 'ط': "'", 'ئ': 'z', 'ء': 'x', 'ؤ': 'c', 'ر': 'v', 'لا': 'b', 'ى': 'n', 'ة': 'm',
+  'و': ',', 'ز': '.', 'ظ': '/',
+  'َ': 'Q', 'ً': 'W', 'ُ': 'E', 'ٌ': 'R', 'لإ': 'T', 'إ': 'Y', '`': 'U', '÷': 'I', '×': 'O', '؛': 'P',
+  '<': '{', '>': '}', 'ِ': 'A', 'ٍ': 'S', 'لأ': 'F', 'أ': 'H', 'ـ': 'J', '،': 'K', '~': 'Z', 'ْ': 'X',
+  'لآ': 'B', 'آ': 'N', '’': 'M', '؟': '?'
+};
+
 interface ManagementModalProps {
   type: string;
   isOpen: boolean;
@@ -61,6 +71,36 @@ const ManagementModal: React.FC<ManagementModalProps> = ({ type, isOpen, onClose
         const event = new Event('input', { bubbles: true });
         input.dispatchEvent(event);
       }
+    }
+  };
+
+  const handleEnglishKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
+      const mappedChar = ARABIC_TO_QWERTY_MAP[e.key];
+      if (mappedChar !== undefined) {
+        e.preventDefault();
+        const input = e.currentTarget;
+        const start = input.selectionStart ?? 0;
+        const end = input.selectionEnd ?? 0;
+        const value = input.value;
+        const newValue = value.substring(0, start) + mappedChar + value.substring(end);
+        input.value = newValue;
+        const newCursorPos = start + mappedChar.length;
+        input.setSelectionRange(newCursorPos, newCursorPos);
+        const event = new Event('input', { bubbles: true });
+        input.dispatchEvent(event);
+      }
+    }
+  };
+
+  const handleEnglishInput = (e: React.FormEvent<HTMLInputElement>) => {
+    const input = e.currentTarget;
+    const value = input.value;
+    const cleaned = value.replace(/[\u0600-\u06FF]/g, "");
+    if (cleaned !== value) {
+      input.value = cleaned;
+      const event = new Event('input', { bubbles: true });
+      input.dispatchEvent(event);
     }
   };
 
@@ -367,7 +407,7 @@ const ManagementModal: React.FC<ManagementModalProps> = ({ type, isOpen, onClose
                         <input {...register("nameEn")} lang="en" dir="ltr" ref={(e) => { 
                           register("nameEn").ref(e); 
                           if (e && !i18n.language.startsWith('ar')) firstInputRef.current = e; 
-                        }} type="text" className="peer w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-2xl p-5 pr-14 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-all font-black uppercase tracking-tighter text-xl shadow-inner" />
+                        }} onKeyDown={handleEnglishKeyDown} onInput={handleEnglishInput} type="text" className="peer w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-2xl p-5 pr-14 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-all font-black uppercase tracking-tighter text-xl shadow-inner" />
                         <span className="absolute right-4 text-[10px] font-black bg-[var(--bg-card-alt)] border border-[var(--border-main)] text-[var(--text-muted)] peer-focus:border-[var(--primary)] peer-focus:text-[var(--primary)] px-2.5 py-1 rounded-lg uppercase tracking-wider select-none pointer-events-none transition-all">EN</span>
                       </div>
                       {errors.nameEn && <span className="text-[9px] text-red-500 font-bold mt-2 block">{errors.nameEn.message as string}</span>}
