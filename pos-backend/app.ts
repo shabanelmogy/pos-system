@@ -1,6 +1,6 @@
 import "./src/utils/terminalColorizer.js"; // Force hot-reload trigger v4
 console.log("Starting POS Backend Server...");
-import express from "express";
+import express, { Request, Response, NextFunction } from "express";
 import { exec } from "child_process";
 import fs from "fs";
 import https from "https";
@@ -32,15 +32,15 @@ app.options("*", cors(corsOptions));
 app.use(express.json());
 app.use(cookieParser());
 
-// Correlation ID Middleware (Phase 5)
-app.use((req, res, next) => {
-  const correlationId = req.headers['x-correlation-id'] || randomBytes(8).toString('hex');
+// Correlation ID Middleware
+app.use((req: Request, res: Response, next: NextFunction) => {
+  const correlationId = (req.headers['x-correlation-id'] as string) || randomBytes(8).toString('hex');
   res.setHeader('x-correlation-id', correlationId);
   runWithCorrelationId(correlationId, next);
 });
 
 // Debug Middleware
-app.use((req, res, next) => {
+app.use((req: Request, res: Response, next: NextFunction) => {
   if (req.method === "OPTIONS" || req.originalUrl.includes("/api/")) {
     console.log(`[DEBUG] Incoming ${req.method} request to ${req.originalUrl}`);
     console.log(`[DEBUG] Cookies present:`, req.cookies ? Object.keys(req.cookies) : "None");
@@ -50,12 +50,12 @@ app.use((req, res, next) => {
 });
 
 // Root Endpoint - Status Check
-app.get("/", async (req, res) => {
+app.get("/", async (req: Request, res: Response) => {
   let dbStatus = "Disconnected";
   try {
     const result = await pool.query("SELECT 1");
     if (result.rows) dbStatus = "Connected";
-  } catch (e) {
+  } catch (e: any) {
     dbStatus = "Error: " + e.message;
   }
 
@@ -68,7 +68,7 @@ app.get("/", async (req, res) => {
 });
 
 // API Docs
-app.get("/api-docs.json", (req, res) => {
+app.get("/api-docs.json", (req: Request, res: Response) => {
   res.json(swaggerSpec);
 });
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
@@ -81,15 +81,12 @@ app.use(globalErrorHandler);
 
 // Server — Self-Healing Startup
 
-const killPort = (port) => {
+const killPort = (port: number | string): Promise<void> => {
   return new Promise((resolve) => {
     // Windows command to find and kill the process on the port
     exec(
       `FOR /F "tokens=5" %i IN ('netstat -ano ^| findstr :${port} ^| findstr LISTENING') DO taskkill /PID %i /F`,
-      (err) => {
-        if (err) {
-          // Port might already be free — that's fine
-        }
+      () => {
         setTimeout(resolve, 800); // Wait for OS to release the port
       }
     );
@@ -99,7 +96,7 @@ const killPort = (port) => {
 const startServer = async () => {
   const certPath = "./.cert/server.crt";
   const keyPath = "./.cert/server.key";
-  let server;
+  let server: any;
 
   if (fs.existsSync(certPath) && fs.existsSync(keyPath)) {
     const options = {
@@ -125,10 +122,10 @@ const startServer = async () => {
         console.log("✅ PostgreSQL connected successfully");
         client.release(); // CRITICAL: Return client to pool to prevent leaks & idle crashes
       })
-      .catch(err => console.error("❌ PostgreSQL Connection Failed:", err.message));
+      .catch((err: any) => console.error("❌ PostgreSQL Connection Failed:", err.message));
   });
 
-  server.on("error", async (err) => {
+  server.on("error", async (err: any) => {
     if (err.code === "EADDRINUSE") {
       console.warn(`⚠️  Port ${PORT} is in use. Killing occupying process and retrying...`);
       server.close();

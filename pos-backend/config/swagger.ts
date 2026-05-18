@@ -209,7 +209,7 @@ const swaggerDefinition = {
 
 const options = {
   definition: swaggerDefinition,
-  apis: ["./src/modules/**/*.docs.js"],
+  apis: ["./src/modules/**/*.docs.js", "./src/modules/**/*.docs.ts"],
 };
 
 export default swaggerJsdoc(options);

@@ -5,9 +5,10 @@
   "main": "index.js",
   "scripts": {
     "predev": "npx kill-port 3001",
-    "dev": "nodemon --no-deprecation app.js",
+    "dev": "tsx watch --no-deprecation app.ts",
+    "build": "tsc",
     "migrate": "node scripts/migrate.js",
-    "start": "node --no-deprecation app.js",
+    "start": "node --no-deprecation dist/app.js",
     "db:generate": "drizzle-kit generate",
     "db:push": "drizzle-kit push",
     "db:migrate": "node src/db/migrate.js",
@@ -46,9 +47,16 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@types/cookie-parser": "^1.4.10",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^25.8.0",
     "@types/pg": "^8.20.0",
     "drizzle-kit": "^0.31.10",
     "kill-port": "^2.0.1",
-    "nodemon": "^3.1.9"
+    "nodemon": "^3.1.9",
+    "tsx": "^4.22.1",
+    "typescript": "^6.0.3"
   }
 }
