@@ -1,4 +1,4 @@
-import { pgTable, uuid, integer, text, timestamp, decimal, boolean, pgEnum } from "drizzle-orm/pg-core";
+import { pgTable, uuid, integer, text, timestamp, decimal, boolean, pgEnum, jsonb } from "drizzle-orm/pg-core";
 import { orders } from "./order.schema.js";
 import { items } from "../item/item.schema.js";
 
@@ -10,7 +10,7 @@ export const orderItems = pgTable("order_items", {
   menuItemId: uuid("menu_item_id").references(() => items.id),
   
   // Snapshots for Audit
-  nameSnapshot: text("name_snapshot").notNull(),
+  nameSnapshot: jsonb("name_snapshot").$type<Record<string, string>>().notNull(),
   unitPrice: decimal("unit_price", { precision: 12, scale: 2 }).notNull(),
   quantity: decimal("quantity", { precision: 12, scale: 2 }).notNull(),
   subtotal: decimal("subtotal", { precision: 12, scale: 2 }).notNull(),
@@ -32,7 +32,7 @@ export const orderItemModifiers = pgTable("order_item_modifiers", {
   id: uuid("id").primaryKey().defaultRandom(),
   orderItemId: uuid("order_item_id").notNull().references(() => orderItems.id, { onDelete: "cascade" }),
   modifierId: uuid("modifier_id").notNull(),
-  name: text("name").notNull(),
+  name: jsonb("name").$type<Record<string, string>>().notNull(),
   unitPrice: decimal("unit_price", { precision: 12, scale: 2 }).default("0"),
   quantity: integer("quantity").default(1),
 });

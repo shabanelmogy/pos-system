@@ -14,9 +14,11 @@ import useCartStore from "../../pos/store/useCartStore";
 import { useTranslation } from "react-i18next";
 import { initSocket } from "../../../shared/utils/socket";
 import usePOSStore from "../../pos/store/usePOSStore";
+import useLocalize from "../../../hooks/useLocalize";
 
 const Tables: React.FC = () => {
   const { t } = useTranslation();
+  const { localize } = useLocalize();
   const queryClient = useQueryClient();
   const { setOrder } = useCustomerStore();
   const { addItem, clearCart } = useCartStore();
@@ -47,7 +49,7 @@ const Tables: React.FC = () => {
       for (let i = 0; i < item.quantity; i++) {
         addItem({
           id: item.menuItem.id,
-          name: item.name,
+          name: localize(item.nameSnapshot) || localize(item.name),
           price: item.unitPrice
         });
       }

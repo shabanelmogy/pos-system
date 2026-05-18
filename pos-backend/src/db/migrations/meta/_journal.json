@@ -36,6 +36,20 @@
       "when": 1778898004164,
       "tag": "0004_lowly_purifiers",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1779103962331,
+      "tag": "0005_jsonb_localization",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1779106119512,
+      "tag": "0006_smiling_puff_adder",
+      "breakpoints": true
     }
   ]
 }

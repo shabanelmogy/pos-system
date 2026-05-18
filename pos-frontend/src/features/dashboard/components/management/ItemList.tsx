@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { MdRestaurantMenu, MdEdit, MdDelete } from "react-icons/md";
 import { LoadingState, ErrorState, EmptyState } from "./StatusStates";
 import { useTranslation } from "react-i18next";
+import useLocalize from "../../../../hooks/useLocalize";
 
 interface ItemListProps {
   data: any[];
@@ -16,6 +17,7 @@ interface ItemListProps {
 
 const ItemList: React.FC<ItemListProps> = ({ data, loading, error, onEdit, onDelete, onRetry, itemVariants }) => {
   const { t } = useTranslation();
+  const { localize } = useLocalize();
   if (loading) return <LoadingState />;
   if (error) return <ErrorState label={t('dashboard.management.tabs.dishes')} onRetry={onRetry} />;
   if (!data || data.length === 0) return <EmptyState label={t('dashboard.management.tabs.dishes')} />;
@@ -30,11 +32,11 @@ const ItemList: React.FC<ItemListProps> = ({ data, loading, error, onEdit, onDel
             </div>
             <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
               <button onClick={() => onEdit("dishes", item)} className="p-2.5 bg-[var(--bg-card-alt)] hover:bg-[var(--border-main)] rounded-xl text-[var(--text-muted)] hover:text-[var(--text-main)]"><MdEdit size={16} /></button>
-              <button onClick={() => onDelete("item", item.id, item.name)} className="p-2.5 bg-red-500/10 hover:bg-red-500/20 rounded-xl text-red-500"><MdDelete size={16} /></button>
+              <button onClick={() => onDelete("item", item.id, localize(item.name))} className="p-2.5 bg-red-500/10 hover:bg-red-500/20 rounded-xl text-red-500"><MdDelete size={16} /></button>
             </div>
           </div>
           <div>
-            <h3 className="text-[var(--text-main)] text-xl font-black tracking-tighter uppercase line-clamp-1">{item.name}</h3>
+            <h3 className="text-[var(--text-main)] text-xl font-black tracking-tighter uppercase line-clamp-1">{localize(item.name)}</h3>
             <div className="flex items-center justify-between mt-2">
               <p className="text-[var(--primary)] text-lg font-black italic">₹{item.price}</p>
               <span className="text-[10px] bg-[var(--bg-card-alt)] text-[var(--text-muted)] px-3 py-1 rounded-full font-black uppercase tracking-widest">{t('dashboard.management.lists.dish')}</span>

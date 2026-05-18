@@ -2,6 +2,7 @@ import React from "react";
 import { motion } from "framer-motion";
 import { MdPlayArrow, MdStop, MdAttachMoney, MdClose } from "react-icons/md";
 import useShiftManager from "../hooks/useShiftManager";
+import useLocalize from "../../hooks/useLocalize";
 
 const ShiftManager: React.FC = () => {
   const { 
@@ -14,6 +15,7 @@ const ShiftManager: React.FC = () => {
     openForm,
     closeForm
   } = useShiftManager();
+  const { localize } = useLocalize();
 
   const closeModal = () => {
     setShowShiftModal(false);
@@ -37,7 +39,7 @@ const ShiftManager: React.FC = () => {
             <h1 className="text-4xl font-black text-white uppercase tracking-tighter leading-tight">Start New Shift</h1>
             <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-[var(--bg-card-alt)] rounded-full border border-[var(--border-main)]">
                <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
-               <p className="text-[var(--text-muted)] text-[10px] font-black uppercase tracking-widest">{selectedPOSPoint?.name} • {selectedBranch?.name}</p>
+               <p className="text-[var(--text-muted)] text-[10px] font-black uppercase tracking-widest">{localize(selectedPOSPoint?.name)} • {localize(selectedBranch?.name)}</p>
             </div>
           </header>
 

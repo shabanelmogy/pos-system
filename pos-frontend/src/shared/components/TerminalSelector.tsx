@@ -7,11 +7,13 @@ import { MdStore, MdComputer, MdLock } from "react-icons/md";
 import useAuth from "../../features/auth/hooks/useAuth";
 import useUserStore from "../../features/auth/store/useUserStore";
 import { Branch, POSPoint } from "../types";
+import useLocalize from "../../hooks/useLocalize";
 
 const TerminalSelector: React.FC = () => {
   const { selectedBranch, setSelectedBranch, selectedPOSPoint, setSelectedPOSPoint, clearPOS } = usePOSStore();
   const { branchId, posPermissions, isAdmin } = useAuth();
   const { removeUser } = useUserStore();
+  const { localize } = useLocalize();
   
   // Internal step for users who ARE allowed to pick a branch (Global Admins)
   const [internalStep, setInternalStep] = useState<number>(1);
@@ -144,7 +146,7 @@ const TerminalSelector: React.FC = () => {
            </button>
 
            <div className="pt-8 border-t border-[var(--border-main)]">
-              <p className="text-[9px] text-[var(--text-dim)] font-black uppercase tracking-widest">Context: {selectedBranch?.name || 'Assigned Branch'}</p>
+              <p className="text-[9px] text-[var(--text-dim)] font-black uppercase tracking-widest">Context: {selectedBranch ? localize(selectedBranch.name) : 'Assigned Branch'}</p>
            </div>
         </motion.div>
       </div>
@@ -194,7 +196,7 @@ const TerminalSelector: React.FC = () => {
                   }`}>
                     <MdStore size={36} />
                   </div>
-                  <h3 className="text-[var(--text-main)] text-2xl font-black tracking-tighter mb-1 uppercase">{branch.name}</h3>
+                  <h3 className="text-[var(--text-main)] text-2xl font-black tracking-tighter mb-1 uppercase">{localize(branch.name)}</h3>
                   <p className="text-[var(--text-muted)] text-xs uppercase tracking-widest font-black">{branch.code}</p>
                   {isDisabled && (
                     <div className="absolute top-6 end-6 text-[#444]">
@@ -217,7 +219,7 @@ const TerminalSelector: React.FC = () => {
                   <div className="w-16 h-16 bg-[var(--bg-card-alt)] rounded-2xl flex items-center justify-center text-[var(--primary)] mb-8 group-hover:bg-[var(--primary)] group-hover:text-[var(--bg-card)] transition-all">
                     <MdComputer size={36} />
                   </div>
-                  <h3 className="text-[var(--text-main)] text-2xl font-black tracking-tighter mb-1 uppercase">{pos.name}</h3>
+                  <h3 className="text-[var(--text-main)] text-2xl font-black tracking-tighter mb-1 uppercase">{localize(pos.name)}</h3>
                   <p className="text-[var(--text-muted)] text-xs uppercase tracking-widest font-black">{pos.code}</p>
                 </motion.button>
               ))}

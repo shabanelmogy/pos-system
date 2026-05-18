@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { MdComputer, MdEdit } from "react-icons/md";
 import { LoadingState, ErrorState, EmptyState } from "./StatusStates";
 import { useTranslation } from "react-i18next";
+import useLocalize from "../../../../hooks/useLocalize";
 
 interface POSPointListProps {
   data: any[];
@@ -15,6 +16,7 @@ interface POSPointListProps {
 
 const POSPointList: React.FC<POSPointListProps> = ({ data, loading, error, onEdit, onRetry, itemVariants }) => {
   const { t } = useTranslation();
+  const { localize } = useLocalize();
   if (loading) return <LoadingState />;
   if (error) return <ErrorState label={t('dashboard.management.tabs.terminals')} onRetry={onRetry} />;
   if (!data || data.length === 0) return <EmptyState label={t('dashboard.management.tabs.terminals')} />;
@@ -30,7 +32,7 @@ const POSPointList: React.FC<POSPointListProps> = ({ data, loading, error, onEdi
             <button onClick={() => onEdit("posPoint", pos)} className="p-3 bg-[var(--bg-card-alt)] hover:bg-[var(--border-main)] rounded-xl text-[var(--text-muted)] hover:text-[var(--text-main)] opacity-0 group-hover:opacity-100 transition-all"><MdEdit size={18} /></button>
            </div>
           <div>
-            <h3 className="text-[var(--text-main)] text-xl font-black tracking-tighter uppercase">{pos.name}</h3>
+            <h3 className="text-[var(--text-main)] text-xl font-black tracking-tighter uppercase">{localize(pos.name)}</h3>
             <p className="text-indigo-400 text-[10px] font-black uppercase tracking-[0.2em] mt-1">{pos.code}</p>
             <div className="mt-4 flex items-center gap-2">
                <span className="px-3 py-1 bg-[var(--bg-card-alt)] rounded-full text-[9px] text-[var(--text-muted)] font-bold uppercase tracking-widest">{t('dashboard.management.lists.terminal')}</span>

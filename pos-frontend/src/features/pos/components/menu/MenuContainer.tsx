@@ -11,6 +11,7 @@ import useUserStore from "../../../auth/store/useUserStore";
 import usePOSStore from "../../store/usePOSStore";
 import useCustomerStore from "../../../../features/customers/store/useCustomerStore";
 import Modal from "../../../../shared/components/Modal";
+import useLocalize from "../../../../hooks/useLocalize";
 
 const MenuContainer: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
@@ -28,6 +29,7 @@ const MenuContainer: React.FC = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
   
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
+  const { localize } = useLocalize();
 
   const isGuest = !customerName || customerName === "Guest";
   const queryClient = useQueryClient();
@@ -97,7 +99,7 @@ const MenuContainer: React.FC = () => {
       const qty = Number(item.quantity) || 1;
       const product = {
         id: item.menuItemId || item.id,
-        name: item.nameSnapshot || item.name,
+        name: localize(item.nameSnapshot) || localize(item.name),
         price: parseFloat(item.unitPrice),
       };
 
@@ -180,7 +182,7 @@ const MenuContainer: React.FC = () => {
   };
 
   const filteredItems = items?.filter((item) =>
-    item.name.toLowerCase().includes(searchTerm.toLowerCase())
+    localize(item.name).toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   if (categoriesLoading)
@@ -287,7 +289,7 @@ const MenuContainer: React.FC = () => {
                    <div className="flex flex-wrap gap-1.5 mb-4">
                       {order.items?.map((item: any, i: number) => (
                         <span key={i} className="text-[9px] bg-[var(--bg-main)] text-[var(--text-muted)] px-2 py-1 rounded-md border border-[var(--border-main)] font-bold">
-                           {item.quantity}x {item.name}
+                           {item.quantity}x {localize(item.nameSnapshot) || localize(item.name)}
                         </span>
                       ))}
                    </div>
@@ -340,7 +342,7 @@ const MenuContainer: React.FC = () => {
                     }`}
                 >
                   <MdRestaurantMenu className={isActive ? "text-black" : "text-[var(--primary)]"} />
-                  {category.name}
+                  {localize(category.name)}
                 </button>
               );
             })}
@@ -391,10 +393,10 @@ const MenuContainer: React.FC = () => {
 
                   <div className="flex-1">
                     <h3 className={`font-bold text-sm leading-snug line-clamp-2 transition-colors ${isActive ? "text-[var(--text-main)]" : "text-[var(--text-muted)] group-hover:text-[var(--text-main)]"}`}>
-                      {item.name}
+                      {localize(item.name)}
                     </h3>
                     {item.description && (
-                      <p className="text-[var(--text-dim)] text-[10px] mt-1 line-clamp-1">{item.description}</p>
+                      <p className="text-[var(--text-dim)] text-[10px] mt-1 line-clamp-1">{localize(item.description)}</p>
                     )}
                   </div>
 

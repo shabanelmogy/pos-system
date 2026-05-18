@@ -6,6 +6,7 @@ import useCartStore from "../../../../features/pos/store/useCartStore";
 import useCustomerStore from "../../../../features/customers/store/useCustomerStore";
 import usePOSStore from "../../../../features/pos/store/usePOSStore";
 import useUserStore from "../../../../features/auth/store/useUserStore";
+import useLocalize from "../../../../hooks/useLocalize";
 
 interface InvoiceProps {
   orderInfo: any;
@@ -23,6 +24,7 @@ const Invoice: React.FC<InvoiceProps> = ({ orderInfo, setShowInvoice, isReprint 
   const { selectedBranch, selectedPOSPoint } = usePOSStore();
   const userRole = useUserStore((state) => state.role);
   const isAdmin = userRole?.toLowerCase() === "admin";
+  const { localize } = useLocalize();
   
   // Settings from DB
   const directPrintSetting = selectedPOSPoint?.settings?.directPrint === true;
@@ -119,8 +121,8 @@ const Invoice: React.FC<InvoiceProps> = ({ orderInfo, setShowInvoice, isReprint 
                 ${items.map((item: any) => `
                   <tr>
                     <td>
-                      ${item.nameSnapshot || item.name}
-                      ${(item.modifiers || []).map((m: any) => `<span class="modifier">+ ${m.nameSnapshot || m.name}</span>`).join('')}
+                      ${localize(item.nameSnapshot) || localize(item.name)}
+                      ${(item.modifiers || []).map((m: any) => `<span class="modifier">+ ${localize(m.name)}</span>`).join('')}
                     </td>
                     <td class="col-qty">${item.quantity}</td>
                     <td class="col-total mono">₹${parseFloat(item.subtotal || (item.unitPrice * item.quantity)).toFixed(2)}</td>
@@ -205,7 +207,7 @@ const Invoice: React.FC<InvoiceProps> = ({ orderInfo, setShowInvoice, isReprint 
                {items.map((item: any, index: number) => (
                  <div key={index} className="flex flex-col">
                     <div className="flex items-center justify-between">
-                       <p className="text-[var(--text-main)] font-black text-[10px] uppercase truncate flex-1">{item.nameSnapshot || item.name}</p>
+                       <p className="text-[var(--text-main)] font-black text-[10px] uppercase truncate flex-1">{localize(item.nameSnapshot) || localize(item.name)}</p>
                        <span className="text-[var(--text-main)] font-black text-[10px] ml-4">₹{formatNum(item.subtotal || (item.unitPrice * item.quantity))}</span>
                     </div>
                     <div className="flex items-center justify-between mt-1">
@@ -215,7 +217,7 @@ const Invoice: React.FC<InvoiceProps> = ({ orderInfo, setShowInvoice, isReprint 
                     {item.modifiers && item.modifiers.length > 0 && (
                       <div className="mt-1 space-y-0.5">
                         {item.modifiers.map((m: any, idx: number) => (
-                          <p key={idx} className="text-[7px] text-[var(--primary)] font-black uppercase ps-2">+ {m.nameSnapshot || m.name}</p>
+                          <p key={idx} className="text-[7px] text-[var(--primary)] font-black uppercase ps-2">+ {localize(m.name)}</p>
                         ))}
                       </div>
                     )}

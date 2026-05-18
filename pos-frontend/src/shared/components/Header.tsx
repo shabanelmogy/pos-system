@@ -13,6 +13,7 @@ import useAuth from "../../features/auth/hooks/useAuth";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { motion, AnimatePresence } from "framer-motion";
 import ThemeSwitcher from "./ThemeSwitcher";
+import useLocalize from "../../hooks/useLocalize";
 
 /** Tailwind default `theme.screens` (px) — keep in sync with tailwind.config if you customize breakpoints */
 const TW_SCREENS = { sm: 640, md: 768, lg: 1024, xl: 1280, "2xl": 1536 } as const;
@@ -85,6 +86,7 @@ const Header: React.FC = () => {
   const { selectedBranch, selectedPOSPoint, activeShift, clearPOS, setShowShiftModal } = usePOSStore();
   const navigate = useNavigate();
   const { i18n } = useTranslation();
+  const { localize } = useLocalize();
   const { enqueueSnackbar } = useSnackbar();
   const [isOnline, setIsOnline] = useState<boolean>(navigator.onLine);
   const [currentTime, setCurrentTime] = useState<Date>(new Date());
@@ -173,7 +175,7 @@ const Header: React.FC = () => {
                 </div>
                 <div className="flex flex-col">
                   <span className="mb-px text-[6px] font-black uppercase leading-none tracking-widest text-[var(--text-muted)] 2xl:mb-0.5 2xl:text-[7px]">Location</span>
-                  <span className="text-[9px] font-black leading-none text-[var(--text-main)] 2xl:text-[10px]">{selectedBranch.name}</span>
+                  <span className="text-[9px] font-black leading-none text-[var(--text-main)] 2xl:text-[10px]">{localize(selectedBranch.name)}</span>
                 </div>
               </div>
 
@@ -184,7 +186,7 @@ const Header: React.FC = () => {
                 </div>
                 <div className="flex flex-col">
                   <span className="mb-px text-[6px] font-black uppercase leading-none tracking-widest text-[var(--text-muted)] 2xl:mb-0.5 2xl:text-[7px]">Terminal</span>
-                  <span className="text-[9px] font-black leading-none text-[var(--text-main)] 2xl:text-[10px]">{selectedPOSPoint.name}</span>
+                  <span className="text-[9px] font-black leading-none text-[var(--text-main)] 2xl:text-[10px]">{localize(selectedPOSPoint.name)}</span>
                 </div>
                 <motion.button
                   whileHover={{ rotate: 180 }}

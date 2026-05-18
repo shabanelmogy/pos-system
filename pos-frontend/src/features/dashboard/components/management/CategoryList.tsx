@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { MdCategory, MdEdit, MdDelete } from "react-icons/md";
 import { LoadingState, ErrorState, EmptyState } from "./StatusStates";
 import { useTranslation } from "react-i18next";
+import useLocalize from "../../../../hooks/useLocalize";
 
 interface CategoryListProps {
   data: any[];
@@ -16,6 +17,7 @@ interface CategoryListProps {
 
 const CategoryList: React.FC<CategoryListProps> = ({ data, loading, error, onEdit, onDelete, onRetry, itemVariants }) => {
   const { t } = useTranslation();
+  const { localize } = useLocalize();
   if (loading) return <LoadingState />;
   if (error) return <ErrorState label={t('dashboard.management.tabs.categories')} onRetry={onRetry} />;
   if (!data || data.length === 0) return <EmptyState label={t('dashboard.management.tabs.categories')} />;
@@ -29,13 +31,13 @@ const CategoryList: React.FC<CategoryListProps> = ({ data, loading, error, onEdi
               <MdCategory size={30} />
             </div>
             <div>
-              <h3 className="text-[var(--text-main)] text-lg font-black tracking-tighter uppercase">{cat.name}</h3>
+              <h3 className="text-[var(--text-main)] text-lg font-black tracking-tighter uppercase">{localize(cat.name)}</h3>
               <p className="text-[var(--text-muted)] text-[10px] font-bold uppercase tracking-widest">{t('dashboard.management.lists.category')}</p>
             </div>
           </div>
           <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
             <button onClick={() => onEdit("category", cat)} className="p-2.5 bg-[var(--bg-card-alt)] hover:bg-[var(--border-main)] rounded-xl text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors"><MdEdit size={16} /></button>
-            <button onClick={() => onDelete("category", cat.id, cat.name)} className="p-2.5 bg-red-500/10 hover:bg-red-500/20 rounded-xl text-red-500 transition-colors"><MdDelete size={16} /></button>
+            <button onClick={() => onDelete("category", cat.id, localize(cat.name))} className="p-2.5 bg-red-500/10 hover:bg-red-500/20 rounded-xl text-red-500 transition-colors"><MdDelete size={16} /></button>
           </div>
         </motion.div>
       ))}

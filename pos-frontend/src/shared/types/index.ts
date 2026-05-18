@@ -1,8 +1,13 @@
 export type UserRole = 'admin' | 'manager' | 'cashier' | 'waiter';
 
+export interface LocalizedString {
+  en: string;
+  ar?: string;
+}
+
 export interface Branch {
   id: string;
-  name: string;
+  name: LocalizedString | string; // support legacy for a while if needed, or just LocalizedString
   code: string;
   city?: string;
   phone?: string;
@@ -11,7 +16,7 @@ export interface Branch {
 
 export interface POSPoint {
   id: string;
-  name: string;
+  name: LocalizedString | string;
   code: string;
   branchId: string;
   settings?: {
@@ -47,15 +52,15 @@ export interface User {
 
 export interface Category {
   id: string;
-  name: string;
+  name: LocalizedString;
 }
 
 export interface MenuItem {
   id: string;
-  name: string;
+  name: LocalizedString;
   price: number;
   categoryId: string;
-  description?: string;
+  description?: LocalizedString;
 }
 
 // Order Types
@@ -67,7 +72,7 @@ export type OrderType = "DINE_IN" | "TAKE_AWAY" | "PICKUP" | "DELIVERY";
 
 export interface OrderModifier {
   modifierId: string;
-  name: string;
+  name: LocalizedString | string;
   price: number;
   quantity: number;
 }
@@ -76,7 +81,7 @@ export interface OrderItem {
   id: string;
   orderId: string;
   menuItemId: string;
-  nameSnapshot: string;
+  nameSnapshot: LocalizedString | string;
   unitPrice: number;
   quantity: number;
   subtotal: number;

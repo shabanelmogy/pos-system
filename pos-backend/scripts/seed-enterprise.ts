@@ -8,7 +8,7 @@ async function seed(): Promise<void> {
     
     // 1. Create Default Branch
     const [branch] = await db.insert(branches).values({
-      name: "Main Headquarters",
+      name: { en: "Main Headquarters", ar: "المقر الرئيسي" },
       code: "BR-MAIN-01",
       city: "Port Said",
       country: "Egypt"
@@ -20,7 +20,7 @@ async function seed(): Promise<void> {
       // 2. Create Default POS Point
       await db.insert(posPoints).values({
         branchId: targetBranchId,
-        name: "Main Register",
+        name: { en: "Main Register", ar: "الكاونتر الرئيسي" },
         code: "POS-MAIN-01"
       }).onConflictDoNothing();
       

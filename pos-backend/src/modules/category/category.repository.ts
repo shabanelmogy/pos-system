@@ -12,8 +12,8 @@ const categoryRepository = {
     return result[0];
   },
 
-  async findByName(name: string): Promise<Category | undefined> {
-    const result = await db.select().from(categories).where(eq(categories.name, name)).limit(1);
+  async findByName(nameEn: string): Promise<Category | undefined> {
+    const result = await db.select().from(categories).where(sql`${categories.name}->>'en' = ${nameEn}`).limit(1);
     return result[0];
   },
 

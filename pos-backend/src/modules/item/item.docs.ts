@@ -27,8 +27,16 @@
  *             type: object
  *             required: [name, price, categoryId]
  *             properties:
- *               name: { type: string, example: "Chicken Pasta" }
- *               description: { type: string, example: "Delicious pasta with grilled chicken" }
+ *               name: 
+ *                 type: object
+ *                 properties:
+ *                   en: { type: string, example: "Chicken Pasta" }
+ *                   ar: { type: string, example: "مكرونة بالدجاج" }
+ *               description: 
+ *                 type: object
+ *                 properties:
+ *                   en: { type: string, example: "Delicious pasta with grilled chicken" }
+ *                   ar: { type: string, example: "مكرونة شهية مع دجاج مشوي" }
  *               price: { type: number, example: 15.99 }
  *               images: { type: array, items: { type: string } }
  *               categoryId: { type: string }
@@ -67,8 +75,16 @@
  *           schema:
  *             type: object
  *             properties:
- *               name: { type: string }
- *               description: { type: string }
+ *               name: 
+ *                 type: object
+ *                 properties:
+ *                   en: { type: string }
+ *                   ar: { type: string }
+ *               description: 
+ *                 type: object
+ *                 properties:
+ *                   en: { type: string }
+ *                   ar: { type: string }
  *               price: { type: number }
  *               images: { type: array, items: { type: string } }
  *               categoryId: { type: string }

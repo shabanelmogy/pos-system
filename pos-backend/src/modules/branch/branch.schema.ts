@@ -1,8 +1,8 @@
-import { pgTable, text, uuid, timestamp, boolean, numeric } from "drizzle-orm/pg-core";
+import { pgTable, text, uuid, timestamp, boolean, numeric, jsonb } from "drizzle-orm/pg-core";
 
 export const branches = pgTable("branches", {
   id: uuid("id").primaryKey().defaultRandom(),
-  name: text("name").notNull(),
+  name: jsonb("name").$type<Record<string, string>>().notNull(),
   code: text("code").notNull().unique(), // e.g., 'BR-CAIRO-01'
   phone: text("phone"),
   email: text("email"),

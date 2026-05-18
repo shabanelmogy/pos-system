@@ -8,9 +8,11 @@ import usePOSStore from "../../store/usePOSStore";
 import { useTranslation } from "react-i18next";
 import { getCustomers, addCustomer } from "../../../../features/customers/api/customerApi";
 import Modal from "../../../../shared/components/Modal";
+import useLocalize from "../../../../hooks/useLocalize";
 
 const CartInfo: React.FC = () => {
   const { t } = useTranslation();
+  const { localize } = useLocalize();
   const { items, updateQuantity, removeItem, clearCart, getItemCount } = useCartStore();
   const { customerName, customerPhone, setCustomer, setGuestCustomer, orderType, setOrderType } = useCustomerStore();
   const { selectedPOSPoint } = usePOSStore();
@@ -242,7 +244,7 @@ const CartInfo: React.FC = () => {
           <div key={item.id} className="bg-[var(--bg-card)] border border-[var(--border-main)] hover:border-[var(--primary)]/40 rounded-xl p-3 transition-all duration-200">
             <div className="flex items-start justify-between gap-2 mb-1">
               <div className="flex-1">
-                <h3 className="text-[var(--text-main)] font-bold text-sm leading-snug">{item.name}</h3>
+                <h3 className="text-[var(--text-main)] font-bold text-sm leading-snug">{localize(item.name)}</h3>
                 {/* MODIFIER DISPLAY */}
                 {item.modifiers.length > 0 && (
                   <div className="flex flex-wrap gap-1 mt-1">

@@ -16,7 +16,7 @@ const categoryService = {
   },
 
   async createCategory(categoryData: NewCategory): Promise<Category> {
-    const existing = await categoryRepository.findByName(categoryData.name);
+    const existing = await categoryRepository.findByName(categoryData.name.en);
     if (existing) {
       fail("Category name already exists", 409);
     }

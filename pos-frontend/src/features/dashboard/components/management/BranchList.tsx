@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { MdStore, MdEdit } from "react-icons/md";
 import { LoadingState, ErrorState, EmptyState } from "./StatusStates";
 import { useTranslation } from "react-i18next";
+import useLocalize from "../../../../hooks/useLocalize";
 
 interface BranchListProps {
   data: any[];
@@ -15,6 +16,7 @@ interface BranchListProps {
 
 const BranchList: React.FC<BranchListProps> = ({ data, loading, error, onEdit, onRetry, itemVariants }) => {
   const { t } = useTranslation();
+  const { localize } = useLocalize();
   if (loading) return <LoadingState />;
   if (error) return <ErrorState label={t('dashboard.management.tabs.branches')} onRetry={onRetry} />;
   if (!data || data.length === 0) return <EmptyState label={t('dashboard.management.tabs.branches')} />;
@@ -30,7 +32,7 @@ const BranchList: React.FC<BranchListProps> = ({ data, loading, error, onEdit, o
             <button onClick={() => onEdit("branch", branch)} className="p-3 bg-[var(--bg-card-alt)] hover:bg-[var(--border-main)] rounded-xl text-[var(--text-muted)] hover:text-[var(--text-main)] opacity-0 group-hover:opacity-100 transition-all"><MdEdit size={18} /></button>
            </div>
           <div>
-            <h3 className="text-[var(--text-main)] text-xl font-black tracking-tighter uppercase">{branch.name}</h3>
+            <h3 className="text-[var(--text-main)] text-xl font-black tracking-tighter uppercase">{localize(branch.name)}</h3>
             <p className="text-[var(--primary)] text-[10px] font-black uppercase tracking-[0.2em] mt-1">{branch.code}</p>
             <div className="mt-4 flex flex-col gap-1">
                <div className="flex items-center gap-2 text-[var(--text-muted)] text-xs">

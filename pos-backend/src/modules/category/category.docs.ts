@@ -32,7 +32,11 @@
  *             type: object
  *             required: [name]
  *             properties:
- *               name: { type: string, example: "Main Course" }
+ *               name: 
+ *                 type: object
+ *                 properties:
+ *                   en: { type: string, example: "Main Course" }
+ *                   ar: { type: string, example: "الطبق الرئيسي" }
  *               images: { type: array, items: { type: string } }
  *     responses:
  *       201:
@@ -85,7 +89,11 @@
  *           schema:
  *             type: object
  *             properties:
- *               name: { type: string }
+ *               name: 
+ *                 type: object
+ *                 properties:
+ *                   en: { type: string }
+ *                   ar: { type: string }
  *               images: { type: array, items: { type: string } }
  *     responses:
  *       200:

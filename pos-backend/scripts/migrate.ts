@@ -23,7 +23,7 @@ const seedEnterpriseData = async (): Promise<void> => {
 
   console.log("🏙️ Seeding Branch...");
   const mainBranch = await db.insert(branches).values({
-    name: "Main Branch",
+    name: { en: "Main Branch", ar: "الفرع الرئيسي" },
     code: "BR-MAIN-01",
     city: "New Delhi",
     address: "123 Business Hub",
@@ -32,7 +32,7 @@ const seedEnterpriseData = async (): Promise<void> => {
 
   console.log("🖥️ Seeding POS Terminal...");
   await db.insert(posPoints).values({
-    name: "Main Counter",
+    name: { en: "Main Counter", ar: "الكاونتر الرئيسي" },
     code: "POS-MAIN-01",
     branchId: branchId,
   });
@@ -88,14 +88,14 @@ const seedEnterpriseData = async (): Promise<void> => {
   ];
 
   for (const cat of menuData) {
-    const newCat = await db.insert(categories).values({ name: cat.name }).returning();
+    const newCat = await db.insert(categories).values({ name: { en: cat.name, ar: cat.name } }).returning();
     const categoryId = newCat[0].id;
 
     for (const item of cat.items) {
       await db.insert(items).values({
-        name: item.name,
+        name: { en: item.name, ar: item.name },
         price: item.price.toString(),
-        description: `Delicious ${item.name} from our ${cat.name} selection.`,
+        description: { en: `Delicious ${item.name} from our ${cat.name} selection.`, ar: "" },
         categoryId: categoryId,
         branchId: branchId, // Ensure items are linked to branch for future scaling
       } as any);

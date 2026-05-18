@@ -5,7 +5,7 @@ import { db } from "../../config/database.js";
 
 export interface ItemWithKitchenStation {
   id: string;
-  name: string;
+  name: Record<string, string>;
   price: string;
   categoryId: string;
   kitchenStationId: string | null;
