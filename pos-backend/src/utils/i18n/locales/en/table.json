@@ -1,3 +1,9 @@
 {
-  "not_found": "Table not found"
+  "not_found": "Table not found",
+  "created": "Table created successfully",
+  "updated": "Table updated successfully",
+  "deleted": "Table deleted successfully",
+  "number_exists": "Table number {no} already exists",
+  "occupied": "Cannot delete table while it is occupied or has an active order. Please complete the order first.",
+  "already_occupied": "Table {no} is already occupied"
 }

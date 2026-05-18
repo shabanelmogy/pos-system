@@ -11,7 +11,7 @@ const userService = {
   async registerUser(userData: NewUser): Promise<User> {
     const existingUser = await userRepository.findByEmail(userData.email);
     if (existingUser) {
-      fail("User with this email already exists", 409);
+      fail("user.email_exists", 409);
     }
 
     const salt = await bcrypt.genSalt(10);
@@ -125,13 +125,13 @@ const userService = {
       )
     ).limit(1);
     if (userOrders.length > 0) {
-      fail("Cannot delete user because they have associated orders. Try deactivating them instead.", 400);
+      fail("user.has_orders", 400);
     }
 
     // Check if user has shifts
     const userShifts = await db.select().from(shifts).where(eq(shifts.cashierId, userId)).limit(1);
     if (userShifts.length > 0) {
-      fail("Cannot delete user because they have operational shift history.", 400);
+      fail("user.has_shifts", 400);
     }
 
     return await userRepository.delete(userId);

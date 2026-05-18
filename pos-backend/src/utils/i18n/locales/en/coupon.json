@@ -2,5 +2,11 @@
   "not_found": "Coupon not found",
   "created": "Coupon created successfully",
   "updated": "Coupon updated successfully",
-  "invalid": "Coupon is invalid or expired"
+  "invalid": "Coupon is invalid or expired",
+  "code_exists": "Coupon code already exists",
+  "new_code_exists": "New coupon code already exists",
+  "invalid_or_inactive": "Invalid or inactive coupon",
+  "expired": "Coupon expired",
+  "limit_per_customer": "Coupon usage limit per customer reached",
+  "global_limit": "Global coupon usage limit reached"
 }

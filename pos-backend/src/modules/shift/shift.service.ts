@@ -11,7 +11,7 @@ const shiftService = {
   ): Promise<Shift> {
     const activeShift = await shiftRepository.findActiveShift(posPointId);
     if (activeShift) {
-      fail("This terminal already has an active open shift.", 400);
+      fail("shift.already_active", 400);
     }
 
     // First create the shift to get the ID
@@ -46,7 +46,7 @@ const shiftService = {
   async closeShift(shiftId: string, closingBalance: number): Promise<Shift> {
     const shift = await shiftRepository.findById(shiftId);
     if (!shift || shift.status !== "open") {
-      fail("Active shift not found.", 404);
+      fail("shift.active_not_found", 404);
     }
 
     const sh = shift!;

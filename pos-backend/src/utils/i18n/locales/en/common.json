@@ -7,5 +7,11 @@
   "errors.not_found": "Resource not found",
   "errors.bad_request": "Bad request",
   "errors.validation_failed": "Validation failed",
-  "errors.invalid_credentials": "Invalid email or password"
+  "errors.invalid_credentials": "Invalid email or password",
+  "errors.access_denied": "Access denied",
+  "errors.invalid_amount": "Payment amount must be greater than zero",
+  "errors.unauthorized_payment": "Unauthorized to record payments",
+  "errors.unauthorized_refund": "Only managers can issue refunds",
+  "errors.unauthorized_merge": "Only managers can merge orders",
+  "errors.unauthorized_split": "Only managers can split orders"
 }

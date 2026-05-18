@@ -109,7 +109,7 @@ export const orderController = {
         branchId: user.branchId
       };
       const result = await orderService.confirmDraft(id, context);
-      res.status(200).json({ success: true, message: "Draft confirmed", data: result });
+      res.status(200).json({ success: true, message: req.t("order.draft_confirmed"), data: result });
     } catch (error) {
       handleError(res, error, "orderController.confirmDraft");
     }
@@ -128,7 +128,7 @@ export const orderController = {
       };
 
       const result = await orderService.updateFulfillmentStatus(id, status, context, notes, reasonCode);
-      res.status(200).json({ success: true, message: "Fulfillment status updated", data: result });
+      res.status(200).json({ success: true, message: req.t("order.fulfillment_updated"), data: result });
     } catch (error) {
       handleError(res, error, "orderController.updateFulfillment");
     }
@@ -147,7 +147,7 @@ export const orderController = {
       };
 
       const result = await orderService.updateLifecycle(id, status, context, notes, reasonCode, { settleWithCash });
-      res.status(200).json({ success: true, message: "Order lifecycle updated", data: result });
+      res.status(200).json({ success: true, message: req.t("order.lifecycle_updated"), data: result });
     } catch (error) {
       handleError(res, error, "orderController.updateLifecycle");
     }

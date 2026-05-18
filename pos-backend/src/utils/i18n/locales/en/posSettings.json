@@ -1,4 +1,5 @@
 {
   "not_found": "POS Settings not found",
-  "updated": "POS Settings updated successfully"
+  "updated": "POS Settings updated successfully",
+  "pos_id_required": "posPointId is required"
 }

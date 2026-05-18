@@ -26,7 +26,7 @@ export const orderLifecycleService = {
   async getOrderById(id: string, context: any = {}): Promise<any> {
     const order = await orderRepository.findById(id);
     if (!order) fail("order.not_found", 404);
-    if (context.role !== "admin" && order.branchId !== context.branchId) fail("Access denied", 403);
+    if (context.role !== "admin" && order.branchId !== context.branchId) fail("errors.access_denied", 403);
     return order;
   },
 
@@ -38,7 +38,7 @@ export const orderLifecycleService = {
       if (idempotencyKey) {
         const existing = await orderRepository.findByIdempotencyKey(idempotencyKey, tx);
         if (existing) {
-          if (existing.branchId !== branchId) fail("Access denied", 403);
+          if (existing.branchId !== branchId) fail("errors.access_denied", 403);
           return existing;
         }
       }
@@ -129,7 +129,7 @@ export const orderLifecycleService = {
     return await db.transaction(async (tx) => {
       const order = await orderRepository.findByIdWithLock(id, tx);
       if (!order) fail("order.not_found", 404);
-      if (role !== "admin" && order.branchId !== branchId) fail("Access denied", 403);
+      if (role !== "admin" && order.branchId !== branchId) fail("errors.access_denied", 403);
       if (order.lifecycle !== "DRAFT") fail(`Cannot confirm an order in ${order.lifecycle} state`, 422);
 
       const activeCount = await orderRepository.countActiveItems(id, tx);
@@ -156,7 +156,7 @@ export const orderLifecycleService = {
     return await db.transaction(async (tx) => {
       const order = await orderRepository.findByIdWithLock(id, tx);
       if (!order) fail("order.not_found", 404);
-      if (role !== "admin" && order.branchId !== branchId) fail("Access denied", 403);
+      if (role !== "admin" && order.branchId !== branchId) fail("errors.access_denied", 403);
 
       const allowed = FULFILLMENT_TRANSITIONS[order.fulfillmentStatus];
       if (!allowed?.includes(status)) fail(`Illegal fulfillment transition: ${order.fulfillmentStatus} → ${status}`, 422);
@@ -183,7 +183,7 @@ export const orderLifecycleService = {
     const { updatedOrder, tableId } = await db.transaction(async (tx) => {
       const order = await orderRepository.findByIdWithLock(id, tx);
       if (!order) fail("order.not_found", 404);
-      if (role !== "admin" && order.branchId !== branchId) fail("Access denied", 403);
+      if (role !== "admin" && order.branchId !== branchId) fail("errors.access_denied", 403);
 
       const allowed = LIFECYCLE_TRANSITIONS[order.lifecycle];
       if (!allowed?.includes(status)) fail(`Illegal lifecycle transition: ${order.lifecycle} → ${status}`, 422);
@@ -250,7 +250,7 @@ export const orderLifecycleService = {
     const { branchId, role } = context;
     const order = await orderRepository.findById(id);
     if (!order) fail("order.not_found", 404);
-    if (role !== "admin" && order.branchId !== branchId) fail("Access denied", 403);
+    if (role !== "admin" && order.branchId !== branchId) fail("errors.access_denied", 403);
 
     if (!order.firstPrintedAt) {
       try {

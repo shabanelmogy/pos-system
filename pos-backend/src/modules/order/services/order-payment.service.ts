@@ -13,13 +13,13 @@ export const orderPaymentService = {
     const { userId, role, branchId } = context;
     const { amount, method, paymentId } = paymentData;
 
-    if (new Decimal(amount).lte(0)) fail("Payment amount must be greater than zero", 422);
-    if (role !== "cashier" && role !== "manager" && role !== "admin") fail("Unauthorized to record payments", 403);
+    if (new Decimal(amount).lte(0)) fail("errors.invalid_amount", 422);
+    if (role !== "cashier" && role !== "manager" && role !== "admin") fail("errors.unauthorized_payment", 403);
 
     return await db.transaction(async (tx) => {
       const order = await orderRepository.findByIdWithLock(orderId, tx);
       if (!order) fail("order.not_found", 404);
-      if (role !== "admin" && order.branchId !== branchId) fail("Access denied", 403);
+      if (role !== "admin" && order.branchId !== branchId) fail("errors.access_denied", 403);
       if (!["ACTIVE"].includes(order.lifecycle)) fail(`Cannot add payment to a ${order.lifecycle} order`, 422);
 
       const paymentAmount = new Decimal(amount);
@@ -59,12 +59,12 @@ export const orderPaymentService = {
 
   async refundOrder(orderId: string, reason: string, context: ServiceContext): Promise<any> {
     const { userId, role, branchId } = context;
-    if (role !== "manager" && role !== "admin") fail("Unauthorized: Only managers can issue refunds", 403);
+    if (role !== "manager" && role !== "admin") fail("errors.unauthorized_refund", 403);
 
     return await db.transaction(async (tx) => {
       const order = await orderRepository.findByIdWithLock(orderId, tx);
       if (!order) fail("order.not_found", 404);
-      if (role !== "admin" && order.branchId !== branchId) fail("Access denied", 403);
+      if (role !== "admin" && order.branchId !== branchId) fail("errors.access_denied", 403);
 
       orderBaseService._validatePaymentTransition(order.paymentStatus, "REFUNDED");
       if (!["ACTIVE", "COMPLETED"].includes(order.lifecycle)) fail(`Cannot refund in ${order.lifecycle} state`, 422);
@@ -88,7 +88,7 @@ export const orderPaymentService = {
       logger.info("Order refunded", { orderId });
       orderEventEmitter.emit(ORDER_EVENTS.REFUNDED, { order: updatedOrder, context });
 
-      return { success: true, message: "Order refunded successfully" };
+      return { success: true, message: "order.refund_success" };
     });
   },
 

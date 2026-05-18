@@ -16,7 +16,7 @@ const couponService = {
 
   async createCoupon(data: NewCoupon): Promise<Coupon> {
     const existing = await couponRepository.findByCode(data.code);
-    if (existing) fail("Coupon code already exists", 400);
+    if (existing) fail("coupon.code_exists", 400);
     return await couponRepository.create(data);
   },
 
@@ -26,7 +26,7 @@ const couponService = {
     
     if (data.code && data.code !== coupon!.code) {
       const existing = await couponRepository.findByCode(data.code);
-      if (existing) fail("New coupon code already exists", 400);
+      if (existing) fail("coupon.new_code_exists", 400);
     }
     
     return await couponRepository.update(id, data);
@@ -39,7 +39,7 @@ const couponService = {
    */
   async validateCoupon(code: string, orderAmount: string | number): Promise<Coupon> {
     const coupon = await couponRepository.findActiveByCode(code);
-    if (!coupon) fail("Invalid or inactive coupon", 422);
+    if (!coupon) fail("order.coupon_inactive", 422);
 
     // 1. Minimum Order Amount Check
     if (new Decimal(orderAmount).lt(new Decimal(coupon!.minOrderAmount))) {

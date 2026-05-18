@@ -131,7 +131,7 @@ export const addPaymentSchema = z.object({
     .regex(/^\d+(\.\d{1,2})?$/, "Amount must be a valid decimal (e.g. \"10.50\")")
     .refine(
       (val) => parseFloat(val) > 0,
-      { message: "Payment amount must be greater than zero" }
+      { message: "errors.invalid_amount" }
     ),
   method: z.enum(["Cash", "Card", "UPI", "Other"]),
   paymentId: z.string().optional(),

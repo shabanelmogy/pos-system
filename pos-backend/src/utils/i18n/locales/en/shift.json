@@ -1,5 +1,7 @@
 {
   "not_found": "Shift details not found",
   "created": "Shift started successfully",
-  "closed": "Shift closed successfully"
+  "closed": "Shift closed successfully",
+  "already_active": "This terminal already has an active open shift.",
+  "active_not_found": "Active shift not found."
 }

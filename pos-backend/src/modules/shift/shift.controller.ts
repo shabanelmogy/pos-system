@@ -41,7 +41,7 @@ const shiftController = {
     try {
       const posPointId = req.query.posPointId as string | undefined;
       if (!posPointId) {
-        res.status(400).json({ success: false, message: "posPointId is required" });
+        res.status(400).json({ success: false, message: req.t("posSettings.pos_id_required") });
         return;
       }
       const shift = await shiftService.getActiveShift(posPointId);

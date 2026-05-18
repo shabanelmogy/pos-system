@@ -17,7 +17,7 @@ if (config.razorpayKeyId && config.razorpaySecretKey) {
 
 const paymentService = {
   async createRazorpayOrder(amount: number, internalOrderId: string): Promise<any> {
-    if (!razorpay) fail("Razorpay is not configured", 500);
+    if (!razorpay) fail("payment.not_configured", 500);
     const options = {
       amount: Math.round(amount * 100), // Amount in paisa
       currency: "INR",
@@ -37,7 +37,7 @@ const paymentService = {
       .digest("hex");
 
     if (expectedSignature !== signature) {
-      fail("Payment verification failed", 400);
+      fail("payment.verification_failed", 400);
     }
     return true;
   },
@@ -50,7 +50,7 @@ const paymentService = {
       .digest("hex");
 
     if (expectedSignature !== signature) {
-      fail("Invalid webhook signature", 400);
+      fail("payment.invalid_signature", 400);
     }
 
     if (body.event === "payment.captured") {

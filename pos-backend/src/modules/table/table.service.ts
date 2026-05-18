@@ -39,7 +39,7 @@ const tableService = {
 
     const t = table!;
     if (t.currentOrderId || t.status !== "Available") {
-      fail("Cannot delete table while it is occupied or has an active order. Please complete the order first.", 400);
+      fail("table.occupied", 400);
     }
 
     return await tableRepository.delete(id);

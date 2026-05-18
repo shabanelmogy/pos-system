@@ -23,7 +23,7 @@ const paymentController = {
       // Update order status to PAID
       await orderService.updatePaymentStatus(orderId, "PAID", { userId: req.user!.id });
 
-      res.status(200).json({ success: true, message: "Payment verified and order updated!" });
+      res.status(200).json({ success: true, message: req.t("payment.verified") });
     } catch (error) {
       handleError(res, error as any, "paymentController.verifyPayment");
     }

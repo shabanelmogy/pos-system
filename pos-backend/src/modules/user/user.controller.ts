@@ -31,7 +31,7 @@ const userController = {
             const newUser = await userService.registerUser(validatedData as any);
             res.status(201).json({
                 success: true, 
-                message: "New user created!", 
+                message: req.t("user.created"), 
                 data: sanitizeUser(newUser)
             });
         } catch (error) {
@@ -66,7 +66,7 @@ const userController = {
 
             res.status(200).json({
                 success: true, 
-                message: "User login successfully!", 
+                message: req.t("user.login_success"), 
                 data: sanitizeUser(user),
                 token: accessToken,
                 activeShift: activeShift 
@@ -106,7 +106,7 @@ const userController = {
 
             res.status(200).json({
                 success: true, 
-                message: "User logout successfully!"
+                message: req.t("user.logout_success")
             });
         } catch (error) {
             handleError(res, error as any, "userController.logout");
@@ -188,17 +188,17 @@ const userController = {
         try {
             const refreshToken = req.cookies.refreshToken;
             if (!refreshToken) {
-                return res.status(401).json({ success: false, message: "Refresh token not found" });
+                return res.status(401).json({ success: false, message: req.t("user.refresh_not_found") });
             }
 
             const user = await userService.findByRefreshToken(refreshToken);
             if (!user) {
-                return res.status(403).json({ success: false, message: "Invalid refresh token" });
+                return res.status(403).json({ success: false, message: req.t("user.invalid_refresh_token") });
             }
 
             jwt.verify(refreshToken, config.refreshTokenSecret!, async (err: any, decoded: any) => {
                 if (err) {
-                    return res.status(403).json({ success: false, message: "Invalid or expired refresh token" });
+                    return res.status(403).json({ success: false, message: req.t("user.invalid_refresh_token") });
                 }
 
                 const accessToken = jwt.sign({ _id: user.id }, config.accessTokenSecret!, {

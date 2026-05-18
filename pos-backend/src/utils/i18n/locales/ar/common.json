@@ -7,5 +7,11 @@
   "errors.not_found": "المورد غير موجود",
   "errors.bad_request": "طلب غير صالح",
   "errors.validation_failed": "فشل التحقق من صحة البيانات",
-  "errors.invalid_credentials": "البريد الإلكتروني أو كلمة المرور غير صالحة"
+  "errors.invalid_credentials": "البريد الإلكتروني أو كلمة المرور غير صالحة",
+  "errors.access_denied": "غير مسموح لك بالوصول",
+  "errors.invalid_amount": "يجب أن يكون مبلغ الدفع أكبر من الصفر",
+  "errors.unauthorized_payment": "غير مصرح لك بتسجيل المدفوعات",
+  "errors.unauthorized_refund": "يحق للمديرين فقط إصدار المبالغ المستردة",
+  "errors.unauthorized_merge": "يحق للمديرين فقط دمج الطلبات",
+  "errors.unauthorized_split": "يحق للمديرين فقط تقسيم الطلبات"
 }

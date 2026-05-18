@@ -1,4 +1,15 @@
 {
   "not_found": "User not found",
-  "unauthorized": "Please log in to continue"
+  "unauthorized": "Please log in to continue",
+  "email_exists": "User with this email already exists",
+  "has_orders": "Cannot delete user because they have associated orders. Try deactivating them instead.",
+  "has_shifts": "Cannot delete user because they have operational shift history.",
+  "login_success": "User login successfully",
+  "logout_success": "User logout successfully",
+  "created": "New user created",
+  "updated": "User updated successfully",
+  "deleted": "User deleted successfully",
+  "refresh_not_found": "Refresh token not found",
+  "invalid_refresh_token": "Invalid or expired refresh token",
+  "pos_assign_success": "POS permissions updated successfully"
 }

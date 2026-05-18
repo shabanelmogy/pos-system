@@ -1,5 +1,9 @@
 {
   "not_found": "Payment details not found",
   "created": "Payment processed successfully",
-  "refunded": "Payment refunded successfully"
+  "refunded": "Payment refunded successfully",
+  "not_configured": "Payment gateway is not configured",
+  "verification_failed": "Payment verification failed",
+  "invalid_signature": "Invalid webhook signature",
+  "verified": "Payment verified and order updated"
 }
