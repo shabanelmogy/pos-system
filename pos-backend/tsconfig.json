@@ -16,6 +16,6 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["app.ts", "config/**/*", "src/**/*"],
+  "include": ["app.ts", "config/**/*", "src/**/*", "scripts/**/*"],
   "exclude": ["node_modules", "dist"]
 }
