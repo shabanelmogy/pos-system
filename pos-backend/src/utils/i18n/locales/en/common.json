@@ -1,0 +1,11 @@
+{
+  "welcome": "Welcome to the POS System API",
+  "success": "Success",
+  "errors.internal": "Internal Server Error",
+  "errors.unauthorized": "Unauthorized access",
+  "errors.forbidden": "Forbidden",
+  "errors.not_found": "Resource not found",
+  "errors.bad_request": "Bad request",
+  "errors.validation_failed": "Validation failed",
+  "errors.invalid_credentials": "Invalid email or password"
+}

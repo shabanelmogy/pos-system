@@ -17,12 +17,21 @@ export const handleError = (res: Response, error: any, context: string): Respons
     logger.error(`Error in ${context}: ${error.message || error}`);
     
     let statusCode = error.statusCode || 500;
-    let message = error.message || "Internal Server Error";
+    let message = error.message || "errors.internal";
     
     if (error.name === "ZodError" || error.issues) {
         statusCode = 400;
         const issues = error.issues || error.errors || [];
         message = issues.map((e: any) => `${e.path.join('.')}: ${e.message}`).join(', ');
+    } else {
+        if (res.req && typeof (res.req as any).t === 'function') {
+            const t = (res.req as any).t;
+            let key = message;
+            if (key === "Internal Server Error") {
+                key = "errors.internal";
+            }
+            message = t(key);
+        }
     }
     
     return res.status(statusCode).json({

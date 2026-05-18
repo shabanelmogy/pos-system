@@ -1,0 +1,5 @@
+{
+  "not_found": "Payment details not found",
+  "created": "Payment processed successfully",
+  "refunded": "Payment refunded successfully"
+}

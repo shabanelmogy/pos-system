@@ -1,0 +1,6 @@
+{
+  "not_found": "Coupon not found",
+  "created": "Coupon created successfully",
+  "updated": "Coupon updated successfully",
+  "invalid": "Coupon is invalid or expired"
+}

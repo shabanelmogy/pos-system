@@ -1,0 +1,11 @@
+{
+  "welcome": "مرحباً بكم في واجهة برمجية نظام نقاط البيع",
+  "success": "تم بنجاح",
+  "errors.internal": "خطأ داخلي في الخادم",
+  "errors.unauthorized": "غير مصرح بالدخول",
+  "errors.forbidden": "غير مسموح بالدخول",
+  "errors.not_found": "المورد غير موجود",
+  "errors.bad_request": "طلب غير صالح",
+  "errors.validation_failed": "فشل التحقق من صحة البيانات",
+  "errors.invalid_credentials": "البريد الإلكتروني أو كلمة المرور غير صالحة"
+}

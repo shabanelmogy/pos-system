@@ -15,6 +15,7 @@ import { pool } from "./src/config/database.js";
 import { runWithCorrelationId } from "./src/utils/logger.js";
 import { randomBytes } from "crypto";
 import { initSocket } from "./src/utils/socket.js";
+import { i18nMiddleware } from "./src/utils/i18n/i18n.js";
 
 const app = express();
 const PORT = config.port || 8000;
@@ -31,6 +32,7 @@ app.use(cors(corsOptions));
 app.options("*", cors(corsOptions));
 app.use(express.json());
 app.use(cookieParser());
+app.use(i18nMiddleware);
 
 // Correlation ID Middleware
 app.use((req: Request, res: Response, next: NextFunction) => {

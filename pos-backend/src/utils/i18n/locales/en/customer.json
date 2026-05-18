@@ -1,0 +1,6 @@
+{
+  "created": "Customer created successfully",
+  "updated": "Customer updated successfully",
+  "deleted": "Customer deleted successfully",
+  "not_found": "Customer not found"
+}

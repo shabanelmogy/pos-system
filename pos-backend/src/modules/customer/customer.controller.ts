@@ -27,7 +27,7 @@ const customerController = {
     try {
       const validatedData = createCustomerSchema.parse(req.body);
       const newCustomer = await customerService.createCustomer(validatedData as any);
-      res.status(201).json({ success: true, message: "Customer created successfully", data: newCustomer });
+      res.status(201).json({ success: true, message: req.t("customer.created"), data: newCustomer });
     } catch (error) {
       handleError(res, error as any, "customerController.create");
     }
@@ -38,7 +38,7 @@ const customerController = {
       const id = req.params.id as string;
       const validatedData = updateCustomerSchema.parse(req.body);
       const updatedCustomer = await customerService.updateCustomer(id, validatedData as any);
-      res.status(200).json({ success: true, message: "Customer updated successfully", data: updatedCustomer });
+      res.status(200).json({ success: true, message: req.t("customer.updated"), data: updatedCustomer });
     } catch (error) {
       handleError(res, error as any, "customerController.update");
     }
