@@ -21,7 +21,7 @@ export const pool = new Pool({
 
 // CRITICAL: Handle pool errors to prevent server crashes
 // Neon serverless DB drops idle connections — this catches those events
-pool.on("error", (err) => {
+pool.on("error", (err: Error) => {
     console.error("[DB POOL ERROR] Unexpected error on idle client:", err.message);
     // Do NOT crash the server — the pool will create a new connection automatically
 });
