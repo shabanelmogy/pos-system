@@ -1,55 +1,56 @@
+import { Request, Response } from "express";
 import categoryService from "./category.service.js";
 import { handleError } from "../../utils/errorHandler.js";
 import { createCategorySchema, updateCategorySchema } from "./category.validation.js";
 
 const categoryController = {
-  async getAll(req, res) {
+  async getAll(req: Request, res: Response): Promise<void> {
     try {
       const categories = await categoryService.getAllCategories();
       res.status(200).json({ success: true, data: categories });
     } catch (error) {
-      handleError(res, error, "categoryController.getAll");
+      handleError(res, error as any, "categoryController.getAll");
     }
   },
 
-  async getById(req, res) {
+  async getById(req: Request, res: Response): Promise<void> {
     try {
-      const { id } = req.params;
+      const id = req.params.id as string;
       const category = await categoryService.getCategoryById(id);
       res.status(200).json({ success: true, data: category });
     } catch (error) {
-      handleError(res, error, "categoryController.getById");
+      handleError(res, error as any, "categoryController.getById");
     }
   },
 
-  async create(req, res) {
+  async create(req: Request, res: Response): Promise<void> {
     try {
       const validatedData = createCategorySchema.parse(req.body);
       const newCategory = await categoryService.createCategory(validatedData);
       res.status(201).json({ success: true, message: "Category created successfully", data: newCategory });
     } catch (error) {
-      handleError(res, error, "categoryController.create");
+      handleError(res, error as any, "categoryController.create");
     }
   },
 
-  async update(req, res) {
+  async update(req: Request, res: Response): Promise<void> {
     try {
-      const { id } = req.params;
+      const id = req.params.id as string;
       const validatedData = updateCategorySchema.parse(req.body);
       const updatedCategory = await categoryService.updateCategory(id, validatedData);
       res.status(200).json({ success: true, message: "Category updated successfully", data: updatedCategory });
     } catch (error) {
-      handleError(res, error, "categoryController.update");
+      handleError(res, error as any, "categoryController.update");
     }
   },
 
-  async delete(req, res) {
+  async delete(req: Request, res: Response): Promise<void> {
     try {
-      const { id } = req.params;
+      const id = req.params.id as string;
       await categoryService.deleteCategory(id);
       res.status(200).json({ success: true, message: "Category deleted successfully" });
     } catch (error) {
-      handleError(res, error, "categoryController.delete");
+      handleError(res, error as any, "categoryController.delete");
     }
   }
 };

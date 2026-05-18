@@ -1,20 +1,21 @@
 import categoryRepository from "./category.repository.js";
 import { fail } from "../../utils/errorHandler.js";
+import { Category, NewCategory } from "./category.schema.js";
 
 const categoryService = {
-  async getAllCategories() {
+  async getAllCategories(): Promise<Category[]> {
     return await categoryRepository.findAll();
   },
 
-  async getCategoryById(id) {
+  async getCategoryById(id: string): Promise<Category> {
     const category = await categoryRepository.findById(id);
     if (!category) {
       fail("Category not found", 404);
     }
-    return category;
+    return category!;
   },
 
-  async createCategory(categoryData) {
+  async createCategory(categoryData: NewCategory): Promise<Category> {
     const existing = await categoryRepository.findByName(categoryData.name);
     if (existing) {
       fail("Category name already exists", 409);
@@ -22,7 +23,7 @@ const categoryService = {
     return await categoryRepository.create(categoryData);
   },
 
-  async updateCategory(id, categoryData) {
+  async updateCategory(id: string, categoryData: Partial<NewCategory>): Promise<Category | undefined> {
     const category = await categoryRepository.findById(id);
     if (!category) {
       fail("Category not found", 404);
@@ -30,7 +31,7 @@ const categoryService = {
     return await categoryRepository.update(id, categoryData);
   },
 
-  async deleteCategory(id) {
+  async deleteCategory(id: string): Promise<Category | undefined> {
     const category = await categoryRepository.findById(id);
     if (!category) {
       fail("Category not found", 404);
