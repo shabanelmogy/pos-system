@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import useThemeStore from "../../../shared/store/useThemeStore";
 import { FaSun, FaMoon } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
+import i18n from "../../../i18n/config";
 
 const Auth: React.FC = () => {
   const { mode, toggleTheme } = useThemeStore();
@@ -14,9 +15,23 @@ const Auth: React.FC = () => {
 
   useEffect(() => {
     document.title = "RestroPOS | Enterprise Secure Login";
+    // Initialize direction from stored language
+    const stored = localStorage.getItem("i18nextLng") || "en";
+    document.documentElement.dir = stored === "ar" ? "rtl" : "ltr";
+    document.documentElement.lang = stored;
   }, []);
 
   const [isRegister, setIsRegister] = useState(false);
+
+  const toggleLanguage = () => {
+    const newLang = i18n.language === "ar" ? "en" : "ar";
+    i18n.changeLanguage(newLang);
+    document.documentElement.dir = newLang === "ar" ? "rtl" : "ltr";
+    document.documentElement.lang = newLang;
+  };
+
+  const isArabic = i18n.language === "ar";
+
 
   return (
     <div className="flex min-h-screen w-full bg-[var(--bg-main)] overflow-hidden">
@@ -75,14 +90,31 @@ const Auth: React.FC = () => {
 
       {/* Authentication Section */}
       <div className="w-full lg:w-2/5 min-h-screen flex flex-col justify-center px-8 md:px-20 relative bg-[var(--bg-main)]">
-        {/* Theme Toggle */}
-        <button
-          onClick={() => toggleTheme()}
-          className="absolute top-10 end-8 md:end-20 bg-[var(--bg-card)] border border-[var(--border-main)] hover:border-[var(--primary)] rounded-xl p-3 cursor-pointer transition-all shadow-sm flex items-center justify-center w-11 h-11 z-10"
-          title={`Switch to ${mode === 'dark' ? 'Light' : 'Dark'} Mode`}
-        >
-          {mode === 'dark' ? <FaSun size={18} className="text-[var(--primary)]" /> : <FaMoon size={18} className="text-blue-500" />}
-        </button>
+        {/* Theme + Language Toggles */}
+        <div className="absolute top-10 end-8 md:end-20 flex items-center gap-2 z-10">
+          {/* Language Toggle */}
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={toggleLanguage}
+            className="bg-[var(--bg-card)] border border-[var(--border-main)] hover:border-[var(--primary)] rounded-xl px-3 h-11 cursor-pointer transition-all shadow-sm flex items-center justify-center gap-1.5"
+            title={isArabic ? "Switch to English" : "التبديل إلى العربية"}
+          >
+            <span className="text-[10px] font-black uppercase tracking-wider text-[var(--text-muted)]">
+              {isArabic ? "AR" : "EN"}
+            </span>
+            <span className="text-[14px]">{isArabic ? "🇸🇦" : "🇺🇸"}</span>
+          </motion.button>
+
+          {/* Theme Toggle */}
+          <button
+            onClick={() => toggleTheme()}
+            className="bg-[var(--bg-card)] border border-[var(--border-main)] hover:border-[var(--primary)] rounded-xl p-3 cursor-pointer transition-all shadow-sm flex items-center justify-center w-11 h-11"
+            title={`Switch to ${mode === 'dark' ? 'Light' : 'Dark'} Mode`}
+          >
+            {mode === 'dark' ? <FaSun size={18} className="text-[var(--primary)]" /> : <FaMoon size={18} className="text-blue-500" />}
+          </button>
+        </div>
 
         <div className="absolute top-12 start-8 md:start-20 flex items-center gap-3">
           <motion.div
