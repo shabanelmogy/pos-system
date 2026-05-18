@@ -1,8 +1,14 @@
 import shiftRepository from "./shift.repository.js";
 import { fail } from "../../utils/errorHandler.js";
+import { Shift } from "./shift.schema.js";
 
 const shiftService = {
-  async openShift(cashierId, branchId, posPointId, openingBalance) {
+  async openShift(
+    cashierId: string,
+    branchId: string,
+    posPointId: string,
+    openingBalance: string | number
+  ): Promise<Shift> {
     const activeShift = await shiftRepository.findActiveShift(posPointId);
     if (activeShift) {
       fail("This terminal already has an active open shift.", 400);
@@ -33,20 +39,22 @@ const shiftService = {
     const slug = `SFT-${cashierName}-${date}-${shiftShortId}`;
 
     // Update with proper slug
-    return await shiftRepository.update(newShift.id, { slug });
+    const updated = await shiftRepository.update(newShift.id, { slug });
+    return updated!;
   },
 
-  async closeShift(shiftId, closingBalance) {
+  async closeShift(shiftId: string, closingBalance: number): Promise<Shift> {
     const shift = await shiftRepository.findById(shiftId);
     if (!shift || shift.status !== "open") {
       fail("Active shift not found.", 404);
     }
 
+    const sh = shift!;
     const salesSummary = await shiftRepository.getShiftSalesSummary(shiftId);
-    const expectedBalance = parseFloat(shift.openingBalance) + salesSummary.cashTotal;
+    const expectedBalance = parseFloat(sh.openingBalance) + salesSummary.cashTotal;
     const variance = closingBalance - expectedBalance;
 
-    return await shiftRepository.update(shiftId, {
+    const updated = await shiftRepository.update(shiftId, {
       closingBalance: closingBalance.toString(),
       expectedBalance: expectedBalance.toString(),
       totalSales: salesSummary.total.toString(),
@@ -56,32 +64,34 @@ const shiftService = {
       status: "closed",
       closedAt: new Date(),
     });
+    return updated!;
   },
 
-  async getActiveShift(posPointId) {
+  async getActiveShift(posPointId: string): Promise<any | null> {
     return await shiftRepository.findActiveShift(posPointId);
   },
 
-  async getAllShifts(filters = {}) {
+  async getAllShifts(filters: any = {}): Promise<any[]> {
     return await shiftRepository.findAll(filters);
   },
 
-  async getReconciliation(shiftId) {
+  async getReconciliation(shiftId: string): Promise<any> {
     const shift = await shiftRepository.findById(shiftId);
     if (!shift) fail("Shift not found", 404);
 
+    const sh = shift!;
     const salesSummary = await shiftRepository.getShiftSalesSummary(shiftId);
     const voidedItems = await shiftRepository.getShiftVoidedItems(shiftId);
 
     return {
-      shiftId: shift.id,
-      slug: shift.slug,
-      openedAt: shift.openedAt,
-      closedAt: shift.closedAt,
-      openingBalance: parseFloat(shift.openingBalance),
-      closingBalance: parseFloat(shift.closingBalance || 0),
-      expectedBalance: parseFloat(shift.expectedBalance || 0),
-      variance: parseFloat(shift.variance || 0),
+      shiftId: sh.id,
+      slug: sh.slug,
+      openedAt: sh.openedAt,
+      closedAt: sh.closedAt,
+      openingBalance: parseFloat(sh.openingBalance),
+      closingBalance: parseFloat(sh.closingBalance || 0),
+      expectedBalance: parseFloat(sh.expectedBalance || 0),
+      variance: parseFloat(sh.variance || 0),
       sales: salesSummary,
       voidedItems: voidedItems.rows || voidedItems
     };

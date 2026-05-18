@@ -1,14 +1,15 @@
 import { eq, and, sql, desc } from "drizzle-orm";
-import { shifts } from "./shift.schema.js";
+import { shifts, Shift, NewShift } from "./shift.schema.js";
 import { orders } from "../order/order.schema.js";
 import { branches } from "../branch/branch.schema.js";
 import { posPoints } from "../posPoint/posPoint.schema.js";
 import { posSettings } from "../posSettings/posSettings.schema.js";
 import { users } from "../user/user.schema.js";
+import { payments } from "../payment/payment.schema.js";
 import { db } from "../../config/database.js";
 
 const shiftRepository = {
-  async findActiveShift(posPointId) {
+  async findActiveShift(posPointId: string): Promise<any | null> {
     try {
       console.log(`[DEBUG] Querying active shift for POS: ${posPointId}`);
       
@@ -29,15 +30,15 @@ const shiftRepository = {
       const shift = activeShift;
       console.log(`[DEBUG] Active shift identified: ${shift.id} Status: ${shift.status}`);
 
-      const bId = shift.branchId || shift.branch_id;
-      const pId = shift.posPointId || shift.pos_point_id;
-      const cId = shift.cashierId || shift.cashier_id;
+      const bId = shift.branchId;
+      const pId = shift.posPointId;
+      const cId = shift.cashierId;
 
       const branchRes = bId ? await db.select().from(branches).where(eq(branches.id, bId)).limit(1) : [];
       const posRes = pId ? await db.select().from(posPoints).where(eq(posPoints.id, pId)).limit(1) : [];
       const cashierRes = cId ? await db.select().from(users).where(eq(users.id, cId)).limit(1) : [];
       
-      const pointData = posRes[0] || null;
+      const pointData = posRes[0] as any || null;
       if (pointData) {
           const setRes = await db.select().from(posSettings).where(eq(posSettings.posPointId, pointData.id)).limit(1);
           pointData.settings = setRes[0] || null;
@@ -55,7 +56,7 @@ const shiftRepository = {
     }
   },
 
-  async create(shiftData) {
+  async create(shiftData: NewShift): Promise<Shift> {
     try {
       const result = await db.insert(shifts).values(shiftData).returning();
       return result[0];
@@ -65,7 +66,7 @@ const shiftRepository = {
     }
   },
 
-  async update(id, shiftData) {
+  async update(id: string, shiftData: Partial<NewShift>): Promise<Shift | undefined> {
     const result = await db.update(shifts)
       .set(shiftData)
       .where(eq(shifts.id, id))
@@ -73,20 +74,20 @@ const shiftRepository = {
     return result[0];
   },
 
-  async findById(id) {
+  async findById(id: string): Promise<any | null> {
     const result = await db.select().from(shifts).where(eq(shifts.id, id)).limit(1);
     if (!result[0]) return null;
 
     const shift = result[0];
-    const bId = shift.branchId || shift.branch_id;
-    const pId = shift.posPointId || shift.pos_point_id;
-    const cId = shift.cashierId || shift.cashier_id;
+    const bId = shift.branchId;
+    const pId = shift.posPointId;
+    const cId = shift.cashierId;
 
     const branchRes = bId ? await db.select().from(branches).where(eq(branches.id, bId)).limit(1) : [];
     const posRes = pId ? await db.select().from(posPoints).where(eq(posPoints.id, pId)).limit(1) : [];
     const cashierRes = cId ? await db.select().from(users).where(eq(users.id, cId)).limit(1) : [];
     
-    const pointData = posRes[0] || null;
+    const pointData = posRes[0] as any || null;
     if (pointData) {
         const setRes = await db.select().from(posSettings).where(eq(posSettings.posPointId, pointData.id)).limit(1);
         pointData.settings = setRes[0] || null;
@@ -100,7 +101,7 @@ const shiftRepository = {
     };
   },
 
-  async findShiftMinimal(id, tx) {
+  async findShiftMinimal(id: string, tx?: any): Promise<any | null> {
     const [shift] = await (tx ?? db).select({
       id: shifts.id,
       status: shifts.status,
@@ -110,12 +111,12 @@ const shiftRepository = {
     return shift || null;
   },
 
-  async findCashierById(cashierId) {
+  async findCashierById(cashierId: string): Promise<any | null> {
     const result = await db.select().from(users).where(eq(users.id, cashierId)).limit(1);
     return result[0] || null;
   },
 
-  async getShiftSalesSummary(shiftId) {
+  async getShiftSalesSummary(shiftId: string): Promise<any> {
     const result = await db.select({
       method: payments.method,
       total: sql`SUM(${payments.amount})`
@@ -129,7 +130,7 @@ const shiftRepository = {
     ))
     .groupBy(payments.method);
 
-    const summary = {
+    const summary: any = {
       total: 0,
       cashTotal: 0,
       cardTotal: 0,
@@ -137,7 +138,7 @@ const shiftRepository = {
       methods: {}
     };
 
-    result.forEach(row => {
+    result.forEach((row: any) => {
       const amount = parseFloat(row.total || 0);
       summary.total += amount;
       summary.methods[row.method] = amount;
@@ -149,7 +150,7 @@ const shiftRepository = {
     return summary;
   },
 
-  async getShiftVoidedItems(shiftId) {
+  async getShiftVoidedItems(shiftId: string): Promise<any> {
     return await db.execute(sql`
       SELECT oi.*, u.name as voided_by_name
       FROM order_items oi
@@ -159,7 +160,7 @@ const shiftRepository = {
     `);
   },
 
-  async findAll(filters = {}) {
+  async findAll(filters: any = {}): Promise<any[]> {
     const { branchId, posPointId, cashierId, startDate, endDate, status } = filters;
     
     const query = db.select({

@@ -22,3 +22,6 @@ export const shifts = pgTable("shifts", {
   status: text("status").default("open").notNull(), // open, closed, suspended
   createdAt: timestamp("created_at").defaultNow(),
 });
+
+export type Shift = typeof shifts.$inferSelect;
+export type NewShift = typeof shifts.$inferInsert;

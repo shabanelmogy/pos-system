@@ -1,27 +1,28 @@
 import branchRepository from "./branch.repository.js";
+import { Branch, NewBranch } from "./branch.schema.js";
 
 const branchService = {
-  async getAllBranches() {
+  async getAllBranches(): Promise<Branch[]> {
     return await branchRepository.findAll();
   },
 
-  async getBranchById(id) {
+  async getBranchById(id: string): Promise<Branch> {
     const branch = await branchRepository.findById(id);
     if (!branch) throw new Error("Branch not found");
-    return branch;
+    return branch!;
   },
 
-  async createBranch(data) {
+  async createBranch(data: NewBranch): Promise<Branch> {
     return await branchRepository.create(data);
   },
 
-  async updateBranch(id, data) {
+  async updateBranch(id: string, data: Partial<NewBranch>): Promise<Branch> {
     const branch = await branchRepository.update(id, data);
     if (!branch) throw new Error("Branch not found");
-    return branch;
+    return branch!;
   },
 
-  async deleteBranch(id) {
+  async deleteBranch(id: string): Promise<any> {
     return await branchRepository.delete(id);
   }
 };
