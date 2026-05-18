@@ -1,29 +1,29 @@
 import { eq, sql } from "drizzle-orm";
-import { customers } from "./customer.schema.js";
+import { customers, Customer, NewCustomer } from "./customer.schema.js";
 import { db } from "../../config/database.js";
 
 const customerRepository = {
-  async findAll() {
+  async findAll(): Promise<Customer[]> {
     return await db.select().from(customers);
   },
 
-  async findById(id) {
+  async findById(id: string): Promise<Customer | undefined> {
     const result = await db.select().from(customers).where(eq(customers.id, id));
     return result[0];
   },
 
-  async findByPhone(phone) {
+  async findByPhone(phone: string): Promise<Customer | undefined> {
     const result = await db.select().from(customers).where(eq(customers.phone, phone));
     return result[0];
   },
 
-  async create(data, externalTx = null) {
+  async create(data: NewCustomer, externalTx: any = null): Promise<Customer> {
     const tx = externalTx || db;
     const result = await tx.insert(customers).values(data).returning();
     return result[0];
   },
 
-  async update(id, data, externalTx = null) {
+  async update(id: string, data: Partial<NewCustomer>, externalTx: any = null): Promise<Customer | undefined> {
     const tx = externalTx || db;
     const result = await tx.update(customers)
       .set({ ...data, updatedAt: new Date() })
@@ -32,7 +32,7 @@ const customerRepository = {
     return result[0];
   },
 
-  async updateStats(id, amount, externalTx = null) {
+  async updateStats(id: string, amount: string | number, externalTx: any = null): Promise<Customer[]> {
     const tx = externalTx || db;
     return await tx.update(customers)
       .set({
