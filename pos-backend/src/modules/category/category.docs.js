@@ -9,6 +9,16 @@
  *     responses:
  *       200:
  *         description: List of categories
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success: { type: boolean, example: true }
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Category'
  *   post:
  *     summary: Create category
  *     tags: [Category]
@@ -27,6 +37,14 @@
  *     responses:
  *       201:
  *         description: Category created
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success: { type: boolean, example: true }
+ *                 data:
+ *                   $ref: '#/components/schemas/Category'
  *
  * /api/category/{id}:
  *   get:
@@ -42,6 +60,14 @@
  *     responses:
  *       200:
  *         description: Category data
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success: { type: boolean, example: true }
+ *                 data:
+ *                   $ref: '#/components/schemas/Category'
  *   put:
  *     summary: Update category
  *     tags: [Category]
@@ -64,6 +90,14 @@
  *     responses:
  *       200:
  *         description: Category updated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success: { type: boolean, example: true }
+ *                 data:
+ *                   $ref: '#/components/schemas/Category'
  *   delete:
  *     summary: Delete category
  *     tags: [Category]
@@ -77,6 +111,12 @@
  *     responses:
  *       200:
  *         description: Category deleted
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success: { type: boolean, example: true }
  */
 
 export default {};

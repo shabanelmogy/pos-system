@@ -177,6 +177,32 @@ const swaggerDefinition = {
           notes: { type: "string", example: "Shift ended normally" },
         },
       },
+      Bill: {
+        type: "object",
+        properties: {
+          id: { type: "string", format: "uuid", description: "The unique primary key UUID of the bill", example: "b1111111-1111-1111-1111-111111111111" },
+          orderId: { type: "string", format: "uuid", description: "The associated order UUID for this bill", example: "o2222222-2222-2222-2222-222222222222" },
+          billNo: { type: "string", description: "Unique auto-generated sequential bill number", example: "BILL-2026-0001" },
+          totalAmount: { type: "number", description: "Gross sum amount of all items in the order", example: 150.00 },
+          taxAmount: { type: "number", description: "Calculated tax value applied to the bill", example: 15.00 },
+          discountAmount: { type: "number", description: "Total discount deductions applied to the bill", example: 10.00 },
+          payableAmount: { type: "number", description: "Net amount payable by the customer after tax and discounts", example: 155.00 },
+          status: { type: "string", enum: ["Paid", "Partially Paid", "Unpaid"], description: "Current payment status of the bill", example: "Unpaid" },
+          createdAt: { type: "string", format: "date-time", description: "Timestamp when the bill was generated", example: "2026-05-18T10:52:51.000Z" },
+          updatedAt: { type: "string", format: "date-time", description: "Timestamp when the bill was last modified", example: "2026-05-18T10:52:51.000Z" },
+        },
+      },
+      Category: {
+        type: "object",
+        properties: {
+          id: { type: "string", format: "uuid", description: "The unique primary key UUID of the category", example: "c3333333-3333-3333-3333-333333333333" },
+          name: { type: "string", description: "Unique display name of the food/drink category", example: "Main Course" },
+          images: { type: "array", items: { type: "string" }, description: "Array of display image URLs for this category", example: ["https://example.com/images/pasta.jpg"] },
+          kitchenStationId: { type: "string", format: "uuid", description: "Associated KDS kitchen station UUID for order routing", example: "k4444444-4444-4444-4444-444444444444" },
+          createdAt: { type: "string", format: "date-time", description: "Timestamp when the category was created", example: "2026-05-18T10:52:51.000Z" },
+          updatedAt: { type: "string", format: "date-time", description: "Timestamp when the category was last updated", example: "2026-05-18T10:52:51.000Z" },
+        },
+      },
     },
   },
 };

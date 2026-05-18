@@ -1,4 +1,4 @@
-import "./src/utils/terminalColorizer.js";
+import "./src/utils/terminalColorizer.js"; // Force hot-reload trigger v4
 console.log("Starting POS Backend Server...");
 import express from "express";
 import { exec } from "child_process";
