@@ -18,7 +18,7 @@ const tableService = {
   async updateTable(id: string, tableData: Partial<NewTable>): Promise<Table | undefined> {
     const table = await tableRepository.findById(id);
     if (!table) {
-      fail("Table not found", 404);
+      fail("table.not_found", 404);
     }
     return await tableRepository.update(id, tableData);
   },
@@ -26,7 +26,7 @@ const tableService = {
   async getTableById(id: string): Promise<TableWithOrder> {
     const table = await tableRepository.findById(id);
     if (!table) {
-      fail("Table not found", 404);
+      fail("table.not_found", 404);
     }
     return table!;
   },
@@ -34,7 +34,7 @@ const tableService = {
   async deleteTable(id: string): Promise<Table | undefined> {
     const table = await tableRepository.findById(id);
     if (!table) {
-      fail("Table not found", 404);
+      fail("table.not_found", 404);
     }
 
     const t = table!;

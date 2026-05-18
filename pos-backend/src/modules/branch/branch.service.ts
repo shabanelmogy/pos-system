@@ -8,7 +8,7 @@ const branchService = {
 
   async getBranchById(id: string): Promise<Branch> {
     const branch = await branchRepository.findById(id);
-    if (!branch) throw new Error("Branch not found");
+    if (!branch) throw new Error("branch.not_found");
     return branch!;
   },
 
@@ -18,7 +18,7 @@ const branchService = {
 
   async updateBranch(id: string, data: Partial<NewBranch>): Promise<Branch> {
     const branch = await branchRepository.update(id, data);
-    if (!branch) throw new Error("Branch not found");
+    if (!branch) throw new Error("branch.not_found");
     return branch!;
   },
 

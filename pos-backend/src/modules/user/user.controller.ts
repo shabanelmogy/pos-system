@@ -130,7 +130,7 @@ const userController = {
             const user = await userService.createUser(req.body);
             res.status(201).json({
                 success: true,
-                message: "User created successfully!",
+                message: req.t("user.created"),
                 data: sanitizeUser(user)
             });
         } catch (error) {
@@ -144,7 +144,7 @@ const userController = {
             const user = await userService.updateUser(userId, req.body);
             res.status(200).json({
                 success: true,
-                message: "User updated successfully!",
+                message: req.t("user.updated"),
                 data: sanitizeUser(user)
             });
         } catch (error) {
@@ -177,7 +177,7 @@ const userController = {
             await userService.deleteUser(userId);
             res.status(200).json({
                 success: true,
-                message: "User deleted successfully!"
+                message: req.t("user.deleted")
             });
         } catch (error) {
             handleError(res, error as any, "userController.deleteUser");

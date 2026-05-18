@@ -36,7 +36,7 @@ const couponController = {
       }
       const validatedData = createCouponSchema.parse(req.body);
       const coupon = await couponService.createCoupon(validatedData as any);
-      res.status(201).json({ success: true, message: "Coupon created successfully", data: coupon });
+      res.status(201).json({ success: true, message: req.t("coupon.created"), data: coupon });
     } catch (error) {
       handleError(res, error as any, "couponController.create");
     }
@@ -50,7 +50,7 @@ const couponController = {
       const id = req.params.id as string;
       const validatedData = updateCouponSchema.parse(req.body);
       const coupon = await couponService.updateCoupon(id, validatedData as any);
-      res.json({ success: true, message: "Coupon updated successfully", data: coupon });
+      res.json({ success: true, message: req.t("coupon.updated"), data: coupon });
     } catch (error) {
       handleError(res, error as any, "couponController.update");
     }

@@ -10,7 +10,7 @@ const couponService = {
 
   async getCouponById(id: string): Promise<Coupon> {
     const coupon = await couponRepository.findById(id);
-    if (!coupon) fail("Coupon not found", 404);
+    if (!coupon) fail("coupon.not_found", 404);
     return coupon!;
   },
 
@@ -22,7 +22,7 @@ const couponService = {
 
   async updateCoupon(id: string, data: Partial<NewCoupon>): Promise<Coupon | undefined> {
     const coupon = await couponRepository.findById(id);
-    if (!coupon) fail("Coupon not found", 404);
+    if (!coupon) fail("coupon.not_found", 404);
     
     if (data.code && data.code !== coupon!.code) {
       const existing = await couponRepository.findByCode(data.code);

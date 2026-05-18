@@ -27,7 +27,7 @@ const branchController = {
     try {
       const validatedData = createBranchSchema.parse(req.body);
       const newBranch = await branchService.createBranch(validatedData as any);
-      res.status(201).json({ success: true, message: "Branch created successfully", data: newBranch });
+      res.status(201).json({ success: true, message: req.t("branch.created"), data: newBranch });
     } catch (error) {
       handleError(res, error as any, "branchController.create");
     }
@@ -38,7 +38,7 @@ const branchController = {
       const id = req.params.id as string;
       const validatedData = updateBranchSchema.parse(req.body);
       const updatedBranch = await branchService.updateBranch(id, validatedData as any);
-      res.status(200).json({ success: true, message: "Branch updated successfully", data: updatedBranch });
+      res.status(200).json({ success: true, message: req.t("branch.updated"), data: updatedBranch });
     } catch (error) {
       handleError(res, error as any, "branchController.update");
     }
@@ -48,7 +48,7 @@ const branchController = {
     try {
       const id = req.params.id as string;
       await branchService.deleteBranch(id);
-      res.status(200).json({ success: true, message: "Branch deleted successfully" });
+      res.status(200).json({ success: true, message: req.t("branch.deleted") });
     } catch (error) {
       handleError(res, error as any, "branchController.delete");
     }

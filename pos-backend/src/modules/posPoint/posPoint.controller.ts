@@ -28,7 +28,7 @@ const posPointController = {
     try {
       const validatedData = createPOSPointSchema.parse(req.body);
       const newPoint = await posPointService.createPOSPoint(validatedData as any);
-      res.status(201).json({ success: true, message: "Terminal created successfully", data: newPoint });
+      res.status(201).json({ success: true, message: req.t("posPoint.created"), data: newPoint });
     } catch (error) {
       handleError(res, error as any, "posPointController.create");
     }
@@ -39,7 +39,7 @@ const posPointController = {
       const id = req.params.id as string;
       const validatedData = updatePOSPointSchema.parse(req.body);
       const updatedPoint = await posPointService.updatePOSPoint(id, validatedData as any);
-      res.status(200).json({ success: true, message: "Terminal updated successfully", data: updatedPoint });
+      res.status(200).json({ success: true, message: req.t("posPoint.updated"), data: updatedPoint });
     } catch (error) {
       handleError(res, error as any, "posPointController.update");
     }
@@ -49,7 +49,7 @@ const posPointController = {
     try {
       const id = req.params.id as string;
       await posPointService.deletePOSPoint(id);
-      res.status(200).json({ success: true, message: "Terminal deleted successfully" });
+      res.status(200).json({ success: true, message: req.t("posPoint.deleted") });
     } catch (error) {
       handleError(res, error as any, "posPointController.delete");
     }

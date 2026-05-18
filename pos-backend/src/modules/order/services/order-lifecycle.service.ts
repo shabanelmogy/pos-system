@@ -25,7 +25,7 @@ export const orderLifecycleService = {
 
   async getOrderById(id: string, context: any = {}): Promise<any> {
     const order = await orderRepository.findById(id);
-    if (!order) fail("Order not found", 404);
+    if (!order) fail("order.not_found", 404);
     if (context.role !== "admin" && order.branchId !== context.branchId) fail("Access denied", 403);
     return order;
   },
@@ -128,7 +128,7 @@ export const orderLifecycleService = {
     const { userId, branchId, role } = context;
     return await db.transaction(async (tx) => {
       const order = await orderRepository.findByIdWithLock(id, tx);
-      if (!order) fail("Order not found", 404);
+      if (!order) fail("order.not_found", 404);
       if (role !== "admin" && order.branchId !== branchId) fail("Access denied", 403);
       if (order.lifecycle !== "DRAFT") fail(`Cannot confirm an order in ${order.lifecycle} state`, 422);
 
@@ -155,7 +155,7 @@ export const orderLifecycleService = {
     const { userId, branchId, role } = context;
     return await db.transaction(async (tx) => {
       const order = await orderRepository.findByIdWithLock(id, tx);
-      if (!order) fail("Order not found", 404);
+      if (!order) fail("order.not_found", 404);
       if (role !== "admin" && order.branchId !== branchId) fail("Access denied", 403);
 
       const allowed = FULFILLMENT_TRANSITIONS[order.fulfillmentStatus];
@@ -182,7 +182,7 @@ export const orderLifecycleService = {
 
     const { updatedOrder, tableId } = await db.transaction(async (tx) => {
       const order = await orderRepository.findByIdWithLock(id, tx);
-      if (!order) fail("Order not found", 404);
+      if (!order) fail("order.not_found", 404);
       if (role !== "admin" && order.branchId !== branchId) fail("Access denied", 403);
 
       const allowed = LIFECYCLE_TRANSITIONS[order.lifecycle];
@@ -249,7 +249,7 @@ export const orderLifecycleService = {
   async recordPrint(id: string, context: ServiceContext): Promise<any> {
     const { branchId, role } = context;
     const order = await orderRepository.findById(id);
-    if (!order) fail("Order not found", 404);
+    if (!order) fail("order.not_found", 404);
     if (role !== "admin" && order.branchId !== branchId) fail("Access denied", 403);
 
     if (!order.firstPrintedAt) {

@@ -26,12 +26,12 @@ const userService = {
   async loginUser(email: string, password: string): Promise<any> {
     const user = await userRepository.findByEmail(email);
     if (!user) {
-      fail("Invalid email or password", 401);
+      fail("errors.invalid_credentials", 401);
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      fail("Invalid email or password", 401);
+      fail("errors.invalid_credentials", 401);
     }
 
     return user!;
@@ -40,7 +40,7 @@ const userService = {
   async getUserById(id: string): Promise<any> {
     const user = await userRepository.findById(id);
     if (!user) {
-      fail("User not found", 404);
+      fail("user.not_found", 404);
     }
     return user!;
   },

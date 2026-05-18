@@ -77,7 +77,7 @@ const shiftService = {
 
   async getReconciliation(shiftId: string): Promise<any> {
     const shift = await shiftRepository.findById(shiftId);
-    if (!shift) fail("Shift not found", 404);
+    if (!shift) fail("shift.not_found", 404);
 
     const sh = shift!;
     const salesSummary = await shiftRepository.getShiftSalesSummary(shiftId);

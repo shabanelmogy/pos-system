@@ -11,7 +11,7 @@ export const orderOpsService = {
     const { userId, role, branchId } = context;
     return await db.transaction(async (tx) => {
       const order = await orderRepository.findByIdWithLock(orderId, tx);
-      if (!order) fail("Order not found", 404);
+      if (!order) fail("order.not_found", 404);
       if (order.branchId !== branchId && role !== "admin") fail("Access denied", 403);
       if (!["DINE_IN", "QR_SELF"].includes(order.orderType)) fail("Only table-based orders can be moved", 422);
 
@@ -128,7 +128,7 @@ export const orderOpsService = {
     const { userId, branchId, role } = context;
     return await db.transaction(async (tx) => {
       const order = await orderRepository.findByIdWithLock(orderId, tx);
-      if (!order) fail("Order not found", 404);
+      if (!order) fail("order.not_found", 404);
       if (role !== "admin" && order.branchId !== branchId) fail("Access denied", 403);
       if (["COMPLETED", "VOIDED", "CANCELLED"].includes(order.lifecycle)) {
         fail(`Cannot modify coupons on a ${order.lifecycle.toLowerCase()} order`, 422);

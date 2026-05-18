@@ -93,7 +93,7 @@ export const orderController = {
       };
 
       const newOrder = await orderService.createOrder(validatedData, context);
-      res.status(201).json({ success: true, message: "Order created successfully", data: newOrder });
+      res.status(201).json({ success: true, message: req.t("order.created"), data: newOrder });
     } catch (error) {
       handleError(res, error, "orderController.create");
     }

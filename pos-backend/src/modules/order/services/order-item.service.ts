@@ -20,7 +20,7 @@ export const orderItemService = {
 
     return await db.transaction(async (tx) => {
       const order = await orderRepository.findByIdWithLock(orderId, tx);
-      if (!order) fail("Order not found", 404);
+      if (!order) fail("order.not_found", 404);
       if (order.branchId !== branchId && role !== "admin") fail("Access denied", 403);
       if (order.lifecycle !== "ACTIVE") fail(`Cannot add items to an order in ${order.lifecycle} state`, 422);
 
@@ -77,7 +77,7 @@ export const orderItemService = {
     const { role, branchId } = context;
     return await db.transaction(async (tx) => {
       const order = await orderRepository.findByIdWithLock(orderId, tx);
-      if (!order) fail("Order not found", 404);
+      if (!order) fail("order.not_found", 404);
       if (order.branchId !== branchId && role !== "admin") fail("Access denied", 403);
       
       orderBaseService._guardAgainstPaidModification(order, role);
@@ -111,7 +111,7 @@ export const orderItemService = {
     const { role, branchId, userId } = context;
     return await db.transaction(async (tx) => {
       const order = await orderRepository.findByIdWithLock(orderId, tx);
-      if (!order) fail("Order not found", 404);
+      if (!order) fail("order.not_found", 404);
       if (order.branchId !== branchId && role !== "admin") fail("Access denied", 403);
       if (!["ACTIVE", "DRAFT"].includes(order.lifecycle)) fail(`Cannot remove items from a ${order.lifecycle} order`, 422);
 
@@ -144,7 +144,7 @@ export const orderItemService = {
 
     return await db.transaction(async (tx) => {
       const order = await orderRepository.findByIdWithLock(orderId, tx);
-      if (!order) fail("Order not found", 404);
+      if (!order) fail("order.not_found", 404);
       if (order.branchId !== branchId && role !== "admin") fail("Access denied", 403);
 
       const item = await orderRepository.findItemById(itemId, tx);

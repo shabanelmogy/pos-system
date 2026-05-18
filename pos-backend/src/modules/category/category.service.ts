@@ -10,7 +10,7 @@ const categoryService = {
   async getCategoryById(id: string): Promise<Category> {
     const category = await categoryRepository.findById(id);
     if (!category) {
-      fail("Category not found", 404);
+      fail("category.not_found", 404);
     }
     return category!;
   },
@@ -26,7 +26,7 @@ const categoryService = {
   async updateCategory(id: string, categoryData: Partial<NewCategory>): Promise<Category | undefined> {
     const category = await categoryRepository.findById(id);
     if (!category) {
-      fail("Category not found", 404);
+      fail("category.not_found", 404);
     }
     return await categoryRepository.update(id, categoryData);
   },
@@ -34,7 +34,7 @@ const categoryService = {
   async deleteCategory(id: string): Promise<Category | undefined> {
     const category = await categoryRepository.findById(id);
     if (!category) {
-      fail("Category not found", 404);
+      fail("category.not_found", 404);
     }
 
     const hasItems = await categoryRepository.hasItems(id);

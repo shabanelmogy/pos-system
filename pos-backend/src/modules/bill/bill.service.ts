@@ -18,7 +18,7 @@ const billService = {
 
   async getBillById(id: string): Promise<Bill> {
     const bill = await billRepository.findById(id);
-    if (!bill) fail("Bill not found", 404);
+    if (!bill) fail("bill.not_found", 404);
     return bill!;
   },
 

@@ -34,7 +34,7 @@ const posSettingsController = {
       const updatedSettings = await posSettingsService.updateSettings(posPointId, req.body);
       res.status(200).json({ 
         success: true, 
-        message: "Settings updated successfully", 
+        message: req.t("posSettings.updated"), 
         data: updatedSettings 
       });
     } catch (error) {

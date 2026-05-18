@@ -97,6 +97,11 @@ axiosWrapper.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
 
+    const language = localStorage.getItem("i18nextLng");
+    if (language) {
+      config.headers["Accept-Language"] = language;
+    }
+
     // Attach active shift/pos context from persisted store so the backend
     // doesn't have to derive it from DB permissions (which can be stale or missing).
     try {

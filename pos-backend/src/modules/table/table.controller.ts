@@ -17,7 +17,7 @@ const tableController = {
     try {
       const validatedData = createTableSchema.parse(req.body);
       const newTable = await tableService.createTable(validatedData as any);
-      res.status(201).json({ success: true, message: "Table created successfully", data: newTable });
+      res.status(201).json({ success: true, message: req.t("table.created"), data: newTable });
     } catch (error) {
       handleError(res, error as any, "tableController.create");
     }
@@ -29,7 +29,7 @@ const tableController = {
       console.log(`[DEBUG] Table Update - ID: ${id}, Body:`, req.body);
       const validatedData = updateTableSchema.parse(req.body);
       const updatedTable = await tableService.updateTable(id, validatedData as any);
-      res.status(200).json({ success: true, message: "Table updated successfully", data: updatedTable });
+      res.status(200).json({ success: true, message: req.t("table.updated"), data: updatedTable });
     } catch (error) {
       handleError(res, error as any, "tableController.update");
     }
@@ -39,7 +39,7 @@ const tableController = {
     try {
       const id = req.params.id as string;
       await tableService.deleteTable(id);
-      res.status(200).json({ success: true, message: "Table deleted successfully" });
+      res.status(200).json({ success: true, message: req.t("table.deleted") });
     } catch (error) {
       handleError(res, error as any, "tableController.delete");
     }

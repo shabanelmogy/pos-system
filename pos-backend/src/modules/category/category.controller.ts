@@ -27,7 +27,7 @@ const categoryController = {
     try {
       const validatedData = createCategorySchema.parse(req.body);
       const newCategory = await categoryService.createCategory(validatedData);
-      res.status(201).json({ success: true, message: "Category created successfully", data: newCategory });
+      res.status(201).json({ success: true, message: req.t("category.created"), data: newCategory });
     } catch (error) {
       handleError(res, error as any, "categoryController.create");
     }
@@ -38,7 +38,7 @@ const categoryController = {
       const id = req.params.id as string;
       const validatedData = updateCategorySchema.parse(req.body);
       const updatedCategory = await categoryService.updateCategory(id, validatedData);
-      res.status(200).json({ success: true, message: "Category updated successfully", data: updatedCategory });
+      res.status(200).json({ success: true, message: req.t("category.updated"), data: updatedCategory });
     } catch (error) {
       handleError(res, error as any, "categoryController.update");
     }
@@ -48,7 +48,7 @@ const categoryController = {
     try {
       const id = req.params.id as string;
       await categoryService.deleteCategory(id);
-      res.status(200).json({ success: true, message: "Category deleted successfully" });
+      res.status(200).json({ success: true, message: req.t("category.deleted") });
     } catch (error) {
       handleError(res, error as any, "categoryController.delete");
     }

@@ -9,7 +9,7 @@ const customerService = {
 
   async getCustomerById(id: string): Promise<Customer> {
     const customer = await customerRepository.findById(id);
-    if (!customer) fail("Customer not found", 404);
+    if (!customer) fail("customer.not_found", 404);
     return customer!;
   },
 

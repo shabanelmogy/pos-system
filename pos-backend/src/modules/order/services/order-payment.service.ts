@@ -18,7 +18,7 @@ export const orderPaymentService = {
 
     return await db.transaction(async (tx) => {
       const order = await orderRepository.findByIdWithLock(orderId, tx);
-      if (!order) fail("Order not found", 404);
+      if (!order) fail("order.not_found", 404);
       if (role !== "admin" && order.branchId !== branchId) fail("Access denied", 403);
       if (!["ACTIVE"].includes(order.lifecycle)) fail(`Cannot add payment to a ${order.lifecycle} order`, 422);
 
@@ -63,7 +63,7 @@ export const orderPaymentService = {
 
     return await db.transaction(async (tx) => {
       const order = await orderRepository.findByIdWithLock(orderId, tx);
-      if (!order) fail("Order not found", 404);
+      if (!order) fail("order.not_found", 404);
       if (role !== "admin" && order.branchId !== branchId) fail("Access denied", 403);
 
       orderBaseService._validatePaymentTransition(order.paymentStatus, "REFUNDED");
@@ -94,7 +94,7 @@ export const orderPaymentService = {
 
   async updatePaymentStatus(orderId: string, newStatus: string, actorId: string, tx: any): Promise<any> {
     const order = await orderRepository.findByIdWithLock(orderId, tx);
-    if (!order) fail("Order not found", 404);
+    if (!order) fail("order.not_found", 404);
 
     orderBaseService._validatePaymentTransition(order.paymentStatus, newStatus);
 

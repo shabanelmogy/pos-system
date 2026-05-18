@@ -57,7 +57,7 @@ const kitchenStationController = {
         res.status(404).json({ error: "Kitchen station not found" });
         return;
       }
-      res.json({ message: "Kitchen station deleted successfully" });
+      res.json({ message: req.t("kitchenStation.deleted") });
     } catch (error: any) {
       res.status(500).json({ error: error.message });
     }

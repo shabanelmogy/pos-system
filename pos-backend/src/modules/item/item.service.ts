@@ -14,7 +14,7 @@ const itemService = {
   async getItemById(id: string): Promise<ItemWithKitchenStation> {
     const item = await itemRepository.findById(id);
     if (!item) {
-      fail("Item not found", 404);
+      fail("item.not_found", 404);
     }
     return item!;
   },
@@ -26,7 +26,7 @@ const itemService = {
   async updateItem(id: string, itemData: Partial<NewItem>): Promise<Item | undefined> {
     const item = await itemRepository.findById(id);
     if (!item) {
-      fail("Item not found", 404);
+      fail("item.not_found", 404);
     }
     return await itemRepository.update(id, itemData);
   },
@@ -34,7 +34,7 @@ const itemService = {
   async deleteItem(id: string): Promise<Item | undefined> {
     const item = await itemRepository.findById(id);
     if (!item) {
-      fail("Item not found", 404);
+      fail("item.not_found", 404);
     }
 
     const hasRelations = await itemRepository.hasRelations(id);

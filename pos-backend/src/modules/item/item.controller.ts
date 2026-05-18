@@ -30,7 +30,7 @@ const itemController = {
     try {
       const validatedData = createItemSchema.parse(req.body);
       const newItem = await itemService.createItem(validatedData as any);
-      res.status(201).json({ success: true, message: "Item created successfully", data: newItem });
+      res.status(201).json({ success: true, message: req.t("item.created"), data: newItem });
     } catch (error) {
       handleError(res, error as any, "itemController.create");
     }
@@ -41,7 +41,7 @@ const itemController = {
       const id = req.params.id as string;
       const validatedData = updateItemSchema.parse(req.body);
       const updatedItem = await itemService.updateItem(id, validatedData as any);
-      res.status(200).json({ success: true, message: "Item updated successfully", data: updatedItem });
+      res.status(200).json({ success: true, message: req.t("item.updated"), data: updatedItem });
     } catch (error) {
       handleError(res, error as any, "itemController.update");
     }
@@ -51,7 +51,7 @@ const itemController = {
     try {
       const id = req.params.id as string;
       await itemService.deleteItem(id);
-      res.status(200).json({ success: true, message: "Item deleted successfully" });
+      res.status(200).json({ success: true, message: req.t("item.deleted") });
     } catch (error) {
       handleError(res, error as any, "itemController.delete");
     }
