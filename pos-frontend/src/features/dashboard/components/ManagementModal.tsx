@@ -12,6 +12,7 @@ import { enqueueSnackbar } from "notistack";
 import CustomDropdown from "../../../shared/components/CustomDropdown";
 import { MdCategory, MdStore, MdPerson, MdEmail, MdLock, MdPhone, MdShield, MdComputer } from "react-icons/md";
 import useManagementForm from "../hooks/useManagementForm";
+import useLocalize from "../../../hooks/useLocalize";
 import { useTranslation } from "react-i18next";
 
 interface ManagementModalProps {
@@ -23,6 +24,7 @@ interface ManagementModalProps {
 
 const ManagementModal: React.FC<ManagementModalProps> = ({ type, isOpen, onClose, initialData = null }) => {
   const { t } = useTranslation();
+  const { localize } = useLocalize();
   const queryClient = useQueryClient();
   const isEdit = !!initialData;
   const firstInputRef = useRef<HTMLInputElement | null>(null);
@@ -132,7 +134,18 @@ const ManagementModal: React.FC<ManagementModalProps> = ({ type, isOpen, onClose
     }
   });
 
-  const onSubmitHandler = (data: any) => mutation.mutate(data);
+  const onSubmitHandler = (data: any) => {
+    if (type === "dishes" || type === "category" || type === "branch" || type === "posPoint") {
+      data = {
+        ...data,
+        name: {
+          en: data.nameEn || "",
+          ar: data.nameAr || ""
+        }
+      };
+    }
+    mutation.mutate(data);
+  };
 
   const togglePOSSelection = (id: string) => {
     setSelectedPOSPoints(prev => prev.includes(id) ? [] : [id]);
@@ -225,7 +238,7 @@ const ManagementModal: React.FC<ManagementModalProps> = ({ type, isOpen, onClose
                   </div>
                   <div className="group">
                     <label className="flex items-center gap-2 text-[var(--text-dim)] text-[9px] font-black uppercase tracking-widest mb-2 px-1"><MdStore /> {t('dashboard.management.modal.assigned_branch')}</label>
-                    <CustomDropdown options={branches || []} value={watchedBranchId} onChange={(val) => setValue("branchId", val)} placeholder={t('dashboard.management.modal.select_branch')} />
+                    <CustomDropdown options={(branches || []).map((b: any) => ({ id: b.id, name: localize(b.name) }))} value={watchedBranchId} onChange={(val) => setValue("branchId", val)} placeholder={t('dashboard.management.modal.select_branch')} />
                   </div>
                 </div>
 
@@ -314,20 +327,48 @@ const ManagementModal: React.FC<ManagementModalProps> = ({ type, isOpen, onClose
 
             {(type === "category" || type === "dishes" || type === "branch" || type === "posPoint" || type === "coupon") && (
               <div className="space-y-8 max-w-lg mx-auto py-10">
-                <div className="group">
-                  <label className="block text-[var(--text-dim)] text-[9px] font-black uppercase tracking-widest mb-3 px-1">{type === "posPoint" ? t('dashboard.management.modal.terminal_name') : t('dashboard.management.modal.name')}</label>
-                  <input {...register("name")} ref={(e) => { 
-                    register("name").ref(e); 
-                    if (e) firstInputRef.current = e; 
-                  }} type="text" className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-2xl p-5 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-all font-black uppercase tracking-tighter text-xl shadow-inner" />
-                  {errors.name && <span className="text-[9px] text-red-500 font-bold mt-2 block">{errors.name.message as string}</span>}
-                </div>
+                {type !== "coupon" ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="group">
+                      <label className="block text-[var(--text-dim)] text-[9px] font-black uppercase tracking-widest mb-3 px-1">
+                        {type === "posPoint" ? "Terminal Name (English)" : "Name (English)"}
+                      </label>
+                      <div className="relative flex items-center">
+                        <input {...register("nameEn")} lang="en" dir="ltr" ref={(e) => { 
+                          register("nameEn").ref(e); 
+                          if (e) firstInputRef.current = e; 
+                        }} type="text" className="peer w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-2xl p-5 pr-14 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-all font-black uppercase tracking-tighter text-xl shadow-inner" />
+                        <span className="absolute right-4 text-[10px] font-black bg-[var(--bg-card-alt)] border border-[var(--border-main)] text-[var(--text-muted)] peer-focus:border-[var(--primary)] peer-focus:text-[var(--primary)] px-2.5 py-1 rounded-lg uppercase tracking-wider select-none pointer-events-none transition-all">EN</span>
+                      </div>
+                      {errors.nameEn && <span className="text-[9px] text-red-500 font-bold mt-2 block">{errors.nameEn.message as string}</span>}
+                    </div>
+                    <div className="group">
+                      <label className="block text-[var(--text-dim)] text-[9px] font-black uppercase tracking-widest mb-3 px-1 text-right">
+                        الاسم بالعربية
+                      </label>
+                      <div className="relative flex items-center">
+                        <input {...register("nameAr")} lang="ar" dir="rtl" type="text" className="peer w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-2xl p-5 pl-14 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-all font-black text-xl shadow-inner text-right" />
+                        <span className="absolute left-4 text-[10px] font-black bg-[var(--bg-card-alt)] border border-[var(--border-main)] text-[var(--text-muted)] peer-focus:border-[var(--primary)] peer-focus:text-[var(--primary)] px-2.5 py-1 rounded-lg select-none pointer-events-none transition-all">عربي</span>
+                      </div>
+                      {errors.nameAr && <span className="text-[9px] text-red-500 font-bold mt-2 block">{errors.nameAr.message as string}</span>}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="group">
+                    <label className="block text-[var(--text-dim)] text-[9px] font-black uppercase tracking-widest mb-3 px-1">Name</label>
+                    <input {...register("name")} ref={(e) => { 
+                      register("name").ref(e); 
+                      if (e) firstInputRef.current = e; 
+                    }} type="text" className="w-full bg-[var(--bg-card)] border border-[var(--border-main)] rounded-2xl p-5 text-[var(--text-main)] focus:outline-none focus:border-[var(--primary)] transition-all font-black uppercase tracking-tighter text-xl shadow-inner" />
+                    {errors.name && <span className="text-[9px] text-red-500 font-bold mt-2 block">{errors.name.message as string}</span>}
+                  </div>
+                )}
 
                 {type === "category" && (
                   <div className="group">
                     <label className="block text-[var(--text-dim)] text-[9px] font-black uppercase tracking-widest mb-3 px-1">Kitchen Station (Routing)</label>
                     <CustomDropdown 
-                      options={kitchenStations || []} 
+                      options={(kitchenStations || []).map((ks: any) => ({ id: ks.id, name: localize(ks.name) }))} 
                       value={watch("kitchenStationId")} 
                       onChange={(val) => setValue("kitchenStationId", val)} 
                       placeholder="Select Kitchen Station" 
@@ -384,7 +425,7 @@ const ManagementModal: React.FC<ManagementModalProps> = ({ type, isOpen, onClose
                 {type === "posPoint" && (
                   <div className="group">
                     <label className="block text-[var(--text-dim)] text-[9px] font-black uppercase tracking-widest mb-3 px-1">{t('dashboard.management.modal.assign_branch')}</label>
-                    <CustomDropdown options={branches || []} value={watchedBranchId} onChange={(val) => setValue("branchId", val)} icon={<MdStore />} placeholder={t('dashboard.management.modal.select_branch')} />
+                    <CustomDropdown options={(branches || []).map((b: any) => ({ id: b.id, name: localize(b.name) }))} value={watchedBranchId} onChange={(val) => setValue("branchId", val)} icon={<MdStore />} placeholder={t('dashboard.management.modal.select_branch')} />
                     {errors.branchId && <span className="text-[9px] text-red-500 font-bold mt-2 block">{errors.branchId.message as string}</span>}
                   </div>
                 )}
@@ -398,7 +439,7 @@ const ManagementModal: React.FC<ManagementModalProps> = ({ type, isOpen, onClose
                     </div>
                     <div className="group">
                       <label className="block text-[var(--text-dim)] text-[9px] font-black uppercase tracking-widest mb-3 px-1">{t('dashboard.management.modal.category')}</label>
-                      <CustomDropdown options={categories || []} value={watch("categoryId")} onChange={(val) => setValue("categoryId", val)} icon={<MdCategory />} placeholder={t('dashboard.management.modal.select_category')} />
+                      <CustomDropdown options={(categories || []).map((c: any) => ({ id: c.id, name: localize(c.name) }))} value={watch("categoryId")} onChange={(val) => setValue("categoryId", val)} icon={<MdCategory />} placeholder={t('dashboard.management.modal.select_category')} />
                       {errors.categoryId && <span className="text-[9px] text-red-500 font-bold mt-2 block">{errors.categoryId.message as string}</span>}
                     </div>
                   </div>

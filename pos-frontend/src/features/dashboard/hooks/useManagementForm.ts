@@ -3,6 +3,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useEffect } from "react";
 
+const ENGLISH_REGEX = /^[A-Za-z0-9\s.,'()\-&]*$/;
+const ARABIC_REGEX = /^[\u0600-\u06FF\s0-9.,'()\-&]*$/;
+
 /**
  * Generates dynamic validation schema based on management type.
  */
@@ -15,18 +18,21 @@ const getValidationSchema = (type: string, isEdit: boolean) => {
       });
     case "dishes":
       return z.object({
-        name: z.string().min(1, "Name is required"),
+        nameEn: z.string().min(1, "English name is required").regex(ENGLISH_REGEX, "English name must contain English characters only"),
+        nameAr: z.string().regex(ARABIC_REGEX, "Arabic name must contain Arabic characters only").optional(),
         price: z.coerce.number().min(0, "Price cannot be negative"),
         categoryId: z.string().min(1, "Category is required"),
       });
     case "category":
       return z.object({
-        name: z.string().min(1, "Name is required"),
+        nameEn: z.string().min(1, "English name is required").regex(ENGLISH_REGEX, "English name must contain English characters only"),
+        nameAr: z.string().regex(ARABIC_REGEX, "Arabic name must contain Arabic characters only").optional(),
         kitchenStationId: z.string().optional().nullable(),
       });
     case "branch":
       return z.object({
-        name: z.string().min(1, "Name is required"),
+        nameEn: z.string().min(1, "English name is required").regex(ENGLISH_REGEX, "English name must contain English characters only"),
+        nameAr: z.string().regex(ARABIC_REGEX, "Arabic name must contain Arabic characters only").optional(),
         code: z.string().min(1, "Branch code is required"),
         city: z.string().optional(),
         phone: z.string().optional(),
@@ -37,7 +43,8 @@ const getValidationSchema = (type: string, isEdit: boolean) => {
       });
     case "posPoint":
       return z.object({
-        name: z.string().min(1, "Terminal name is required"),
+        nameEn: z.string().min(1, "English terminal name is required").regex(ENGLISH_REGEX, "English name must contain English characters only"),
+        nameAr: z.string().regex(ARABIC_REGEX, "Arabic name must contain Arabic characters only").optional(),
         code: z.string().min(1, "Terminal code is required"),
         branchId: z.string().min(1, "Please assign to a branch"),
       });
@@ -82,7 +89,7 @@ const useManagementForm = (type: string, initialData: any, isOpen: boolean) => {
   } = useForm<any>({
     resolver: zodResolver(schema),
     defaultValues: {
-        tableNo: "", seats: "", name: "", price: "", categoryId: "",
+        tableNo: "", seats: "", nameEn: "", nameAr: "", name: "", price: "", categoryId: "",
         code: "", phone: "", email: "", address: "", city: "",
         branchId: "", role: "cashier", password: "",
         taxRate: 0, serviceChargeRate: 0, currency: "INR",
@@ -95,8 +102,27 @@ const useManagementForm = (type: string, initialData: any, isOpen: boolean) => {
   useEffect(() => {
     if (isOpen) {
       if (initialData) {
+        // Extract localized name parts if name is an object
+        let nameEn = "";
+        let nameAr = "";
+        if (initialData.name && typeof initialData.name === "object") {
+          nameEn = initialData.name.en || "";
+          nameAr = initialData.name.ar || "";
+        } else if (typeof initialData.name === "string") {
+          // Fallback parsing if name is stored as JSON string
+          try {
+            const parsed = JSON.parse(initialData.name);
+            nameEn = parsed.en || "";
+            nameAr = parsed.ar || "";
+          } catch {
+            nameEn = initialData.name;
+          }
+        }
+        
         reset({
           ...initialData,
+          nameEn,
+          nameAr,
           price: initialData.price?.toString() || "",
           taxRate: initialData.taxRate?.toString() || "0",
           serviceChargeRate: initialData.serviceChargeRate?.toString() || "0",
@@ -108,7 +134,7 @@ const useManagementForm = (type: string, initialData: any, isOpen: boolean) => {
         });
       } else {
         reset({
-          tableNo: "", seats: "", name: "", price: "", categoryId: "",
+          tableNo: "", seats: "", nameEn: "", nameAr: "", name: "", price: "", categoryId: "",
           code: "", phone: "", email: "", address: "", city: "",
           branchId: "", role: "cashier", password: "",
           taxRate: 0, serviceChargeRate: 0, currency: "INR",
