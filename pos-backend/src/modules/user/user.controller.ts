@@ -57,8 +57,8 @@ const userController = {
             res.cookie('refreshToken', refreshToken, {
                 maxAge: 1000 * 60 * 60 * 24 * 7,
                 httpOnly: true,
-                sameSite: config.nodeEnv === 'production' ? 'none' : 'lax',
-                secure: config.nodeEnv === 'production',
+                sameSite: 'none',
+                secure: true,
                 path: '/' 
             });
 
@@ -95,8 +95,8 @@ const userController = {
         try {
             res.clearCookie('refreshToken', {
                 httpOnly: true,
-                sameSite: 'lax',
-                secure: config.nodeEnv === 'production',
+                sameSite: 'none',
+                secure: true,
                 path: '/'
             });
 
