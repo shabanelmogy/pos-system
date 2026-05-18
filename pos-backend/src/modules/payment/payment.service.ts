@@ -5,9 +5,9 @@ import paymentRepository from "./payment.repository.js";
 import orderService from "../order/order.service.js";
 import { fail } from "../../utils/errorHandler.js";
 
-let razorpay;
+let razorpay: any;
 if (config.razorpayKeyId && config.razorpaySecretKey) {
-  razorpay = new Razorpay({
+  razorpay = new (Razorpay as any)({
     key_id: config.razorpayKeyId,
     key_secret: config.razorpaySecretKey,
   });
@@ -16,7 +16,7 @@ if (config.razorpayKeyId && config.razorpaySecretKey) {
 }
 
 const paymentService = {
-  async createRazorpayOrder(amount, internalOrderId) {
+  async createRazorpayOrder(amount: number, internalOrderId: string): Promise<any> {
     if (!razorpay) fail("Razorpay is not configured", 500);
     const options = {
       amount: Math.round(amount * 100), // Amount in paisa
@@ -30,9 +30,9 @@ const paymentService = {
     return await razorpay.orders.create(options);
   },
 
-  async verifySignature(orderId, paymentId, signature) {
+  async verifySignature(orderId: string, paymentId: string, signature: string): Promise<boolean> {
     const expectedSignature = crypto
-      .createHmac("sha256", config.razorpaySecretKey)
+      .createHmac("sha256", config.razorpaySecretKey!)
       .update(orderId + "|" + paymentId)
       .digest("hex");
 
@@ -42,8 +42,8 @@ const paymentService = {
     return true;
   },
 
-  async processWebhook(body, signature) {
-    const secret = config.razorpyWebhookSecret;
+  async processWebhook(body: any, signature: string): Promise<boolean> {
+    const secret = config.razorpyWebhookSecret || "";
     const expectedSignature = crypto
       .createHmac("sha256", secret)
       .update(JSON.stringify(body))
@@ -64,10 +64,10 @@ const paymentService = {
         currency: payment.currency,
         status: payment.status,
         method: payment.method,
-        email: payment.email,
-        contact: payment.contact,
+        email: payment.email || null,
+        contact: payment.contact || null,
         createdAt: new Date(payment.created_at * 1000)
-      });
+      } as any);
 
       if (internalOrderId) {
         // Mocking a system actor ID for webhook updates
