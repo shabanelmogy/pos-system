@@ -9,3 +9,6 @@ export const tables = pgTable("tables", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
+
+export type Table = typeof tables.$inferSelect;
+export type NewTable = typeof tables.$inferInsert;

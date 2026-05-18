@@ -1,11 +1,15 @@
 import { eq, sql } from "drizzle-orm";
-import { tables } from "./table.schema.js";
+import { tables, Table, NewTable } from "./table.schema.js";
 import { orders } from "../order/order.schema.js";
 import { db } from "../../config/database.js";
 import orderEventEmitter from "../../utils/events.js";
 
+export interface TableWithOrder extends Table {
+  currentOrder: any | null;
+}
+
 const tableRepository = {
-  async findAll() {
+  async findAll(): Promise<TableWithOrder[]> {
     const rows = await db
       .select({
         table: tables,
@@ -21,7 +25,7 @@ const tableRepository = {
     }));
   },
 
-  async findById(id, externalTx = null) {
+  async findById(id: string, externalTx: any = null): Promise<TableWithOrder | null> {
     const tx = externalTx || db;
     const result = await tx
       .select({
@@ -40,24 +44,24 @@ const tableRepository = {
     };
   },
 
-  async findByIdWithLock(id, tx = db) {
+  async findByIdWithLock(id: string, tx: any = db): Promise<TableWithOrder | null> {
     await tx.execute(sql`SELECT 1 FROM tables WHERE id = ${id} FOR UPDATE`);
     return await this.findById(id, tx);
   },
 
-  async findByTableNo(tableNo) {
+  async findByTableNo(tableNo: number): Promise<Table | undefined> {
     const result = await db.select().from(tables).where(eq(tables.tableNo, tableNo)).limit(1);
     return result[0];
   },
 
-  async create(tableData) {
+  async create(tableData: NewTable): Promise<Table> {
     const result = await db.insert(tables).values(tableData).returning();
     return result[0];
   },
 
-  async update(id, tableData, externalTx = null) {
+  async update(id: string, tableData: Partial<NewTable>, externalTx: any = null): Promise<Table | undefined> {
     const tx = externalTx || db;
-    const updateObj = { updatedAt: new Date() };
+    const updateObj: any = { updatedAt: new Date() };
     if (tableData.tableNo !== undefined) updateObj.tableNo = tableData.tableNo;
     if (tableData.seats !== undefined) updateObj.seats = tableData.seats;
     if (tableData.status !== undefined) updateObj.status = tableData.status;
@@ -70,7 +74,6 @@ const tableRepository = {
     const updated = result[0];
 
     // Defer the socket emit to AFTER the transaction commits.
-    // If emitted inside a transaction, the frontend refetches before the DB has committed.
     setImmediate(() => {
       orderEventEmitter.emit("table_updated", { table: updated, branchId: null });
     });
@@ -78,7 +81,7 @@ const tableRepository = {
     return updated;
   },
 
-  async delete(id) {
+  async delete(id: string): Promise<Table | undefined> {
     const result = await db.delete(tables).where(eq(tables.id, id)).returning();
     return result[0];
   }
