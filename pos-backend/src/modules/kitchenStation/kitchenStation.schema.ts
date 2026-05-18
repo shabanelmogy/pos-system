@@ -8,3 +8,6 @@ export const kitchenStations = pgTable("kitchen_stations", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
+
+export type KitchenStation = typeof kitchenStations.$inferSelect;
+export type NewKitchenStation = typeof kitchenStations.$inferInsert;
