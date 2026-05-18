@@ -1,28 +1,29 @@
-import itemRepository from "./item.repository.js";
+import itemRepository, { ItemWithKitchenStation } from "./item.repository.js";
 import { fail } from "../../utils/errorHandler.js";
+import { Item, NewItem } from "./item.schema.js";
 
 const itemService = {
-  async getAllItems() {
+  async getAllItems(): Promise<Item[]> {
     return await itemRepository.findAll();
   },
 
-  async getItemsByCategory(categoryId) {
+  async getItemsByCategory(categoryId: string): Promise<Item[]> {
     return await itemRepository.findByCategoryId(categoryId);
   },
 
-  async getItemById(id) {
+  async getItemById(id: string): Promise<ItemWithKitchenStation> {
     const item = await itemRepository.findById(id);
     if (!item) {
       fail("Item not found", 404);
     }
-    return item;
+    return item!;
   },
 
-  async createItem(itemData) {
+  async createItem(itemData: NewItem): Promise<Item> {
     return await itemRepository.create(itemData);
   },
 
-  async updateItem(id, itemData) {
+  async updateItem(id: string, itemData: Partial<NewItem>): Promise<Item | undefined> {
     const item = await itemRepository.findById(id);
     if (!item) {
       fail("Item not found", 404);
@@ -30,7 +31,7 @@ const itemService = {
     return await itemRepository.update(id, itemData);
   },
 
-  async deleteItem(id) {
+  async deleteItem(id: string): Promise<Item | undefined> {
     const item = await itemRepository.findById(id);
     if (!item) {
       fail("Item not found", 404);

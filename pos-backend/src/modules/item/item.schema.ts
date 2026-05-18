@@ -19,3 +19,8 @@ export const itemModifiers = pgTable("item_modifiers", {
   price: numeric("price", { precision: 10, scale: 2 }).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
+
+export type Item = typeof items.$inferSelect;
+export type NewItem = typeof items.$inferInsert;
+export type ItemModifier = typeof itemModifiers.$inferSelect;
+export type NewItemModifier = typeof itemModifiers.$inferInsert;
