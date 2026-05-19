@@ -6,9 +6,10 @@ import {
 } from "react-icons/fa";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { enqueueSnackbar } from "notistack";
-import { deleteCategory } from "../../pos/api/posApi";
+import { deleteCategory, updateItem } from "../../pos/api/posApi";
 import { CategoryTreeNode, MenuItem } from "../../../shared/types";
 import useLocalize from "../../../hooks/useLocalize";
+import SearchInput from "../../../shared/components/SearchInput";
 
 interface Props {
   nodes: CategoryTreeNode[];
@@ -22,6 +23,7 @@ interface Props {
   expandEpoch?: number;
   collapseEpoch?: number;
   searchQuery?: string;
+  maxExpandDepth?: number;
 }
 
 interface NodeProps extends Props {
@@ -30,11 +32,33 @@ interface NodeProps extends Props {
 }
 
 const TreeNode: React.FC<NodeProps> = ({
-  node, depth, allNodes, onSelectCategory, selectedCategoryId, selectedItemId, onSelectItem, onAddChild, onEdit, expandEpoch, collapseEpoch, searchQuery = "",
+  node, depth, allNodes, onSelectCategory, selectedCategoryId, selectedItemId, onSelectItem, onAddChild, onEdit, expandEpoch, collapseEpoch, searchQuery = "", maxExpandDepth,
 }) => {
-  const [isOpen, setIsOpen] = useState(depth === 0);
+  const [isOpen, setIsOpen] = useState(() => {
+    if (expandEpoch && expandEpoch > 0) {
+      if (collapseEpoch && collapseEpoch >= expandEpoch) {
+        return depth === 0;
+      }
+      return maxExpandDepth !== undefined ? depth < maxExpandDepth : true;
+    }
+    return depth === 0;
+  });
+  const [isDragOver, setIsDragOver] = useState(false);
   const queryClient = useQueryClient();
   const { localize } = useLocalize();
+
+  const moveItemMutation = useMutation({
+    mutationFn: ({ itemId, targetCategoryId }: { itemId: string; targetCategoryId: string }) =>
+      updateItem({ itemId, categoryId: targetCategoryId }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["category-tree"] });
+      queryClient.invalidateQueries({ queryKey: ["categories"] });
+      enqueueSnackbar("Dish moved successfully", { variant: "success" });
+    },
+    onError: (err: any) => {
+      enqueueSnackbar(err?.response?.data?.message || "Cannot move dish", { variant: "error" });
+    },
+  });
 
   // Automatically expand parent nodes when a child/descendant category is selected or when searching
   const isAncestor = React.useMemo(() => {
@@ -55,9 +79,9 @@ const TreeNode: React.FC<NodeProps> = ({
   // Listen to expand/collapse triggers from parent
   React.useEffect(() => {
     if (expandEpoch && expandEpoch > 0) {
-      setIsOpen(true);
+      setIsOpen(maxExpandDepth !== undefined ? depth < maxExpandDepth : true);
     }
-  }, [expandEpoch]);
+  }, [expandEpoch, depth, maxExpandDepth]);
 
   React.useEffect(() => {
     if (collapseEpoch && collapseEpoch > 0) {
@@ -120,9 +144,39 @@ const TreeNode: React.FC<NodeProps> = ({
       <motion.div
         layout
         onClick={() => { onSelectCategory(node); if (hasChevron) setIsOpen(o => !o); }}
-        className={`group flex items-center gap-2 px-3 py-2.5 rounded-xl cursor-pointer transition-all duration-150 mb-1 select-none
+        onDragOver={(e) => {
+          if (!hasChildren) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = "move";
+          }
+        }}
+        onDragEnter={(e) => {
+          if (!hasChildren) {
+            e.preventDefault();
+            setIsDragOver(true);
+          }
+        }}
+        onDragLeave={() => {
+          setIsDragOver(false);
+        }}
+        onDrop={(e) => {
+          e.preventDefault();
+          setIsDragOver(false);
+          try {
+            const dataStr = e.dataTransfer.getData("text/plain");
+            if (!dataStr) return;
+            const { itemId, sourceCategoryId } = JSON.parse(dataStr);
+            if (sourceCategoryId === node.id) return;
+            moveItemMutation.mutate({ itemId, targetCategoryId: node.id });
+          } catch (err) {
+            console.error("Drop failed", err);
+          }
+        }}
+        className={`group flex items-center gap-2 px-3 py-2.5 rounded-xl cursor-pointer transition-all duration-150 mb-1 select-none border-2 border-transparent
           ${isSelected
             ? "bg-[var(--primary)] text-[var(--primary-fg)] shadow-lg shadow-[var(--primary)]/20"
+            : isDragOver
+            ? "bg-[var(--primary)]/10 border-dashed border-[var(--primary)] text-[var(--primary)] scale-[1.02] shadow-sm"
             : "hover:bg-[var(--bg-hover)] text-[var(--text-main)]"
           }`}
       >
@@ -236,6 +290,7 @@ const TreeNode: React.FC<NodeProps> = ({
                 expandEpoch={expandEpoch}
                 collapseEpoch={collapseEpoch}
                 searchQuery={searchQuery}
+                maxExpandDepth={maxExpandDepth}
               />
             ))}
 
@@ -246,7 +301,13 @@ const TreeNode: React.FC<NodeProps> = ({
                 <div
                   key={item.id}
                   onClick={(e) => { e.stopPropagation(); onSelectItem?.(item, node); }}
-                  className={`ms-5 border-s-2 border-dashed ps-3 py-2 flex items-center justify-between transition-all select-none cursor-pointer rounded-r-xl my-0.5
+                  draggable
+                  onDragStart={(e) => {
+                    e.stopPropagation();
+                    e.dataTransfer.setData("text/plain", JSON.stringify({ itemId: item.id, sourceCategoryId: node.id }));
+                    e.dataTransfer.effectAllowed = "move";
+                  }}
+                  className={`ms-5 border-s-2 border-dashed ps-3 py-2 flex items-center justify-between transition-all select-none cursor-pointer rounded-r-xl my-0.5 active:scale-95 active:opacity-75
                     ${isItemActive
                       ? "text-primary-fg bg-[var(--primary)] border-[var(--primary)] font-bold shadow-md shadow-[var(--primary)]/10"
                       : "text-[var(--text-dim)] border-[var(--border-main)] hover:text-[var(--text-main)] hover:bg-[var(--bg-hover)]"
@@ -291,9 +352,10 @@ interface TreeViewProps {
 const CategoryTreeView: React.FC<TreeViewProps> = ({
   tree, selectedCategoryId, selectedItemId, onSelectCategory, onSelectItem, onAddRoot, onAddChild, onEdit,
 }) => {
-  const [expandEpoch, setExpandEpoch] = useState(0);
+  const [expandEpoch, setExpandEpoch] = useState(1);
   const [collapseEpoch, setCollapseEpoch] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
+  const [expandLevel, setExpandLevel] = useState(2);
   const { localize } = useLocalize();
 
   const filteredTree = React.useMemo(() => {
@@ -340,38 +402,56 @@ const CategoryTreeView: React.FC<TreeViewProps> = ({
 
       {/* Toolbar for Expand/Collapse & Search */}
       <div className="px-4 py-3 border-b border-[var(--border-main)] bg-[var(--bg-card-alt)]/10 flex flex-col gap-2.5 flex-none">
-        <div className="relative w-full">
-          <FaSearch className="absolute start-3 top-1/2 -translate-y-1/2 text-[var(--text-dim)]" size={11} />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search categories & dishes..."
-            className="w-full bg-[var(--bg-main)] border border-[var(--border-main)] focus:border-[var(--primary)]/60 rounded-xl px-4 py-2 ps-8.5 pe-8.5 text-xs font-bold outline-none text-[var(--text-main)] placeholder-[var(--text-dim)] transition-all"
-          />
-          {searchQuery && (
-            <button
-              onClick={() => setSearchQuery("")}
-              className="absolute end-3 top-1/2 -translate-y-1/2 text-[var(--text-dim)] hover:text-[var(--text-main)] transition-colors p-1 rounded-full flex items-center justify-center"
-            >
-              <FaTimesCircle size={11} />
-            </button>
-          )}
-        </div>
+        <SearchInput
+          value={searchQuery}
+          onChange={setSearchQuery}
+          placeholder="Search categories & dishes..."
+        />
 
-        <div className="flex gap-2 items-center justify-end">
-          <button
-            onClick={() => setExpandEpoch(e => e + 1)}
-            className="text-[9px] font-black uppercase tracking-widest px-2.5 py-1.5 rounded-lg border border-[var(--border-main)] text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-hover)] transition-all active:scale-95"
-          >
-            Expand All
-          </button>
-          <button
-            onClick={() => setCollapseEpoch(e => e + 1)}
-            className="text-[9px] font-black uppercase tracking-widest px-2.5 py-1.5 rounded-lg border border-[var(--border-main)] text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-hover)] transition-all active:scale-95"
-          >
-            Collapse All
-          </button>
+        <div className="flex gap-2 items-center justify-between">
+          <div className="flex items-center gap-1.5 select-none">
+            <span className="text-[9px] font-black uppercase tracking-wider text-[var(--text-dim)]">Levels:</span>
+            <div className="flex items-center bg-[var(--bg-main)] border border-[var(--border-main)] rounded-lg overflow-hidden h-6.5">
+              <button
+                onClick={() => {
+                  const newL = Math.max(1, expandLevel - 1);
+                  setExpandLevel(newL);
+                  setExpandEpoch(e => e + 1);
+                }}
+                className="px-2 text-[10px] font-black hover:bg-[var(--bg-hover)] text-[var(--text-dim)] hover:text-[var(--text-main)] transition-colors h-full"
+              >
+                -
+              </button>
+              <span className="px-1 text-[10px] font-bold text-[var(--text-main)] min-w-[14px] text-center">
+                {expandLevel}
+              </span>
+              <button
+                onClick={() => {
+                  const newL = Math.min(5, expandLevel + 1);
+                  setExpandLevel(newL);
+                  setExpandEpoch(e => e + 1);
+                }}
+                className="px-2 text-[10px] font-black hover:bg-[var(--bg-hover)] text-[var(--text-dim)] hover:text-[var(--text-main)] transition-colors h-full"
+              >
+                +
+              </button>
+            </div>
+          </div>
+
+          <div className="flex gap-1.5 items-center">
+            <button
+              onClick={() => setExpandEpoch(e => e + 1)}
+              className="text-[9px] font-black uppercase tracking-widest px-2.5 py-1.5 rounded-lg border border-[var(--border-main)] text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-hover)] transition-all active:scale-95"
+            >
+              Expand {expandLevel} {expandLevel === 1 ? "Level" : "Levels"}
+            </button>
+            <button
+              onClick={() => setCollapseEpoch(e => e + 1)}
+              className="text-[9px] font-black uppercase tracking-widest px-2.5 py-1.5 rounded-lg border border-[var(--border-main)] text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-hover)] transition-all active:scale-95"
+            >
+              Collapse All
+            </button>
+          </div>
         </div>
       </div>
 
@@ -401,6 +481,7 @@ const CategoryTreeView: React.FC<TreeViewProps> = ({
               expandEpoch={expandEpoch}
               collapseEpoch={collapseEpoch}
               searchQuery={searchQuery}
+              maxExpandDepth={expandLevel}
             />
           ))
         )}

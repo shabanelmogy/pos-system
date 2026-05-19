@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { FaChevronRight, FaFolder, FaFolderOpen, FaRegCircle, FaSearch, FaTimesCircle } from "react-icons/fa";
+import { FaChevronRight, FaFolder, FaFolderOpen, FaRegCircle } from "react-icons/fa";
+import SearchInput from "./SearchInput";
 
 export interface TreeAction {
   icon: React.ReactNode;
@@ -299,24 +300,12 @@ export const TreeView: React.FC<TreeViewProps> = ({
       {/* Internal Search bar & Expand controls */}
       <div className="px-6 py-3 border-b border-[var(--border-main)] bg-[var(--bg-card-alt)]/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         {showSearch && externalSearchQuery === undefined ? (
-          <div className="relative flex-1 max-w-md">
-            <FaSearch className="absolute start-3.5 top-1/2 -translate-y-1/2 text-[var(--text-dim)]" size={12} />
-            <input
-              type="text"
-              value={internalSearchQuery}
-              onChange={(e) => setInternalSearchQuery(e.target.value)}
-              placeholder={searchPlaceholder}
-              className="w-full bg-[var(--bg-main)] border border-[var(--border-main)] focus:border-[var(--primary)]/60 rounded-xl px-4 py-2.5 ps-9 pe-9 text-xs font-bold outline-none text-[var(--text-main)] placeholder-[var(--text-dim)] transition-all"
-            />
-            {internalSearchQuery && (
-              <button
-                onClick={() => setInternalSearchQuery("")}
-                className="absolute end-3 top-1/2 -translate-y-1/2 text-[var(--text-dim)] hover:text-[var(--text-main)] transition-colors p-1 rounded-full flex items-center justify-center"
-              >
-                <FaTimesCircle size={12} />
-              </button>
-            )}
-          </div>
+          <SearchInput
+            value={internalSearchQuery}
+            onChange={setInternalSearchQuery}
+            placeholder={searchPlaceholder}
+            className="flex-1 max-w-md"
+          />
         ) : (
           <div className="flex-1" />
         )}
