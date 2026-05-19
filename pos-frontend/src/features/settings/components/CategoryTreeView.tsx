@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   FaChevronRight, FaFolderPlus, FaEdit, FaTrash,
-  FaFolder, FaFolderOpen, FaLeaf, FaPlus,
+  FaFolder, FaFolderOpen, FaLeaf, FaPlus, FaSearch, FaTimesCircle,
 } from "react-icons/fa";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { enqueueSnackbar } from "notistack";
@@ -21,6 +21,7 @@ interface Props {
   onEdit: (node: CategoryTreeNode) => void;
   expandEpoch?: number;
   collapseEpoch?: number;
+  searchQuery?: string;
 }
 
 interface NodeProps extends Props {
@@ -29,13 +30,13 @@ interface NodeProps extends Props {
 }
 
 const TreeNode: React.FC<NodeProps> = ({
-  node, depth, allNodes, onSelectCategory, selectedCategoryId, selectedItemId, onSelectItem, onAddChild, onEdit, expandEpoch, collapseEpoch,
+  node, depth, allNodes, onSelectCategory, selectedCategoryId, selectedItemId, onSelectItem, onAddChild, onEdit, expandEpoch, collapseEpoch, searchQuery = "",
 }) => {
   const [isOpen, setIsOpen] = useState(depth === 0);
   const queryClient = useQueryClient();
   const { localize } = useLocalize();
 
-  // Automatically expand parent nodes when a child/descendant category is selected
+  // Automatically expand parent nodes when a child/descendant category is selected or when searching
   const isAncestor = React.useMemo(() => {
     if (!selectedCategoryId) return false;
     const check = (n: CategoryTreeNode): boolean => {
@@ -46,10 +47,10 @@ const TreeNode: React.FC<NodeProps> = ({
   }, [node.children, selectedCategoryId]);
 
   React.useEffect(() => {
-    if (isAncestor) {
+    if (isAncestor || searchQuery) {
       setIsOpen(true);
     }
-  }, [isAncestor]);
+  }, [isAncestor, searchQuery]);
 
   // Listen to expand/collapse triggers from parent
   React.useEffect(() => {
@@ -95,6 +96,22 @@ const TreeNode: React.FC<NodeProps> = ({
     if (window.confirm(`Delete category "${localize(node.name)}"?`)) {
       deleteMutation.mutate();
     }
+  };
+
+  const renderName = (nameStr: string) => {
+    if (!searchQuery) return nameStr;
+    const index = nameStr.toLowerCase().indexOf(searchQuery.toLowerCase());
+    if (index === -1) return nameStr;
+    const before = nameStr.substring(0, index);
+    const match = nameStr.substring(index, index + searchQuery.length);
+    const after = nameStr.substring(index + searchQuery.length);
+    return (
+      <span>
+        {before}
+        <span className="bg-yellow-500/30 text-yellow-500 px-0.5 rounded font-black">{match}</span>
+        {after}
+      </span>
+    );
   };
 
   return (
@@ -144,7 +161,7 @@ const TreeNode: React.FC<NodeProps> = ({
 
         {/* Name */}
         <span className={`flex-1 font-bold text-sm leading-tight truncate ${isSelected ? "text-primary-fg" : ""}`}>
-          {localize(node.name)}
+          {renderName(localize(node.name))}
         </span>
 
         {/* Badges */}
@@ -218,6 +235,7 @@ const TreeNode: React.FC<NodeProps> = ({
                 onEdit={onEdit}
                 expandEpoch={expandEpoch}
                 collapseEpoch={collapseEpoch}
+                searchQuery={searchQuery}
               />
             ))}
 
@@ -239,7 +257,7 @@ const TreeNode: React.FC<NodeProps> = ({
                       🍴
                     </span>
                     <span className={`text-xs truncate leading-tight ${isItemActive ? "text-primary-fg" : ""}`}>
-                      {localize(item.name)}
+                      {renderName(localize(item.name))}
                     </span>
                   </div>
                   <span className={`text-[9px] font-black shrink-0 px-2 py-0.5 rounded-lg border
@@ -275,6 +293,32 @@ const CategoryTreeView: React.FC<TreeViewProps> = ({
 }) => {
   const [expandEpoch, setExpandEpoch] = useState(0);
   const [collapseEpoch, setCollapseEpoch] = useState(0);
+  const [searchQuery, setSearchQuery] = useState("");
+  const { localize } = useLocalize();
+
+  const filteredTree = React.useMemo(() => {
+    if (!searchQuery) return tree;
+
+    const filter = (nodes: CategoryTreeNode[]): CategoryTreeNode[] => {
+      return nodes
+        .map((node) => {
+          const matchSelf = localize(node.name).toLowerCase().includes(searchQuery.toLowerCase());
+          const matchingChildren = node.children ? filter(node.children) : [];
+          const matchingItems = node.items ? node.items.filter(item => localize(item.name).toLowerCase().includes(searchQuery.toLowerCase())) : [];
+
+          if (matchSelf || matchingChildren.length > 0 || matchingItems.length > 0) {
+            return {
+              ...node,
+              children: matchingChildren,
+              items: node.items ? node.items.filter(item => localize(item.name).toLowerCase().includes(searchQuery.toLowerCase())) : []
+            };
+          }
+          return null;
+        })
+        .filter(Boolean) as CategoryTreeNode[];
+    };
+    return filter(tree);
+  }, [tree, searchQuery, localize]);
 
   return (
     <div className="flex flex-col h-full">
@@ -294,39 +338,60 @@ const CategoryTreeView: React.FC<TreeViewProps> = ({
         </button>
       </div>
 
-      {/* Toolbar for Expand/Collapse */}
-      <div className="flex gap-2 px-4 py-2 border-b border-[var(--border-main)] bg-[var(--bg-card-alt)]/10 flex-none items-center justify-end">
-        <button
-          onClick={() => setExpandEpoch(e => e + 1)}
-          className="text-[9px] font-black uppercase tracking-widest px-2.5 py-1.5 rounded-lg border border-[var(--border-main)] text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-hover)] transition-all active:scale-95"
-        >
-          Expand All
-        </button>
-        <button
-          onClick={() => setCollapseEpoch(e => e + 1)}
-          className="text-[9px] font-black uppercase tracking-widest px-2.5 py-1.5 rounded-lg border border-[var(--border-main)] text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-hover)] transition-all active:scale-95"
-        >
-          Collapse All
-        </button>
+      {/* Toolbar for Expand/Collapse & Search */}
+      <div className="px-4 py-3 border-b border-[var(--border-main)] bg-[var(--bg-card-alt)]/10 flex flex-col gap-2.5 flex-none">
+        <div className="relative w-full">
+          <FaSearch className="absolute start-3 top-1/2 -translate-y-1/2 text-[var(--text-dim)]" size={11} />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search categories & dishes..."
+            className="w-full bg-[var(--bg-main)] border border-[var(--border-main)] focus:border-[var(--primary)]/60 rounded-xl px-4 py-2 ps-8.5 pe-8.5 text-xs font-bold outline-none text-[var(--text-main)] placeholder-[var(--text-dim)] transition-all"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery("")}
+              className="absolute end-3 top-1/2 -translate-y-1/2 text-[var(--text-dim)] hover:text-[var(--text-main)] transition-colors p-1 rounded-full flex items-center justify-center"
+            >
+              <FaTimesCircle size={11} />
+            </button>
+          )}
+        </div>
+
+        <div className="flex gap-2 items-center justify-end">
+          <button
+            onClick={() => setExpandEpoch(e => e + 1)}
+            className="text-[9px] font-black uppercase tracking-widest px-2.5 py-1.5 rounded-lg border border-[var(--border-main)] text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-hover)] transition-all active:scale-95"
+          >
+            Expand All
+          </button>
+          <button
+            onClick={() => setCollapseEpoch(e => e + 1)}
+            className="text-[9px] font-black uppercase tracking-widest px-2.5 py-1.5 rounded-lg border border-[var(--border-main)] text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-hover)] transition-all active:scale-95"
+          >
+            Collapse All
+          </button>
+        </div>
       </div>
 
       {/* Tree */}
       <div className="flex-1 overflow-y-auto custom-scrollbar p-3">
-        {tree.length === 0 ? (
+        {filteredTree.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 gap-3 opacity-40">
             <FaFolder size={36} className="text-[var(--text-dim)]" />
             <p className="text-[var(--text-muted)] text-xs font-bold uppercase tracking-widest text-center">
-              No categories yet.<br />Click "Add Root" to begin.
+              No categories or items found.
             </p>
           </div>
         ) : (
-          tree.map(node => (
+          filteredTree.map(node => (
             <TreeNode
               key={node.id}
               node={node}
               depth={0}
-              nodes={tree}
-              allNodes={tree}
+              nodes={filteredTree}
+              allNodes={filteredTree}
               onSelectCategory={onSelectCategory}
               selectedCategoryId={selectedCategoryId}
               selectedItemId={selectedItemId}
@@ -335,6 +400,7 @@ const CategoryTreeView: React.FC<TreeViewProps> = ({
               onEdit={onEdit}
               expandEpoch={expandEpoch}
               collapseEpoch={collapseEpoch}
+              searchQuery={searchQuery}
             />
           ))
         )}

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { FaChevronRight, FaFolder, FaFolderOpen, FaRegCircle, FaSearch } from "react-icons/fa";
+import { FaChevronRight, FaFolder, FaFolderOpen, FaRegCircle, FaSearch, FaTimesCircle } from "react-icons/fa";
 
 export interface TreeAction {
   icon: React.ReactNode;
@@ -306,8 +306,16 @@ export const TreeView: React.FC<TreeViewProps> = ({
               value={internalSearchQuery}
               onChange={(e) => setInternalSearchQuery(e.target.value)}
               placeholder={searchPlaceholder}
-              className="w-full bg-[var(--bg-main)] border border-[var(--border-main)] focus:border-[var(--primary)]/60 rounded-xl px-4 py-2.5 ps-9 text-xs font-bold outline-none text-[var(--text-main)] placeholder-[var(--text-dim)] transition-all"
+              className="w-full bg-[var(--bg-main)] border border-[var(--border-main)] focus:border-[var(--primary)]/60 rounded-xl px-4 py-2.5 ps-9 pe-9 text-xs font-bold outline-none text-[var(--text-main)] placeholder-[var(--text-dim)] transition-all"
             />
+            {internalSearchQuery && (
+              <button
+                onClick={() => setInternalSearchQuery("")}
+                className="absolute end-3 top-1/2 -translate-y-1/2 text-[var(--text-dim)] hover:text-[var(--text-main)] transition-colors p-1 rounded-full flex items-center justify-center"
+              >
+                <FaTimesCircle size={12} />
+              </button>
+            )}
           </div>
         ) : (
           <div className="flex-1" />

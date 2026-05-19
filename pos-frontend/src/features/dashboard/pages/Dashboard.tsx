@@ -4,7 +4,6 @@ import { BiSolidDish } from "react-icons/bi";
 import { FaHistory, FaWallet, FaUsers } from "react-icons/fa";
 import Metrics from "../components/Metrics";
 import RecentOrders from "../components/RecentOrders";
-import Management from "../components/Management";
 import CustomerList from "../../customers/components/CustomerList";
 import ManagementModal from "../components/ManagementModal";
 import ShortageMonitor from "../components/ShortageMonitor";
@@ -14,7 +13,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { getBranches } from "../api/dashboardApi";
 import { useTranslation } from "react-i18next";
-import { MenuTreeList } from "../components/management/MenuTreeList";
+import { useNavigate } from "react-router-dom";
+import MenuManager from "../../settings/pages/MenuManager";
 import TableList from "../components/management/TableList";
 import BranchList from "../components/management/BranchList";
 import POSPointList from "../components/management/POSPointList";
@@ -27,6 +27,7 @@ import { TreeView, TreeNodeData } from "../../../shared/components/TreeView";
 const Dashboard: React.FC = () => {
   const { t } = useTranslation();
   const { canManageSettings } = useAuth();
+  const navigate = useNavigate();
   const [modalState, setModalState] = useState<{ isOpen: boolean; type: string }>({ isOpen: false, type: "" });
   const [activeTab, setActiveTab] = useState("Metrics");
   const [selectedBranchId, setSelectedBranchId] = useState("all");
@@ -83,14 +84,8 @@ const Dashboard: React.FC = () => {
       icon: <MdFolderOpen className="text-emerald-500" size={15} />,
       children: [
         {
-          id: "Management",
-          label: "Master Directory Tree",
-          type: "nav",
-          icon: <MdCategory size={13} className="text-emerald-400" />,
-        },
-        {
           id: "MenuTree",
-          label: "Menu Tree Only",
+          label: "Menu Hierarchy Tree",
           type: "nav",
           icon: <BiSolidDish size={13} className="text-amber-400" />,
         },
@@ -163,12 +158,12 @@ const Dashboard: React.FC = () => {
   ];
 
   return (
-    <div className="bg-[var(--bg-main)] min-h-[calc(100vh-5rem)] pb-20 overflow-y-auto">
+    <div className="bg-[var(--bg-main)] h-[calc(100vh-5rem)] flex flex-col overflow-hidden">
       {/* Top Banner / Hero */}
-      <div className="bg-[var(--bg-card)] border-b border-[var(--border-main)] shadow-sm">
-        <div className="container mx-auto px-3 py-6 flex flex-col md:flex-row items-center justify-between gap-6">
+      <div className="bg-[var(--bg-card)] border-b border-[var(--border-main)] shadow-sm shrink-0">
+        <div className="w-full px-6 py-4 flex flex-col md:flex-row items-center justify-between gap-6">
           <div>
-            <div className="flex items-center gap-3 mb-2">
+            <div className="flex items-center gap-3 mb-1">
               <span className="bg-[var(--primary)]/10 text-[var(--primary)] text-[10px] font-black tracking-widest px-2 py-1 rounded-md uppercase">{t('dashboard.badge')}</span>
             </div>
             <motion.h1
@@ -178,7 +173,7 @@ const Dashboard: React.FC = () => {
             >
               {t('dashboard.title')}
             </motion.h1>
-            <p className="text-[var(--text-muted)] mt-1 text-sm font-medium">{t('dashboard.subtitle')}</p>
+            <p className="text-[var(--text-muted)] mt-0.5 text-xs font-semibold">{t('dashboard.subtitle')}</p>
           </div>
 
           <div className="flex items-center gap-4 flex-wrap justify-center">
@@ -207,14 +202,14 @@ const Dashboard: React.FC = () => {
       </div>
 
       {/* Dashboard Main Grid Layout */}
-      <div className="container mx-auto px-3 mt-8 grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
-        
+      <div className="w-full px-6 py-6 flex-1 overflow-hidden min-h-0 grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+
         {/* Left Column: Console Navigation Sidebar TreeView */}
-        <div className="lg:col-span-3 flex flex-col h-full">
-          <div className="sticky top-[6.5rem]">
+        <div className="lg:col-span-3 flex flex-col h-full overflow-hidden">
+          <div className="h-full overflow-y-auto custom-scrollbar pr-1 bg-[var(--bg-card)] border border-[var(--border-main)] rounded-[2rem] p-4 shadow-sm">
             <TreeView
               data={navTreeData}
-              showSearch={false}
+              showSearch={true}
               headerTitle="Console Directory"
               headerSubtitle="Enterprise Portal Navigation"
               emptyLabel="No console groups found."
@@ -229,86 +224,105 @@ const Dashboard: React.FC = () => {
         </div>
 
         {/* Right Column: Dynamic Content Panel */}
-        <div className="lg:col-span-9 flex flex-col h-full min-h-[550px]">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={activeTab + selectedBranchId}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.2 }}
-              className="h-full"
-            >
-              {activeTab === "Metrics" && <Metrics branchId={selectedBranchId} />}
-              {activeTab === "MenuTree" && (
-                <MenuTreeList
-                  categories={data.categories}
-                  items={data.items}
-                  loading={status.loadingCategories || status.loadingItems}
-                  error={status.errorCategories || status.errorItems}
-                  onEdit={openEditModal}
-                  onDelete={openConfirm}
-                  onRetry={handleManualRefresh}
-                />
-              )}
-              {activeTab === "Management" && <Management />}
-              {activeTab === "Customers" && <CustomerList />}
-              {activeTab === "Orders" && <RecentOrders branchId={selectedBranchId} />}
-              {activeTab === "Shortage" && <ShortageMonitor branchId={selectedBranchId} />}
-              
-              {/* Direct sidebar views for individual management directories */}
-              {activeTab === "Tables" && (
-                <TableList 
-                  data={data.tables} 
-                  loading={status.loadingTables} 
-                  error={status.errorTables} 
-                  onEdit={openEditModal}
-                  onDelete={openConfirm}
-                  onRetry={handleManualRefresh}
-                  itemVariants={{ hidden: { opacity: 0 }, show: { opacity: 1 } }}
-                />
-              )}
-              {activeTab === "Branches" && (
-                <BranchList 
-                  data={data.branches} 
-                  loading={status.loadingBranches} 
-                  error={status.errorBranches} 
-                  onEdit={openEditModal}
-                  onRetry={handleManualRefresh}
-                  itemVariants={{ hidden: { opacity: 0 }, show: { opacity: 1 } }}
-                />
-              )}
-              {activeTab === "POSPoints" && (
-                <POSPointList 
-                  data={data.posPoints} 
-                  loading={status.loadingPOSPoints} 
-                  error={status.errorPOSPoints} 
-                  onEdit={openEditModal}
-                  onRetry={handleManualRefresh}
-                  itemVariants={{ hidden: { opacity: 0 }, show: { opacity: 1 } }}
-                />
-              )}
-              {activeTab === "Users" && (
-                <StaffList 
-                  data={data.usersData} 
-                  loading={status.loadingUsers} 
-                  error={status.errorUsers} 
-                  onEdit={openEditModal}
-                  onDelete={openConfirm}
-                  onRetry={handleManualRefresh}
-                  searchQuery=""
-                />
-              )}
-              {activeTab === "Coupons" && (
-                <div className="bg-[var(--bg-card)] border border-[var(--border-main)] rounded-[2rem] p-8 shadow-sm">
-                  <CouponList 
-                    onAdd={() => openEditModal("coupon")}
-                    onEdit={(coupon) => openEditModal("coupon", coupon)}
-                  />
-                </div>
-              )}
-            </motion.div>
-          </AnimatePresence>
+        <div className="lg:col-span-9 flex flex-col h-full overflow-hidden">
+          <div className="h-full flex flex-col min-h-0 overflow-hidden">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeTab + selectedBranchId}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}
+                className="h-full"
+              >
+                {activeTab === "Metrics" && (
+                  <div className="h-full overflow-y-auto custom-scrollbar pr-1">
+                    <Metrics branchId={selectedBranchId} />
+                  </div>
+                )}
+                {activeTab === "MenuTree" && (
+                  <div className="h-full overflow-hidden">
+                    <MenuManager isEmbedded={true} />
+                  </div>
+                )}
+                {activeTab === "Customers" && (
+                  <div className="h-full overflow-y-auto custom-scrollbar pr-1">
+                    <CustomerList />
+                  </div>
+                )}
+                {activeTab === "Orders" && (
+                  <div className="h-full overflow-y-auto custom-scrollbar pr-1">
+                    <RecentOrders branchId={selectedBranchId} />
+                  </div>
+                )}
+                {activeTab === "Shortage" && (
+                  <div className="h-full overflow-y-auto custom-scrollbar pr-1">
+                    <ShortageMonitor branchId={selectedBranchId} />
+                  </div>
+                )}
+
+                {/* Direct sidebar views for individual management directories */}
+                {activeTab === "Tables" && (
+                  <div className="h-full overflow-y-auto custom-scrollbar pr-1 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-max">
+                    <TableList
+                      data={data.tables || []}
+                      loading={status.loadingTables}
+                      error={status.errorTables}
+                      onEdit={openEditModal}
+                      onDelete={openConfirm}
+                      onRetry={handleManualRefresh}
+                      itemVariants={{ hidden: { opacity: 0 }, show: { opacity: 1 } }}
+                    />
+                  </div>
+                )}
+                {activeTab === "Branches" && (
+                  <div className="h-full overflow-y-auto custom-scrollbar pr-1 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-max">
+                    <BranchList
+                      data={data.branches || []}
+                      loading={status.loadingBranches}
+                      error={status.errorBranches}
+                      onEdit={openEditModal}
+                      onRetry={handleManualRefresh}
+                      itemVariants={{ hidden: { opacity: 0 }, show: { opacity: 1 } }}
+                    />
+                  </div>
+                )}
+                {activeTab === "POSPoints" && (
+                  <div className="h-full overflow-y-auto custom-scrollbar pr-1 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-max">
+                    <POSPointList
+                      data={data.posPoints || []}
+                      loading={status.loadingPOSPoints}
+                      error={status.errorPOSPoints}
+                      onEdit={openEditModal}
+                      onRetry={handleManualRefresh}
+                      itemVariants={{ hidden: { opacity: 0 }, show: { opacity: 1 } }}
+                    />
+                  </div>
+                )}
+                {activeTab === "Users" && (
+                  <div className="h-full overflow-y-auto custom-scrollbar pr-1">
+                    <StaffList
+                      data={data.usersData || []}
+                      loading={status.loadingUsers}
+                      error={status.errorUsers}
+                      onEdit={openEditModal}
+                      onDelete={openConfirm}
+                      onRetry={handleManualRefresh}
+                      searchQuery=""
+                    />
+                  </div>
+                )}
+                {activeTab === "Coupons" && (
+                  <div className="h-full overflow-y-auto custom-scrollbar pr-1 bg-[var(--bg-card)] border border-[var(--border-main)] rounded-[2rem] p-8 shadow-sm">
+                    <CouponList
+                      onAdd={() => openEditModal("coupon", null)}
+                      onEdit={(coupon) => openEditModal("coupon", coupon)}
+                    />
+                  </div>
+                )}
+              </motion.div>
+            </AnimatePresence>
+          </div>
         </div>
 
       </div>
@@ -319,7 +333,7 @@ const Dashboard: React.FC = () => {
         onClose={handleCloseModal}
       />
 
-      <ConfirmModal 
+      <ConfirmModal
         isOpen={confirmModal.isOpen}
         onClose={closeConfirm}
         onConfirm={handleConfirmAction}

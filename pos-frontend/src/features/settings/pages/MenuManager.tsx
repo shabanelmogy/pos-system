@@ -11,7 +11,11 @@ import ItemFormModal from "../components/ItemFormModal";
 import BackButton from "../../../shared/components/BackButton";
 import BottomNav from "../../../shared/components/BottomNav";
 
-const MenuManager: React.FC = () => {
+interface MenuManagerProps {
+  isEmbedded?: boolean;
+}
+
+const MenuManager: React.FC<MenuManagerProps> = ({ isEmbedded = false }) => {
   // Tree state
   const { data: tree = [], isLoading } = useQuery<CategoryTreeNode[]>({
     queryKey: ["category-tree"],
@@ -93,24 +97,9 @@ const MenuManager: React.FC = () => {
     );
   }
 
-  return (
-    <section className="bg-[var(--bg-main)] h-full overflow-hidden flex flex-col">
-      {/* Header */}
-      <div className="flex items-center justify-between px-6 md:px-10 py-6 md:py-8 flex-none">
-        <div className="flex items-center gap-4">
-          <BackButton />
-          <div>
-            <h1 className="text-[var(--text-main)] text-2xl font-black uppercase tracking-tighter">
-              Menu Manager
-            </h1>
-            <p className="text-[var(--text-muted)] text-[10px] font-bold uppercase tracking-widest mt-1">
-              Organize categories and items
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div className="flex-1 overflow-hidden px-6 md:px-10 pb-24 lg:pb-10 flex flex-col lg:flex-row gap-6 md:gap-8">
+  const content = (
+    <>
+      <div className={`flex-1 overflow-hidden pb-10 flex flex-col lg:flex-row gap-6 md:gap-8 min-h-0 ${isEmbedded ? "" : "px-6 md:px-10"}`}>
         
         {/* Left: Tree View */}
         <div className="w-full lg:w-1/3 bg-[var(--bg-card)] rounded-3xl border border-[var(--border-main)] flex flex-col overflow-hidden max-h-[40vh] lg:max-h-full">
@@ -159,8 +148,6 @@ const MenuManager: React.FC = () => {
         </div>
       </div>
 
-      <BottomNav />
-
       {/* Modals */}
       <CategoryFormModal
         isOpen={isCategoryModalOpen}
@@ -180,6 +167,37 @@ const MenuManager: React.FC = () => {
           setSelectedItem(updatedItem);
         }}
       />
+    </>
+  );
+
+  if (isEmbedded) {
+    return (
+      <div className="h-full flex flex-col overflow-hidden">
+        {content}
+      </div>
+    );
+  }
+
+  return (
+    <section className="bg-[var(--bg-main)] h-full overflow-hidden flex flex-col">
+      {/* Header */}
+      <div className="flex items-center justify-between px-6 md:px-10 py-6 md:py-8 flex-none">
+        <div className="flex items-center gap-4">
+          <BackButton />
+          <div>
+            <h1 className="text-[var(--text-main)] text-2xl font-black uppercase tracking-tighter">
+              Menu Manager
+            </h1>
+            <p className="text-[var(--text-muted)] text-[10px] font-bold uppercase tracking-widest mt-1">
+              Organize categories and items
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {content}
+
+      <BottomNav />
     </section>
   );
 };

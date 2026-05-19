@@ -426,9 +426,9 @@ export const MasterTreeList: React.FC<MasterTreeListProps> = ({
   if (error) return <ErrorState label="Master Tree" onRetry={onRetry} />;
 
   return (
-    <div className="col-span-full grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch min-h-[550px]">
+    <div className="col-span-full grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch h-full overflow-hidden">
       {/* Left Column: Master Directory Tree View */}
-      <div className="lg:col-span-5 flex flex-col h-full">
+      <div className="lg:col-span-5 flex flex-col h-full overflow-hidden">
         <TreeView
           data={treeData}
           showSearch={true}
@@ -458,8 +458,8 @@ export const MasterTreeList: React.FC<MasterTreeListProps> = ({
       </div>
 
       {/* Right Column: Dynamic Preview Context Panel */}
-      <div className="lg:col-span-7 flex flex-col justify-stretch h-full">
-        <div className="bg-[var(--bg-card)] border border-[var(--border-main)] rounded-[2rem] p-6 shadow-sm flex flex-col justify-between h-full min-h-[480px]">
+      <div className="lg:col-span-7 flex flex-col justify-stretch h-full overflow-hidden">
+        <div className="bg-[var(--bg-card)] border border-[var(--border-main)] rounded-[2rem] p-6 shadow-sm flex flex-col justify-between h-full overflow-y-auto custom-scrollbar">
           <AnimatePresence mode="wait">
             {selectedNode ? (
               <motion.div

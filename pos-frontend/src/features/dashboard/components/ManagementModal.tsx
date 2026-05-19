@@ -14,6 +14,7 @@ import { MdCategory, MdStore, MdPerson, MdEmail, MdLock, MdPhone, MdShield, MdCo
 import useManagementForm from "../hooks/useManagementForm";
 import useLocalize from "../../../hooks/useLocalize";
 import { useTranslation } from "react-i18next";
+import { uploadImage } from "../../pos/api/posApi";
 
 import { TableForm } from "./management/forms/TableForm";
 import { CategoryForm } from "./management/forms/CategoryForm";
@@ -60,6 +61,36 @@ const ManagementModal: React.FC<ManagementModalProps> = ({ type, isOpen, onClose
   const [selectedPOSPoints, setSelectedPOSPoints] = useState<string[]>([]);
   const [posSearchQuery, setPosSearchQuery] = useState("");
   const [showTerminals, setShowTerminals] = useState(false);
+  const [imageUrl, setImageUrl] = useState<string>("");
+  const [isUploading, setIsUploading] = useState(false);
+
+  // Image upload mutation
+  const uploadMutation = useMutation({
+    mutationFn: (base64: string) => uploadImage(base64),
+    onMutate: () => setIsUploading(true),
+    onSuccess: (res: any) => {
+      setIsUploading(false);
+      const url = res.data?.url || res.data;
+      setImageUrl(url);
+      enqueueSnackbar("Image uploaded successfully!", { variant: "success" });
+    },
+    onError: (err: any) => {
+      setIsUploading(false);
+      enqueueSnackbar(err?.response?.data?.message || "Failed to upload image", { variant: "error" });
+    },
+  });
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      enqueueSnackbar("Please select an image file", { variant: "warning" });
+      return;
+    }
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => uploadMutation.mutate(reader.result as string);
+  };
 
   const { register, handleSubmit, setValue, watch, errors } = useManagementForm(type, initialData, isOpen);
 
@@ -151,6 +182,12 @@ const ManagementModal: React.FC<ManagementModalProps> = ({ type, isOpen, onClose
         setSelectedPOSPoints([]);
         setShowTerminals(false);
       }
+
+      if ((type === "category" || type === "dishes") && initialData) {
+        setImageUrl(initialData.images?.[0] || "");
+      } else {
+        setImageUrl("");
+      }
     }
   }, [isOpen, initialData, type]);
 
@@ -172,8 +209,8 @@ const ManagementModal: React.FC<ManagementModalProps> = ({ type, isOpen, onClose
 
         switch (type) {
           case "table": return updateTable(id, { tableNo: preparedData.tableNo, seats: preparedData.seats });
-          case "dishes": return updateItem(id, { name: preparedData.name, price: preparedData.price, categoryId: preparedData.categoryId });
-          case "category": return updateCategory(id, { name: preparedData.name, kitchenStationId: preparedData.kitchenStationId });
+          case "dishes": return updateItem(id, { name: preparedData.name, price: preparedData.price, categoryId: preparedData.categoryId, images: preparedData.images });
+          case "category": return updateCategory(id, { name: preparedData.name, kitchenStationId: preparedData.kitchenStationId, images: preparedData.images });
           case "branch": return updateBranch(id, { ...preparedData, id });
           case "posPoint": return updatePOSPoint(id, preparedData);
           case "coupon": return updateCoupon(id, preparedData);
@@ -220,6 +257,12 @@ const ManagementModal: React.FC<ManagementModalProps> = ({ type, isOpen, onClose
           en: data.nameEn || "",
           ar: data.nameAr || ""
         }
+      };
+    }
+    if (type === "category" || type === "dishes") {
+      data = {
+        ...data,
+        images: imageUrl ? [imageUrl] : []
       };
     }
     mutation.mutate(data);
@@ -326,6 +369,9 @@ const ManagementModal: React.FC<ManagementModalProps> = ({ type, isOpen, onClose
                 handleArabicKeyPress={handleArabicKeyPress}
                 handleEnglishKeyDown={handleEnglishKeyDown}
                 handleEnglishInput={handleEnglishInput}
+                imageUrl={imageUrl}
+                isUploading={isUploading}
+                handleImageChange={handleImageChange}
               />
             )}
 
@@ -343,6 +389,9 @@ const ManagementModal: React.FC<ManagementModalProps> = ({ type, isOpen, onClose
                 handleEnglishKeyDown={handleEnglishKeyDown}
                 handleEnglishInput={handleEnglishInput}
                 t={t}
+                imageUrl={imageUrl}
+                isUploading={isUploading}
+                handleImageChange={handleImageChange}
               />
             )}
 
