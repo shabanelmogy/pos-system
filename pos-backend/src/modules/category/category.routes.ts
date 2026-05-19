@@ -7,6 +7,7 @@ const router = express.Router();
 router.use(isVerifiedUser);
 
 router.get("/", categoryController.getAll);
+router.get("/tree", categoryController.getTree);   // Must be before /:id
 router.get("/:id", categoryController.getById);
 router.post("/", categoryController.create);
 router.put("/:id", categoryController.update);

@@ -6,7 +6,7 @@ import { logout } from "../../features/auth/api/authApi";
 import useUserStore from "../../features/auth/store/useUserStore";
 import usePOSStore from "../../features/pos/store/usePOSStore";
 import { useNavigate } from "react-router-dom";
-import { MdDashboard, MdStore, MdComputer, MdSwapHoriz, MdStop, MdSettings } from "react-icons/md";
+import { MdDashboard, MdStore, MdComputer, MdSwapHoriz, MdStop, MdSettings, MdRestaurantMenu } from "react-icons/md";
 import { useSnackbar } from "notistack";
 import { useTranslation } from "react-i18next";
 import useAuth from "../../features/auth/hooks/useAuth";
@@ -243,6 +243,12 @@ const Header: React.FC = () => {
           {canAccessDashboard && (
             <IconButton onClick={() => navigate("/dashboard")} title="Analytics">
               <MdDashboard className="size-4 2xl:size-[18px]" />
+            </IconButton>
+          )}
+          
+          {isAdmin && (
+            <IconButton onClick={() => navigate("/menu-manager")} title="Menu Manager">
+              <MdRestaurantMenu className="size-4 2xl:size-[18px]" />
             </IconButton>
           )}
           

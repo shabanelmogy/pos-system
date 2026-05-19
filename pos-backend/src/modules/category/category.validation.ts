@@ -8,9 +8,11 @@ const localizedString = z.object({
 export const createCategorySchema = z.object({
   name: localizedString,
   images: z.array(z.string().url()).optional().default([]),
+  parentId: z.string().uuid().nullable().optional(),
 });
 
 export const updateCategorySchema = z.object({
   name: localizedString.optional(),
   images: z.array(z.string().url()).optional(),
+  parentId: z.string().uuid().nullable().optional(),
 });

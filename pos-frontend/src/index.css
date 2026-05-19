@@ -15,6 +15,7 @@
   --primary: #f6b100;
   --primary-hover: #e5a600;
   --primary-light: rgba(246, 177, 0, 0.15);
+  --primary-fg: #000000;
 
   /* ── Dark Mode Surfaces (Default) ── */
   --bg-main: #1f1f1f;
@@ -92,12 +93,14 @@
   --primary: #3b82f6;
   --primary-hover: #2563eb;
   --primary-light: rgba(59, 130, 246, 0.15);
+  --primary-fg: #ffffff;
 }
 
 [data-palette='green'] {
   --primary: #10b981;
   --primary-hover: #059669;
   --primary-light: rgba(16, 185, 129, 0.15);
+  --primary-fg: #ffffff;
 }
 
 /* Black: white accent on dark, black accent on light */
@@ -105,6 +108,7 @@
   --primary: #f5f5f5;
   --primary-hover: #cccccc;
   --primary-light: rgba(245, 245, 245, 0.1);
+  --primary-fg: #000000;
 }
 
 [data-palette='black'][data-mode='light'],
@@ -112,6 +116,7 @@
   --primary: #111111;
   --primary-hover: #333333;
   --primary-light: rgba(0, 0, 0, 0.06);
+  --primary-fg: #ffffff;
 }
 
 /* ============================================================
@@ -199,16 +204,79 @@ body {
   }
 }
 
-.custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
-}
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
-}
 .custom-scrollbar::-webkit-scrollbar-thumb {
   background: rgba(246, 177, 0, 0.4);
   border-radius: 10px;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: var(--primary);
+}
+
+/* ============================================================
+   THEME HIGH-CONTRAST UTILITIES
+   Bypasses Tailwind JIT JIT limitations with arbitrary CSS variables.
+   ============================================================ */
+
+.text-primary-fg {
+  color: var(--primary-fg) !important;
+}
+
+.text-primary-fg-70 {
+  color: var(--primary-fg) !important;
+  opacity: 0.7 !important;
+}
+
+.text-primary-fg-60 {
+  color: var(--primary-fg) !important;
+  opacity: 0.6 !important;
+}
+
+/* Dynamic semi-transparent badge/border overlay */
+.badge-active-bg {
+  color: var(--primary-fg) !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  background-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+[data-palette='gold'] .badge-active-bg,
+:root:not([data-palette]) .badge-active-bg,
+[data-palette='black'] .badge-active-bg {
+  border-color: rgba(0, 0, 0, 0.12) !important;
+  background-color: rgba(0, 0, 0, 0.08) !important;
+  color: #000000 !important;
+}
+
+[data-palette='black'][data-mode='light'] .badge-active-bg,
+[data-palette='black'][data-theme='light'] .badge-active-bg {
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  background-color: rgba(255, 255, 255, 0.12) !important;
+  color: #ffffff !important;
+}
+
+/* Dynamic button hover overlay on active background */
+.btn-active-hover {
+  color: var(--primary-fg) !important;
+}
+
+.btn-active-hover:hover {
+  background-color: rgba(255, 255, 255, 0.15) !important;
+  color: var(--primary-fg) !important;
+}
+
+[data-palette='gold'] .btn-active-hover:hover,
+:root:not([data-palette]) .btn-active-hover:hover,
+[data-palette='black'] .btn-active-hover:hover {
+  background-color: rgba(0, 0, 0, 0.12) !important;
+  color: #000000 !important;
+}
+
+[data-palette='black'][data-mode='light'] .btn-active-hover:hover,
+[data-palette='black'][data-theme='light'] .btn-active-hover:hover {
+  background-color: rgba(255, 255, 255, 0.15) !important;
+  color: #ffffff !important;
+}
+
+.btn-active-hover-danger:hover {
+  background-color: rgba(239, 68, 68, 0.25) !important;
+  color: #fee2e2 !important;
 }

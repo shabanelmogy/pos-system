@@ -13,6 +13,15 @@ const categoryController = {
     }
   },
 
+  async getTree(req: Request, res: Response): Promise<void> {
+    try {
+      const tree = await categoryService.getCategoryTree();
+      res.status(200).json({ success: true, data: tree });
+    } catch (error) {
+      handleError(res, error as any, "categoryController.getTree");
+    }
+  },
+
   async getById(req: Request, res: Response): Promise<void> {
     try {
       const id = req.params.id as string;

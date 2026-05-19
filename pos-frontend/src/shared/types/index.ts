@@ -53,7 +53,14 @@ export interface User {
 export interface Category {
   id: string;
   name: LocalizedString;
+  parentId?: string | null;
   kitchenStationId?: string | null;
+}
+
+export interface CategoryTreeNode extends Category {
+  children: CategoryTreeNode[];
+  itemCount?: number;
+  items?: MenuItem[];
 }
 
 export interface MenuItem {
@@ -62,6 +69,7 @@ export interface MenuItem {
   price: number;
   categoryId: string;
   description?: LocalizedString;
+  images?: string[];
 }
 
 // Order Types

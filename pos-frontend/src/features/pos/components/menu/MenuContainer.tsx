@@ -225,7 +225,7 @@ const MenuContainer: React.FC = () => {
                </div>
                <button 
                 onClick={() => handleDuplicateOrder(customerLastOrder)}
-                className="flex items-center gap-1.5 bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-black text-[10px] font-black px-2.5 py-1.5 rounded-lg transition-all active:scale-95 shadow-sm"
+                className="flex items-center gap-1.5 bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-[var(--primary-fg)] text-[10px] font-black px-2.5 py-1.5 rounded-lg transition-all active:scale-95 shadow-sm"
                 title="Repeat this order"
                >
                   <FaCopy size={10} /> Repeat
@@ -297,7 +297,7 @@ const MenuContainer: React.FC = () => {
                    <div className="flex gap-2">
                       <button 
                         onClick={() => handleDuplicateOrder(order)}
-                        className="flex-1 bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-black text-[10px] font-black py-2.5 rounded-xl transition-all flex items-center justify-center gap-2 uppercase tracking-widest"
+                        className="flex-1 bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-[var(--primary-fg)] text-[10px] font-black py-2.5 rounded-xl transition-all flex items-center justify-center gap-2 uppercase tracking-widest"
                       >
                          <FaCopy size={12} /> Duplicate Order
                       </button>
@@ -311,7 +311,7 @@ const MenuContainer: React.FC = () => {
       <div className="relative group/nav px-6 pt-4">
         <button
           onClick={() => scroll("left")}
-          className="absolute start-1 top-[calc(50%+8px)] -translate-y-1/2 z-10 bg-[var(--bg-card)]/80 hover:bg-[var(--primary)] text-[var(--primary)] hover:text-black p-1.5 rounded-full lg:opacity-0 lg:group-hover/nav:opacity-100 transition-all duration-300 border border-[var(--border-main)] shadow-xl backdrop-blur-sm rtl:rotate-180"
+          className="absolute start-1 top-[calc(50%+8px)] -translate-y-1/2 z-10 bg-[var(--bg-card)]/80 hover:bg-[var(--primary)] text-[var(--primary)] hover:text-[var(--primary-fg)] p-1.5 rounded-full lg:opacity-0 lg:group-hover/nav:opacity-100 transition-all duration-300 border border-[var(--border-main)] shadow-xl backdrop-blur-sm rtl:rotate-180"
         >
           <MdChevronLeft size={20} />
         </button>
@@ -337,11 +337,11 @@ const MenuContainer: React.FC = () => {
                     setSearchTerm("");
                   }}
                   className={`relative flex items-center gap-2 px-5 py-3 text-sm font-bold uppercase tracking-wider whitespace-nowrap transition-all duration-200 rounded-t-xl ${isActive
-                    ? "bg-[var(--primary)] text-black shadow-lg shadow-[var(--primary)]/20"
+                    ? "bg-[var(--primary)] text-[var(--primary-fg)] shadow-lg shadow-[var(--primary)]/20"
                     : "text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-hover)]"
                     }`}
                 >
-                  <MdRestaurantMenu className={isActive ? "text-black" : "text-[var(--primary)]"} />
+                  <MdRestaurantMenu className={isActive ? "text-[var(--primary-fg)]" : "text-[var(--primary)]"} />
                   {localize(category.name)}
                 </button>
               );
@@ -352,7 +352,7 @@ const MenuContainer: React.FC = () => {
         {/* Right Scroll Button */}
         <button
           onClick={() => scroll("right")}
-          className="absolute end-1 top-[calc(50%+8px)] -translate-y-1/2 z-10 bg-[var(--bg-card)]/80 hover:bg-[var(--primary)] text-[var(--primary)] hover:text-black p-1.5 rounded-full lg:opacity-0 lg:group-hover/nav:opacity-100 transition-all duration-300 border border-[var(--border-main)] shadow-xl backdrop-blur-sm rtl:rotate-180"
+          className="absolute end-1 top-[calc(50%+8px)] -translate-y-1/2 z-10 bg-[var(--bg-card)]/80 hover:bg-[var(--primary)] text-[var(--primary)] hover:text-[var(--primary-fg)] p-1.5 rounded-full lg:opacity-0 lg:group-hover/nav:opacity-100 transition-all duration-300 border border-[var(--border-main)] shadow-xl backdrop-blur-sm rtl:rotate-180"
         >
           <MdChevronRight size={20} />
         </button>
@@ -381,14 +381,18 @@ const MenuContainer: React.FC = () => {
                 >
                   {/* Qty Badge */}
                   {isActive && (
-                    <div className="absolute top-2.5 end-2.5 bg-[var(--primary)] text-black text-xs font-black w-6 h-6 rounded-full flex items-center justify-center shadow-lg z-10">
+                    <div className="absolute top-2.5 end-2.5 bg-[var(--primary)] text-[var(--primary-fg)] text-xs font-black w-6 h-6 rounded-full flex items-center justify-center shadow-lg z-10">
                       {itemCount}
                     </div>
                   )}
 
-                  {/* Icon */}
-                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-3 transition-colors ${isActive ? "bg-[var(--primary)]/20" : "bg-[var(--bg-hover)] group-hover:bg-[var(--bg-card-alt)]"}`}>
-                    <MdRestaurantMenu className={`text-2xl ${isActive ? "text-[var(--primary)]" : "text-[var(--text-dim)]"}`} />
+                  {/* Image/Icon */}
+                  <div className={`w-12 h-12 rounded-xl overflow-hidden flex items-center justify-center mb-3 transition-colors ${isActive ? "bg-[var(--primary)]/20" : "bg-[var(--bg-hover)] group-hover:bg-[var(--bg-card-alt)]"}`}>
+                    {item.images && item.images.length > 0 ? (
+                      <img src={item.images[0]} alt={localize(item.name)} className="w-full h-full object-cover" />
+                    ) : (
+                      <MdRestaurantMenu className={`text-2xl ${isActive ? "text-[var(--primary)]" : "text-[var(--text-dim)]"}`} />
+                    )}
                   </div>
 
                   <div className="flex-1">
@@ -434,7 +438,7 @@ const MenuContainer: React.FC = () => {
                   {isActive && (
                     <button
                       onClick={(e) => { e.stopPropagation(); handleAddToCart(item); }}
-                      className="mt-3 w-full py-2 bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-black text-xs font-black uppercase rounded-xl flex items-center justify-center gap-2 transition-all active:scale-95 shadow-lg shadow-[var(--primary)]/20"
+                      className="mt-3 w-full py-2 bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-[var(--primary-fg)] text-xs font-black uppercase rounded-xl flex items-center justify-center gap-2 transition-all active:scale-95 shadow-lg shadow-[var(--primary)]/20"
                     >
                       <FaShoppingCart size={11} />
                       Add {itemCount > 1 ? `${itemCount} items` : "to order"}

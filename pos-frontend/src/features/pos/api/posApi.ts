@@ -18,6 +18,7 @@ export const getShiftReconciliation = (shiftId: string) => axiosWrapper.get(`/ap
 
 // Category Endpoints
 export const getCategories = () => axiosWrapper.get("/api/category");
+export const getCategoryTree = () => axiosWrapper.get("/api/category/tree");
 export const addCategory = (data: any) => axiosWrapper.post("/api/category", data);
 export const updateCategory = ({ categoryId, ...data }: { categoryId: string; [key: string]: any }) => axiosWrapper.put(`/api/category/${categoryId}`, data);
 export const deleteCategory = (categoryId: string) => axiosWrapper.delete(`/api/category/${categoryId}`);
@@ -36,3 +37,6 @@ export const verifyPaymentRazorpay = (data: any) =>
 
 // Order Endpoints
 export const addOrder = (data: any) => axiosWrapper.post("/api/order", data);
+
+// Image Upload Endpoint
+export const uploadImage = (base64Data: string) => axiosWrapper.post("/api/upload", { image: base64Data });

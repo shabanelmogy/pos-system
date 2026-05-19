@@ -13,6 +13,7 @@ import posPointRouter from "./posPoint/posPoint.routes.js";
 import posSettingsRouter from "./posSettings/posSettings.routes.js";
 import couponRouter from "./coupon/coupon.routes.js";
 import kitchenStationRouter from "./kitchenStation/kitchenStation.routes.js";
+import uploadRouter from "./upload/upload.routes.js";
 
 const router = express.Router();
 
@@ -30,5 +31,6 @@ router.use("/pos-point", posPointRouter);
 router.use("/pos-settings", posSettingsRouter);
 router.use("/coupon", couponRouter);
 router.use("/kitchen-station", kitchenStationRouter);
+router.use("/upload", uploadRouter);
 
 export default router;

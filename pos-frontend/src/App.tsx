@@ -6,7 +6,7 @@ import {
   useLocation,
   Navigate,
 } from "react-router-dom";
-import { Home, Auth, Orders, Tables, Menu, Dashboard, Customers, Settings, KitchenBoard } from "./pages";
+import { Home, Auth, Orders, Tables, Menu, Dashboard, Customers, Settings, KitchenBoard, MenuManager } from "./pages";
 import Header from "./shared/components/Header";
 import useLoadData from "./shared/hooks/useLoadData";
 import FullScreenLoader from "./shared/components/FullScreenLoader"
@@ -68,72 +68,82 @@ function Layout() {
   if (needsShift) return <ShiftManager />;
 
   return (
-    <>
+    <div className="h-screen w-screen flex flex-col overflow-hidden bg-[var(--bg-main)]">
       {!isOnAuthPage && !isOnKdsPage && <Header />}
       {/* Shift close modal overlay — only when shift is open and user requests it */}
       {showShiftModal && activeShift && <ShiftManager />}
-      <Routes>
-        <Route
-          path="/"
-          element={
-            <ProtectedRoutes>
-              {openOnMenu && !isAdmin ? <Navigate to="/menu" /> : <Home />}
-            </ProtectedRoutes>
-          }
-        />
-        <Route path="/auth" element={isAuth ? <Navigate to="/" /> : <Auth />} />
-        <Route
-          path="/orders"
-          element={
-            <ProtectedRoutes>
-              <Orders />
-            </ProtectedRoutes>
-          }
-        />
-        <Route
-          path="/tables"
-          element={
-            <ProtectedRoutes>
-              {enableTables ? <Tables /> : <Navigate to="/menu" />}
-            </ProtectedRoutes>
-          }
-        />
-        <Route
-          path="/menu"
-          element={
-            <ProtectedRoutes>
-              <Menu />
-            </ProtectedRoutes>
-          }
-        />
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoutes>
-              <Dashboard />
-            </ProtectedRoutes>
-          }
-        />
-        <Route
-          path="/customers"
-          element={
-            <ProtectedRoutes>
-              <Customers />
-            </ProtectedRoutes>
-          }
-        />
-        <Route
-          path="/settings"
-          element={
-            <ProtectedRoutes>
-              <Settings />
-            </ProtectedRoutes>
-          }
-        />
-        <Route path="/kds" element={<KitchenBoard />} />
-        <Route path="*" element={<div>Not Found</div>} />
-      </Routes>
-    </>
+      <main className="flex-1 min-h-0 overflow-hidden relative">
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <ProtectedRoutes>
+                {openOnMenu && !isAdmin ? <Navigate to="/menu" /> : <Home />}
+              </ProtectedRoutes>
+            }
+          />
+          <Route path="/auth" element={isAuth ? <Navigate to="/" /> : <Auth />} />
+          <Route
+            path="/orders"
+            element={
+              <ProtectedRoutes>
+                <Orders />
+              </ProtectedRoutes>
+            }
+          />
+          <Route
+            path="/tables"
+            element={
+              <ProtectedRoutes>
+                {enableTables ? <Tables /> : <Navigate to="/menu" />}
+              </ProtectedRoutes>
+            }
+          />
+          <Route
+            path="/menu"
+            element={
+              <ProtectedRoutes>
+                <Menu />
+              </ProtectedRoutes>
+            }
+          />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoutes>
+                <Dashboard />
+              </ProtectedRoutes>
+            }
+          />
+          <Route
+            path="/customers"
+            element={
+              <ProtectedRoutes>
+                <Customers />
+              </ProtectedRoutes>
+            }
+          />
+          <Route
+            path="/settings"
+            element={
+              <ProtectedRoutes>
+                <Settings />
+              </ProtectedRoutes>
+            }
+          />
+          <Route
+            path="/menu-manager"
+            element={
+              <ProtectedRoutes>
+                <MenuManager />
+              </ProtectedRoutes>
+            }
+          />
+          <Route path="/kds" element={<KitchenBoard />} />
+          <Route path="*" element={<div>Not Found</div>} />
+        </Routes>
+      </main>
+    </div>
   );
 }
 

@@ -118,6 +118,8 @@ export const kitchenStationsRelations = relations(kitchenStations, ({ one, many 
 export const categoriesRelations = relations(categories, ({ one, many }) => ({
   kitchenStation: one(kitchenStations, { fields: [categories.kitchenStationId], references: [kitchenStations.id] }),
   items: many(items),
+  parent: one(categories, { fields: [categories.parentId], references: [categories.id], relationName: "subcategories" }),
+  children: many(categories, { relationName: "subcategories" }),
 }));
 
 // Payments Relations

@@ -1,4 +1,4 @@
-import { eq, sql, inArray } from "drizzle-orm";
+import { eq, sql, inArray, asc } from "drizzle-orm";
 import { items, itemModifiers, Item, NewItem, ItemModifier } from "./item.schema.js";
 import { categories } from "../category/category.schema.js";
 import { db } from "../../config/database.js";
@@ -13,11 +13,11 @@ export interface ItemWithKitchenStation {
 
 const itemRepository = {
   async findAll(): Promise<Item[]> {
-    return await db.select().from(items);
+    return await db.select().from(items).orderBy(asc(items.createdAt));
   },
 
   async findByCategoryId(categoryId: string): Promise<Item[]> {
-    return await db.select().from(items).where(eq(items.categoryId, categoryId));
+    return await db.select().from(items).where(eq(items.categoryId, categoryId)).orderBy(asc(items.createdAt));
   },
 
   async findById(id: string): Promise<ItemWithKitchenStation | undefined> {
