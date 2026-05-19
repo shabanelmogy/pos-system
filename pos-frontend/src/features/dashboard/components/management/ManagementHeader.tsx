@@ -74,14 +74,16 @@ const ManagementHeader: React.FC<ManagementHeaderProps> = ({ subTabs, activeSubT
             >
                <MdRefresh size={20} />
             </motion.button>
-            <motion.button
-               whileHover={{ scale: 1.05 }}
-               whileTap={{ scale: 0.95 }}
-               onClick={() => openEditModal(typeMapping[activeSubTab], null)}
-               className="bg-[var(--primary)] text-[var(--bg-card)] px-5 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg flex items-center gap-2 whitespace-nowrap"
-            >
-               <MdAddCircle size={16} /> {newLabelMapping[activeSubTab]}
-            </motion.button>
+            {typeMapping[activeSubTab] && (
+              <motion.button
+                 whileHover={{ scale: 1.05 }}
+                 whileTap={{ scale: 0.95 }}
+                 onClick={() => openEditModal(typeMapping[activeSubTab], null)}
+                 className="bg-[var(--primary)] text-[var(--bg-card)] px-5 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg flex items-center gap-2 whitespace-nowrap"
+              >
+                 <MdAddCircle size={16} /> {newLabelMapping[activeSubTab]}
+              </motion.button>
+            )}
          </div>
       </div>
     </div>

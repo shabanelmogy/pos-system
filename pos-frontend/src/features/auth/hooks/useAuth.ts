@@ -21,7 +21,7 @@ const useAuth = () => {
         isWaiter: normalizedRole === 'waiter',
         
         canManageOrders: (['admin', 'manager', 'cashier', 'waiter'] as UserRole[]).includes(normalizedRole as any),
-        canCompleteOrders: (['admin', 'manager', 'cashier'] as UserRole[]).includes(normalizedRole as any),
+        canCompleteOrders: (['manager', 'cashier'] as UserRole[]).includes(normalizedRole as any),
         canAccessDashboard: (['admin', 'manager'] as UserRole[]).includes(normalizedRole as any),
         canManageSettings: normalizedRole === 'admin'
     };

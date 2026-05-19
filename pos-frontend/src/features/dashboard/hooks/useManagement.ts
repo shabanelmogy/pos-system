@@ -5,7 +5,7 @@ import { useManagementMutations } from "./useManagementMutations";
 import { useManagementModals } from "./useManagementModals";
 
 export const useManagement = () => {
-  const [activeSubTab, setActiveSubTab] = useState("Tables");
+  const [activeSubTab, setActiveSubTab] = useState("MenuTree");
   const [searchQuery, setSearchQuery] = useState("");
 
   const { confirmModal, openConfirm, closeConfirm, editModal, openEditModal, closeEditModal } = useManagementModals();

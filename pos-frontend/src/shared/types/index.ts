@@ -55,6 +55,7 @@ export interface Category {
   name: LocalizedString;
   parentId?: string | null;
   kitchenStationId?: string | null;
+  images?: string[];
 }
 
 export interface CategoryTreeNode extends Category {

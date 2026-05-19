@@ -19,6 +19,8 @@ interface Props {
   onSelectItem?: (item: MenuItem, category: CategoryTreeNode) => void;
   onAddChild: (parent: CategoryTreeNode) => void;
   onEdit: (node: CategoryTreeNode) => void;
+  expandEpoch?: number;
+  collapseEpoch?: number;
 }
 
 interface NodeProps extends Props {
@@ -27,11 +29,40 @@ interface NodeProps extends Props {
 }
 
 const TreeNode: React.FC<NodeProps> = ({
-  node, depth, allNodes, onSelectCategory, selectedCategoryId, selectedItemId, onSelectItem, onAddChild, onEdit,
+  node, depth, allNodes, onSelectCategory, selectedCategoryId, selectedItemId, onSelectItem, onAddChild, onEdit, expandEpoch, collapseEpoch,
 }) => {
   const [isOpen, setIsOpen] = useState(depth === 0);
   const queryClient = useQueryClient();
   const { localize } = useLocalize();
+
+  // Automatically expand parent nodes when a child/descendant category is selected
+  const isAncestor = React.useMemo(() => {
+    if (!selectedCategoryId) return false;
+    const check = (n: CategoryTreeNode): boolean => {
+      if (n.id === selectedCategoryId) return true;
+      return n.children.some(check);
+    };
+    return node.children.some(check);
+  }, [node.children, selectedCategoryId]);
+
+  React.useEffect(() => {
+    if (isAncestor) {
+      setIsOpen(true);
+    }
+  }, [isAncestor]);
+
+  // Listen to expand/collapse triggers from parent
+  React.useEffect(() => {
+    if (expandEpoch && expandEpoch > 0) {
+      setIsOpen(true);
+    }
+  }, [expandEpoch]);
+
+  React.useEffect(() => {
+    if (collapseEpoch && collapseEpoch > 0) {
+      setIsOpen(false);
+    }
+  }, [collapseEpoch]);
 
   const hasChildren = node.children.length > 0;
   const hasItems = (node.itemCount ?? 0) > 0;
@@ -91,14 +122,24 @@ const TreeNode: React.FC<NodeProps> = ({
           <span className="w-[10px] shrink-0" />
         )}
 
-        {/* Icon */}
-        <span className={`shrink-0 ${isSelected ? "text-primary-fg-70" : isLeaf ? "text-[var(--primary)]" : "text-amber-500"}`}>
-          {isLeaf
-            ? <FaLeaf size={13} />
-            : isOpen
-              ? <FaFolderOpen size={14} />
-              : <FaFolder size={14} />
-          }
+        {/* Icon / Image thumbnail */}
+        <span className="shrink-0">
+          {node.images && node.images.length > 0 ? (
+            <span className={`w-5 h-5 rounded-md overflow-hidden inline-flex items-center justify-center border ${
+              isSelected ? "border-white/30" : "border-[var(--border-main)]"
+            }`}>
+              <img src={node.images[0]} alt="" className="w-full h-full object-cover" />
+            </span>
+          ) : (
+            <span className={`shrink-0 ${isSelected ? "text-primary-fg-70" : isLeaf ? "text-[var(--primary)]" : "text-amber-500"}`}>
+              {isLeaf
+                ? <FaLeaf size={13} />
+                : isOpen
+                  ? <FaFolderOpen size={14} />
+                  : <FaFolder size={14} />
+              }
+            </span>
+          )}
         </span>
 
         {/* Name */}
@@ -175,6 +216,8 @@ const TreeNode: React.FC<NodeProps> = ({
                 onSelectItem={onSelectItem}
                 onAddChild={onAddChild}
                 onEdit={onEdit}
+                expandEpoch={expandEpoch}
+                collapseEpoch={collapseEpoch}
               />
             ))}
 
@@ -230,6 +273,9 @@ interface TreeViewProps {
 const CategoryTreeView: React.FC<TreeViewProps> = ({
   tree, selectedCategoryId, selectedItemId, onSelectCategory, onSelectItem, onAddRoot, onAddChild, onEdit,
 }) => {
+  const [expandEpoch, setExpandEpoch] = useState(0);
+  const [collapseEpoch, setCollapseEpoch] = useState(0);
+
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
@@ -245,6 +291,22 @@ const CategoryTreeView: React.FC<TreeViewProps> = ({
           className="flex items-center gap-2 bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-[var(--primary-fg)] text-[10px] font-black uppercase tracking-widest px-3 py-2 rounded-xl transition-all shadow-md shadow-[var(--primary)]/20 active:scale-95"
         >
           <FaPlus size={10} /> Add Root
+        </button>
+      </div>
+
+      {/* Toolbar for Expand/Collapse */}
+      <div className="flex gap-2 px-4 py-2 border-b border-[var(--border-main)] bg-[var(--bg-card-alt)]/10 flex-none items-center justify-end">
+        <button
+          onClick={() => setExpandEpoch(e => e + 1)}
+          className="text-[9px] font-black uppercase tracking-widest px-2.5 py-1.5 rounded-lg border border-[var(--border-main)] text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-hover)] transition-all active:scale-95"
+        >
+          Expand All
+        </button>
+        <button
+          onClick={() => setCollapseEpoch(e => e + 1)}
+          className="text-[9px] font-black uppercase tracking-widest px-2.5 py-1.5 rounded-lg border border-[var(--border-main)] text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-hover)] transition-all active:scale-95"
+        >
+          Collapse All
         </button>
       </div>
 
@@ -271,6 +333,8 @@ const CategoryTreeView: React.FC<TreeViewProps> = ({
               onSelectItem={onSelectItem}
               onAddChild={onAddChild}
               onEdit={onEdit}
+              expandEpoch={expandEpoch}
+              collapseEpoch={collapseEpoch}
             />
           ))
         )}

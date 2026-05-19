@@ -1,10 +1,10 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { enqueueSnackbar } from "notistack";
-import { FaTimes, FaFolderPlus, FaEdit } from "react-icons/fa";
+import { FaTimes, FaFolderPlus, FaEdit, FaFolder } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
-import { addCategory, updateCategory } from "../../pos/api/posApi";
+import { addCategory, updateCategory, uploadImage } from "../../pos/api/posApi";
 import { CategoryTreeNode } from "../../../shared/types";
 import useLocalize from "../../../hooks/useLocalize";
 
@@ -32,6 +32,9 @@ const CategoryFormModal: React.FC<Props> = ({
   const { localize } = useLocalize();
   const isEditing = !!editCategory;
 
+  const [imageUrl, setImageUrl] = useState<string>("");
+  const [isUploading, setIsUploading] = useState(false);
+
   const { register, handleSubmit, reset, setValue, formState: { errors } } = useForm<FormValues>({
     defaultValues: { name_en: "", name_ar: "", parentId: null },
   });
@@ -43,16 +46,47 @@ const CategoryFormModal: React.FC<Props> = ({
       setValue("name_en", editCategory.name.en || "");
       setValue("name_ar", editCategory.name.ar || "");
       setValue("parentId", editCategory.parentId ?? null);
+      setImageUrl(editCategory.images?.[0] || "");
     } else {
       reset({ name_en: "", name_ar: "", parentId: parentCategory?.id ?? null });
+      setImageUrl("");
     }
   }, [isOpen, isEditing, editCategory, parentCategory, reset, setValue]);
+
+  // Image upload mutation
+  const uploadMutation = useMutation({
+    mutationFn: (base64: string) => uploadImage(base64),
+    onMutate: () => setIsUploading(true),
+    onSuccess: (res: any) => {
+      setIsUploading(false);
+      const url = res.data?.url || res.data;
+      setImageUrl(url);
+      enqueueSnackbar("Image uploaded!", { variant: "success" });
+    },
+    onError: (err: any) => {
+      setIsUploading(false);
+      enqueueSnackbar(err?.response?.data?.message || "Failed to upload image", { variant: "error" });
+    },
+  });
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      enqueueSnackbar("Please select an image file", { variant: "warning" });
+      return;
+    }
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => uploadMutation.mutate(reader.result as string);
+  };
 
   const mutation = useMutation({
     mutationFn: (values: FormValues) => {
       const payload = {
         name: { en: values.name_en, ar: values.name_ar || undefined },
         parentId: values.parentId || null,
+        images: imageUrl ? [imageUrl] : [],
       };
       if (isEditing) {
         return updateCategory({ categoryId: editCategory!.id, ...payload });
@@ -135,6 +169,43 @@ const CategoryFormModal: React.FC<Props> = ({
 
             {/* Form */}
             <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-5">
+
+              {/* Image Upload */}
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)]">
+                  Category Image <span className="text-[var(--text-dim)]">(optional)</span>
+                </label>
+                <div className="flex items-center gap-4">
+                  <div className="relative group w-20 h-20 rounded-2xl border-2 border-dashed border-[var(--border-main)] hover:border-[var(--primary)]/60 bg-[var(--bg-main)] overflow-hidden flex items-center justify-center cursor-pointer transition-all shrink-0">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageChange}
+                      className="absolute inset-0 opacity-0 cursor-pointer z-10"
+                      disabled={isUploading}
+                    />
+                    {isUploading ? (
+                      <div className="w-5 h-5 rounded-full border-2 border-[var(--primary)] border-t-transparent animate-spin" />
+                    ) : imageUrl ? (
+                      <>
+                        <img src={imageUrl} alt="Category" className="w-full h-full object-cover" />
+                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all z-20">
+                          <span className="text-[9px] font-black uppercase text-white">Change</span>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="flex flex-col items-center gap-1 text-[var(--text-dim)] group-hover:text-[var(--text-muted)] transition-colors">
+                        <FaFolder size={20} />
+                        <span className="text-[8px] font-black uppercase">Upload</span>
+                      </div>
+                    )}
+                  </div>
+                  <p className="text-[10px] text-[var(--text-dim)] font-bold leading-relaxed">
+                    Upload an image for this category. It will appear in the tree view and the POS menu tabs.
+                  </p>
+                </div>
+              </div>
+
               {/* Name EN */}
               <div className="space-y-2">
                 <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)]">
@@ -192,8 +263,8 @@ const CategoryFormModal: React.FC<Props> = ({
                 </button>
                 <button
                   type="submit"
-                  disabled={mutation.isPending}
-                  className="flex-1 py-3 rounded-xl bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-black text-[11px] font-black uppercase tracking-widest transition-all disabled:opacity-50 shadow-lg shadow-[var(--primary)]/20"
+                  disabled={mutation.isPending || isUploading}
+                  className="flex-1 py-3 rounded-xl bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-[var(--primary-fg)] text-[11px] font-black uppercase tracking-widest transition-all disabled:opacity-50 shadow-lg shadow-[var(--primary)]/20"
                 >
                   {mutation.isPending ? "Saving…" : isEditing ? "Update" : "Create"}
                 </button>

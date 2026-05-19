@@ -154,7 +154,7 @@ const RecentOrders: React.FC = () => {
 
   const content = (
     <div className={`transition-all duration-700 ${isFullscreen ? "fixed inset-0 z-[9999] bg-black/60 p-2 backdrop-blur-2xl 2xl:p-8" : "relative mb-3 mt-1.5"}`}>
-      <div className={`bg-[var(--bg-card)] w-full rounded-[2rem] border border-[var(--bg-card-alt)] shadow-2xl overflow-hidden flex flex-col transition-all duration-700 2xl:rounded-[2.5rem] ${isFullscreen ? "h-full w-full max-w-7xl mx-auto" : "min-h-[360px] lg:h-[508px] 2xl:h-[635px]"}`}>
+      <div className={`bg-[var(--bg-card)] w-full rounded-[2rem] border border-[var(--bg-card-alt)] shadow-2xl overflow-hidden flex flex-col transition-all duration-700 2xl:rounded-[2.5rem] ${isFullscreen ? "h-full w-full max-w-7xl mx-auto" : "min-h-[360px] lg:h-[575px] 2xl:h-[710px]"}`}>
         
         {/* Top Header - Analytics & Summary */}
         <div className="sticky top-0 z-30 border-b border-[var(--bg-card-alt)] bg-gradient-to-br from-[var(--bg-card)] via-[var(--bg-card)] to-[var(--primary)]/5 px-3 py-2 2xl:px-5 2xl:py-4">

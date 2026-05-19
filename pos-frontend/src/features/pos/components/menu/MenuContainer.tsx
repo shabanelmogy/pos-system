@@ -341,7 +341,13 @@ const MenuContainer: React.FC = () => {
                     : "text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-hover)]"
                     }`}
                 >
-                  <MdRestaurantMenu className={isActive ? "text-[var(--primary-fg)]" : "text-[var(--primary)]"} />
+                  {category.images && category.images.length > 0 ? (
+                    <span className={`w-5 h-5 rounded-md overflow-hidden inline-flex items-center justify-center border ${isActive ? "border-white/30" : "border-[var(--border-main)]"}`}>
+                      <img src={category.images[0]} alt="" className="w-full h-full object-cover" />
+                    </span>
+                  ) : (
+                    <MdRestaurantMenu className={isActive ? "text-[var(--primary-fg)]" : "text-[var(--primary)]"} />
+                  )}
                   {localize(category.name)}
                 </button>
               );

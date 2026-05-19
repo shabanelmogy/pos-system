@@ -156,8 +156,14 @@ const CategoryDetailsView: React.FC<Props> = ({
         {/* Info Grid Card */}
         <div className="bg-[var(--bg-card)] border border-[var(--border-main)] rounded-3xl p-5 flex flex-col md:flex-row gap-6 shadow-sm">
           {/* Visual Indicator */}
-          <div className="w-20 h-20 md:w-24 md:h-24 rounded-2xl bg-[var(--primary)]/10 text-[var(--primary)] flex items-center justify-center shrink-0 border border-[var(--primary)]/20 shadow-inner">
-            {isBranch ? <FaFolderOpen size={36} /> : <FaLeaf size={32} />}
+          <div className="w-20 h-20 md:w-24 md:h-24 rounded-2xl overflow-hidden flex items-center justify-center shrink-0 border border-[var(--border-main)] shadow-inner">
+            {category.images && category.images.length > 0 ? (
+              <img src={category.images[0]} alt={localize(category.name)} className="w-full h-full object-cover" />
+            ) : (
+              <div className="w-full h-full bg-[var(--primary)]/10 text-[var(--primary)] flex items-center justify-center">
+                {isBranch ? <FaFolderOpen size={36} /> : <FaLeaf size={32} />}
+              </div>
+            )}
           </div>
 
           {/* Core Info */}

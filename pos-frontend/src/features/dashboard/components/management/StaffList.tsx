@@ -4,6 +4,7 @@ import { MdPeople, MdShield, MdComputer, MdStore, MdEmail, MdPhone, MdEdit, MdDe
 import { LoadingState, ErrorState, EmptyState } from "./StatusStates";
 import { User } from "../../api/dashboardApi";
 import { useTranslation } from "react-i18next";
+import useLocalize from "../../../../hooks/useLocalize";
 
 interface StaffListProps {
   data: User[];
@@ -17,6 +18,7 @@ interface StaffListProps {
 
 const StaffList: React.FC<StaffListProps> = ({ data, loading, error, onEdit, onDelete, onRetry, searchQuery }) => {
   const { t } = useTranslation();
+  const { localize } = useLocalize();
   if (loading) return <LoadingState />;
   if (error) return <ErrorState label={t('dashboard.management.tabs.staff')} onRetry={onRetry} />;
   
@@ -87,7 +89,7 @@ const StaffList: React.FC<StaffListProps> = ({ data, loading, error, onEdit, onD
                       <div className="w-8 h-8 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-400">
                          <MdStore size={18} />
                       </div>
-                      <p className="text-[var(--text-muted)] text-xs font-black uppercase tracking-widest">{user.branch?.name || t('dashboard.management.lists.global')}</p>
+                      <p className="text-[var(--text-muted)] text-xs font-black uppercase tracking-widest">{user.branch?.name ? localize(user.branch.name) : t('dashboard.management.lists.global')}</p>
                     </div>
                 </td>
                 <td className="px-6 py-4">
