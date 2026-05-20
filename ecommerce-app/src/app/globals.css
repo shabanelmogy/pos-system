@@ -1,26 +1,136 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* ── Default Tokens (Dark Mode, Gold Palette) ── */
+  --primary: #f6b100;
+  --primary-hover: #e5a600;
+  --primary-light: rgba(246, 177, 0, 0.15);
+  --primary-fg: #000000;
+
+  --bg-main: #1f1f1f;
+  --bg-card: #1a1a1a;
+  --bg-card-alt: #262626;
+  --bg-input: #1a1a1a;
+  --bg-hover: #2e2e2e;
+
+  --text-main: #f5f5f5;
+  --text-muted: #ababab;
+  --text-dim: #666666;
+
+  --border-main: rgba(246, 177, 0, 0.1);
+  --shadow-main: rgba(0, 0, 0, 0.5);
+
+  --status-success: #10b981;
+  --status-success-bg: rgba(16, 185, 129, 0.1);
+  --status-warning: #f59e0b;
+  --status-warning-bg: rgba(245, 158, 11, 0.1);
+  --status-error: #ef4444;
+  --status-error-bg: rgba(239, 68, 68, 0.1);
+
+  --background: var(--bg-main);
+  --foreground: var(--text-main);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+/* ── Light Mode overrides ── */
+[data-theme='light'],
+[data-mode='light'] {
+  --bg-main: #f3f4f6;
+  --bg-card: #ffffff;
+  --bg-card-alt: #f9fafb;
+  --bg-input: #ffffff;
+  --bg-hover: #f1f5f9;
+  --text-main: #111827;
+  --text-muted: #4b5563;
+  --text-dim: #9ca3af;
+  --border-main: #e5e7eb;
+  --shadow-main: rgba(0, 0, 0, 0.08);
+  --status-success: #059669;
+  --status-success-bg: #ecfdf5;
+  --status-warning: #d97706;
+  --status-warning-bg: #fffbeb;
+  --status-error: #dc2626;
+  --status-error-bg: #fef2f2;
+
+  --background: var(--bg-main);
+  --foreground: var(--text-main);
+}
+
+/* ── Palettes overrides ── */
+[data-palette='blue'] {
+  --primary: #3b82f6;
+  --primary-hover: #2563eb;
+  --primary-light: rgba(59, 130, 246, 0.15);
+  --primary-fg: #ffffff;
+}
+
+[data-palette='green'] {
+  --primary: #10b981;
+  --primary-hover: #059669;
+  --primary-light: rgba(16, 185, 129, 0.15);
+  --primary-fg: #ffffff;
+}
+
+[data-palette='black'] {
+  --primary: #f5f5f5;
+  --primary-hover: #cccccc;
+  --primary-light: rgba(245, 245, 245, 0.1);
+  --primary-fg: #000000;
+}
+
+[data-palette='black'][data-mode='light'],
+[data-palette='black'][data-theme='light'] {
+  --primary: #111111;
+  --primary-hover: #333333;
+  --primary-light: rgba(0, 0, 0, 0.06);
+  --primary-fg: #ffffff;
+}
+
+@theme {
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-light: var(--primary-light);
+  --color-primary-fg: var(--primary-fg);
+
+  --color-bg-main: var(--bg-main);
+  --color-bg-card: var(--bg-card);
+  --color-bg-card-alt: var(--bg-card-alt);
+  --color-bg-input: var(--bg-input);
+  --color-bg-hover: var(--bg-hover);
+
+  --color-text-main: var(--text-main);
+  --color-text-muted: var(--text-muted);
+  --color-text-dim: var(--text-dim);
+
+  --color-border-main: var(--border-main);
+  --color-shadow-main: var(--shadow-main);
+
+  --color-status-success: var(--status-success);
+  --color-status-success-bg: var(--status-success-bg);
+  --color-status-warning: var(--status-warning);
+  --color-status-warning-bg: var(--status-warning-bg);
+  --color-status-error: var(--status-error);
+  --color-status-error-bg: var(--status-error-bg);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  transition: background-color 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+              color 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
+*,
+*::before,
+*::after {
+  transition: background-color 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+              border-color 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.no-transition * {
+  transition: none !important;
+}
+
