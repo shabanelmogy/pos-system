@@ -8,20 +8,25 @@ import { useAuthorizationStore } from "../store/useAuthorizationStore";
 import { useAuthorization } from "../hooks/useAuthorization";
 import BackButton from "@/shared/components/BackButton";
 import BottomNav from "@/shared/components/BottomNav";
-import { 
-  MdSecurity, 
-  MdPeople, 
-  MdAdd, 
-  MdEdit, 
-  MdDelete, 
-  MdContentCopy, 
-  MdSearch, 
-  MdCheck, 
-  MdClose, 
-  MdSave, 
-  MdToggleOn, 
+import {
+  MdSecurity,
+  MdPeople,
+  MdAdd,
+  MdEdit,
+  MdDelete,
+  MdContentCopy,
+  MdSearch,
+  MdCheck,
+  MdClose,
+  MdSave,
+  MdToggleOn,
   MdToggleOff,
-  MdShield
+  MdShield,
+  MdLock,
+  MdLockOpen,
+  MdPerson,
+  MdAdminPanelSettings,
+  MdInfo,
 } from "react-icons/md";
 import { motion, AnimatePresence } from "framer-motion";
 import { enqueueSnackbar } from "notistack";
@@ -31,212 +36,192 @@ interface UserWithRoles {
   name: string;
   email: string;
   role: string;
-  roles?: string[]; // mapped from DB rbac
+  roles?: string[];
 }
 
+// ── Module icon map ──────────────────────────────────────────
+const MODULE_ICONS: Record<string, React.ReactNode> = {
+  users:       <MdPeople size={14} />,
+  roles:       <MdShield size={14} />,
+  products:    <span style={{fontSize:12}}>📦</span>,
+  inventory:   <span style={{fontSize:12}}>🗃️</span>,
+  orders:      <span style={{fontSize:12}}>🧾</span>,
+  customers:   <MdPerson size={14} />,
+  pos:         <span style={{fontSize:12}}>🖥️</span>,
+  accounting:  <span style={{fontSize:12}}>💰</span>,
+  hr:          <span style={{fontSize:12}}>👥</span>,
+  reporting:   <span style={{fontSize:12}}>📊</span>,
+  system:      <MdAdminPanelSettings size={14} />,
+  ecommerce:   <span style={{fontSize:12}}>🛒</span>,
+  marketing:   <span style={{fontSize:12}}>📣</span>,
+  shipping:    <span style={{fontSize:12}}>🚚</span>,
+  recruitment: <span style={{fontSize:12}}>🧩</span>,
+};
+
+const MODULE_COLORS: Record<string, string> = {
+  users:       "var(--primary)",
+  roles:       "#8b5cf6",
+  products:    "#f59e0b",
+  inventory:   "#10b981",
+  orders:      "#3b82f6",
+  customers:   "#ec4899",
+  pos:         "#06b6d4",
+  accounting:  "#84cc16",
+  hr:          "#f97316",
+  reporting:   "#6366f1",
+  system:      "#ef4444",
+  ecommerce:   "#14b8a6",
+  marketing:   "#e879f9",
+  shipping:    "#0ea5e9",
+  recruitment: "#a78bfa",
+};
+
+// ── Progress Bar Component ───────────────────────────────────
+const ProgressBar: React.FC<{ value: number; total: number; color?: string }> = ({ value, total, color = "var(--primary)" }) => {
+  const pct = total === 0 ? 0 : Math.round((value / total) * 100);
+  return (
+    <div style={{ display:"flex", alignItems:"center", gap:6 }}>
+      <div style={{ flex:1, height:3, background:"var(--bg-main)", borderRadius:99, overflow:"hidden" }}>
+        <div style={{ width:`${pct}%`, height:"100%", background:color, borderRadius:99, transition:"width 0.4s ease" }} />
+      </div>
+      <span style={{ fontSize:8, fontWeight:900, color:"var(--text-muted)", letterSpacing:"0.1em", whiteSpace:"nowrap", minWidth:28 }}>
+        {value}/{total}
+      </span>
+    </div>
+  );
+};
+
+// ── Main Component ────────────────────────────────────────────
 const PermissionManagement: React.FC = () => {
   const queryClient = useQueryClient();
   const { can } = useAuthorization();
-  const setAllRoles = useAuthorizationStore((state) => state.setAllRoles);
-  const deactivatedRoleIds = useAuthorizationStore((state) => state.deactivatedRoleIds);
-  const toggleRoleActive = useAuthorizationStore((state) => state.toggleRoleActive);
+  const setAllRoles = useAuthorizationStore((s) => s.setAllRoles);
+  const deactivatedRoleIds = useAuthorizationStore((s) => s.deactivatedRoleIds);
+  const toggleRoleActive = useAuthorizationStore((s) => s.toggleRoleActive);
 
-  // Tabs: "roles" or "user-assignments"
   const [activeTab, setActiveTab] = useState<"roles" | "user-assignments">("roles");
-
-  // Filter States
-  const [roleSearchQuery, setRoleSearchQuery] = useState("");
-  const [permissionSearchQuery, setPermissionSearchQuery] = useState("");
-  const [userSearchQuery, setUserSearchQuery] = useState("");
-
-  // Selection States
+  const [roleSearch, setRoleSearch] = useState("");
+  const [permSearch, setPermSearch] = useState("");
+  const [userSearch, setUserSearch] = useState("");
   const [selectedRoleId, setSelectedRoleId] = useState<string | null>(null);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
-
-  // Edit / Add Modal States
   const [isRoleModalOpen, setIsRoleModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<"create" | "edit" | "clone">("create");
   const [roleForm, setRoleForm] = useState({ name: "", description: "" });
-  const [selectedPermissionIds, setSelectedPermissionIds] = useState<string[]>([]);
-
-  // User assignment state
+  const [selectedPermIds, setSelectedPermIds] = useState<string[]>([]);
   const [userRoleIds, setUserRoleIds] = useState<string[]>([]);
+  const [hoveredRoleId, setHoveredRoleId] = useState<string | null>(null);
 
-  // 1. Fetch System Permissions
-  const { data: permissionsRes, isLoading: isLoadingPerms } = useQuery({
+  // ── Queries ──────────────────────────────────────────────────
+  const { data: permsRes, isLoading: loadingPerms } = useQuery({
     queryKey: ["rbac-permissions"],
     queryFn: () => authorizationApi.getPermissions(),
   });
-  const allPermissions = useMemo(() => permissionsRes?.data?.data || [], [permissionsRes]);
+  const allPerms: Permission[] = useMemo(() => permsRes?.data?.data || [], [permsRes]);
 
-  // 2. Fetch System Roles
-  const { data: rolesRes, isLoading: isLoadingRoles } = useQuery({
+  const { data: rolesRes, isLoading: loadingRoles } = useQuery({
     queryKey: ["rbac-roles"],
     queryFn: () => authorizationApi.getRoles(),
   });
-  const allRoles = useMemo(() => rolesRes?.data?.data || [], [rolesRes]);
+  const allRoles: Role[] = useMemo(() => rolesRes?.data?.data || [], [rolesRes]);
 
-  // Keep authorization store in sync with all roles to allow dynamic permission deactivation filters
+  useEffect(() => { if (allRoles.length > 0) setAllRoles(allRoles); }, [allRoles, setAllRoles]);
+  useEffect(() => { if (allRoles.length > 0 && !selectedRoleId) setSelectedRoleId(allRoles[0].id); }, [allRoles, selectedRoleId]);
+
+  const selectedRole = useMemo(() => allRoles.find((r) => r.id === selectedRoleId) || null, [allRoles, selectedRoleId]);
+
   useEffect(() => {
-    if (allRoles.length > 0) {
-      setAllRoles(allRoles);
-    }
-  }, [allRoles, setAllRoles]);
-
-  // Set default selected role
-  useEffect(() => {
-    if (allRoles.length > 0 && !selectedRoleId) {
-      setSelectedRoleId(allRoles[0].id);
-    }
-  }, [allRoles, selectedRoleId]);
-
-  const selectedRole = useMemo(() => {
-    return allRoles.find((r) => r.id === selectedRoleId) || null;
-  }, [allRoles, selectedRoleId]);
-
-  // Initialize selected permissions for selected role
-  useEffect(() => {
-    if (selectedRole) {
-      setSelectedPermissionIds(selectedRole.permissions?.map((p) => p.id) || []);
-    } else {
-      setSelectedPermissionIds([]);
-    }
+    setSelectedPermIds(selectedRole?.permissions?.map((p) => p.id) || []);
   }, [selectedRole]);
 
-  // 3. Fetch Users
-  const { data: usersRes, isLoading: isLoadingUsers } = useQuery({
+  const { data: usersRes, isLoading: loadingUsers } = useQuery({
     queryKey: ["rbac-users"],
     queryFn: () => getUsers(),
   });
   const allUsers = useMemo(() => (usersRes?.data?.data || []) as UserWithRoles[], [usersRes]);
 
-  // Set default selected user
-  useEffect(() => {
-    if (allUsers.length > 0 && !selectedUserId) {
-      setSelectedUserId(allUsers[0].id);
-    }
-  }, [allUsers, selectedUserId]);
+  useEffect(() => { if (allUsers.length > 0 && !selectedUserId) setSelectedUserId(allUsers[0].id); }, [allUsers, selectedUserId]);
 
-  const selectedUser = useMemo(() => {
-    return allUsers.find((u) => u.id === selectedUserId) || null;
-  }, [allUsers, selectedUserId]);
+  const selectedUser = useMemo(() => allUsers.find((u) => u.id === selectedUserId) || null, [allUsers, selectedUserId]);
 
-  // Fetch roles of selected user
   const { data: userRolesRes, refetch: refetchUserRoles } = useQuery({
     queryKey: ["rbac-user-roles", selectedUserId],
     queryFn: () => authorizationApi.getUserRoles(selectedUserId!),
     enabled: !!selectedUserId,
   });
-
   useEffect(() => {
-    if (userRolesRes?.data?.data) {
-      setUserRoleIds(userRolesRes.data.data.map((r) => r.id));
-    } else {
-      setUserRoleIds([]);
-    }
+    setUserRoleIds(userRolesRes?.data?.data?.map((r: Role) => r.id) || []);
   }, [userRolesRes]);
 
-  // Mutation: Create / Edit Role
+  // ── Mutations ─────────────────────────────────────────────────
   const roleMutation = useMutation({
-    mutationFn: (data: { id?: string; name: string; description: string; permissionIds: string[] }) => {
-      if (data.id) {
-        return authorizationApi.updateRole(data.id, {
-          name: data.name,
-          description: data.description,
-          permissionIds: data.permissionIds,
-        });
-      } else {
-        return authorizationApi.createRole({
-          name: data.name,
-          description: data.description,
-          permissionIds: data.permissionIds,
-        });
-      }
-    },
+    mutationFn: (d: { id?: string; name: string; description: string; permissionIds: string[] }) =>
+      d.id ? authorizationApi.updateRole(d.id, { name: d.name, description: d.description, permissionIds: d.permissionIds })
+           : authorizationApi.createRole({ name: d.name, description: d.description, permissionIds: d.permissionIds }),
     onSuccess: (res) => {
       queryClient.invalidateQueries({ queryKey: ["rbac-roles"] });
-      enqueueSnackbar(res.data.message || "Role saved successfully!", { variant: "success" });
+      enqueueSnackbar(res.data.message || "Role saved!", { variant: "success" });
       setIsRoleModalOpen(false);
     },
-    onError: (err: any) => {
-      enqueueSnackbar(err.response?.data?.message || "Failed to save role.", { variant: "error" });
-    },
+    onError: (e: any) => enqueueSnackbar(e.response?.data?.message || "Failed to save role.", { variant: "error" }),
   });
 
-  // Mutation: Delete Role
   const deleteRoleMutation = useMutation({
     mutationFn: (id: string) => authorizationApi.deleteRole(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["rbac-roles"] });
-      enqueueSnackbar("Role deleted successfully", { variant: "success" });
+      enqueueSnackbar("Role deleted", { variant: "success" });
       setSelectedRoleId(null);
     },
-    onError: (err: any) => {
-      enqueueSnackbar(err.response?.data?.message || "Failed to delete role.", { variant: "error" });
-    },
+    onError: (e: any) => enqueueSnackbar(e.response?.data?.message || "Failed to delete role.", { variant: "error" }),
   });
 
-  // Mutation: Assign User Roles
   const assignUserRolesMutation = useMutation({
-    mutationFn: (data: { userId: string; roleIds: string[] }) =>
-      authorizationApi.assignUserRoles(data.userId, data.roleIds),
+    mutationFn: (d: { userId: string; roleIds: string[] }) => authorizationApi.assignUserRoles(d.userId, d.roleIds),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["rbac-user-roles", selectedUserId] });
-      enqueueSnackbar("User roles updated successfully!", { variant: "success" });
+      enqueueSnackbar("User roles updated!", { variant: "success" });
     },
-    onError: (err: any) => {
-      enqueueSnackbar(err.response?.data?.message || "Failed to assign roles.", { variant: "error" });
-    },
+    onError: (e: any) => enqueueSnackbar(e.response?.data?.message || "Failed to assign roles.", { variant: "error" }),
   });
 
-  const handleSelectAllGlobal = () => {
-    setSelectedPermissionIds(allPermissions.map((p) => p.id));
-    enqueueSnackbar("Selected all system permissions", { variant: "info" });
-  };
-
-  const handleClearAllGlobal = () => {
-    setSelectedPermissionIds([]);
-    enqueueSnackbar("Cleared all permissions", { variant: "info" });
-  };
-
+  // ── Helpers ───────────────────────────────────────────────────
   const getMappedCategory = (cat: string) => {
     if (cat === "catalog") return "products";
     if (cat === "crm") return "customers";
     return cat;
   };
 
-  // Group Permissions by Category Module
-  const groupedPermissions = useMemo(() => {
-    const groups: { [category: string]: Permission[] } = {};
-    allPermissions.forEach((p) => {
-      const mappedCat = getMappedCategory(p.category);
-      if (!groups[mappedCat]) groups[mappedCat] = [];
-      
-      // Filter permissions by search query
-      const matchSearch = 
-        p.name.toLowerCase().includes(permissionSearchQuery.toLowerCase()) || 
-        p.key.toLowerCase().includes(permissionSearchQuery.toLowerCase());
-      
-      if (matchSearch) {
-        groups[mappedCat].push(p);
+  const groupedPerms = useMemo(() => {
+    const groups: { [cat: string]: Permission[] } = {};
+    allPerms.forEach((p) => {
+      const cat = getMappedCategory(p.category);
+      if (!groups[cat]) groups[cat] = [];
+      const q = permSearch.toLowerCase();
+      if (!q || p.name.toLowerCase().includes(q) || p.key.toLowerCase().includes(q)) {
+        groups[cat].push(p);
       }
     });
     return groups;
-  }, [allPermissions, permissionSearchQuery]);
+  }, [allPerms, permSearch]);
 
-  // Compute Effective Permissions of the Selected User (real-time preview)
-  const userEffectivePermissions = useMemo(() => {
-    const selectedRoles = allRoles.filter((r) => userRoleIds.includes(r.id));
-    const permsSet = new Set<string>();
-    selectedRoles.forEach((role) => {
-      // Exclude if deactivated
-      if (deactivatedRoleIds.includes(role.id)) return;
-      role.permissions?.forEach((p) => permsSet.add(p.key));
-    });
-    return Array.from(permsSet);
+  const userEffectivePerms = useMemo(() => {
+    const set = new Set<string>();
+    allRoles.filter((r) => userRoleIds.includes(r.id) && !deactivatedRoleIds.includes(r.id))
+      .forEach((r) => r.permissions?.forEach((p) => set.add(p.key)));
+    return Array.from(set);
   }, [userRoleIds, allRoles, deactivatedRoleIds]);
 
-  // Role Action Helpers
+  const filteredRoles = useMemo(
+    () => allRoles.filter((r) => r.name.toLowerCase().includes(roleSearch.toLowerCase())),
+    [allRoles, roleSearch]
+  );
+
+  const filteredUsers = useMemo(
+    () => allUsers.filter((u) => u.name.toLowerCase().includes(userSearch.toLowerCase()) || u.email.toLowerCase().includes(userSearch.toLowerCase())),
+    [allUsers, userSearch]
+  );
+
   const handleOpenRoleModal = (mode: "create" | "edit" | "clone") => {
     setModalMode(mode);
     if (mode === "create") {
@@ -252,607 +237,550 @@ const PermissionManagement: React.FC = () => {
 
   const handleSaveRole = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!roleForm.name.trim()) {
-      enqueueSnackbar("Role name is required", { variant: "warning" });
-      return;
-    }
+    if (!roleForm.name.trim()) { enqueueSnackbar("Role name is required", { variant: "warning" }); return; }
     roleMutation.mutate({
       id: modalMode === "edit" && selectedRole ? selectedRole.id : undefined,
       name: roleForm.name,
       description: roleForm.description,
-      permissionIds: modalMode === "create" ? [] : selectedPermissionIds,
+      permissionIds: modalMode === "create" ? [] : selectedPermIds,
     });
   };
 
   const handleDeleteRole = (id: string) => {
-    if (window.confirm("Are you sure you want to delete this role? Any users assigned to this role will lose its permissions.")) {
+    if (window.confirm("Delete this role? Users assigned to it will lose its permissions.")) {
       deleteRoleMutation.mutate(id);
     }
   };
 
-  const handleTogglePermission = (permissionId: string) => {
-    setSelectedPermissionIds((prev) =>
-      prev.includes(permissionId)
-        ? prev.filter((id) => id !== permissionId)
-        : [...prev, permissionId]
-    );
-  };
+  const handleTogglePerm = (id: string) =>
+    setSelectedPermIds((prev) => prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]);
 
-  const handleSavePermissionMatrix = () => {
+  const handleSaveMatrix = () => {
     if (!selectedRole) return;
-    roleMutation.mutate({
-      id: selectedRole.id,
-      name: selectedRole.name,
-      description: selectedRole.description || "",
-      permissionIds: selectedPermissionIds,
-    });
+    roleMutation.mutate({ id: selectedRole.id, name: selectedRole.name, description: selectedRole.description || "", permissionIds: selectedPermIds });
   };
 
-  const handleToggleModulePermissions = (category: string, selectAll: boolean) => {
-    const modulePermIds = groupedPermissions[category]?.map((p) => p.id) || [];
-    if (selectAll) {
-      setSelectedPermissionIds((prev) => Array.from(new Set([...prev, ...modulePermIds])));
-    } else {
-      setSelectedPermissionIds((prev) => prev.filter((id) => !modulePermIds.includes(id)));
-    }
-  };
-
-  const handleToggleUserRole = (roleId: string) => {
-    setUserRoleIds((prev) =>
-      prev.includes(roleId) ? prev.filter((id) => id !== roleId) : [...prev, roleId]
-    );
+  const handleModuleToggle = (cat: string, all: boolean) => {
+    const ids = groupedPerms[cat]?.map((p) => p.id) || [];
+    if (all) setSelectedPermIds((prev) => Array.from(new Set([...prev, ...ids])));
+    else setSelectedPermIds((prev) => prev.filter((id) => !ids.includes(id)));
   };
 
   const handleSaveUserRoles = () => {
     if (!selectedUserId) return;
-    assignUserRolesMutation.mutate({
-      userId: selectedUserId,
-      roleIds: userRoleIds,
-    });
+    assignUserRolesMutation.mutate({ userId: selectedUserId, roleIds: userRoleIds });
   };
 
-  const filteredRoles = useMemo(() => {
-    return allRoles.filter((r) => r.name.toLowerCase().includes(roleSearchQuery.toLowerCase()));
-  }, [allRoles, roleSearchQuery]);
-
-  const filteredUsers = useMemo(() => {
-    return allUsers.filter(
-      (u) =>
-        u.name.toLowerCase().includes(userSearchQuery.toLowerCase()) ||
-        u.email.toLowerCase().includes(userSearchQuery.toLowerCase())
-    );
-  }, [allUsers, userSearchQuery]);
-
-  const isSavingMatrix = roleMutation.isPending;
-  const isSavingUserRoles = assignUserRolesMutation.isPending;
-
+  // ────────────────────────────────────────────────────────────
   return (
-    <section className="bg-[var(--bg-main)] h-[calc(100vh-5rem)] overflow-hidden flex flex-col">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between px-6 md:px-10 py-5 gap-4">
-        <div className="flex items-center gap-4">
+    <section style={{ background: "var(--bg-main)", height: "calc(100vh - 5rem)", overflow: "hidden", display: "flex", flexDirection: "column" }}>
+
+      {/* ── PAGE HEADER ───────────────────────────────── */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 28px", borderBottom: "1px solid var(--border-main)", background: "var(--bg-card)", flexWrap: "wrap", gap: 12 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
           <BackButton />
-          <div>
-            <h1 className="text-[var(--text-main)] text-2xl font-black uppercase tracking-tighter flex items-center gap-2">
-              <MdShield className="text-[var(--primary)]" /> Authorization & Access Control
-            </h1>
-            <p className="text-[var(--text-muted)] text-[10px] font-bold uppercase tracking-widest mt-1">
-              Configure system roles, permissions, and security scope mappings
-            </p>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <div style={{ width: 36, height: 36, background: "var(--primary)", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <MdShield size={20} color="#000" />
+            </div>
+            <div>
+              <h1 style={{ fontSize: 16, fontWeight: 900, textTransform: "uppercase", letterSpacing: "-0.03em", color: "var(--text-main)", lineHeight: 1 }}>
+                Access Control
+              </h1>
+              <p style={{ fontSize: 9, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.15em", marginTop: 3 }}>
+                Roles · Permissions · User Assignments
+              </p>
+            </div>
           </div>
         </div>
 
-        {/* Tab Selection */}
-        <div className="flex bg-[var(--bg-card)] p-1 rounded-2xl border border-[var(--border-main)] self-stretch md:self-auto shadow-inner">
-          <button
-            onClick={() => setActiveTab("roles")}
-            className={`flex-1 md:flex-none px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 transition-all ${
-              activeTab === "roles"
-                ? "bg-[var(--primary)] text-black font-black"
-                : "text-[var(--text-muted)] hover:text-[var(--text-main)]"
-            }`}
-          >
-            <MdSecurity size={14} /> Roles & Permissions
-          </button>
-          <button
-            onClick={() => setActiveTab("user-assignments")}
-            className={`flex-1 md:flex-none px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 transition-all ${
-              activeTab === "user-assignments"
-                ? "bg-[var(--primary)] text-black font-black"
-                : "text-[var(--text-muted)] hover:text-[var(--text-main)]"
-            }`}
-          >
-            <MdPeople size={14} /> User Role Assignments
-          </button>
+        {/* Tab switcher */}
+        <div style={{ display: "flex", background: "var(--bg-main)", borderRadius: 12, padding: 3, border: "1px solid var(--border-main)", gap: 3 }}>
+          {([
+            { key: "roles", icon: <MdSecurity size={13} />, label: "Roles & Permissions" },
+            { key: "user-assignments", icon: <MdPeople size={13} />, label: "User Assignments" },
+          ] as const).map((tab) => (
+            <button
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key)}
+              style={{
+                display: "flex", alignItems: "center", gap: 6, padding: "7px 14px",
+                borderRadius: 9, fontSize: 9, fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.1em",
+                border: "none", cursor: "pointer", transition: "all 0.2s",
+                background: activeTab === tab.key ? "var(--primary)" : "transparent",
+                color: activeTab === tab.key ? "#000" : "var(--text-muted)",
+              }}
+            >
+              {tab.icon} {tab.label}
+            </button>
+          ))}
         </div>
       </div>
 
-      <div className="flex-1 overflow-hidden px-6 md:px-10 pb-24 lg:pb-10 flex flex-col lg:flex-row gap-6 md:gap-8">
-        
-        {/* LEFT PANEL: LISTS */}
-        <div className="w-full lg:w-1/3 bg-[var(--bg-card)] rounded-3xl border border-[var(--border-main)] flex flex-col overflow-hidden max-h-[300px] lg:max-h-full shadow-lg">
-          {activeTab === "roles" ? (
-            <>
-              {/* Roles Header */}
-              <div className="p-4 border-b border-[var(--border-main)] bg-[var(--bg-card-alt)]/30 flex items-center justify-between">
-                <h2 className="text-[var(--text-muted)] text-[10px] font-black uppercase tracking-widest">
-                  Active System Roles
-                </h2>
-                {can("roles:create") && (
-                  <button
-                    onClick={() => handleOpenRoleModal("create")}
-                    className="p-1.5 bg-[var(--primary)] text-black rounded-lg hover:bg-[var(--primary-hover)] transition-all shadow-md"
-                    title="Create New Role"
-                  >
-                    <MdAdd size={16} />
-                  </button>
-                )}
-              </div>
+      {/* ── BODY ──────────────────────────────────────── */}
+      <div style={{ flex: 1, overflow: "hidden", display: "flex", gap: 0 }}>
 
-              {/* Roles Search */}
-              <div className="p-3 border-b border-[var(--border-main)]">
-                <div className="relative">
-                  <MdSearch className="absolute start-3 top-2.5 text-[var(--text-muted)]" size={16} />
-                  <input
-                    type="text"
-                    placeholder="Search roles..."
-                    value={roleSearchQuery}
-                    onChange={(e) => setRoleSearchQuery(e.target.value)}
-                    className="w-full bg-[var(--bg-main)] border border-[var(--border-main)] rounded-xl ps-9 pe-4 py-2 text-xs font-bold focus:outline-none focus:border-[var(--primary)] text-[var(--text-main)] placeholder-[var(--text-muted)]"
-                  />
-                </div>
-              </div>
+        {/* ── LEFT SIDEBAR ──────────────────────────── */}
+        <div style={{
+          width: 260, flexShrink: 0, display: "flex", flexDirection: "column",
+          borderRight: "1px solid var(--border-main)", background: "var(--bg-card)", overflow: "hidden",
+        }}>
+          {/* Sidebar header */}
+          <div style={{ padding: "12px 14px", borderBottom: "1px solid var(--border-main)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <span style={{ fontSize: 9, fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.15em", color: "var(--text-muted)" }}>
+              {activeTab === "roles" ? `Roles (${filteredRoles.length})` : `Users (${filteredUsers.length})`}
+            </span>
+            {activeTab === "roles" && can("roles:create") && (
+              <button
+                onClick={() => handleOpenRoleModal("create")}
+                title="New Role"
+                style={{ width: 24, height: 24, background: "var(--primary)", border: "none", borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}
+              >
+                <MdAdd size={14} color="#000" />
+              </button>
+            )}
+          </div>
 
-              {/* Roles List */}
-              <div className="flex-1 overflow-y-auto custom-scrollbar p-3 space-y-2">
-                {isLoadingRoles ? (
-                  <div className="text-center py-6 text-xs text-[var(--text-muted)] uppercase tracking-wider font-bold">
-                    Loading Roles...
-                  </div>
-                ) : filteredRoles.length === 0 ? (
-                  <div className="text-center py-6 text-xs text-[var(--text-muted)] uppercase tracking-wider font-bold">
-                    No roles found
-                  </div>
-                ) : (
-                  filteredRoles.map((role) => {
-                    const isActive = !deactivatedRoleIds.includes(role.id);
-                    return (
-                      <div
-                        key={role.id}
-                        onClick={() => setSelectedRoleId(role.id)}
-                        className={`w-full flex items-center justify-between p-3.5 rounded-2xl cursor-pointer transition-all border ${
-                          selectedRoleId === role.id
-                            ? "bg-[var(--primary)] text-black border-transparent shadow-lg shadow-[var(--primary)]/10"
-                            : "bg-[var(--bg-main)] border-transparent text-[var(--text-main)] hover:border-[var(--primary)]/30"
-                        }`}
-                      >
-                        <div className="text-start flex-1 min-w-0">
-                          <p className="text-xs font-black uppercase tracking-tight leading-none">
-                            {role.name}
-                          </p>
-                          <p
-                            className={`text-[8px] font-bold mt-1.5 truncate max-w-[180px] ${
-                              selectedRoleId === role.id ? "text-black/60" : "text-[var(--text-dim)]"
-                            }`}
-                          >
-                            {role.description || "No description"}
-                          </p>
+          {/* Search */}
+          <div style={{ padding: "10px 12px", borderBottom: "1px solid var(--border-main)" }}>
+            <div style={{ position: "relative" }}>
+              <MdSearch style={{ position: "absolute", left: 9, top: "50%", transform: "translateY(-50%)", color: "var(--text-muted)", pointerEvents: "none" }} size={14} />
+              <input
+                type="text"
+                placeholder={activeTab === "roles" ? "Search roles…" : "Search users…"}
+                value={activeTab === "roles" ? roleSearch : userSearch}
+                onChange={(e) => activeTab === "roles" ? setRoleSearch(e.target.value) : setUserSearch(e.target.value)}
+                style={{
+                  width: "100%", background: "var(--bg-main)", border: "1px solid var(--border-main)",
+                  borderRadius: 8, paddingLeft: 30, paddingRight: 10, paddingTop: 6, paddingBottom: 6,
+                  fontSize: 11, color: "var(--text-main)", outline: "none", boxSizing: "border-box",
+                }}
+              />
+            </div>
+          </div>
+
+          {/* List */}
+          <div style={{ flex: 1, overflowY: "auto" }} className="custom-scrollbar">
+            {activeTab === "roles" ? (
+              loadingRoles ? (
+                <SidebarSkeleton count={5} />
+              ) : filteredRoles.length === 0 ? (
+                <EmptyState label="No roles found" />
+              ) : (
+                filteredRoles.map((role) => {
+                  const isActive = !deactivatedRoleIds.includes(role.id);
+                  const isSelected = selectedRoleId === role.id;
+                  const permCount = role.permissions?.length || 0;
+                  const isHovered = hoveredRoleId === role.id;
+
+                  return (
+                    <div
+                      key={role.id}
+                      onClick={() => setSelectedRoleId(role.id)}
+                      onMouseEnter={() => setHoveredRoleId(role.id)}
+                      onMouseLeave={() => setHoveredRoleId(null)}
+                      style={{
+                        padding: "10px 14px", cursor: "pointer", borderBottom: "1px solid var(--border-main)",
+                        background: isSelected ? "var(--primary)" : isHovered ? "var(--bg-card-alt)" : "transparent",
+                        transition: "background 0.15s",
+                      }}
+                    >
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 6 }}>
+                        {/* Name + badge */}
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                            <span style={{ fontSize: 10, fontWeight: 900, textTransform: "uppercase", letterSpacing: "-0.02em", color: isSelected ? "#000" : "var(--text-main)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                              {role.name}
+                            </span>
+                            {!isActive && (
+                              <span style={{ fontSize: 7, fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.08em", background: "rgba(239,68,68,0.12)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 4, padding: "1px 4px", whiteSpace: "nowrap" }}>
+                                Off
+                              </span>
+                            )}
+                          </div>
+                          <div style={{ fontSize: 8, color: isSelected ? "rgba(0,0,0,0.55)" : "var(--text-dim)", marginTop: 2, fontWeight: 700 }}>
+                            {permCount} permission{permCount !== 1 ? "s" : ""}
+                          </div>
                         </div>
 
-                        {/* Status Toggle & Actions */}
-                        <div className="flex items-center gap-1 onClick-stopPropagation" onClick={(e) => e.stopPropagation()}>
+                        {/* Inline actions (visible on hover or selected) */}
+                        <div
+                          style={{ display: "flex", alignItems: "center", gap: 2, opacity: isHovered || isSelected ? 1 : 0, transition: "opacity 0.15s" }}
+                          onClick={(e) => e.stopPropagation()}
+                        >
                           <button
                             onClick={() => toggleRoleActive(role.id, !isActive)}
-                            className={`p-1 rounded ${
-                              selectedRoleId === role.id ? "text-black" : "text-[var(--text-muted)]"
-                            }`}
-                            title={isActive ? "Deactivate Role" : "Activate Role"}
+                            title={isActive ? "Deactivate" : "Activate"}
+                            style={{ background: "none", border: "none", cursor: "pointer", padding: 2, borderRadius: 4, display: "flex" }}
                           >
-                            {isActive ? <MdToggleOn size={22} className="text-green-500" /> : <MdToggleOff size={22} className="text-red-500" />}
+                            {isActive
+                              ? <MdToggleOn size={18} style={{ color: isSelected ? "#000" : "#22c55e" }} />
+                              : <MdToggleOff size={18} style={{ color: "#ef4444" }} />}
                           </button>
+                          {can("roles:update") && (
+                            <button
+                              onClick={() => handleOpenRoleModal("edit")}
+                              title="Edit"
+                              style={{ background: "none", border: "none", cursor: "pointer", padding: 3, borderRadius: 4, display: "flex", color: isSelected ? "#000" : "var(--text-muted)" }}
+                            >
+                              <MdEdit size={13} />
+                            </button>
+                          )}
+                          {can("roles:update") && (
+                            <button
+                              onClick={() => handleOpenRoleModal("clone")}
+                              title="Clone"
+                              style={{ background: "none", border: "none", cursor: "pointer", padding: 3, borderRadius: 4, display: "flex", color: isSelected ? "#000" : "var(--text-muted)" }}
+                            >
+                              <MdContentCopy size={13} />
+                            </button>
+                          )}
+                          {can("roles:delete") && (
+                            <button
+                              onClick={() => handleDeleteRole(role.id)}
+                              title="Delete"
+                              style={{ background: "none", border: "none", cursor: "pointer", padding: 3, borderRadius: 4, display: "flex", color: isSelected ? "#000" : "#ef4444" }}
+                            >
+                              <MdDelete size={13} />
+                            </button>
+                          )}
                         </div>
                       </div>
-                    );
-                  })
-                )}
-              </div>
-            </>
-          ) : (
-            <>
-              {/* Users Header */}
-              <div className="p-4 border-b border-[var(--border-main)] bg-[var(--bg-card-alt)]/30">
-                <h2 className="text-[var(--text-muted)] text-[10px] font-black uppercase tracking-widest">
-                  System Users
-                </h2>
-              </div>
-
-              {/* Users Search */}
-              <div className="p-3 border-b border-[var(--border-main)]">
-                <div className="relative">
-                  <MdSearch className="absolute start-3 top-2.5 text-[var(--text-muted)]" size={16} />
-                  <input
-                    type="text"
-                    placeholder="Search users..."
-                    value={userSearchQuery}
-                    onChange={(e) => setUserSearchQuery(e.target.value)}
-                    className="w-full bg-[var(--bg-main)] border border-[var(--border-main)] rounded-xl ps-9 pe-4 py-2 text-xs font-bold focus:outline-none focus:border-[var(--primary)] text-[var(--text-main)] placeholder-[var(--text-muted)]"
-                  />
-                </div>
-              </div>
-
-              {/* Users List */}
-              <div className="flex-1 overflow-y-auto custom-scrollbar p-3 space-y-2">
-                {isLoadingUsers ? (
-                  <div className="text-center py-6 text-xs text-[var(--text-muted)] uppercase tracking-wider font-bold">
-                    Loading Users...
-                  </div>
-                ) : filteredUsers.length === 0 ? (
-                  <div className="text-center py-6 text-xs text-[var(--text-muted)] uppercase tracking-wider font-bold">
-                    No users found
-                  </div>
-                ) : (
-                  filteredUsers.map((user) => (
-                    <button
+                    </div>
+                  );
+                })
+              )
+            ) : (
+              // User list
+              loadingUsers ? <SidebarSkeleton count={5} /> : filteredUsers.length === 0 ? <EmptyState label="No users found" /> :
+                filteredUsers.map((user) => {
+                  const isSelected = selectedUserId === user.id;
+                  const isHovered = hoveredRoleId === user.id;
+                  return (
+                    <div
                       key={user.id}
                       onClick={() => setSelectedUserId(user.id)}
-                      className={`w-full flex items-center justify-between p-3.5 rounded-2xl transition-all border ${
-                        selectedUserId === user.id
-                          ? "bg-[var(--primary)] text-black border-transparent shadow-lg shadow-[var(--primary)]/10"
-                          : "bg-[var(--bg-main)] border-transparent text-[var(--text-main)] hover:border-[var(--primary)]/30"
-                      }`}
+                      onMouseEnter={() => setHoveredRoleId(user.id)}
+                      onMouseLeave={() => setHoveredRoleId(null)}
+                      style={{
+                        padding: "10px 14px", cursor: "pointer", borderBottom: "1px solid var(--border-main)",
+                        background: isSelected ? "var(--primary)" : isHovered ? "var(--bg-card-alt)" : "transparent",
+                        transition: "background 0.15s",
+                      }}
                     >
-                      <div className="text-start flex-1 min-w-0">
-                        <p className="text-xs font-black uppercase tracking-tight leading-none">
-                          {user.name}
-                        </p>
-                        <p
-                          className={`text-[8px] font-bold mt-1.5 truncate max-w-[200px] ${
-                            selectedUserId === user.id ? "text-black/60" : "text-[var(--text-dim)]"
-                          }`}
-                        >
-                          {user.email}
-                        </p>
+                      <div style={{ fontSize: 10, fontWeight: 900, textTransform: "uppercase", letterSpacing: "-0.02em", color: isSelected ? "#000" : "var(--text-main)" }}>
+                        {user.name}
                       </div>
-                    </button>
-                  ))
-                )}
-              </div>
-            </>
-          )}
+                      <div style={{ fontSize: 8, color: isSelected ? "rgba(0,0,0,0.55)" : "var(--text-dim)", marginTop: 2, fontWeight: 700, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        {user.email}
+                      </div>
+                    </div>
+                  );
+                })
+            )}
+          </div>
         </div>
 
-        {/* RIGHT PANEL: DETAILS & ASSIGNMENTS */}
-        <div className="flex-1 overflow-hidden h-full flex flex-col">
-          {activeTab === "roles" ? (
-            <AnimatePresence mode="wait">
-              {selectedRole ? (
-                <motion.div
-                  key={selectedRole.id}
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  className="h-full flex flex-col bg-[var(--bg-card)] rounded-3xl border border-[var(--border-main)] shadow-lg overflow-hidden"
-                >
-                  {/* Role Header Panel */}
-                  <div className="p-6 border-b border-[var(--border-main)] flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div>
-                      <div className="flex items-center gap-3">
-                        <h2 className="text-[var(--text-main)] text-lg font-black uppercase tracking-tighter">
-                          {selectedRole.name}
-                        </h2>
-                        {!deactivatedRoleIds.includes(selectedRole.id) ? (
-                          <span className="bg-green-500/10 text-green-500 border border-green-500/20 text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full">
-                            Active
-                          </span>
-                        ) : (
-                          <span className="bg-red-500/10 text-red-500 border border-red-500/20 text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full">
-                            Inactive (Excluded)
-                          </span>
-                        )}
+        {/* ── RIGHT CONTENT ──────────────────────────── */}
+        <div style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column", background: "var(--bg-main)" }}>
+          <AnimatePresence mode="wait">
+            {activeTab === "roles" ? (
+              selectedRole ? (
+                <motion.div key={selectedRole.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} style={{ display: "flex", flexDirection: "column", height: "100%", overflow: "hidden" }}>
+
+                  {/* ── Role Toolbar ──── */}
+                  <div style={{ padding: "12px 20px", borderBottom: "1px solid var(--border-main)", background: "var(--bg-card)", display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+                    {/* Role name + status */}
+                    <div style={{ flex: 1, display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
+                      <div style={{
+                        width: 32, height: 32, borderRadius: 8, background: deactivatedRoleIds.includes(selectedRole.id) ? "rgba(239,68,68,0.1)" : "rgba(var(--primary-rgb, 234,179,8), 0.1)",
+                        border: `1px solid ${deactivatedRoleIds.includes(selectedRole.id) ? "rgba(239,68,68,0.2)" : "var(--primary)"}`,
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                      }}>
+                        {deactivatedRoleIds.includes(selectedRole.id) ? <MdLock size={15} color="#ef4444" /> : <MdLockOpen size={15} color="var(--primary)" />}
                       </div>
-                      <p className="text-[var(--text-muted)] text-[10px] font-medium mt-1 leading-relaxed">
-                        {selectedRole.description || "No description provided."}
-                      </p>
+                      <div>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                          <span style={{ fontSize: 14, fontWeight: 900, textTransform: "uppercase", letterSpacing: "-0.03em", color: "var(--text-main)" }}>
+                            {selectedRole.name}
+                          </span>
+                          <span style={{
+                            fontSize: 7, fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.1em",
+                            padding: "2px 6px", borderRadius: 4,
+                            background: deactivatedRoleIds.includes(selectedRole.id) ? "rgba(239,68,68,0.1)" : "rgba(34,197,94,0.1)",
+                            color: deactivatedRoleIds.includes(selectedRole.id) ? "#ef4444" : "#22c55e",
+                            border: `1px solid ${deactivatedRoleIds.includes(selectedRole.id) ? "rgba(239,68,68,0.25)" : "rgba(34,197,94,0.25)"}`,
+                          }}>
+                            {deactivatedRoleIds.includes(selectedRole.id) ? "Inactive" : "Active"}
+                          </span>
+                        </div>
+                        <div style={{ fontSize: 9, color: "var(--text-muted)", marginTop: 1 }}>
+                          {selectedRole.description || "No description"} · {selectedPermIds.length}/{allPerms.length} permissions
+                        </div>
+                      </div>
                     </div>
 
-                    {/* Role Actions */}
-                    <div className="flex items-center gap-2">
-                      {can("roles:update") && (
-                        <>
-                          <button
-                            onClick={() => handleOpenRoleModal("edit")}
-                            className="bg-[var(--bg-main)] text-[var(--text-main)] p-2.5 rounded-xl border border-[var(--border-main)] hover:border-[var(--primary)] transition-all flex items-center justify-center"
-                            title="Edit Role Details"
-                          >
-                            <MdEdit size={16} />
-                          </button>
-                          <button
-                            onClick={() => handleOpenRoleModal("clone")}
-                            className="bg-[var(--bg-main)] text-[var(--text-main)] p-2.5 rounded-xl border border-[var(--border-main)] hover:border-[var(--primary)] transition-all flex items-center justify-center"
-                            title="Clone Role"
-                          >
-                            <MdContentCopy size={16} />
-                          </button>
-                        </>
-                      )}
-                      {can("roles:delete") && (
-                        <button
-                          onClick={() => handleDeleteRole(selectedRole.id)}
-                          className="bg-red-500/10 text-red-500 border border-red-500/20 p-2.5 rounded-xl hover:bg-red-500 hover:text-white transition-all flex items-center justify-center"
-                          title="Delete Role"
-                        >
-                          <MdDelete size={16} />
-                        </button>
-                      )}
+                    {/* Perm search */}
+                    <div style={{ position: "relative" }}>
+                      <MdSearch style={{ position: "absolute", left: 8, top: "50%", transform: "translateY(-50%)", color: "var(--text-muted)", pointerEvents: "none" }} size={13} />
+                      <input
+                        type="text"
+                        placeholder="Search permissions…"
+                        value={permSearch}
+                        onChange={(e) => setPermSearch(e.target.value)}
+                        style={{
+                          width: 200, background: "var(--bg-main)", border: "1px solid var(--border-main)",
+                          borderRadius: 8, paddingLeft: 26, paddingRight: 10, paddingTop: 5, paddingBottom: 5,
+                          fontSize: 11, color: "var(--text-main)", outline: "none",
+                        }}
+                      />
                     </div>
+
+                    {/* Bulk actions */}
+                    <button
+                      onClick={() => setSelectedPermIds(allPerms.map((p) => p.id))}
+                      style={{ fontSize: 9, fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.08em", padding: "5px 10px", borderRadius: 7, border: "1px solid var(--border-main)", background: "var(--bg-main)", color: "var(--text-muted)", cursor: "pointer" }}
+                    >
+                      Select All
+                    </button>
+                    <button
+                      onClick={() => setSelectedPermIds([])}
+                      style={{ fontSize: 9, fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.08em", padding: "5px 10px", borderRadius: 7, border: "1px solid var(--border-main)", background: "var(--bg-main)", color: "var(--text-muted)", cursor: "pointer" }}
+                    >
+                      Clear All
+                    </button>
+
+                    {/* Save */}
+                    <button
+                      onClick={handleSaveMatrix}
+                      disabled={roleMutation.isPending}
+                      style={{
+                        display: "flex", alignItems: "center", gap: 6, padding: "6px 14px",
+                        background: "var(--primary)", color: "#000", border: "none", borderRadius: 8,
+                        fontSize: 9, fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.1em", cursor: "pointer",
+                        opacity: roleMutation.isPending ? 0.6 : 1,
+                      }}
+                    >
+                      <MdSave size={13} />
+                      {roleMutation.isPending ? "Saving…" : "Save Changes"}
+                    </button>
                   </div>
 
-                  {/* Search and Action Bar */}
-                  <div className="p-4 bg-[var(--bg-card-alt)]/30 border-b border-[var(--border-main)] flex flex-col md:flex-row items-center justify-between gap-3">
-                    <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3 w-full md:w-auto">
-                      <div className="relative w-full md:w-64">
-                        <MdSearch className="absolute start-3 top-2 text-[var(--text-muted)]" size={14} />
-                        <input
-                          type="text"
-                          placeholder="Search permissions..."
-                          value={permissionSearchQuery}
-                          onChange={(e) => setPermissionSearchQuery(e.target.value)}
-                          className="w-full bg-[var(--bg-main)] border border-[var(--border-main)] rounded-lg ps-8 pe-3 py-1 text-xs focus:outline-none focus:border-[var(--primary)] text-[var(--text-main)] placeholder-[var(--text-muted)]"
-                        />
-                      </div>
-                      
-                      {/* Bulk Selection Actions */}
-                      <div className="flex gap-2">
-                        <button
-                          type="button"
-                          onClick={handleSelectAllGlobal}
-                          className="px-3 py-1.5 rounded-lg border border-[var(--border-main)] hover:border-[var(--primary)] text-[var(--text-main)] text-[9px] font-black uppercase tracking-widest transition-all bg-[var(--bg-main)] hover:bg-[var(--primary)]/10"
-                        >
-                          Select All
-                        </button>
-                        <button
-                          type="button"
-                          onClick={handleClearAllGlobal}
-                          className="px-3 py-1.5 rounded-lg border border-[var(--border-main)] hover:border-red-500/50 text-[var(--text-main)] text-[9px] font-black uppercase tracking-widest transition-all bg-[var(--bg-main)] hover:bg-red-500/10"
-                        >
-                          Clear All
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="flex gap-2 w-full md:w-auto">
-                      <button
-                        onClick={handleSavePermissionMatrix}
-                        disabled={isSavingMatrix}
-                        className="flex-1 md:flex-none bg-[var(--primary)] text-black px-5 py-2 rounded-xl font-black uppercase tracking-widest text-[9px] flex items-center justify-center gap-1.5 hover:bg-[var(--primary-hover)] transition-all shadow-md shadow-[var(--primary)]/10 disabled:opacity-50"
-                      >
-                        <MdSave size={14} /> {isSavingMatrix ? "Saving..." : "Save Scope Mapping"}
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Matrix Box */}
-                  <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-6">
-                    {isLoadingPerms ? (
-                      <div className="text-center py-10 font-bold uppercase tracking-wider text-xs text-[var(--text-muted)]">
-                        Loading System Scopes...
-                      </div>
-                    ) : Object.keys(groupedPermissions).length === 0 ? (
-                      <div className="text-center py-10 font-bold uppercase tracking-wider text-xs text-[var(--text-muted)]">
-                        No permissions match search filter
-                      </div>
+                  {/* ── Permission Matrix ──── */}
+                  <div style={{ flex: 1, overflowY: "auto", padding: "16px 20px 80px" }} className="custom-scrollbar">
+                    {loadingPerms ? (
+                      <MatrixSkeleton />
+                    ) : Object.keys(groupedPerms).length === 0 ? (
+                      <EmptyState label="No permissions match filter" />
                     ) : (
-                      PERMISSION_MODULES.map((module) => {
-                        const modulePermissions = groupedPermissions[module.key] || [];
-                        if (modulePermissions.length === 0) return null;
+                      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: 12 }}>
+                        {PERMISSION_MODULES.map((mod) => {
+                          const perms = groupedPerms[mod.key] || [];
+                          if (perms.length === 0) return null;
+                          const checkedCount = perms.filter((p) => selectedPermIds.includes(p.id)).length;
+                          const allChecked = checkedCount === perms.length;
+                          const color = MODULE_COLORS[mod.key] || "var(--primary)";
 
-                        const allChecked = modulePermissions.every((p) => selectedPermissionIds.includes(p.id));
-                        const someChecked = modulePermissions.some((p) => selectedPermissionIds.includes(p.id));
+                          return (
+                            <div
+                              key={mod.key}
+                              style={{ background: "var(--bg-card)", border: "1px solid var(--border-main)", borderRadius: 16, overflow: "hidden", transition: "border-color 0.2s" }}
+                            >
+                              {/* Module header */}
+                              <div style={{ padding: "10px 14px", borderBottom: "1px solid var(--border-main)", display: "flex", alignItems: "center", gap: 8, background: `${color}08` }}>
+                                <div style={{ width: 26, height: 26, borderRadius: 7, background: `${color}18`, border: `1px solid ${color}30`, display: "flex", alignItems: "center", justifyContent: "center", color }}>
+                                  {MODULE_ICONS[mod.key] ?? <MdShield size={13} />}
+                                </div>
+                                <div style={{ flex: 1, minWidth: 0 }}>
+                                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                                    <span style={{ fontSize: 10, fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--text-main)" }}>
+                                      {mod.label}
+                                    </span>
+                                    <button
+                                      onClick={() => handleModuleToggle(mod.key, !allChecked)}
+                                      style={{ fontSize: 7, fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.1em", padding: "2px 7px", borderRadius: 5, border: `1px solid ${color}40`, background: allChecked ? `${color}15` : "transparent", color: allChecked ? color : "var(--text-muted)", cursor: "pointer", transition: "all 0.15s" }}
+                                    >
+                                      {allChecked ? "Unselect All" : "Select All"}
+                                    </button>
+                                  </div>
+                                  <div style={{ marginTop: 4 }}>
+                                    <ProgressBar value={checkedCount} total={perms.length} color={color} />
+                                  </div>
+                                </div>
+                              </div>
 
-                        return (
-                          <div
-                            key={module.key}
-                            className="bg-[var(--bg-main)] rounded-2xl border border-[var(--border-main)] p-4 space-y-4 hover:border-[var(--primary)]/20 transition-colors"
-                          >
-                            {/* Module Header */}
-                            <div className="flex items-center justify-between border-b border-[var(--border-main)] pb-2.5">
-                              <span className="text-[10px] text-[var(--text-main)] font-black uppercase tracking-[0.15em] border-s-2 border-[var(--primary)] ps-2.5">
-                                {module.label}
-                              </span>
-
-                              <div className="flex gap-2">
-                                <button
-                                  onClick={() => handleToggleModulePermissions(module.key, !allChecked)}
-                                  className="text-[8px] font-black uppercase tracking-widest px-2.5 py-1 rounded bg-[var(--bg-card)] border border-[var(--border-main)] text-[var(--text-muted)] hover:text-[var(--text-main)] hover:border-[var(--primary)] transition-all"
-                                >
-                                  {allChecked ? "Unselect All" : "Select All"}
-                                </button>
+                              {/* Permission pills */}
+                              <div style={{ padding: "10px 12px", display: "flex", flexWrap: "wrap", gap: 6 }}>
+                                {perms.map((p) => {
+                                  const on = selectedPermIds.includes(p.id);
+                                  return (
+                                    <label
+                                      key={p.id}
+                                      title={p.key}
+                                      style={{
+                                        display: "flex", alignItems: "center", gap: 5, padding: "5px 9px",
+                                        borderRadius: 8, cursor: "pointer", userSelect: "none", transition: "all 0.15s",
+                                        background: on ? `${color}15` : "var(--bg-main)",
+                                        border: `1px solid ${on ? `${color}40` : "var(--border-main)"}`,
+                                      }}
+                                    >
+                                      <input type="checkbox" checked={on} onChange={() => handleTogglePerm(p.id)} style={{ display: "none" }} />
+                                      <div style={{
+                                        width: 12, height: 12, borderRadius: 3, border: `1.5px solid ${on ? color : "var(--border-main)"}`,
+                                        background: on ? color : "transparent", display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.15s",
+                                      }}>
+                                        {on && <MdCheck size={8} color="#000" />}
+                                      </div>
+                                      <div>
+                                        <div style={{ fontSize: 9, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.04em", color: on ? "var(--text-main)" : "var(--text-muted)", lineHeight: 1 }}>
+                                          {p.name}
+                                        </div>
+                                        <div style={{ fontSize: 7, color: "var(--text-dim)", marginTop: 1.5, fontFamily: "monospace", letterSpacing: "0.04em" }}>
+                                          {p.key}
+                                        </div>
+                                      </div>
+                                    </label>
+                                  );
+                                })}
                               </div>
                             </div>
-
-                            {/* Permission Grid */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-                              {modulePermissions.map((p) => {
-                                const isChecked = selectedPermissionIds.includes(p.id);
-                                return (
-                                  <label
-                                    key={p.id}
-                                    className={`flex items-start gap-2.5 p-3 rounded-xl border cursor-pointer select-none transition-all ${
-                                      isChecked
-                                        ? "bg-[var(--primary)]/10 border-[var(--primary)]/30 text-[var(--text-main)]"
-                                        : "bg-[var(--bg-card)] border-transparent text-[var(--text-muted)] hover:border-[var(--border-main)]"
-                                    }`}
-                                  >
-                                    <input
-                                      type="checkbox"
-                                      checked={isChecked}
-                                      onChange={() => handleTogglePermission(p.id)}
-                                      className="sr-only"
-                                    />
-                                    <div
-                                      className={`mt-0.5 w-3.5 h-3.5 rounded flex items-center justify-center border transition-all ${
-                                        isChecked
-                                          ? "bg-[var(--primary)] border-[var(--primary)] text-black"
-                                          : "border-[var(--border-main)] bg-[var(--bg-main)]"
-                                      }`}
-                                    >
-                                      {isChecked && <MdCheck size={10} />}
-                                    </div>
-                                    <div className="flex flex-col min-w-0">
-                                      <span className="text-[9px] font-black uppercase tracking-tight leading-none text-[var(--text-main)]">
-                                        {p.name}
-                                      </span>
-                                      <span className="text-[7px] font-bold text-[var(--text-dim)] mt-1 tracking-wider leading-relaxed">
-                                        {p.key}
-                                      </span>
-                                    </div>
-                                  </label>
-                                );
-                              })}
-                            </div>
-                          </div>
-                        );
-                      })
+                          );
+                        })}
+                      </div>
                     )}
                   </div>
                 </motion.div>
               ) : (
-                <div className="h-full bg-[var(--bg-card)] rounded-3xl border border-[var(--border-main)] border-dashed flex flex-col items-center justify-center p-10 text-center opacity-35">
-                  <div className="w-20 h-20 bg-[var(--bg-main)] rounded-full flex items-center justify-center mb-6">
-                    <MdShield size={32} className="text-[var(--primary)]" />
-                  </div>
-                  <h2 className="text-[var(--text-main)] text-xl font-black uppercase tracking-tighter mb-2">
-                    Scope Configurator
-                  </h2>
-                  <p className="text-[var(--text-dim)] text-[10px] uppercase tracking-[0.2em] max-w-[220px]">
-                    Select a security role from the left panel to configure its permissions matrix
-                  </p>
-                </div>
-              )}
-            </AnimatePresence>
-          ) : (
-            <AnimatePresence mode="wait">
-              {selectedUser ? (
-                <motion.div
-                  key={selectedUser.id}
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  className="h-full flex flex-col bg-[var(--bg-card)] rounded-3xl border border-[var(--border-main)] shadow-lg overflow-hidden"
-                >
-                  {/* User Profile Panel */}
-                  <div className="p-6 border-b border-[var(--border-main)] flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div>
-                      <h2 className="text-[var(--text-main)] text-lg font-black uppercase tracking-tighter">
-                        {selectedUser.name}
-                      </h2>
-                      <p className="text-[var(--text-muted)] text-[10px] font-bold uppercase tracking-widest mt-1">
-                        Email: {selectedUser.email}
-                      </p>
-                    </div>
+                <EmptyContentState icon={<MdShield size={36} />} title="Select a Role" subtitle="Choose a role from the sidebar to configure its permission matrix" />
+              )
+            ) : (
+              // ── USER ASSIGNMENTS TAB ─────────────────────
+              selectedUser ? (
+                <motion.div key={selectedUser.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} style={{ display: "flex", flexDirection: "column", height: "100%", overflow: "hidden" }}>
 
+                  {/* User Toolbar */}
+                  <div style={{ padding: "12px 20px", borderBottom: "1px solid var(--border-main)", background: "var(--bg-card)", display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+                    <div style={{ flex: 1, display: "flex", alignItems: "center", gap: 10 }}>
+                      <div style={{ width: 36, height: 36, borderRadius: 10, background: "var(--bg-main)", border: "1px solid var(--border-main)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        <MdPerson size={20} color="var(--text-muted)" />
+                      </div>
+                      <div>
+                        <div style={{ fontSize: 14, fontWeight: 900, textTransform: "uppercase", letterSpacing: "-0.03em", color: "var(--text-main)" }}>
+                          {selectedUser.name}
+                        </div>
+                        <div style={{ fontSize: 9, color: "var(--text-muted)", marginTop: 1 }}>
+                          {selectedUser.email} · {userRoleIds.length} role{userRoleIds.length !== 1 ? "s" : ""} assigned · {userEffectivePerms.length} effective permissions
+                        </div>
+                      </div>
+                    </div>
                     <button
                       onClick={handleSaveUserRoles}
-                      disabled={isSavingUserRoles}
-                      className="bg-[var(--primary)] text-black px-6 py-2.5 rounded-xl font-black uppercase tracking-widest text-[9px] flex items-center justify-center gap-1.5 hover:bg-[var(--primary-hover)] transition-all shadow-md shadow-[var(--primary)]/10 disabled:opacity-50"
+                      disabled={assignUserRolesMutation.isPending}
+                      style={{
+                        display: "flex", alignItems: "center", gap: 6, padding: "7px 16px",
+                        background: "var(--primary)", color: "#000", border: "none", borderRadius: 8,
+                        fontSize: 9, fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.1em", cursor: "pointer",
+                        opacity: assignUserRolesMutation.isPending ? 0.6 : 1,
+                      }}
                     >
-                      <MdSave size={14} /> {isSavingUserRoles ? "Saving..." : "Save Role Assignments"}
+                      <MdSave size={13} /> {assignUserRolesMutation.isPending ? "Saving…" : "Save Assignments"}
                     </button>
                   </div>
 
-                  {/* Selection and Preview Split */}
-                  <div className="flex-1 overflow-hidden flex flex-col lg:flex-row divide-y lg:divide-y-0 lg:divide-x divide-[var(--border-main)]">
-                    {/* Role checklist (Left) */}
-                    <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-4">
-                      <h3 className="text-[var(--text-muted)] text-[9px] font-black uppercase tracking-widest border-s-2 border-[var(--primary)] ps-2">
-                        Assigned Security Roles
-                      </h3>
+                  {/* Two-column: role checklist + effective perms preview */}
+                  <div style={{ flex: 1, overflow: "hidden", display: "flex" }}>
 
-                      <div className="space-y-2">
+                    {/* Role Checklist */}
+                    <div style={{ width: "45%", overflowY: "auto", padding: "16px", borderRight: "1px solid var(--border-main)" }} className="custom-scrollbar">
+                      <div style={{ fontSize: 9, fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.15em", color: "var(--text-muted)", marginBottom: 10, paddingBottom: 8, borderBottom: "1px solid var(--border-main)", display: "flex", alignItems: "center", gap: 6 }}>
+                        <div style={{ width: 3, height: 12, background: "var(--primary)", borderRadius: 2 }} />
+                        Assign Roles
+                      </div>
+                      <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                         {allRoles.map((role) => {
-                          const isAssigned = userRoleIds.includes(role.id);
-                          const isActive = !deactivatedRoleIds.includes(role.id);
-
+                          const assigned = userRoleIds.includes(role.id);
+                          const active = !deactivatedRoleIds.includes(role.id);
+                          const color = MODULE_COLORS.roles;
                           return (
                             <label
                               key={role.id}
-                              className={`flex items-center justify-between p-4 rounded-2xl border cursor-pointer select-none transition-all ${
-                                isAssigned
-                                  ? "bg-[var(--primary)]/10 border-[var(--primary)]/30 text-[var(--text-main)]"
-                                  : "bg-[var(--bg-main)] border-transparent text-[var(--text-muted)] hover:border-[var(--border-main)]"
-                              }`}
+                              style={{
+                                display: "flex", alignItems: "center", gap: 10, padding: "10px 12px",
+                                borderRadius: 10, cursor: "pointer", userSelect: "none", transition: "all 0.15s",
+                                background: assigned ? `${color}10` : "var(--bg-card)",
+                                border: `1px solid ${assigned ? `${color}30` : "var(--border-main)"}`,
+                              }}
                             >
-                              <div className="flex items-center gap-3">
-                                <input
-                                  type="checkbox"
-                                  checked={isAssigned}
-                                  onChange={() => handleToggleUserRole(role.id)}
-                                  className="sr-only"
-                                />
-                                <div
-                                  className={`w-4 h-4 rounded-md flex items-center justify-center border transition-all ${
-                                    isAssigned
-                                      ? "bg-[var(--primary)] border-[var(--primary)] text-black"
-                                      : "border-[var(--border-main)] bg-[var(--bg-card)]"
-                                  }`}
-                                >
-                                  {isAssigned && <MdCheck size={12} />}
-                                </div>
-                                <div className="text-start">
-                                  <span className="text-xs font-black uppercase tracking-tight text-[var(--text-main)] block">
+                              <input type="checkbox" checked={assigned} onChange={() => setUserRoleIds((prev) => prev.includes(role.id) ? prev.filter((x) => x !== role.id) : [...prev, role.id])} style={{ display: "none" }} />
+                              <div style={{
+                                width: 16, height: 16, borderRadius: 5, border: `1.5px solid ${assigned ? color : "var(--border-main)"}`,
+                                background: assigned ? color : "transparent", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+                              }}>
+                                {assigned && <MdCheck size={10} color="#000" />}
+                              </div>
+                              <div style={{ flex: 1, minWidth: 0 }}>
+                                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                                  <span style={{ fontSize: 10, fontWeight: 900, textTransform: "uppercase", letterSpacing: "-0.02em", color: "var(--text-main)" }}>
                                     {role.name}
                                   </span>
-                                  <span className="text-[8px] font-medium text-[var(--text-dim)] mt-0.5 block truncate max-w-[180px]">
-                                    {role.description || "No description"}
-                                  </span>
+                                  {!active && (
+                                    <span style={{ fontSize: 7, fontWeight: 900, textTransform: "uppercase", background: "rgba(239,68,68,0.1)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 4, padding: "1px 4px" }}>
+                                      Inactive
+                                    </span>
+                                  )}
+                                </div>
+                                <div style={{ fontSize: 8, color: "var(--text-dim)", marginTop: 2 }}>
+                                  {role.permissions?.length || 0} permissions · {role.description || "No description"}
                                 </div>
                               </div>
-
-                              {!isActive && (
-                                <span className="bg-red-500/10 text-red-500 border border-red-500/20 text-[7px] font-black uppercase tracking-widest px-2 py-0.5 rounded">
-                                  Inactive
-                                </span>
-                              )}
                             </label>
                           );
                         })}
                       </div>
                     </div>
 
-                    {/* Preview Effective Permissions (Right) */}
-                    <div className="flex-1 overflow-y-auto custom-scrollbar p-6 bg-[var(--bg-card-alt)]/20 space-y-4">
-                      <div className="flex items-center justify-between border-b border-[var(--border-main)] pb-2.5">
-                        <h3 className="text-[var(--text-muted)] text-[9px] font-black uppercase tracking-widest border-s-2 border-orange-500 ps-2">
-                          Effective Scopes Preview
-                        </h3>
-                        <span className="bg-[var(--bg-main)] border border-[var(--border-main)] text-[8px] font-black uppercase px-2 py-0.5 rounded text-[var(--text-muted)]">
-                          {userEffectivePermissions.length} Scopes Active
+                    {/* Effective Permissions Preview */}
+                    <div style={{ flex: 1, overflowY: "auto", padding: "16px", background: "var(--bg-card-alt, var(--bg-main))" }} className="custom-scrollbar">
+                      <div style={{ fontSize: 9, fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.15em", color: "var(--text-muted)", marginBottom: 10, paddingBottom: 8, borderBottom: "1px solid var(--border-main)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                          <div style={{ width: 3, height: 12, background: "#f97316", borderRadius: 2 }} />
+                          Effective Permissions
+                        </div>
+                        <span style={{ fontSize: 8, fontWeight: 900, background: "var(--bg-card)", border: "1px solid var(--border-main)", borderRadius: 5, padding: "2px 6px", color: "var(--text-muted)" }}>
+                          {userEffectivePerms.length} active
                         </span>
                       </div>
 
-                      {userEffectivePermissions.length === 0 ? (
-                        <div className="text-center py-10 font-bold uppercase tracking-wider text-[10px] text-[var(--text-dim)]">
-                          No active permissions from roles
+                      {userEffectivePerms.length === 0 ? (
+                        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", paddingTop: 40, gap: 8, opacity: 0.4 }}>
+                          <MdInfo size={24} color="var(--text-muted)" />
+                          <span style={{ fontSize: 9, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.1em", textAlign: "center" }}>
+                            Assign roles to see effective permissions
+                          </span>
                         </div>
                       ) : (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                          {userEffectivePermissions.map((key) => {
-                            const pObj = allPermissions.find((p) => p.key === key);
+                        <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                          {userEffectivePerms.map((key) => {
+                            const pObj = allPerms.find((p) => p.key === key);
+                            const cat = getMappedCategory(pObj?.category || "");
+                            const color = MODULE_COLORS[cat] || "var(--primary)";
                             return (
                               <div
                                 key={key}
-                                className="bg-[var(--bg-main)] border border-[var(--border-main)] rounded-xl p-2.5 flex items-center justify-between"
+                                style={{
+                                  display: "flex", alignItems: "center", gap: 6, padding: "5px 9px",
+                                  background: "var(--bg-card)", border: "1px solid var(--border-main)",
+                                  borderRadius: 8,
+                                }}
                               >
-                                <div className="min-w-0">
-                                  <p className="text-[9px] font-black uppercase text-[var(--text-main)] leading-none">
+                                <div style={{ width: 6, height: 6, borderRadius: "50%", background: color, flexShrink: 0 }} />
+                                <div>
+                                  <div style={{ fontSize: 9, fontWeight: 800, textTransform: "uppercase", color: "var(--text-main)", lineHeight: 1 }}>
                                     {pObj?.name || key.split(":")[1] || key}
-                                  </p>
-                                  <p className="text-[7px] font-bold text-[var(--text-dim)] mt-1 tracking-wider leading-none">
+                                  </div>
+                                  <div style={{ fontSize: 7, color: "var(--text-dim)", fontFamily: "monospace", marginTop: 1 }}>
                                     {key}
-                                  </p>
-                                </div>
-                                <div className="w-4 h-4 bg-green-500/10 border border-green-500/20 text-green-500 rounded-full flex items-center justify-center">
-                                  <MdCheck size={10} />
+                                  </div>
                                 </div>
                               </div>
                             );
@@ -863,95 +791,131 @@ const PermissionManagement: React.FC = () => {
                   </div>
                 </motion.div>
               ) : (
-                <div className="h-full bg-[var(--bg-card)] rounded-3xl border border-[var(--border-main)] border-dashed flex flex-col items-center justify-center p-10 text-center opacity-35">
-                  <div className="w-20 h-20 bg-[var(--bg-main)] rounded-full flex items-center justify-center mb-6">
-                    <MdPeople size={32} className="text-[var(--primary)]" />
-                  </div>
-                  <h2 className="text-[var(--text-main)] text-xl font-black uppercase tracking-tighter mb-2">
-                    Security Mapping Preview
-                  </h2>
-                  <p className="text-[var(--text-dim)] text-[10px] uppercase tracking-[0.2em] max-w-[220px]">
-                    Select a user from the left panel to assign roles and preview active scopes
-                  </p>
-                </div>
-              )}
-            </AnimatePresence>
-          )}
+                <EmptyContentState icon={<MdPeople size={36} />} title="Select a User" subtitle="Choose a user from the sidebar to assign roles and preview their active permissions" />
+              )
+            )}
+          </AnimatePresence>
         </div>
-
       </div>
 
-      {/* MODAL: Create / Edit / Clone Role */}
-      {isRoleModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+      {/* ── CREATE / EDIT / CLONE MODAL ─────────────── */}
+      <AnimatePresence>
+        {isRoleModalOpen && (
           <motion.div
-            initial={{ scale: 0.95, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="bg-[var(--bg-card)] border border-[var(--border-main)] w-full max-w-md rounded-3xl p-6 shadow-2xl relative"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{ position: "fixed", inset: 0, zIndex: 50, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(0,0,0,0.55)", backdropFilter: "blur(4px)", padding: 16 }}
           >
-            <button
-              onClick={() => setIsRoleModalOpen(false)}
-              className="absolute end-4 top-4 text-[var(--text-muted)] hover:text-[var(--text-main)]"
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              style={{ background: "var(--bg-card)", border: "1px solid var(--border-main)", width: "100%", maxWidth: 420, borderRadius: 20, padding: 24, boxShadow: "0 24px 60px rgba(0,0,0,0.35)", position: "relative" }}
             >
-              <MdClose size={20} />
-            </button>
+              <button
+                onClick={() => setIsRoleModalOpen(false)}
+                style={{ position: "absolute", right: 14, top: 14, background: "none", border: "none", cursor: "pointer", color: "var(--text-muted)", padding: 4 }}
+              >
+                <MdClose size={18} />
+              </button>
 
-            <h3 className="text-[var(--text-main)] text-xl font-black uppercase tracking-tighter mb-5">
-              {modalMode === "create" ? "Create Security Role" : modalMode === "edit" ? "Edit Role Info" : "Clone Role"}
-            </h3>
-
-            <form onSubmit={handleSaveRole} className="space-y-4">
-              <div className="space-y-2">
-                <label className="text-[10px] text-[var(--text-muted)] font-black uppercase tracking-widest block">
-                  Role Name
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={roleForm.name}
-                  onChange={(e) => setRoleForm((prev) => ({ ...prev, name: e.target.value }))}
-                  placeholder="e.g. Regional Manager"
-                  className="w-full bg-[var(--bg-main)] border border-[var(--border-main)] rounded-xl px-4 py-2.5 text-[var(--text-main)] text-xs font-bold focus:outline-none focus:border-[var(--primary)] transition-colors"
-                />
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20 }}>
+                <div style={{ width: 32, height: 32, background: "var(--primary)", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  {modalMode === "create" ? <MdAdd size={18} color="#000" /> : modalMode === "edit" ? <MdEdit size={16} color="#000" /> : <MdContentCopy size={16} color="#000" />}
+                </div>
+                <h3 style={{ fontSize: 14, fontWeight: 900, textTransform: "uppercase", letterSpacing: "-0.03em", color: "var(--text-main)" }}>
+                  {modalMode === "create" ? "New Role" : modalMode === "edit" ? "Edit Role" : "Clone Role"}
+                </h3>
               </div>
 
-              <div className="space-y-2">
-                <label className="text-[10px] text-[var(--text-muted)] font-black uppercase tracking-widest block">
-                  Role Description
-                </label>
-                <textarea
-                  value={roleForm.description}
-                  onChange={(e) => setRoleForm((prev) => ({ ...prev, description: e.target.value }))}
-                  placeholder="Brief explanation of roles scope..."
-                  rows={3}
-                  className="w-full bg-[var(--bg-main)] border border-[var(--border-main)] rounded-xl px-4 py-2.5 text-[var(--text-main)] text-xs font-bold focus:outline-none focus:border-[var(--primary)] transition-colors resize-none"
-                />
-              </div>
-
-              <div className="flex gap-3 pt-4">
-                <button
-                  type="button"
-                  onClick={() => setIsRoleModalOpen(false)}
-                  className="flex-1 bg-[var(--bg-main)] text-[var(--text-main)] py-2.5 rounded-xl border border-[var(--border-main)] font-black uppercase tracking-widest text-[9px]"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={roleMutation.isPending}
-                  className="flex-1 bg-[var(--primary)] text-black py-2.5 rounded-xl font-black uppercase tracking-widest text-[9px] hover:bg-[var(--primary-hover)] transition-all shadow-lg shadow-[var(--primary)]/10"
-                >
-                  {roleMutation.isPending ? "Saving..." : "Save Role"}
-                </button>
-              </div>
-            </form>
+              <form onSubmit={handleSaveRole} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+                <div>
+                  <label style={{ display: "block", fontSize: 9, fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.12em", color: "var(--text-muted)", marginBottom: 6 }}>
+                    Role Name *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={roleForm.name}
+                    onChange={(e) => setRoleForm((p) => ({ ...p, name: e.target.value }))}
+                    placeholder="e.g. Regional Manager"
+                    style={{ width: "100%", background: "var(--bg-main)", border: "1px solid var(--border-main)", borderRadius: 10, padding: "9px 12px", fontSize: 12, color: "var(--text-main)", outline: "none", boxSizing: "border-box" }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: "block", fontSize: 9, fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.12em", color: "var(--text-muted)", marginBottom: 6 }}>
+                    Description
+                  </label>
+                  <textarea
+                    value={roleForm.description}
+                    onChange={(e) => setRoleForm((p) => ({ ...p, description: e.target.value }))}
+                    placeholder="Brief explanation of this role's scope…"
+                    rows={3}
+                    style={{ width: "100%", background: "var(--bg-main)", border: "1px solid var(--border-main)", borderRadius: 10, padding: "9px 12px", fontSize: 12, color: "var(--text-main)", outline: "none", resize: "none", boxSizing: "border-box" }}
+                  />
+                </div>
+                <div style={{ display: "flex", gap: 10, paddingTop: 6 }}>
+                  <button
+                    type="button"
+                    onClick={() => setIsRoleModalOpen(false)}
+                    style={{ flex: 1, padding: "9px", borderRadius: 10, border: "1px solid var(--border-main)", background: "var(--bg-main)", fontSize: 9, fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.1em", cursor: "pointer", color: "var(--text-main)" }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={roleMutation.isPending}
+                    style={{ flex: 1, padding: "9px", borderRadius: 10, border: "none", background: "var(--primary)", fontSize: 9, fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.1em", cursor: "pointer", color: "#000", opacity: roleMutation.isPending ? 0.6 : 1 }}
+                  >
+                    {roleMutation.isPending ? "Saving…" : "Save Role"}
+                  </button>
+                </div>
+              </form>
+            </motion.div>
           </motion.div>
-        </div>
-      )}
+        )}
+      </AnimatePresence>
 
       <BottomNav />
     </section>
   );
 };
+
+// ── Sub-components ────────────────────────────────────────────
+const SidebarSkeleton: React.FC<{ count: number }> = ({ count }) => (
+  <>
+    {Array.from({ length: count }).map((_, i) => (
+      <div key={i} style={{ padding: "12px 14px", borderBottom: "1px solid var(--border-main)" }}>
+        <div style={{ height: 10, width: "60%", background: "var(--bg-card-alt)", borderRadius: 4, marginBottom: 6, animation: "pulse 1.5s infinite" }} />
+        <div style={{ height: 8, width: "40%", background: "var(--bg-card-alt)", borderRadius: 4 }} />
+      </div>
+    ))}
+  </>
+);
+
+const EmptyState: React.FC<{ label: string }> = ({ label }) => (
+  <div style={{ padding: "30px 14px", textAlign: "center", fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", color: "var(--text-dim)" }}>
+    {label}
+  </div>
+);
+
+const MatrixSkeleton: React.FC = () => (
+  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: 12 }}>
+    {[1, 2, 3, 4].map((i) => (
+      <div key={i} style={{ background: "var(--bg-card)", borderRadius: 16, height: 180, animation: "pulse 1.5s infinite", border: "1px solid var(--border-main)" }} />
+    ))}
+  </div>
+);
+
+const EmptyContentState: React.FC<{ icon: React.ReactNode; title: string; subtitle: string }> = ({ icon, title, subtitle }) => (
+  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 12, opacity: 0.3, padding: 40 }}>
+    <div style={{ color: "var(--primary)" }}>{icon}</div>
+    <div style={{ textAlign: "center" }}>
+      <div style={{ fontSize: 16, fontWeight: 900, textTransform: "uppercase", letterSpacing: "-0.03em", color: "var(--text-main)" }}>{title}</div>
+      <div style={{ fontSize: 9, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: "0.15em", marginTop: 6, maxWidth: 260 }}>{subtitle}</div>
+    </div>
+  </motion.div>
+);
 
 export default PermissionManagement;
