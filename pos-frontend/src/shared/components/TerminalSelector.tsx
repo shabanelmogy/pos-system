@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { getBranches, getPOSPoints } from "../../features/pos/api/posApi";
-import usePOSStore from "../../features/pos/store/usePOSStore";
+import { getBranches, getPOSPoints } from "@/shared/api/services/posApi";
+import usePOSStore from "@/features/pos/terminal/store/usePOSStore";
 import { motion } from "framer-motion";
 import { MdStore, MdComputer, MdLock } from "react-icons/md";
-import useAuth from "../../features/auth/hooks/useAuth";
-import useUserStore from "../../features/auth/store/useUserStore";
+import useAuth from "@/features/system/auth/hooks/useAuth";
+import useUserStore from "@/features/system/auth/store/useUserStore";
 import { Branch, POSPoint } from "../types";
-import useLocalize from "../../hooks/useLocalize";
+import useLocalize from "@/shared/hooks/useLocalize";
 
 const TerminalSelector: React.FC = () => {
   const { selectedBranch, setSelectedBranch, selectedPOSPoint, setSelectedPOSPoint, clearPOS } = usePOSStore();

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import i18n from '../../i18n/config';
+import i18n from "@/i18n/config";
 import { useTranslation } from 'react-i18next';
 
 export const getDirection = (lng: string) => {

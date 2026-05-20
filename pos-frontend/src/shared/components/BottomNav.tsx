@@ -4,12 +4,12 @@ import { MdOutlineReorder, MdTableBar } from "react-icons/md";
 import { BiSolidDish } from "react-icons/bi";
 import { useNavigate, useLocation } from "react-router-dom";
 import Modal from "./Modal";
-import useCustomerStore from "../../features/customers/store/useCustomerStore";
-import useCartStore from "../../features/pos/store/useCartStore";
-import usePOSStore from "../../features/pos/store/usePOSStore";
-import useAuth from "../../features/auth/hooks/useAuth";
+import useCustomerStore from "@/features/crm/customer/store/useCustomerStore";
+import useCartStore from "@/features/pos/terminal/store/useCartStore";
+import usePOSStore from "@/features/pos/terminal/store/usePOSStore";
+import useAuth from "@/features/system/auth/hooks/useAuth";
 import { useTranslation } from "react-i18next";
-import { getCustomers } from "../../features/customers/api/customerApi";
+import { getCustomers } from "@/shared/api/services/customerApi";
 import { FiCheck, FiUser } from "react-icons/fi";
 
 const BottomNav: React.FC = () => {

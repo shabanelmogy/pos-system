@@ -2,7 +2,7 @@ import React, { useState, useRef, useLayoutEffect, useCallback } from 'react';
 import ReactDOM from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaPalette, FaSun, FaMoon, FaCheck, FaTimes } from 'react-icons/fa';
-import { useThemeStore, Palette, Mode } from '../store/useThemeStore';
+import { useThemeStore, Palette, Mode } from "@/features/system/settings/store/useThemeStore";
 
 const PANEL_WIDTH = 340;
 const PANEL_GAP = 8;

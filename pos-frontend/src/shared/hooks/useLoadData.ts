@@ -1,8 +1,8 @@
-import { getUserData } from "../../features/auth/api/authApi";
+import { getUserData } from "@/shared/api/services/authApi";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import useUserStore from "../../features/auth/store/useUserStore";
-import usePOSStore from "../../features/pos/store/usePOSStore";
+import useUserStore from "@/features/system/auth/store/useUserStore";
+import usePOSStore from "@/features/pos/terminal/store/usePOSStore";
 
 const useLoadData = (): boolean => {
   const navigate = useNavigate();

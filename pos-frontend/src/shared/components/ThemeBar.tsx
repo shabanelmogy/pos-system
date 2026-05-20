@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { FaSun, FaMoon } from 'react-icons/fa';
-import { useThemeStore, Palette, Mode } from '../store/useThemeStore';
+import { useThemeStore, Palette, Mode } from "@/features/system/settings/store/useThemeStore";
 
 // ─── Palette config ────────────────────────────────────────────────────────
 const PALETTES: { id: Palette; hex: string; lightHex?: string; label: string }[] = [

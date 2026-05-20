@@ -3,9 +3,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { openShift, closeShift, getShiftReconciliation } from "../../features/pos/api/posApi";
-import usePOSStore from "../../features/pos/store/usePOSStore";
-import useUserStore from "../../features/auth/store/useUserStore";
+import { openShift, closeShift, getShiftReconciliation } from "@/shared/api/services/posApi";
+import usePOSStore from "@/features/pos/terminal/store/usePOSStore";
+import useUserStore from "@/features/system/auth/store/useUserStore";
 import { enqueueSnackbar } from "notistack";
 import { Branch, POSPoint, Shift } from "../types";
 

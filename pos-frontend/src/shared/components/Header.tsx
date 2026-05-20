@@ -1,19 +1,19 @@
 import React, { useState, useEffect } from "react";
 import { FaUserCircle, FaBell } from "react-icons/fa";
-import logo from "../../assets/images/logo.png";
+import logo from "@/assets/images/logo.png";
 import { useMutation } from "@tanstack/react-query";
-import { logout } from "../../features/auth/api/authApi";
-import useUserStore from "../../features/auth/store/useUserStore";
-import usePOSStore from "../../features/pos/store/usePOSStore";
+import { logout } from "@/shared/api/services/authApi";
+import useUserStore from "@/features/system/auth/store/useUserStore";
+import usePOSStore from "@/features/pos/terminal/store/usePOSStore";
 import { useNavigate } from "react-router-dom";
 import { MdDashboard, MdStore, MdComputer, MdSwapHoriz, MdStop, MdSettings, MdRestaurantMenu } from "react-icons/md";
 import { useSnackbar } from "notistack";
 import { useTranslation } from "react-i18next";
-import useAuth from "../../features/auth/hooks/useAuth";
+import useAuth from "@/features/system/auth/hooks/useAuth";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { motion, AnimatePresence } from "framer-motion";
 import ThemeSwitcher from "./ThemeSwitcher";
-import useLocalize from "../../hooks/useLocalize";
+import useLocalize from "@/shared/hooks/useLocalize";
 
 /** Tailwind default `theme.screens` (px) — keep in sync with tailwind.config if you customize breakpoints */
 const TW_SCREENS = { sm: 640, md: 768, lg: 1024, xl: 1280, "2xl": 1536 } as const;

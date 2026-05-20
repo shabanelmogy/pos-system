@@ -1,8 +1,8 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { MdPlayArrow, MdStop, MdAttachMoney, MdClose } from "react-icons/md";
-import useShiftManager from "../hooks/useShiftManager";
-import useLocalize from "../../hooks/useLocalize";
+import useShiftManager from "@/shared/hooks/useShiftManager";
+import useLocalize from "@/shared/hooks/useLocalize";
 
 const ShiftManager: React.FC = () => {
   const { 
