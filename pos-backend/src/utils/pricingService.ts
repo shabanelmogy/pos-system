@@ -1,5 +1,5 @@
 import { Decimal } from "decimal.js";
-import branchRepository from "../modules/branch/branch.repository.js";
+import branchRepository from "../modules/system/branch/branch.repository.js";
 
 export interface OrderTotals {
   subtotal: string;

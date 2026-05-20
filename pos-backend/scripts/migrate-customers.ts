@@ -1,6 +1,6 @@
 import { db } from "../src/config/database.js";
-import { orders } from "../src/modules/order/order.schema.js";
-import { customers } from "../src/modules/customer/customer.schema.js";
+import { orders } from "../src/modules/pos/order/order.schema.js";
+import { customers } from "../src/modules/crm/customer/customer.schema.js";
 import { eq, isNotNull } from "drizzle-orm";
 
 interface CustomerMapEntry {

@@ -1,28 +1,64 @@
-# Modules Directory Architecture
+# Modules Directory — Domain-Grouped Modular Monolith
 
-This directory follows a feature-based modular structure. Each module encapsulates its own schema, repository, service, controller, and routes.
+This directory organizes all business feature modules grouped into **Business Domains**.
+Each module internally follows the exact **7-File Module Pattern** unchanged.
 
-## The 7-File Module Pattern
+## Domain Groups
 
-1.  **`*.schema.js`**: Defines the database table using Drizzle ORM.
-2.  **`*.repository.js`**: Handles direct database queries. Encapsulates all Drizzle-specific logic.
-3.  **`*.service.js`**: Orchestration layer. Contains business logic and calls repositories.
-4.  **`*.controller.js`**: Handles HTTP request/response logic.
-5.  **`*.routes.js`**: Defines the module's API endpoints.
-6.  **`*.validation.js`**: Request body validation using Zod.
-7.  **`*.docs.js`**: Swagger/OpenAPI documentation for the module.
+| Domain | Path | Modules |
+| :--- | :--- | :--- |
+| **system** | `modules/system/` | `user`, `branch`, `upload`, `notification` |
+| **pos** | `modules/pos/` | `order`, `shift`, `table`, `kitchenStation`, `posPoint`, `posSettings`, `payment`, `bill` |
+| **catalog** | `modules/catalog/` | `item`, `category`, `coupon`, `modifier`, `pricing` |
+| **inventory** | `modules/inventory/` | `stock`, `stockAdjustment`, `stockLog`, `warehouse` |
+| **purchasing** | `modules/purchasing/` | `supplier`, `purchaseOrder`, `goodsReceipt` |
+| **finance** | `modules/finance/` | `account`, `journalEntry`, `tax`, `expense`, `installment` |
+| **crm** | `modules/crm/` | `customer`, `loyalty` |
+| **hr** | `modules/hr/` | `employee`, `attendance`, `payroll`, `leave` |
+| **reporting** | `modules/reporting/` | `salesReport`, `inventoryReport`, `financeReport` |
+| **ecommerce** | `modules/ecommerce/` | `cart`, `checkout` |
 
-## Registration
+## The 7-File Module Pattern (Unchanged)
 
-### Routing
-All module routes must be registered in `src/modules/routes.js` to be mounted under `/api`.
+Every module must contain exactly these files:
 
-### Database
-All module schemas must be exported in `src/modules/schema.js` to be detected by Drizzle migrations.
+```
+module-name/
+  module-name.schema.ts       # Drizzle ORM table definition
+  module-name.repository.ts   # Database queries (Drizzle only)
+  module-name.service.ts      # Business logic orchestration
+  module-name.controller.ts   # Express request/response handling
+  module-name.routes.ts       # Route definitions
+  module-name.validation.ts   # Zod request body schemas
+  module-name.docs.ts         # Swagger/OpenAPI documentation
+```
+
+## Architectural Rules
+
+### Dependency Flow
+```
+route → controller → service → repository → database
+```
+
+### Communication Rules
+- ✅ **Service → Service**: Allowed for business workflows
+- ✅ **Cross-module joins in repositories**: Allowed for reporting/read-heavy queries
+- ❌ **Controller → Repository**: Banned
+- ❌ **Repository → Repository**: Banned
+- ❌ **Direct schema mutations across modules**: Banned for writes
+
+### Naming Conventions
+- **Folder names**: singular `camelCase` (e.g. `posPoint`, `journalEntry`)
+- **Database tables**: plural `snake_case` (e.g. `pos_points`, `journal_entries`)
+
+## Central Aggregators
+
+- **`schema.ts`**: Imports and re-exports all Drizzle schemas for `drizzle-kit` migration generation.
+- **`routes.ts`**: Registers all Express routers under the `/api` base path.
 
 ## Database Scripts
 
-- `npm run db:generate`: Generate migration files from schema changes.
-- `npm run db:push`: Push schema changes directly to the database (use for dev).
-- `npm run db:migrate`: Run generated migrations.
-- `npm run db:studio`: Open Drizzle Studio to view/edit data.
+- `npm run db:generate` — Generate Drizzle migration files from schema changes
+- `npm run db:push` — Push schema changes directly to the database (dev only)
+- `npm run db:migrate` — Run generated migrations
+- `npm run db:studio` — Open Drizzle Studio to inspect data

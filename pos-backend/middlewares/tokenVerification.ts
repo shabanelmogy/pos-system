@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import config from "../config/config.js";
-import userRepository from "../src/modules/user/user.repository.js";
-import shiftRepository from "../src/modules/shift/shift.repository.js";
+import userRepository from "../src/modules/system/user/user.repository.js";
+import shiftRepository from "../src/modules/pos/shift/shift.repository.js";
 import { fail } from "../src/utils/errorHandler.js";
 
 // Extend the Express Request interface globally to allow typed req.user

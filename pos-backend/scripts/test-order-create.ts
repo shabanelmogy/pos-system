@@ -1,5 +1,5 @@
 import { db } from "../src/config/database.js";
-import orderService from "../src/modules/order/order.service.js";
+import orderService from "../src/modules/pos/order/order.service.js";
 
 async function test(): Promise<void> {
   console.log("🧪 Testing Order Creation...");

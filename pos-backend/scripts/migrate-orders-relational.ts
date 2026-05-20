@@ -1,6 +1,6 @@
 import { db } from "../src/config/database.js";
-import { orders } from "../src/modules/order/order.schema.js";
-import { orderItems } from "../src/modules/order/orderItem.schema.js";
+import { orders } from "../src/modules/pos/order/order.schema.js";
+import { orderItems } from "../src/modules/pos/order/orderItem.schema.js";
 import { eq } from "drizzle-orm";
 
 const isUUID = (str: string): boolean => {

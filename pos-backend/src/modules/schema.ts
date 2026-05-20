@@ -1,21 +1,22 @@
 import { relations } from "drizzle-orm";
-import { users, userPosPermissions } from "./user/user.schema.js";
-import { tables } from "./table/table.schema.js";
-import { orders, orderLifecycleEnum, fulfillmentStatusEnum, paymentStatusEnum, orderTypeEnum, orderStatusHistory } from "./order/order.schema.js";
-import { orderItems, itemStatusEnum } from "./order/orderItem.schema.js";
-import { payments } from "./payment/payment.schema.js";
-import { categories } from "./category/category.schema.js";
-import { items, itemModifiers } from "./item/item.schema.js";
-import { customers } from "./customer/customer.schema.js";
-import { bills } from "./bill/bill.schema.js";
-import { branches } from "./branch/branch.schema.js";
-import { posPoints } from "./posPoint/posPoint.schema.js";
-import { shifts } from "./shift/shift.schema.js";
-import { posSettings } from "./posSettings/posSettings.schema.js";
-import { coupons, couponTypeEnum } from "./coupon/coupon.schema.js";
-import { kitchenStations } from "./kitchenStation/kitchenStation.schema.js";
-import { orderSequences } from "./order/orderSequence.schema.js";
-import { orderItemModifiers } from "./order/orderItem.schema.js";
+import { users, userPosPermissions } from "./system/user/user.schema.js";
+import { tables } from "./pos/table/table.schema.js";
+import { orders, orderLifecycleEnum, fulfillmentStatusEnum, paymentStatusEnum, orderTypeEnum, orderStatusHistory } from "./pos/order/order.schema.js";
+import { orderItems, itemStatusEnum } from "./pos/order/orderItem.schema.js";
+import { payments } from "./pos/payment/payment.schema.js";
+import { categories } from "./catalog/category/category.schema.js";
+import { items, itemModifiers } from "./catalog/item/item.schema.js";
+import { customers } from "./crm/customer/customer.schema.js";
+import { bills } from "./pos/bill/bill.schema.js";
+import { branches } from "./system/branch/branch.schema.js";
+import { posPoints } from "./pos/posPoint/posPoint.schema.js";
+import { shifts } from "./pos/shift/shift.schema.js";
+import { posSettings } from "./pos/posSettings/posSettings.schema.js";
+import { coupons, couponTypeEnum } from "./catalog/coupon/coupon.schema.js";
+import { kitchenStations } from "./pos/kitchenStation/kitchenStation.schema.js";
+import { orderSequences } from "./pos/order/orderSequence.schema.js";
+import { orderItemModifiers } from "./pos/order/orderItem.schema.js";
+
 
 // Users Relations
 export const usersRelations = relations(users, ({ one, many }) => ({

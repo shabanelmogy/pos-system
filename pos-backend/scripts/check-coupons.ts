@@ -1,5 +1,5 @@
 import { db } from "../src/config/database.js";
-import { coupons } from "../src/modules/coupon/coupon.schema.js";
+import { coupons } from "../src/modules/catalog/coupon/coupon.schema.js";
 
 async function check(): Promise<void> {
   try {

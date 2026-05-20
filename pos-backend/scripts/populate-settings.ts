@@ -1,6 +1,6 @@
 import { db } from "../src/config/database.js";
-import { posPoints } from "../src/modules/posPoint/posPoint.schema.js";
-import { posSettings } from "../src/modules/posSettings/posSettings.schema.js";
+import { posPoints } from "../src/modules/pos/posPoint/posPoint.schema.js";
+import { posSettings } from "../src/modules/pos/posSettings/posSettings.schema.js";
 import { sql } from "drizzle-orm";
 
 async function populateSettings(): Promise<void> {

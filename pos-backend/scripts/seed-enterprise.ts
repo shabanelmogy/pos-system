@@ -1,6 +1,6 @@
 import { db } from "../src/config/database.js";
-import { branches } from "../src/modules/branch/branch.schema.js";
-import { posPoints } from "../src/modules/posPoint/posPoint.schema.js";
+import { branches } from "../src/modules/system/branch/branch.schema.js";
+import { posPoints } from "../src/modules/pos/posPoint/posPoint.schema.js";
 
 async function seed(): Promise<void> {
   try {

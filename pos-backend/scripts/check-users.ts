@@ -1,5 +1,5 @@
 import { db } from "../src/config/database.js";
-import { users } from "../src/modules/user/user.schema.js";
+import { users } from "../src/modules/system/user/user.schema.js";
 
 async function check(): Promise<void> {
   try {

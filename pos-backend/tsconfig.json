@@ -14,7 +14,12 @@
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "paths": {
+      "@/shared/*": ["./src/shared/*"],
+      "@/modules/*": ["./src/modules/*"],
+      "@/config/*": ["./src/config/*"]
+    }
   },
   "include": ["app.ts", "config/**/*", "src/**/*", "scripts/**/*"],
   "exclude": ["node_modules", "dist"]

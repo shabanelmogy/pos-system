@@ -1,10 +1,10 @@
 import { db, pool } from "../src/config/database.js";
-import { users } from "../src/modules/user/user.schema.js";
-import { tables } from "../src/modules/table/table.schema.js";
-import { categories } from "../src/modules/category/category.schema.js";
-import { items } from "../src/modules/item/item.schema.js";
-import { branches } from "../src/modules/branch/branch.schema.js";
-import { posPoints } from "../src/modules/posPoint/posPoint.schema.js";
+import { users } from "../src/modules/system/user/user.schema.js";
+import { tables } from "../src/modules/pos/table/table.schema.js";
+import { categories } from "../src/modules/catalog/category/category.schema.js";
+import { items } from "../src/modules/catalog/item/item.schema.js";
+import { branches } from "../src/modules/system/branch/branch.schema.js";
+import { posPoints } from "../src/modules/pos/posPoint/posPoint.schema.js";
 import bcrypt from "bcryptjs";
 import "dotenv/config";
 
