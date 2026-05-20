@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { useAuthorization } from "../hooks/useAuthorization";
 import { PermissionGuardProps } from "../types";
 
@@ -32,4 +32,3 @@ export const PermissionGuard: React.FC<PermissionGuardProps> = ({
   return <>{children}</>;
 };
 
-import { useMemo } from "react";

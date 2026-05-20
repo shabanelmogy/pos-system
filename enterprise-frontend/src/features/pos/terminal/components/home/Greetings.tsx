@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
 import useUserStore from "@/features/system/auth/store/useUserStore";
-import useAuth from "@/features/system/auth/hooks/useAuth";
 import { useTranslation } from "../../../../../../node_modules/react-i18next";
 import { BiSolidDish } from "react-icons/bi";
+import { useAuthorization } from "@/modules/authorization/hooks/useAuthorization";
 
 const Greetings: React.FC = () => {
   const { t } = useTranslation();
-  const { canCompleteOrders } = useAuth();
+  const { can } = useAuthorization();
   const userData = useUserStore();
   const [dateTime, setDateTime] = useState<Date>(new Date());
 
@@ -34,7 +34,7 @@ const Greetings: React.FC = () => {
           {t('pos.home.greeting')}, {userData.name || "USER"}
         </h1>
         <p className="text-[var(--text-muted)] text-xs">{t('pos.home.greeting_sub')}</p>
-        {canCompleteOrders && (
+        {can("orders:create") && (
           <button
             onClick={handleStartOrder}
             className="mt-3 bg-[var(--primary)] text-[var(--bg-card)] font-bold py-1.5 px-5 rounded-xl hover:bg-yellow-600 transition-colors shadow-lg flex items-center gap-2 text-sm hover:scale-105"

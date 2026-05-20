@@ -6,7 +6,7 @@ import {
   useLocation,
   Navigate,
 } from "react-router-dom";
-import { Home, Auth, Orders, Tables, Menu, Dashboard, Customers, Settings, KitchenBoard, MenuManager } from "@/pages";
+import { Home, Auth, Orders, Tables, Menu, Dashboard, Customers, Settings, KitchenBoard, MenuManager, PermissionManagement } from "@/pages";
 import Header from "@/shared/components/Header";
 import useLoadData from "@/shared/hooks/useLoadData";
 import FullScreenLoader from "@/shared/components/FullScreenLoader";
@@ -18,6 +18,8 @@ import useUserStore from "@/features/system/auth/store/useUserStore";
 import usePOSStore from "@/features/pos/terminal/store/usePOSStore";
 import useCustomerStore from "@/features/crm/customer/store/useCustomerStore";
 import { ThemeProvider } from "@/app/providers/ThemeProvider";
+import { useAuthorizationStore } from "@/modules/authorization/store/useAuthorizationStore";
+import { RouteGuard } from "@/modules/authorization/guards/RouteGuard";
 
 function Layout() {
   const isLoading = useLoadData();
@@ -26,6 +28,11 @@ function Layout() {
   const { activeShift, showShiftModal, selectedPOSPoint, selectedBranch } = usePOSStore();
   const { customerName, setCustomer } = useCustomerStore();
   const location = useLocation();
+
+  const initializeAuth = useAuthorizationStore((state) => state.initialize);
+  useEffect(() => {
+    initializeAuth();
+  }, [initializeAuth, isAuth]);
   const isOnAuthPage = location.pathname.startsWith("/auth");
   const isOnKdsPage = location.pathname.startsWith("/kds");
   
@@ -87,7 +94,9 @@ function Layout() {
             path="/orders"
             element={
               <ProtectedRoutes>
-                <Orders />
+                <RouteGuard permissions={["orders:view"]}>
+                  <Orders />
+                </RouteGuard>
               </ProtectedRoutes>
             }
           />
@@ -95,7 +104,9 @@ function Layout() {
             path="/tables"
             element={
               <ProtectedRoutes>
-                {enableTables ? <Tables /> : <Navigate to="/menu" />}
+                <RouteGuard permissions={["pos:manage_tables"]}>
+                  {enableTables ? <Tables /> : <Navigate to="/menu" />}
+                </RouteGuard>
               </ProtectedRoutes>
             }
           />
@@ -103,7 +114,9 @@ function Layout() {
             path="/menu"
             element={
               <ProtectedRoutes>
-                <Menu />
+                <RouteGuard permissions={["catalog:view"]}>
+                  <Menu />
+                </RouteGuard>
               </ProtectedRoutes>
             }
           />
@@ -111,7 +124,9 @@ function Layout() {
             path="/dashboard"
             element={
               <ProtectedRoutes>
-                <Dashboard />
+                <RouteGuard permissions={["reporting:view"]}>
+                  <Dashboard />
+                </RouteGuard>
               </ProtectedRoutes>
             }
           />
@@ -119,7 +134,9 @@ function Layout() {
             path="/customers"
             element={
               <ProtectedRoutes>
-                <Customers />
+                <RouteGuard permissions={["crm:view"]}>
+                  <Customers />
+                </RouteGuard>
               </ProtectedRoutes>
             }
           />
@@ -127,7 +144,9 @@ function Layout() {
             path="/settings"
             element={
               <ProtectedRoutes>
-                <Settings />
+                <RouteGuard permissions={["system:settings"]}>
+                  <Settings />
+                </RouteGuard>
               </ProtectedRoutes>
             }
           />
@@ -135,7 +154,19 @@ function Layout() {
             path="/menu-manager"
             element={
               <ProtectedRoutes>
-                <MenuManager />
+                <RouteGuard permissions={["catalog:manage"]}>
+                  <MenuManager />
+                </RouteGuard>
+              </ProtectedRoutes>
+            }
+          />
+          <Route
+            path="/permission-management"
+            element={
+              <ProtectedRoutes>
+                <RouteGuard permissions={["roles:view"]}>
+                  <PermissionManagement />
+                </RouteGuard>
               </ProtectedRoutes>
             }
           />

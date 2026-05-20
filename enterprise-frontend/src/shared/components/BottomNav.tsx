@@ -7,13 +7,14 @@ import Modal from "./Modal";
 import useCustomerStore from "@/features/crm/customer/store/useCustomerStore";
 import useCartStore from "@/features/pos/terminal/store/useCartStore";
 import usePOSStore from "@/features/pos/terminal/store/usePOSStore";
-import useAuth from "@/features/system/auth/hooks/useAuth";
 import { useTranslation } from "../../../node_modules/react-i18next";
 import { getCustomers } from "@/shared/api/services/customerApi";
 import { FiCheck, FiUser } from "react-icons/fi";
+import { useAuthorization } from "@/modules/authorization/hooks/useAuthorization";
 
 const BottomNav: React.FC = () => {
   const { t } = useTranslation();
+  const { can } = useAuthorization();
   const navigate = useNavigate();
   const location = useLocation();
   const { selectedPOSPoint } = usePOSStore();
@@ -68,7 +69,7 @@ const BottomNav: React.FC = () => {
     setSuggestions([]);
   };
 
-  const { canCompleteOrders, isAdmin } = useAuth();
+
   const requireCustomer = selectedPOSPoint?.settings?.requireCustomerOnOrder;
 
   const handleDishClick = () => {
@@ -171,25 +172,26 @@ const BottomNav: React.FC = () => {
         </button>
       )}
 
-      {isAdmin && (
-        <>
-          <button
-            onClick={() => navigate("/customers")}
-            className={`flex flex-col items-center justify-center font-bold transition-all ${isActive("/customers") ? "text-[var(--primary)]" : "text-[var(--text-muted)] hover:text-[var(--text-main)]"
-              } w-full`}
-          >
-            <FaUsers size={20} />
-            <span className="text-[10px] mt-1">{t('common.nav.customers')}</span>
-          </button>
-          <button
-            onClick={() => navigate("/dashboard")}
-            className={`flex flex-col items-center justify-center font-bold transition-all ${isActive("/dashboard") ? "text-[var(--primary)]" : "text-[var(--text-muted)] hover:text-[var(--text-main)]"
-              } w-full`}
-          >
-            <FaChartBar size={20} />
-            <span className="text-[10px] mt-1">{t('common.nav.admin')}</span>
-          </button>
-        </>
+      {can("crm:view") && (
+        <button
+          onClick={() => navigate("/customers")}
+          className={`flex flex-col items-center justify-center font-bold transition-all ${isActive("/customers") ? "text-[var(--primary)]" : "text-[var(--text-muted)] hover:text-[var(--text-main)]"
+            } w-full`}
+        >
+          <FaUsers size={20} />
+          <span className="text-[10px] mt-1">{t('common.nav.customers')}</span>
+        </button>
+      )}
+
+      {can("reporting:view") && (
+        <button
+          onClick={() => navigate("/dashboard")}
+          className={`flex flex-col items-center justify-center font-bold transition-all ${isActive("/dashboard") ? "text-[var(--primary)]" : "text-[var(--text-muted)] hover:text-[var(--text-main)]"
+            } w-full`}
+        >
+          <FaChartBar size={20} />
+          <span className="text-[10px] mt-1">{t('common.nav.admin')}</span>
+        </button>
       )}
 
 

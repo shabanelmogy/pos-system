@@ -6,7 +6,7 @@ import { logout } from "@/shared/api/services/authApi";
 import useUserStore from "@/features/system/auth/store/useUserStore";
 import usePOSStore from "@/features/pos/terminal/store/usePOSStore";
 import { useNavigate } from "react-router-dom";
-import { MdDashboard, MdStore, MdComputer, MdSwapHoriz, MdStop, MdSettings, MdRestaurantMenu } from "react-icons/md";
+import { MdDashboard, MdStore, MdComputer, MdSwapHoriz, MdStop, MdSettings, MdRestaurantMenu, MdShield } from "react-icons/md";
 import { useSnackbar } from "notistack";
 import { useTranslation } from "../../../node_modules/react-i18next";
 import useAuth from "@/features/system/auth/hooks/useAuth";
@@ -14,6 +14,8 @@ import { LanguageSwitcher } from "./LanguageSwitcher";
 import { motion, AnimatePresence } from "framer-motion";
 import ThemeSwitcher from "./ThemeSwitcher";
 import useLocalize from "@/shared/hooks/useLocalize";
+import { useAuthorization } from "@/modules/authorization/hooks/useAuthorization";
+import { useAuthorizationStore } from "@/modules/authorization/store/useAuthorizationStore";
 
 /** Tailwind default `theme.screens` (px) — keep in sync with tailwind.config if you customize breakpoints */
 const TW_SCREENS = { sm: 640, md: 768, lg: 1024, xl: 1280, "2xl": 1536 } as const;
@@ -82,6 +84,7 @@ const ViewportDebugBanner: React.FC = () => {
 
 const Header: React.FC = () => {
   const { role, name, canAccessDashboard, isAdmin } = useAuth();
+  const { can } = useAuthorization();
   const { removeUser } = useUserStore();
   const { selectedBranch, selectedPOSPoint, activeShift, clearPOS, setShowShiftModal } = usePOSStore();
   const navigate = useNavigate();
@@ -111,6 +114,7 @@ const Header: React.FC = () => {
     onSuccess: () => {
       removeUser();
       clearPOS();
+      useAuthorizationStore.getState().clear();
       navigate("/auth");
     },
     onError: (error: any) => {
@@ -240,19 +244,25 @@ const Header: React.FC = () => {
 
           <LanguageSwitcher />
 
-          {canAccessDashboard && (
+          {can("reporting:view") && (
             <IconButton onClick={() => navigate("/dashboard")} title="Analytics">
               <MdDashboard className="size-4 2xl:size-[18px]" />
             </IconButton>
           )}
 
-          {isAdmin && (
+          {can("catalog:manage") && (
             <IconButton onClick={() => navigate("/menu-manager")} title="Menu Manager">
               <MdRestaurantMenu className="size-4 2xl:size-[18px]" />
             </IconButton>
           )}
 
-          {isAdmin && (
+          {can("roles:view") && (
+            <IconButton onClick={() => navigate("/permission-management")} title="Access Control">
+              <MdShield className="size-4 2xl:size-[18px]" />
+            </IconButton>
+          )}
+
+          {can("system:settings") && (
             <IconButton onClick={() => navigate("/settings")} title="System Settings">
               <MdSettings className="size-4 2xl:size-[18px]" />
             </IconButton>

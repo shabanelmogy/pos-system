@@ -4,6 +4,7 @@ import { enqueueSnackbar } from "notistack";
 import useUserStore from "@/features/system/auth/store/useUserStore";
 import usePOSStore from "@/features/pos/terminal/store/usePOSStore";
 import { useNavigate } from "react-router-dom";
+import { useAuthorizationStore } from "@/modules/authorization/store/useAuthorizationStore";
 import { useForm, UseFormRegister, FieldErrors } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -54,7 +55,10 @@ const useLogin = (): LoginHook => {
     onSuccess: (res: any) => {
       const { token, activeShift, data: userData } = res.data;
 
-      if (token) localStorage.setItem("accessToken", token);
+      if (token) {
+        localStorage.setItem("accessToken", token);
+        useAuthorizationStore.getState().initialize();
+      }
 
       // Initialize POS session state
       if (activeShift) {

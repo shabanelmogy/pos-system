@@ -189,11 +189,28 @@ const PermissionManagement: React.FC = () => {
     },
   });
 
+  const handleSelectAllGlobal = () => {
+    setSelectedPermissionIds(allPermissions.map((p) => p.id));
+    enqueueSnackbar("Selected all system permissions", { variant: "info" });
+  };
+
+  const handleClearAllGlobal = () => {
+    setSelectedPermissionIds([]);
+    enqueueSnackbar("Cleared all permissions", { variant: "info" });
+  };
+
+  const getMappedCategory = (cat: string) => {
+    if (cat === "catalog") return "products";
+    if (cat === "crm") return "customers";
+    return cat;
+  };
+
   // Group Permissions by Category Module
   const groupedPermissions = useMemo(() => {
     const groups: { [category: string]: Permission[] } = {};
     allPermissions.forEach((p) => {
-      if (!groups[p.category]) groups[p.category] = [];
+      const mappedCat = getMappedCategory(p.category);
+      if (!groups[mappedCat]) groups[mappedCat] = [];
       
       // Filter permissions by search query
       const matchSearch = 
@@ -201,7 +218,7 @@ const PermissionManagement: React.FC = () => {
         p.key.toLowerCase().includes(permissionSearchQuery.toLowerCase());
       
       if (matchSearch) {
-        groups[p.category].push(p);
+        groups[mappedCat].push(p);
       }
     });
     return groups;
@@ -572,15 +589,35 @@ const PermissionManagement: React.FC = () => {
 
                   {/* Search and Action Bar */}
                   <div className="p-4 bg-[var(--bg-card-alt)]/30 border-b border-[var(--border-main)] flex flex-col md:flex-row items-center justify-between gap-3">
-                    <div className="relative w-full md:w-64">
-                      <MdSearch className="absolute start-3 top-2 text-[var(--text-muted)]" size={14} />
-                      <input
-                        type="text"
-                        placeholder="Search permissions..."
-                        value={permissionSearchQuery}
-                        onChange={(e) => setPermissionSearchQuery(e.target.value)}
-                        className="w-full bg-[var(--bg-main)] border border-[var(--border-main)] rounded-lg ps-8 pe-3 py-1 text-xs focus:outline-none focus:border-[var(--primary)] text-[var(--text-main)] placeholder-[var(--text-muted)]"
-                      />
+                    <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3 w-full md:w-auto">
+                      <div className="relative w-full md:w-64">
+                        <MdSearch className="absolute start-3 top-2 text-[var(--text-muted)]" size={14} />
+                        <input
+                          type="text"
+                          placeholder="Search permissions..."
+                          value={permissionSearchQuery}
+                          onChange={(e) => setPermissionSearchQuery(e.target.value)}
+                          className="w-full bg-[var(--bg-main)] border border-[var(--border-main)] rounded-lg ps-8 pe-3 py-1 text-xs focus:outline-none focus:border-[var(--primary)] text-[var(--text-main)] placeholder-[var(--text-muted)]"
+                        />
+                      </div>
+                      
+                      {/* Bulk Selection Actions */}
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={handleSelectAllGlobal}
+                          className="px-3 py-1.5 rounded-lg border border-[var(--border-main)] hover:border-[var(--primary)] text-[var(--text-main)] text-[9px] font-black uppercase tracking-widest transition-all bg-[var(--bg-main)] hover:bg-[var(--primary)]/10"
+                        >
+                          Select All
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleClearAllGlobal}
+                          className="px-3 py-1.5 rounded-lg border border-[var(--border-main)] hover:border-red-500/50 text-[var(--text-main)] text-[9px] font-black uppercase tracking-widest transition-all bg-[var(--bg-main)] hover:bg-red-500/10"
+                        >
+                          Clear All
+                        </button>
+                      </div>
                     </div>
 
                     <div className="flex gap-2 w-full md:w-auto">
