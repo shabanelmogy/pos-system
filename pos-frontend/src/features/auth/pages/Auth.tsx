@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import restaurant from "../../../assets/images/restaurant-img.jpg";
+import erpBg from "../../../assets/images/erp-bg.png";
 import logo from "../../../assets/images/logo.png";
 import Register from "../components/Register";
 import Login from "../components/Login";
@@ -14,7 +14,7 @@ const Auth: React.FC = () => {
   const { t } = useTranslation();
 
   useEffect(() => {
-    document.title = "RestroPOS | Enterprise Secure Login";
+    document.title = "NexusERP | Enterprise Secure Login";
     // Initialize direction from stored language
     const stored = localStorage.getItem("i18nextLng") || "en";
     document.documentElement.dir = stored === "ar" ? "rtl" : "ltr";
@@ -43,7 +43,7 @@ const Auth: React.FC = () => {
           transition={{ duration: 1.5, ease: "easeOut" }}
           className="absolute inset-0"
         >
-          <img className="w-full h-full object-cover grayscale-[0.3]" src={restaurant} alt="Experience" />
+          <img className="w-full h-full object-cover grayscale-[0.1]" src={erpBg} alt="Experience" />
           <div className="absolute inset-0 bg-gradient-to-r from-black via-black/80 to-transparent"></div>
         </motion.div>
 
@@ -123,7 +123,7 @@ const Auth: React.FC = () => {
           >
             <img src={logo} alt="Logo" className="h-6 w-6 brightness-0" />
           </motion.div>
-          <span className="text-[var(--text-main)] font-black uppercase tracking-tighter text-xl">Restro<span className="text-[var(--primary)]">POS</span></span>
+          <span className="text-[var(--text-main)] font-black uppercase tracking-tighter text-xl">Nexus<span className="text-[var(--primary)]">ERP</span></span>
         </div>
 
         <div className="max-w-md w-full mx-auto">

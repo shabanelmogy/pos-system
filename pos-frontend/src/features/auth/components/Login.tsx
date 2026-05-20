@@ -1,6 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { MdEmail, MdLock, MdLogin, MdAdminPanelSettings, MdPointOfSale } from "react-icons/md";
+import { MdEmail, MdLock, MdLogin, MdAdminPanelSettings, MdAccountBalance } from "react-icons/md";
 import useLogin from "../hooks/useLogin";
 import { useTranslation } from "react-i18next";
 
@@ -83,8 +83,8 @@ const Login: React.FC = () => {
 
         <div className="grid grid-cols-2 gap-3">
           {[
-            { role: t('auth.role_admin'), email: 'admin@gmail.com', icon: <MdAdminPanelSettings size={22} /> },
-            { role: t('auth.role_cashier'), email: 'cashier@gmail.com', icon: <MdPointOfSale size={22} /> }
+            { role: t('auth.role_admin'), email: 'admin@nexus.com', icon: <MdAdminPanelSettings size={22} /> },
+            { role: t('auth.role_finance'), email: 'finance@nexus.com', icon: <MdAccountBalance size={22} /> }
           ].map((demo) => (
             <button
               key={demo.role}
