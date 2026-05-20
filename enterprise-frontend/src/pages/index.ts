@@ -1,0 +1,11 @@
+export { default as Home } from "@/features/pos/terminal/pages/Home";
+export { default as Menu } from "@/features/pos/terminal/pages/Menu";
+export { default as Orders } from "@/features/pos/order/pages/Orders";
+export { default as Auth } from "@/features/system/auth/pages/Auth";
+export { default as Tables } from "@/features/pos/table/pages/Tables";
+export { default as Dashboard } from "@/features/reporting/dashboard/pages/Dashboard";
+export { default as Customers } from "@/features/crm/customer/pages/Customers";
+export { default as Settings } from "@/features/system/settings/pages/Settings";
+export { default as MenuManager } from "@/features/system/settings/pages/MenuManager";
+export { default as KitchenBoard } from "@/features/pos/kds/pages/KitchenBoard";
+export { default as PermissionManagement } from "@/modules/authorization/pages/PermissionManagement";
